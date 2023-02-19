@@ -3,6 +3,7 @@ package com.v7878;
 import static com.v7878.AndroidUnsafe4.*;
 import static com.v7878.Utils.*;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -122,7 +123,7 @@ public class Memory {
         }
 
         static void checkAlignmentShift(int align_shift) {
-            assert_((align_shift >= 0) && (align_shift < ADDRESS_SIZE),
+            assert_((align_shift >= 0) && (align_shift < (ADDRESS_SIZE * 8)),
                     IllegalArgumentException::new,
                     "Invalid alignment shift: " + align_shift);
         }
@@ -188,14 +189,8 @@ public class Memory {
             return size == alignment();
         }
 
-        String decorateLayoutString(String s) {
-            if (!hasNaturalAlignment()) {
-                s += "%" + alignShift;
-            }
-            if (name().isPresent()) {
-                s = String.format("%s(%s)", s, name().get());
-            }
-            return s;
+        public final boolean hasAlignedSize() {
+            return isAlignedL(size(), alignment());
         }
 
         @Override
@@ -215,6 +210,21 @@ public class Memory {
             return name.equals(otherLayout.name)
                     && size == otherLayout.size
                     && alignShift == otherLayout.alignShift;
+        }
+
+        String decorateLayoutString(String s) {
+            s = String.format("%s%d", s, size());
+            if (!hasAlignedSize()) {
+                s = String.format("%s+%d", s,
+                        roundUpL(size(), alignment()) - size());
+            }
+            if (!hasNaturalAlignment()) {
+                s = String.format("%s%%%d", s, alignShift);
+            }
+            if (name().isPresent()) {
+                s = String.format("%s(%s)", s, name().get());
+            }
+            return s;
         }
 
         @Override
@@ -258,7 +268,7 @@ public class Memory {
         }
 
         //TODO array copy
-        public static GroupLayout unionLayout(Layout... elements) {
+        public static GroupLayout unionLayout(boolean fill_to_alignment, Layout... elements) {
             Objects.requireNonNull(elements);
             int align_shift = 0;
             long size = 0;
@@ -266,11 +276,17 @@ public class Memory {
                 align_shift = Math.max(align_shift, element.alignmentShift());
                 size = Math.max(size, element.size());
             }
-            size = roundUpL(size, 1 << align_shift);
-            checkSize(size, true);
+            if (fill_to_alignment) {
+                size = roundUpL(size, 1 << align_shift);
+                checkSize(size, true);
+            }
             return new GroupLayout(GroupLayout.Kind.UNION,
                     Stream.of(elements)
                             .collect(Collectors.toList()), size, align_shift);
+        }
+
+        public static GroupLayout unionLayout(Layout... elements) {
+            return unionLayout(true, elements);
         }
 
         public static GroupLayout fullStructLayout(Layout... elements) {
@@ -283,8 +299,6 @@ public class Memory {
                         IllegalArgumentException::new,
                         "Incompatible alignment constraints");
                 size += element.size();
-
-                //TODO
                 checkSize(size, true);
             }
             assert_(isAlignedL(size, 1 << align_shift),
@@ -295,48 +309,56 @@ public class Memory {
                             .collect(Collectors.toList()), size, align_shift);
         }
 
-        /*public static GroupLayout structLayout(boolean fill_to_alignment, Layout... elements) {
+        public static GroupLayout structLayout(boolean fill_to_alignment, Layout... elements) {
             Objects.requireNonNull(elements);
+            ArrayList<Layout> out_list = new ArrayList<>(elements.length);
             int align_shift = 0;
             long size = 0;
             for (Layout element : elements) {
                 align_shift = Math.max(align_shift, element.alignmentShift());
-                assert_(isAlignedL(size, element.alignment()),
-                        IllegalArgumentException::new,
-                        "Incompatible alignment constraints");
-                size += element.size();
-
-                //TODO
+                long new_size = roundUpL(size, element.alignment());
+                if (new_size != size) {
+                    out_list.add(paddingLayout(new_size - size));
+                }
+                out_list.add(element);
+                size = new_size + element.size();
                 checkSize(size, true);
             }
-            assert_(isAlignedL(size, 1 << align_shift),
-                    IllegalArgumentException::new,
-                    "Incompatible alignment constraints");
+            if (fill_to_alignment) {
+                long new_size = roundUpL(size, 1 << align_shift);
+                if (new_size != size) {
+                    out_list.add(paddingLayout(new_size - size));
+                }
+                size = new_size;
+                checkSize(size, true);
+            }
             return new GroupLayout(GroupLayout.Kind.STRUCT,
-                    Stream.of(elements)
-                            .collect(Collectors.toList()), size, align_shift);
-        }*/
+                    out_list, size, align_shift);
+        }
+
+        public static GroupLayout structLayout(Layout... elements) {
+            return structLayout(true, elements);
+        }
     }
 
     public static class PaddingLayout extends Layout {
 
         PaddingLayout(long size) {
-            this(size, Optional.empty());
+            this(size, 0, Optional.empty());
         }
 
-        PaddingLayout(long size, Optional<String> name) {
-            super(size, 0, name);
+        PaddingLayout(long size, int align_shift, Optional<String> name) {
+            super(size, align_shift, name);
         }
 
         @Override
         public boolean hasNaturalAlignment() {
-            return true;
+            return alignmentShift() == 0;
         }
 
         @Override
         PaddingLayout dup(int align_shift, Optional<String> name) {
-            assert_(align_shift == 0, IllegalArgumentException::new);
-            return new PaddingLayout(size(), name);
+            return new PaddingLayout(size(), align_shift, name);
         }
 
         @Override
@@ -372,7 +394,7 @@ public class Memory {
 
         @Override
         public String toString() {
-            return decorateLayoutString("x" + size());
+            return decorateLayoutString("x");
         }
     }
 
@@ -457,7 +479,7 @@ public class Memory {
             if (order == ByteOrder.LITTLE_ENDIAN) {
                 descriptor = Character.toLowerCase(descriptor);
             }
-            return decorateLayoutString(String.format("%s%d", descriptor, size()));
+            return decorateLayoutString(Character.toString(descriptor));
         }
     }
 

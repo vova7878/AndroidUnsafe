@@ -297,7 +297,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
             out.addAll(Arrays.asList(af));
             c = c.getSuperclass();
         }
-        return out.toArray(Field[]::new);
+        return out.stream().toArray(Field[]::new);
     }
 
     public static Field[] getInstanceFields(Class<?> c) {
@@ -307,7 +307,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
             out.addAll(Arrays.asList(af));
             c = c.getSuperclass();
         }
-        return out.toArray(Field[]::new);
+        return out.stream().toArray(Field[]::new);
     }
 
     public static Method[] getMethods(Class<?> c) {
@@ -317,6 +317,6 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
             out.addAll(Arrays.asList(af));
             c = c.getSuperclass();
         }
-        return out.toArray(Method[]::new);
+        return out.stream().toArray(Method[]::new);
     }
 }

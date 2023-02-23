@@ -1042,9 +1042,12 @@ public class Memory {
         }
     }
 
-    public static GroupLayout getClassLayout(Class<?> clazz) {
+    public static Layout getClassLayout(Class<?> clazz) {
         assert_((clazz != Class.class) && (clazz != String.class) && (!clazz.isArray()),
                 IllegalArgumentException::new);
+        if (clazz.isPrimitive()) {
+            return Layout.valueLayout(clazz).withName(clazz.getName());
+        }
         Field[] ifields = getInstanceFields(clazz);
         Arrays.sort(ifields, (a, b) -> {
             return Integer.compare(fieldOffset(a), fieldOffset(b));

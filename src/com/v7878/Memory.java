@@ -2,13 +2,14 @@ package com.v7878;
 
 import static com.v7878.AndroidUnsafe4.*;
 import static com.v7878.Utils.*;
+import java.lang.reflect.Field;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.LongBinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -1041,91 +1042,20 @@ public class Memory {
         }
     }
 
-    /*public static class Layout extends LayoutField {
-
-        private LayoutField[] data;
-
-        Layout(long offset, long size, int align_shift,
-                String name, LayoutField[] data) {
-            super(offset, size, align_shift, name);
-            this.data = data;
-        }
-
-        public static Layout makeLayout(long offset, long size, boolean hard_size,
-                int align_shift, String name, LayoutField[] tmp_info) {
-            checkOffset(offset);
-            checkSize(size);
-            assert_((align_shift >= 0) && (align_shift < 64), IllegalArgumentException::new);
-            if (tmp_info == null || tmp_info.length == 0) {
-                return new Layout(offset, 1 << align_shift, align_shift, name, null);
-            }
-            LayoutField[] info = tmp_info.clone();
-            Arrays.sort(info, (a, b) -> {
-                return Long.compare(a.offset, b.offset);
-            });
-            ArrayList<LayoutField> lf_list = new ArrayList<>(info.length);
-            long tmp_size = 0;
-            int max_align_shift = 0;
-            int paddings_num = 0;
-            for (LayoutField lf : info) {
-                checkOffset(lf.offset);
-                checkSize(lf.size);
-                assert_((lf.alignShift >= 0) && (lf.alignShift < 64), IllegalArgumentException::new);
-                assert_(tmp_size <= lf.offset, IllegalArgumentException::new);
-                long align = 1L << lf.alignShift;
-                assert_(checkAlignmentL(lf.offset, align), IllegalArgumentException::new);
-                if (tmp_size < lf.offset) {
-                    long new_size = lf.offset;
-                    lf_list.add(new LayoutField(tmp_size, new_size - tmp_size, 0, "<padding " + paddings_num + ">"));
-                    paddings_num++;
-                    tmp_size = new_size;
-                }
-                tmp_size += lf.size;
-                max_align_shift = Math.max(max_align_shift, lf.alignShift);
-                lf_list.add(lf);
-            }
-            max_align_shift = Math.max(max_align_shift, align_shift);
-            assert_(max_align_shift == align_shift, IllegalArgumentException::new);
-            long align = 1L << max_align_shift;
-
-            long new_size = Math.max(tmp_size, size);
-            assert_(new_size == size, IllegalArgumentException::new);
-            new_size = roundUpL(new_size, align);
-            assert_((!hard_size) || (new_size == size), IllegalArgumentException::new);
-            if (tmp_size != new_size) {
-                lf_list.add(new LayoutField(tmp_size, new_size - tmp_size, 0, "<padding " + paddings_num + ">"));
-                tmp_size = new_size;
-            }
-
-            return new Layout(offset, tmp_size, max_align_shift, name,
-                    lf_list.toArray(LayoutField[]::new));
-        }
-
-        @Override
-        public String toString() {
-            String out = super.toString();
-            for (Object le : data) {
-                out += "\n" + le;
-            }
-            return out;
-        }
-    }
-
-    private static int getFieldSize(Class<?> clazz) {
-        return arrayIndexScale(Array.newInstance(clazz, 0).getClass());
-    }
-
-    public static Layout getClassLayout(Class<?> clazz) {
+    public static GroupLayout getClassLayout(Class<?> clazz) {
         assert_((clazz != Class.class) && (clazz != String.class) && (!clazz.isArray()),
                 IllegalArgumentException::new);
         Field[] ifields = getInstanceFields(clazz);
-        LayoutField[] le = new LayoutField[ifields.length];
+        Arrays.sort(ifields, (a, b) -> {
+            return Integer.compare(fieldOffset(a), fieldOffset(b));
+        });
+        ValueLayout[] vls = new ValueLayout[ifields.length];
         for (int i = 0; i < ifields.length; i++) {
             Field ifield = ifields[i];
-            int field_size = getFieldSize(ifield.getType());
-            le[i] = new LayoutField(fieldOffset(ifield), field_size, log2(field_size),
-                    ifield.getName() + "(" + ifield.getType().getName() + ")");
+            Class<?> ft = ifield.getType();
+            vls[i] = Layout.valueLayout(ft.isPrimitive() ? ft : Object.class)
+                    .withName(ifield.getDeclaringClass().getName() + "." + ifield.getName());
         }
-        return Layout.makeLayout(0, objectSizeField(clazz), false, OBJECT_ALIGNMENT_SHIFT, clazz.getName(), le);
-    }*/
+        return Layout.structLayout(false, vls).withName(clazz.getName()).withAlignmentShift(OBJECT_ALIGNMENT_SHIFT);
+    }
 }

@@ -59,39 +59,39 @@ public class RawLayout extends Layout {
         return decorateLayoutString("x");
     }
 
-    static class PaddingLayout extends RawLayout {
+    static class Padding extends RawLayout {
 
-        public PaddingLayout(long size) {
+        public Padding(long size) {
             super(size);
         }
 
-        public PaddingLayout(long size, int align_shift, Optional<String> name) {
+        public Padding(long size, int align_shift, Optional<String> name) {
             super(size, align_shift, name);
         }
 
         @Override
-        PaddingLayout dup(int align_shift, Optional<String> name) {
-            return new PaddingLayout(size(), align_shift, name);
+        Padding dup(int align_shift, Optional<String> name) {
+            return new Padding(size(), align_shift, name);
         }
 
         @Override
-        public PaddingLayout withName(String name) {
-            return (PaddingLayout) super.withName(name);
+        public Padding withName(String name) {
+            return (Padding) super.withName(name);
         }
 
         @Override
-        public PaddingLayout withAlignmentShift(int align_shift) {
-            return (PaddingLayout) super.withAlignmentShift(align_shift);
+        public Padding withAlignmentShift(int align_shift) {
+            return (Padding) super.withAlignmentShift(align_shift);
         }
 
         @Override
-        public PaddingLayout withAlignment(long alignment) {
-            return (PaddingLayout) super.withAlignment(alignment);
+        public Padding withAlignment(long alignment) {
+            return (Padding) super.withAlignment(alignment);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(super.hashCode(), PaddingLayout.class);
+            return Objects.hash(super.hashCode(), Padding.class);
         }
 
         @Override
@@ -102,7 +102,7 @@ public class RawLayout extends Layout {
             if (!super.equals(other)) {
                 return false;
             }
-            return other instanceof PaddingLayout;
+            return other instanceof Padding;
         }
 
         @Override

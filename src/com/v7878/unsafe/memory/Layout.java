@@ -60,7 +60,7 @@ public abstract class Layout {
     }
 
     public final boolean isPadding() {
-        return this instanceof RawLayout.PaddingLayout;
+        return this instanceof RawLayout.Padding;
     }
 
     abstract Layout dup(int align_shift, Optional<String> name);
@@ -132,7 +132,7 @@ public abstract class Layout {
 
     static Layout paddingLayout(long size) {
         checkSize(size, true);
-        return new RawLayout.PaddingLayout(size);
+        return new RawLayout.Padding(size);
     }
 
     public static ValueLayout valueLayout(Class<?> carrier) {

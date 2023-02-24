@@ -104,11 +104,10 @@ public class Memory {
             if (base_address != 0) {
                 out.append("0x");
                 out.append(Long.toHexString(base_address));
-                out.append(" ");
             }
             out.append("+");
             out.append(offset);
-            out.append(" %");
+            out.append("%");
             out.append(alignShift);
             return out.toString();
         }

@@ -125,7 +125,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
             //TODO
             size = roundUp(ARRAY_INT_BASE_OFFSET, OBJECT_ALIGNMENT);
         }
-        return newNonMovableArrayVM(int.class, size * 2 - ARRAY_INT_BASE_OFFSET / 4);
+        return newNonMovableArrayVM(int.class, (size - ARRAY_INT_BASE_OFFSET) / 4);
     }
 
     public static Object allocateObject(int size, boolean nonmovable) {

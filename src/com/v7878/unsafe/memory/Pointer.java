@@ -10,6 +10,13 @@ public class Pointer {
     private final long offset;
     private final int alignShift;
 
+    private Pointer(Object base, long base_address, long offset, int alignShift) {
+        this.base = base;
+        this.base_address = base_address;
+        this.offset = offset;
+        this.alignShift = alignShift;
+    }
+
     public Pointer(long address) {
         this(null, address);
     }
@@ -56,17 +63,32 @@ public class Pointer {
         return base == null;
     }
 
-    public boolean isRaw() {
+    public boolean hasRawAddress() {
         return (base == null) || (base_address != 0);
     }
 
     public long getRawAddress() {
-        assert_(isRaw(), UnsupportedOperationException::new);
+        assert_(hasRawAddress(), UnsupportedOperationException::new);
         return base_address + offset;
     }
 
     public long getOffset() {
         return base == null ? base_address + offset : offset;
+    }
+
+    public Pointer addOffset(long add_offset) {
+        if (hasRawAddress()) {
+            long address = getRawAddress();
+            address = Math.addExact(address, add_offset);
+            assert_(checkNativeAddress(address), IllegalArgumentException::new);
+            long new_offset = address - base_address;
+            assert_(checkOffset(new_offset), IllegalArgumentException::new);
+            return new Pointer(base, base_address, new_offset,
+                    Long.numberOfTrailingZeros(address));
+        }
+        long new_offset = Math.addExact(offset, add_offset);
+        assert_(checkOffset(new_offset), IllegalArgumentException::new);
+        return new Pointer(base, 0, new_offset, OBJECT_ALIGNMENT_SHIFT);
     }
 
     public int getAlignmentShift() {
@@ -98,5 +120,24 @@ public class Pointer {
         out.append("%");
         out.append(alignShift);
         return out.toString();
+    }
+
+    public static Pointer allocateHeap(int size, int alignment) {
+        assert_(size >= 0, IllegalArgumentException::new);
+        assert_(isPowerOfTwo(alignment), IllegalArgumentException::new);
+        size = Math.addExact(size, alignment - 1);
+        Object data = newNonMovableArrayVM(byte.class, size);
+        long address = addressOfNonMovableArrayData(data);
+        long aligned_address = roundUpL(address, alignment);
+        return new Pointer(data, ARRAY_BYTE_BASE_OFFSET + aligned_address - address);
+    }
+
+    public static Pointer allocateNative(long size, long alignment) {
+        Layout.checkSize(size);
+        Layout.checkAlignment(alignment);
+        size = Math.addExact(size, alignment - 1);
+        long address = allocateMemory(size);
+        long aligned_address = roundUpL(address, alignment);
+        return new Pointer(null, address).addOffset(aligned_address - address);
     }
 }

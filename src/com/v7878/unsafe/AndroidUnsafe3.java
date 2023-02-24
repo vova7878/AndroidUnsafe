@@ -6,9 +6,7 @@ import static com.v7878.unsafe.Utils.*;
 import java.lang.invoke.*;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 @DangerLevel(3)
 @TargetApi(Build.VERSION_CODES.O)

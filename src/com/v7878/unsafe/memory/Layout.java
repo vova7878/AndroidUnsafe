@@ -1,25 +1,18 @@
 package com.v7878.unsafe.memory;
 
-import static com.v7878.unsafe.AndroidUnsafe2.*;
-import static com.v7878.unsafe.AndroidUnsafe3.fieldOffset;
-import static com.v7878.unsafe.AndroidUnsafe3.getInstanceFields;
-import static com.v7878.unsafe.AndroidUnsafe4.OBJECT_ALIGNMENT_SHIFT;
+import static com.v7878.unsafe.AndroidUnsafe4.*;
 import com.v7878.unsafe.Utils;
 import static com.v7878.unsafe.Utils.*;
 import java.lang.reflect.Field;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.*;
+import java.util.stream.*;
 
 public abstract class Layout {
 
     static void checkAlignment(long alignment) {
         assert_(isPowerOfTwoL(alignment)
-                && (IS64BIT || is32BitClean(alignment)),
+                && (IS64BIT || is32BitOnly(alignment)),
                 IllegalArgumentException::new,
                 "Invalid alignment: " + alignment);
     }
@@ -33,7 +26,7 @@ public abstract class Layout {
     static void checkSize(long size, boolean includeZero) {
         assert_(Utils.checkSize(size) || (includeZero && size == 0),
                 IllegalArgumentException::new,
-                "Invalid size for layout: " + size);
+                "Invalid size: " + size);
     }
 
     static void checkSize(long size) {
@@ -67,7 +60,7 @@ public abstract class Layout {
     }
 
     public final boolean isPadding() {
-        return this instanceof PaddingLayout;
+        return this instanceof RawLayout.PaddingLayout;
     }
 
     abstract Layout dup(int align_shift, Optional<String> name);
@@ -132,9 +125,14 @@ public abstract class Layout {
     @Override
     public abstract String toString();
 
-    public static Layout paddingLayout(long size) {
+    public static RawLayout rawLayout(long size) {
         checkSize(size, true);
-        return new PaddingLayout(size);
+        return new RawLayout(size);
+    }
+
+    static Layout paddingLayout(long size) {
+        checkSize(size, true);
+        return new RawLayout.PaddingLayout(size);
     }
 
     public static ValueLayout valueLayout(Class<?> carrier) {

@@ -251,7 +251,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     private static synchronized void initKPoisonReferences() {
         Object test = allocateNonMovableObject(0);
         long address = addressOfNonMovableArray(test);
-        assert_(is32BitClean(address), IllegalStateException::new);
+        assert_(is32BitOnly(address), IllegalStateException::new);
         int real = (int) address;
         int raw = rawObjectToInt(test);
         if (real == raw) {

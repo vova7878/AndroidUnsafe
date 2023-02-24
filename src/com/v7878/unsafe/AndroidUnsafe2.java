@@ -93,7 +93,7 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
 
     public static void putWordChecked(Object obj, long offset, long value, boolean is_64_bit) {
         assert_(checkPointer(obj, offset), IllegalArgumentException::new);
-        assert_(is_64_bit || is32BitClean(value), IllegalArgumentException::new);
+        assert_(is_64_bit || is32BitOnly(value), IllegalArgumentException::new);
         putWord(obj, offset, value, is_64_bit);
     }
 
@@ -103,7 +103,7 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
 
     public static void putWordChecked(long address, long value, boolean is_64_bit) {
         assert_(checkNativeAddress(address), IllegalArgumentException::new);
-        assert_(is_64_bit || is32BitClean(value), IllegalArgumentException::new);
+        assert_(is_64_bit || is32BitOnly(value), IllegalArgumentException::new);
         putWord(address, value, is_64_bit);
     }
 

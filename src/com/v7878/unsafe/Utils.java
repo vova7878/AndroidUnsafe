@@ -4,12 +4,8 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import com.v7878.Thrower;
 import static com.v7878.unsafe.AndroidUnsafe2.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.lang.reflect.*;
+import java.util.function.*;
 
 @TargetApi(Build.VERSION_CODES.O)
 public class Utils {
@@ -144,7 +140,7 @@ public class Utils {
         return sb.toString().toUpperCase();
     }
 
-    public static boolean is32BitClean(long value) {
+    public static boolean is32BitOnly(long value) {
         return value >>> 32 == 0;
     }
 
@@ -156,19 +152,23 @@ public class Utils {
         return (x >= 0) && isPowerOfTwoUnsignedL(x);
     }
 
-    public static long roundDownL(long x, long n) {
-        assert_(isPowerOfTwoL(n), IllegalArgumentException::new);
+    public static long roundDownUnsignedL(long x, long n) {
+        assert_(isPowerOfTwoUnsignedL(n), IllegalArgumentException::new);
         return x & -n;
     }
 
+    public static long roundDownL(long x, long n) {
+        assert_(x >= 0 && n >= 0, IllegalArgumentException::new);
+        return roundDownUnsignedL(x, n);
+    }
+
     public static long roundUpUnsignedL(long x, long n) {
-        long out = roundDownL(x + n - 1, n);
+        long out = roundDownUnsignedL(x + n - 1, n);
         assert_(Long.compareUnsigned(out, x) >= 0, IllegalArgumentException::new);
         return out;
     }
 
     public static long roundUpL(long x, long n) {
-        assert_(x >= 0, IllegalArgumentException::new);
         long out = roundDownL(x + n - 1, n);
         assert_(out >= x, IllegalArgumentException::new);
         return out;
@@ -182,19 +182,23 @@ public class Utils {
         return (x >= 0) && isPowerOfTwoUnsigned(x);
     }
 
-    public static int roundDown(int x, int n) {
-        assert_(isPowerOfTwo(n), IllegalArgumentException::new);
+    public static int roundDownUnsigned(int x, int n) {
+        assert_(isPowerOfTwoUnsigned(n), IllegalArgumentException::new);
         return x & -n;
     }
 
+    public static int roundDown(int x, int n) {
+        assert_(x >= 0 && n >= 0, IllegalArgumentException::new);
+        return roundDownUnsigned(x, n);
+    }
+
     public static int roundUpUnsigned(int x, int n) {
-        int out = roundDown(x + n - 1, n);
+        int out = roundDownUnsigned(x + n - 1, n);
         assert_(Integer.compareUnsigned(out, x) >= 0, IllegalArgumentException::new);
         return out;
     }
 
     public static int roundUp(int x, int n) {
-        assert_(x >= 0, IllegalArgumentException::new);
         int out = roundDown(x + n - 1, n);
         assert_(out >= x, IllegalArgumentException::new);
         return out;
@@ -212,7 +216,7 @@ public class Utils {
 
     public static boolean checkNativeAddress(long address) {
         if (ADDRESS_SIZE == 4) {
-            return is32BitClean(address);
+            return is32BitOnly(address);
         }
         return true;
     }
@@ -220,7 +224,7 @@ public class Utils {
     public static boolean checkOffset(long offset) {
         if (ADDRESS_SIZE == 4) {
             // Note: this will also check for negative sizes
-            return is32BitClean(offset);
+            return is32BitOnly(offset);
         }
         return offset >= 0;
     }

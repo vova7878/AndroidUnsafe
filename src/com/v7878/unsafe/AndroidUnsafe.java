@@ -134,12 +134,7 @@ public class AndroidUnsafe {
     }
 
     public static <T> T allocateInstance(Class<T> clazz) {
-        try {
-            return (T) unsafe.allocateInstance(clazz);
-        } catch (InstantiationException e) {
-            throwException(e);
-            throw new RuntimeException(e);
-        }
+        return (T) nothrow_run(() -> unsafe.allocateInstance(clazz));
     }
 
     @TargetApi(Build.VERSION_CODES.N)

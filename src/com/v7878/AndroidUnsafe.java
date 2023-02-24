@@ -6,6 +6,7 @@ import static com.v7878.Utils.nothrow_run;
 import java.lang.reflect.*;
 import sun.misc.Unsafe;
 
+@DangerLevel(1)
 public class AndroidUnsafe {
 
     public static void throwException(Throwable th) {

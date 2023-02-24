@@ -5,6 +5,7 @@ import android.os.Build;
 import static com.v7878.Utils.*;
 import java.nio.ByteOrder;
 
+@DangerLevel(2)
 @TargetApi(Build.VERSION_CODES.N)
 public class AndroidUnsafe2 extends AndroidUnsafe {
 

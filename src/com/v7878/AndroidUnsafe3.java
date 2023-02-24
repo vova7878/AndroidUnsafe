@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
+@DangerLevel(3)
 @TargetApi(Build.VERSION_CODES.O)
 public class AndroidUnsafe3 extends AndroidUnsafe2 {
 
@@ -138,6 +139,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         artFieldPadding = (int) (af - th[0].sFields) % artFieldSize;
     }
 
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static <T> T[] arrayCast(Class<T> clazz, Object... data) {
         assert_(!clazz.isPrimitive(), IllegalArgumentException::new);
         T[] out = (T[]) Array.newInstance(clazz, data.length);

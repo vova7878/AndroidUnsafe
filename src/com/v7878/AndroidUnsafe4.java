@@ -6,6 +6,7 @@ import static com.v7878.Utils.*;
 import java.lang.reflect.*;
 import java.util.Objects;
 
+@DangerLevel(4)
 @TargetApi(Build.VERSION_CODES.O)
 public class AndroidUnsafe4 extends AndroidUnsafe3 {
 
@@ -64,6 +65,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return shadow$_monitor_;
     }
 
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static <T> T setObjectClass(Object obj, Class<T> clazz) {
         Field sk = getShadowKlassField();
         nothrow_run(() -> sk.set(obj, clazz));
@@ -99,6 +101,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return clh[0].length;
     }
 
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static void setArrayLength(Object arr, int length) {
         assert_(arr != null, NullPointerException::new);
         assert_(length >= 0, IllegalArgumentException::new);
@@ -179,6 +182,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return roundUp(sizeOf(obj), OBJECT_ALIGNMENT);
     }
 
+    @DangerLevel(5)
     public static <T> T cloneBySize(T obj, boolean nonmovable) {
         int size = sizeOf(obj);
         Object out = allocateObject(size, nonmovable);
@@ -186,10 +190,12 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return (T) out;
     }
 
+    @DangerLevel(5)
     public static <T> T cloneBySize(T obj) {
         return cloneBySize(obj, false);
     }
 
+    @DangerLevel(5)
     public static <T> T cloneNonMovable(T obj) {
         return cloneBySize(obj, true);
     }
@@ -204,6 +210,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return out;
     }
 
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static Object makeObject(byte[] dump, boolean nonmovable) {
         if (dump == null) {
             return null;
@@ -214,16 +221,63 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return out;
     }
 
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static Object makeObject(byte[] dump) {
         return makeObject(dump, false);
     }
 
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static Object makeNonMovableObject(byte[] dump) {
         return makeObject(dump, true);
     }
 
-    /*private static Class<?> voidArrayClass;
+    @DangerLevel(DangerLevel.MAX)
+    public static int rawObjectToInt(Object obj) {
+        Object[] arr = new Object[1];
+        arr[0] = obj;
+        return getInt(arr, ARRAY_OBJECT_BASE_OFFSET);
+    }
 
+    @DangerLevel(DangerLevel.MAX)
+    public static Object rawIntToObject(int obj) {
+        int[] arr = new int[1];
+        arr[0] = obj;
+        return getObject(arr, ARRAY_INT_BASE_OFFSET);
+    }
+
+    private static boolean kPoisonReferences;
+
+    @DangerLevel(DangerLevel.MAX)
+    private static synchronized void initKPoisonReferences() {
+        Object test = allocateNonMovableObject(0);
+        long address = addressOfNonMovableArray(test);
+        assert_(Utils.is32BitClean(address), IllegalStateException::new);
+        int real = (int) address;
+        int raw = rawObjectToInt(test);
+        if (real == raw) {
+            kPoisonReferences = false;
+        } else if (real == -raw) {
+            kPoisonReferences = true;
+        }
+        throw new IllegalStateException();
+    }
+
+    @DangerLevel(DangerLevel.MAX)
+    public static int objectToInt(Object obj) {
+        initKPoisonReferences();
+        int out = rawObjectToInt(obj);
+        return kPoisonReferences ? -out : out;
+    }
+
+    @DangerLevel(DangerLevel.MAX)
+    public static Object intToObject(int obj) {
+        initKPoisonReferences();
+        return rawIntToObject(kPoisonReferences ? -obj : obj);
+    }
+
+    private static Class<?> voidArrayClass;
+
+    @DangerLevel(DangerLevel.MAX)
     public synchronized static Class<?> getVoidArrayClass() {
         if (voidArrayClass == null) {
             Class<?> nc = cloneBySize(int[].class);
@@ -233,5 +287,5 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
             voidArrayClass = nc;
         }
         return voidArrayClass;
-    }*/
+    }
 }

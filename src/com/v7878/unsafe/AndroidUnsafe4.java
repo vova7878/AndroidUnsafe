@@ -1,8 +1,8 @@
-package com.v7878;
+package com.v7878.unsafe;
 
 import android.annotation.TargetApi;
 import android.os.Build;
-import static com.v7878.Utils.*;
+import static com.v7878.unsafe.Utils.*;
 import java.lang.reflect.*;
 import java.util.Objects;
 
@@ -251,15 +251,16 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     private static synchronized void initKPoisonReferences() {
         Object test = allocateNonMovableObject(0);
         long address = addressOfNonMovableArray(test);
-        assert_(Utils.is32BitClean(address), IllegalStateException::new);
+        assert_(is32BitClean(address), IllegalStateException::new);
         int real = (int) address;
         int raw = rawObjectToInt(test);
         if (real == raw) {
             kPoisonReferences = false;
         } else if (real == -raw) {
             kPoisonReferences = true;
+        } else {
+            throw new IllegalStateException(real + " " + raw);
         }
-        throw new IllegalStateException();
     }
 
     @DangerLevel(DangerLevel.MAX)

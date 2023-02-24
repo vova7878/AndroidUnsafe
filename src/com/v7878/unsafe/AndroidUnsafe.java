@@ -1,8 +1,9 @@
-package com.v7878;
+package com.v7878.unsafe;
 
 import android.annotation.TargetApi;
 import android.os.Build;
-import static com.v7878.Utils.nothrow_run;
+import com.v7878.Thrower;
+import static com.v7878.unsafe.Utils.*;
 import java.lang.reflect.*;
 import sun.misc.Unsafe;
 

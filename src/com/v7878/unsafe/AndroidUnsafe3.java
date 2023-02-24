@@ -1,8 +1,8 @@
-package com.v7878;
+package com.v7878.unsafe;
 
 import android.annotation.TargetApi;
 import android.os.Build;
-import static com.v7878.Utils.*;
+import static com.v7878.unsafe.Utils.*;
 import java.lang.invoke.*;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.*;

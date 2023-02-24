@@ -1,9 +1,9 @@
-package com.v7878;
+package com.v7878.unsafe;
 
 import android.annotation.TargetApi;
 import android.os.Build;
-import static com.v7878.AndroidUnsafe2.ADDRESS_SIZE;
-import static com.v7878.AndroidUnsafe2.IS_BIG_ENDIAN;
+import com.v7878.Thrower;
+import static com.v7878.unsafe.AndroidUnsafe2.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

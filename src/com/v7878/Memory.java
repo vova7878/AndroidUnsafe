@@ -232,7 +232,7 @@ public class Memory {
         public abstract String toString();
 
         public static Layout paddingLayout(long size) {
-            checkSize(size);
+            checkSize(size, true);
             return new PaddingLayout(size);
         }
 
@@ -271,6 +271,7 @@ public class Memory {
         //TODO array copy
         public static GroupLayout unionLayout(boolean fill_to_alignment, Layout... elements) {
             Objects.requireNonNull(elements);
+            assert_(elements.length != 0, IllegalArgumentException::new);
             int align_shift = 0;
             long size = 0;
             for (Layout element : elements) {
@@ -279,8 +280,8 @@ public class Memory {
             }
             if (fill_to_alignment) {
                 size = roundUpL(size, 1 << align_shift);
-                checkSize(size, true);
             }
+            checkSize(size);
             return new GroupLayout(GroupLayout.Kind.UNION,
                     Stream.of(elements)
                             .collect(Collectors.toList()), size, align_shift);
@@ -292,6 +293,7 @@ public class Memory {
 
         public static GroupLayout fullStructLayout(Layout... elements) {
             Objects.requireNonNull(elements);
+            assert_(elements.length != 0, IllegalArgumentException::new);
             int align_shift = 0;
             long size = 0;
             for (Layout element : elements) {
@@ -299,9 +301,9 @@ public class Memory {
                 assert_(isAlignedL(size, element.alignment()),
                         IllegalArgumentException::new,
                         "Incompatible alignment constraints");
-                size += element.size();
-                checkSize(size, true);
+                size = Math.addExact(size, element.size());
             }
+            checkSize(size);
             assert_(isAlignedL(size, 1 << align_shift),
                     IllegalArgumentException::new,
                     "Incompatible alignment constraints");
@@ -312,6 +314,7 @@ public class Memory {
 
         public static GroupLayout structLayout(boolean fill_to_alignment, Layout... elements) {
             Objects.requireNonNull(elements);
+            assert_(elements.length != 0, IllegalArgumentException::new);
             ArrayList<Layout> out_list = new ArrayList<>(elements.length);
             int align_shift = 0;
             long size = 0;
@@ -322,8 +325,7 @@ public class Memory {
                     out_list.add(paddingLayout(new_size - size));
                 }
                 out_list.add(element);
-                size = new_size + element.size();
-                checkSize(size, true);
+                size = Math.addExact(new_size, element.size());
             }
             if (fill_to_alignment) {
                 long new_size = roundUpL(size, 1 << align_shift);
@@ -331,8 +333,8 @@ public class Memory {
                     out_list.add(paddingLayout(new_size - size));
                 }
                 size = new_size;
-                checkSize(size, true);
             }
+            checkSize(size);
             return new GroupLayout(GroupLayout.Kind.STRUCT,
                     out_list, size, align_shift);
         }

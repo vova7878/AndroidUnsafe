@@ -10,27 +10,27 @@ import java.util.stream.*;
 
 public abstract class Layout {
 
-    static void checkAlignment(long alignment) {
+    static void requireValidAlignment(long alignment) {
         assert_(isPowerOfTwoL(alignment)
                 && (IS64BIT || is32BitOnly(alignment)),
                 IllegalArgumentException::new,
                 "Invalid alignment: " + alignment);
     }
 
-    static void checkAlignmentShift(int align_shift) {
+    static void requireValidAlignmentShift(int align_shift) {
         assert_((align_shift >= 0) && (align_shift < (ADDRESS_SIZE * 8)),
                 IllegalArgumentException::new,
                 "Invalid alignment shift: " + align_shift);
     }
 
-    static void checkSize(long size, boolean includeZero) {
+    static void requireValidSize(long size, boolean includeZero) {
         assert_(Utils.checkSize(size) || (includeZero && size == 0),
                 IllegalArgumentException::new,
                 "Invalid size: " + size);
     }
 
-    static void checkSize(long size) {
-        checkSize(size, false);
+    static void requireValidSize(long size) {
+        Layout.requireValidSize(size, false);
     }
 
     private final long size;
@@ -71,12 +71,12 @@ public abstract class Layout {
     }
 
     public Layout withAlignmentShift(int align_shift) {
-        checkAlignmentShift(align_shift);
+        requireValidAlignmentShift(align_shift);
         return dup(align_shift, name);
     }
 
     public Layout withAlignment(long alignment) {
-        checkAlignment(alignment);
+        requireValidAlignment(alignment);
         return withAlignmentShift(log2(alignment));
     }
 
@@ -126,12 +126,12 @@ public abstract class Layout {
     public abstract String toString();
 
     public static RawLayout rawLayout(long size) {
-        checkSize(size, true);
+        Layout.requireValidSize(size, true);
         return new RawLayout(size);
     }
 
     static Layout paddingLayout(long size) {
-        checkSize(size, true);
+        Layout.requireValidSize(size, false);
         return new RawLayout.Padding(size);
     }
 
@@ -180,7 +180,7 @@ public abstract class Layout {
         if (fill_to_alignment) {
             size = roundUpL(size, 1 << align_shift);
         }
-        checkSize(size);
+        requireValidSize(size);
         return new GroupLayout(GroupLayout.Kind.UNION,
                 Stream.of(elements)
                         .collect(Collectors.toList()), size, align_shift);
@@ -202,7 +202,7 @@ public abstract class Layout {
                     "Incompatible alignment constraints");
             size = Math.addExact(size, element.size());
         }
-        checkSize(size);
+        requireValidSize(size);
         assert_(isAlignedL(size, 1 << align_shift),
                 IllegalArgumentException::new,
                 "Incompatible alignment constraints");
@@ -233,7 +233,7 @@ public abstract class Layout {
             }
             size = new_size;
         }
-        checkSize(size);
+        requireValidSize(size);
         return new GroupLayout(GroupLayout.Kind.STRUCT,
                 out_list, size, align_shift);
     }
@@ -260,5 +260,19 @@ public abstract class Layout {
                     .withName(ifield.getDeclaringClass().getName() + "." + ifield.getName());
         }
         return Layout.structLayout(false, vls).withName(clazz.getName()).withAlignmentShift(OBJECT_ALIGNMENT_SHIFT);
+    }
+
+    public final MemorySegment allocateNative() {
+        Pointer p = Pointer.allocateNative(size(), alignment());
+        return new MemorySegment(p, this);
+    }
+
+    public final MemorySegment allocateHeap() {
+        long alignment = alignment();
+        if (size > Integer.MAX_VALUE || alignment > Integer.MAX_VALUE) {
+            throw new IllegalStateException();
+        }
+        Pointer p = Pointer.allocateHeap((int) size, (int) alignment);
+        return new MemorySegment(p, this);
     }
 }

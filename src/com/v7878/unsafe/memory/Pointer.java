@@ -133,8 +133,8 @@ public class Pointer {
     }
 
     public static Pointer allocateNative(long size, long alignment) {
-        Layout.checkSize(size);
-        Layout.checkAlignment(alignment);
+        Layout.requireValidSize(size);
+        Layout.requireValidAlignment(alignment);
         size = Math.addExact(size, alignment - 1);
         long address = allocateMemory(size);
         long aligned_address = roundUpL(address, alignment);

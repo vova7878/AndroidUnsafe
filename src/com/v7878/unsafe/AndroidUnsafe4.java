@@ -33,7 +33,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
                 "OBJECT_SIZE must be equal to 8");
     }
 
-    private static void initShadow() {
+    private synchronized static void initShadow() {
         if (shadow$_monitor_ == null) {
             Field[] fds = getDeclaredFields0(Object.class, false);
             shadow$_klass_ = searchField(fds, "shadow$_klass_", true);
@@ -43,7 +43,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         }
     }
 
-    private static void initVMRuntime() {
+    private synchronized static void initVMRuntime() {
         if (vmruntime == null) {
             Class<?> vmrc = nothrow_run(() -> Class.forName("dalvik.system.VMRuntime"));
             Method[] mtds = getDeclaredMethods(vmrc);
@@ -55,6 +55,13 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         }
     }
 
+    private synchronized static void initInternalClone() {
+        if (internalClone == null) {
+            internalClone = getDeclaredMethod(Object.class, "internalClone");
+            setAccessible(internalClone, true);
+        }
+    }
+
     public static Field getShadowKlassField() {
         initShadow();
         return shadow$_klass_;
@@ -63,6 +70,11 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     public static Field getShadowMonitorField() {
         initShadow();
         return shadow$_monitor_;
+    }
+
+    public static <T> T internalClone(T obj) {
+        initInternalClone();
+        return (T) nothrow_run(() -> internalClone.invoke(obj), true);
     }
 
     @DangerLevel(DangerLevel.VERY_CAREFUL)
@@ -84,14 +96,6 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
 
     public static long addressOfNonMovableArray(Object array) {
         return addressOfNonMovableArrayData(array) - arrayBaseOffset(array.getClass());
-    }
-
-    public static <T> T internalClone(T obj) {
-        if (internalClone == null) {
-            internalClone = getDeclaredMethod(Object.class, "internalClone");
-            setAccessible(internalClone, true);
-        }
-        return (T) nothrow_run(() -> internalClone.invoke(obj), true);
     }
 
     public static int getArrayLength(Object arr) {
@@ -245,21 +249,23 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return getObject(arr, ARRAY_INT_BASE_OFFSET);
     }
 
-    private static boolean kPoisonReferences;
+    private static Boolean kPoisonReferences;
 
     @DangerLevel(DangerLevel.MAX)
     private static synchronized void initKPoisonReferences() {
-        Object test = allocateNonMovableObject(0);
-        long address = addressOfNonMovableArray(test);
-        assert_(is32BitOnly(address), IllegalStateException::new);
-        int real = (int) address;
-        int raw = rawObjectToInt(test);
-        if (real == raw) {
-            kPoisonReferences = false;
-        } else if (real == -raw) {
-            kPoisonReferences = true;
-        } else {
-            throw new IllegalStateException(real + " " + raw);
+        if (kPoisonReferences == null) {
+            Object test = allocateNonMovableObject(0);
+            long address = addressOfNonMovableArray(test);
+            assert_(is32BitOnly(address), IllegalStateException::new);
+            int real = (int) address;
+            int raw = rawObjectToInt(test);
+            if (real == raw) {
+                kPoisonReferences = false;
+            } else if (real == -raw) {
+                kPoisonReferences = true;
+            } else {
+                throw new IllegalStateException(real + " " + raw);
+            }
         }
     }
 

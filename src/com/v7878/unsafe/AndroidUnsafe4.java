@@ -15,6 +15,23 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         public int length;
     }
 
+    public static class StringMirror {
+
+        public static final boolean COMPACT_STRINGS = nothrow_run(() -> {
+            StringMirror[] test = arrayCast(StringMirror.class, "\uffff");
+            if (test[0].count == 3) {
+                return true;
+            }
+            if (test[0].count == 1) {
+                return false;
+            }
+            throw new IllegalStateException("" + test[0].count);
+        });
+
+        public int count;
+        public int hash;
+    }
+
     public static final int OBJECT_ALIGNMENT_SHIFT = 3;
     public static final int OBJECT_ALIGNMENT = 1 << OBJECT_ALIGNMENT_SHIFT;
     public static final int OBJECT_INSTANCE_SIZE = objectSizeField(Object.class);
@@ -166,10 +183,18 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return out;
     }
 
+    public static boolean isCompressedString(String s) {
+        StringMirror[] sm = arrayCast(StringMirror.class, s);
+        return StringMirror.COMPACT_STRINGS && ((sm[0].count & 1) == 0);
+    }
+
     public static int sizeOf(Object obj) {
         Objects.requireNonNull(obj);
-        //TODO: String
-        assert_(!(obj instanceof String), IllegalArgumentException::new, "Not supported yet");
+        if (obj instanceof String) {
+            String sobj = (String) obj;
+            int data_size = sobj.length() * (isCompressedString(sobj) ? 1 : 2);
+            return roundUp(objectSizeField(StringMirror.class) + data_size, OBJECT_ALIGNMENT);
+        }
         if (obj instanceof Class) {
             ClassMirror[] clh = arrayCast(ClassMirror.class, obj);
             return clh[0].classSize;

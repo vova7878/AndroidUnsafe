@@ -10,7 +10,7 @@ import java.util.Objects;
 @TargetApi(Build.VERSION_CODES.O)
 public class AndroidUnsafe4 extends AndroidUnsafe3 {
 
-    public static class ArrayBase {
+    public static class ArrayMirror {
 
         public int length;
     }
@@ -101,7 +101,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     public static int getArrayLength(Object arr) {
         assert_(arr != null, NullPointerException::new);
         assert_(arr.getClass().isArray(), IllegalArgumentException::new);
-        ArrayBase[] clh = arrayCast(ArrayBase.class, arr);
+        ArrayMirror[] clh = arrayCast(ArrayMirror.class, arr);
         return clh[0].length;
     }
 
@@ -110,7 +110,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         assert_(arr != null, NullPointerException::new);
         assert_(length >= 0, IllegalArgumentException::new);
         assert_(arr.getClass().isArray(), IllegalArgumentException::new);
-        ArrayBase[] clh = arrayCast(ArrayBase.class, arr);
+        ArrayMirror[] clh = arrayCast(ArrayMirror.class, arr);
         clh[0].length = length;
     }
 
@@ -160,7 +160,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     }
 
     public static int objectSizeField(Class<?> clazz) {
-        ClassBase[] clh = arrayCast(ClassBase.class, clazz);
+        ClassMirror[] clh = arrayCast(ClassMirror.class, clazz);
         int out = clh[0].objectSize;
         assert_(out != 0, IllegalArgumentException::new, "objectSize == 0");
         return out;
@@ -171,7 +171,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         //TODO: String
         assert_(!(obj instanceof String), IllegalArgumentException::new, "Not supported yet");
         if (obj instanceof Class) {
-            ClassBase[] clh = arrayCast(ClassBase.class, obj);
+            ClassMirror[] clh = arrayCast(ClassMirror.class, obj);
             return clh[0].classSize;
         }
         @SuppressWarnings("null")
@@ -288,7 +288,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     public synchronized static Class<?> getVoidArrayClass() {
         if (voidArrayClass == null) {
             Class<?> nc = cloneBySize(int[].class);
-            ClassBase[] clh = arrayCast(ClassBase.class, nc);
+            ClassMirror[] clh = arrayCast(ClassMirror.class, nc);
             clh[0].componentType = void.class;
             clh[0].name = null;
             voidArrayClass = nc;

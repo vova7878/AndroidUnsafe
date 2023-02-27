@@ -12,7 +12,7 @@ import java.util.*;
 @TargetApi(Build.VERSION_CODES.O)
 public class AndroidUnsafe3 extends AndroidUnsafe2 {
 
-    public static class ClassBase {
+    public static class ClassMirror {
 
         public ClassLoader classLoader;
         public Class<?> componentType;
@@ -42,12 +42,12 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         public short virtualMethodsOffset;
     }
 
-    public static class AccessibleObjectBase {
+    public static class AccessibleObjectMirror {
 
         public boolean override;
     }
 
-    public static class FieldBase extends AccessibleObjectBase {
+    public static class FieldMirror extends AccessibleObjectMirror {
 
         public int accessFlags;
         public Class<?> declaringClass;
@@ -56,7 +56,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         public Class<?> type;
     }
 
-    public static class ExecutableBase extends AccessibleObjectBase {
+    public static class ExecutableMirror extends AccessibleObjectMirror {
 
         public volatile boolean hasRealParameterData;
         public volatile Parameter[] parameters;
@@ -67,24 +67,24 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         public int dexMethodIndex;
     }
 
-    public static class MethodHandleBase {
+    public static class MethodHandleMirror {
 
         public MethodType type;
         public Object different;
-        public MethodHandleImplBase cachedSpreadInvoker;
+        public MethodHandleImplMirror cachedSpreadInvoker;
         public int handleKind;
         public long artFieldOrMethod;
     }
 
-    public static final class MethodHandleImplBase extends MethodHandleBase {
+    public static final class MethodHandleImplMirror extends MethodHandleMirror {
 
-        public HandleInfo info;
+        public HandleInfoMirror info;
     }
 
-    public static final class HandleInfo {
+    public static final class HandleInfoMirror {
 
         public Member member;
-        public MethodHandleImplBase handle;
+        public MethodHandleImplMirror handle;
     }
 
     private static class Test {
@@ -120,7 +120,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     private static final Method mGetArtField;
 
     static {
-        ClassBase[] th = arrayCast(ClassBase.class, Test.class);
+        ClassMirror[] th = arrayCast(ClassMirror.class, Test.class);
 
         long am = getArtMethod(Test.am);
         long bm = getArtMethod(Test.bm);
@@ -148,12 +148,12 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     }
 
     public static void setAccessible(AccessibleObject ao, boolean value) {
-        AccessibleObjectBase[] aob = arrayCast(AccessibleObjectBase.class, ao);
+        AccessibleObjectMirror[] aob = arrayCast(AccessibleObjectMirror.class, ao);
         aob[0].override = value;
     }
 
     public static int fieldOffset(Field f) {
-        FieldBase[] fh = arrayCast(FieldBase.class, f);
+        FieldMirror[] fh = arrayCast(FieldMirror.class, f);
         return fh[0].offset;
     }
 
@@ -173,7 +173,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     }
 
     public static long getArtMethod(Executable ex) {
-        ExecutableBase[] eh = arrayCast(ExecutableBase.class, ex);
+        ExecutableMirror[] eh = arrayCast(ExecutableMirror.class, ex);
         return eh[0].artMethod;
     }
 
@@ -184,7 +184,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     @SuppressWarnings("UseSpecificCatch")
     public static Executable[] getDeclaredExecutables0(Class<?> clazz) {
         Objects.requireNonNull(clazz);
-        ClassBase[] clh = arrayCast(ClassBase.class, clazz);
+        ClassMirror[] clh = arrayCast(ClassMirror.class, clazz);
         long methods = clh[0].methods;
         if (methods == 0) {
             return new Executable[0];
@@ -195,7 +195,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
             return out;
         }
         MethodHandle mh = allocateInstance(MethodHandleImplClass);
-        MethodHandleImplBase[] mhh = arrayCast(MethodHandleImplBase.class, mh);
+        MethodHandleImplMirror[] mhh = arrayCast(MethodHandleImplMirror.class, mh);
         for (int i = 0; i < col; i++) {
             mhh[0].artFieldOrMethod = methods + artMethodPadding + artMethodSize * i;
             mhh[0].info = null;
@@ -207,7 +207,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     @SuppressWarnings("UseSpecificCatch")
     public static Field[] getDeclaredFields0(Class<?> clazz, boolean s) {
         Objects.requireNonNull(clazz);
-        ClassBase[] clh = arrayCast(ClassBase.class, clazz);
+        ClassMirror[] clh = arrayCast(ClassMirror.class, clazz);
         long fields = s ? clh[0].sFields : clh[0].iFields;
         if (fields == 0) {
             return new Field[0];
@@ -218,7 +218,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
             return out;
         }
         MethodHandle mh = allocateInstance(MethodHandleImplClass);
-        MethodHandleImplBase[] mhh = arrayCast(MethodHandleImplBase.class, mh);
+        MethodHandleImplMirror[] mhh = arrayCast(MethodHandleImplMirror.class, mh);
         for (int i = 0; i < col; i++) {
             mhh[0].artFieldOrMethod = fields + artFieldPadding + artFieldSize * i;
             mhh[0].info = null;
@@ -252,7 +252,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
 
     public static Method convertConstructorToMethod(Constructor<?> ct) {
         Method out = allocateInstance(Method.class);
-        ExecutableBase[] eb = arrayCast(ExecutableBase.class, ct, out);
+        ExecutableMirror[] eb = arrayCast(ExecutableMirror.class, ct, out);
 
         eb[1].override = eb[0].override;
         eb[1].accessFlags = eb[0].accessFlags;

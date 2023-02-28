@@ -116,7 +116,6 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     }
 
     public static int getArrayLength(Object arr) {
-        assert_(arr != null, NullPointerException::new);
         assert_(arr.getClass().isArray(), IllegalArgumentException::new);
         ArrayMirror[] clh = arrayCast(ArrayMirror.class, arr);
         return clh[0].length;
@@ -124,9 +123,8 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
 
     @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static void setArrayLength(Object arr, int length) {
-        assert_(arr != null, NullPointerException::new);
-        assert_(length >= 0, IllegalArgumentException::new);
         assert_(arr.getClass().isArray(), IllegalArgumentException::new);
+        assert_(length >= 0, IllegalArgumentException::new);
         ArrayMirror[] clh = arrayCast(ArrayMirror.class, arr);
         clh[0].length = length;
     }
@@ -159,10 +157,8 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     public static <T> T newArrayInstance(Class<T> cls, int length, boolean nonmovable) {
         assert_(cls.isArray(), IllegalArgumentException::new);
         assert_(length >= 0, IllegalArgumentException::new);
-        int size = arrayIndexScale(cls) * length;
-        assert_(size >= 0, IllegalArgumentException::new);
-        size += arrayBaseOffset(cls);
-        assert_(size >= 0, IllegalArgumentException::new);
+        int size = Math.multiplyExact(arrayIndexScale(cls), length);
+        size = Math.addExact(size, arrayBaseOffset(cls));
         T out = setObjectClass(allocateObject(size, nonmovable), cls);
         setArrayLength(out, length);
         return out;

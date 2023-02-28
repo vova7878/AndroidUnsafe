@@ -320,6 +320,8 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
         assert_(checkOffset(bytes), IllegalArgumentException::new);
         assert_(checkPointer(srcBase, srcOffset), IllegalArgumentException::new);
         assert_(checkPointer(destBase, destOffset), IllegalArgumentException::new);
+        assert_(checkPointer(srcBase, Math.addExact(srcOffset, bytes)), IllegalArgumentException::new);
+        assert_(checkPointer(destBase, Math.addExact(destOffset, bytes)), IllegalArgumentException::new);
         copyMemory(srcBase, srcOffset, destBase, destOffset, bytes);
     }
 }

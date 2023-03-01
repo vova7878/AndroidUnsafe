@@ -56,7 +56,7 @@ public class RawLayout extends Layout {
 
     @Override
     public String toString() {
-        return decorateLayoutString("x");
+        return decorateLayoutString("X");
     }
 
     static class Padding extends RawLayout {
@@ -107,7 +107,7 @@ public class RawLayout extends Layout {
 
         @Override
         public String toString() {
-            return decorateLayoutString("xp");
+            return decorateLayoutString("x");
         }
     }
 }

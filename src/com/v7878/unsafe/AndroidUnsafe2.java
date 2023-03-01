@@ -305,12 +305,23 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
         if (bytes == 0) {
             return;
         }
-        if (srcBase == null && destBase == null) {
-            copyMemory(srcOffset, destOffset, bytes);
+        //maybe it can be done better
+        if (srcBase == null) {
+            if (destBase == null) {
+                copyMemory(srcOffset, destOffset, bytes);
+                return;
+            }
+            for (long i = 0; i < bytes; i++) {
+                putByte(destBase, destOffset + i, getByte(srcOffset + i));
+            }
             return;
         }
-
-        //maybe it can be done better
+        if (destBase == null) {
+            for (long i = 0; i < bytes; i++) {
+                putByte(destOffset + i, getByte(srcBase, srcOffset + i));
+            }
+            return;
+        }
         for (long i = 0; i < bytes; i++) {
             putByte(destBase, destOffset + i, getByte(srcBase, srcOffset + i));
         }

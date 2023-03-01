@@ -201,6 +201,7 @@ public class AndroidUnsafe {
         unsafe.putShort(obj, offset, newValue);
     }
 
+    @TargetApi(Build.VERSION_CODES.N)
     public static float getFloat(Object obj, long offset) {
         return unsafe.getFloat(obj, offset);
     }

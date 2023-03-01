@@ -256,7 +256,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return makeObject(dump, true);
     }
 
-    @DangerLevel(DangerLevel.MAX)
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static int rawObjectToInt(Object obj) {
         Object[] arr = new Object[1];
         arr[0] = obj;

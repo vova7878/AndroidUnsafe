@@ -13,8 +13,15 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
     public static final boolean IS64BIT = ADDRESS_SIZE == 8;
     public static final boolean IS_BIG_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
 
-    //TODO
-    public static final boolean UNALIGNED_ACCESS = false;
+    public static boolean UNALIGNED_ACCESS = false;
+
+    static {
+        String arch = System.getProperty("os.arch");
+        if (arch != null) {
+            UNALIGNED_ACCESS = arch.equals("i386") || arch.equals("x86")
+                    || arch.equals("amd64") || arch.equals("x86_64");
+        }
+    }
 
     public static final int ARRAY_BOOLEAN_BASE_OFFSET = arrayBaseOffset(boolean[].class);
     public static final int ARRAY_BYTE_BASE_OFFSET = arrayBaseOffset(byte[].class);

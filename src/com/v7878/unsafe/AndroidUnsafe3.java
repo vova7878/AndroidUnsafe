@@ -120,21 +120,27 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     private static final Method mGetArtField;
 
     static {
-        ClassMirror[] th = arrayCast(ClassMirror.class, Test.class);
+        ClassMirror[] tm = arrayCast(ClassMirror.class, Test.class);
 
         long am = getArtMethod(Test.am);
         long bm = getArtMethod(Test.bm);
         artMethodSize = (int) (bm - am);
-        artMethodPadding = (int) (am - th[0].methods) % artMethodSize;
+        artMethodPadding = (int) (am - tm[0].methods) % artMethodSize;
 
-        mGetArtField = nothrow_run(() -> {
-            return getDeclaredMethod(Field.class, "getArtField");
-        });
+        mGetArtField = getDeclaredMethod(Field.class, "getArtField");
 
         long af = getArtField(Test.af);
         long bf = getArtField(Test.bf);
         artFieldSize = (int) (bf - af);
-        artFieldPadding = (int) (af - th[0].sFields) % artFieldSize;
+        artFieldPadding = (int) (af - tm[0].sFields) % artFieldSize;
+
+        try {
+            Class<?> bits = Class.forName("java.nio.Bits");
+            Method unaligned = getDeclaredMethod(bits, "unaligned");
+            setAccessible(unaligned, true);
+            UNALIGNED_ACCESS = (boolean) unaligned.invoke(null);
+        } catch (@SuppressWarnings("UseSpecificCatch") Throwable th) {
+        }
     }
 
     @DangerLevel(DangerLevel.VERY_CAREFUL)

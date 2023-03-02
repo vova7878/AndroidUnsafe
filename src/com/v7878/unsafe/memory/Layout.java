@@ -3,9 +3,11 @@ package com.v7878.unsafe.memory;
 import static com.v7878.unsafe.AndroidUnsafe4.*;
 import com.v7878.unsafe.Utils;
 import static com.v7878.unsafe.Utils.*;
+import com.v7878.unsafe.memory.LayoutPath.PathElement;
 import java.lang.reflect.Field;
 import java.nio.ByteOrder;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.*;
 
 public abstract class Layout {
@@ -124,6 +126,22 @@ public abstract class Layout {
 
     @Override
     public abstract String toString();
+
+    private static <T> T computePathOp(LayoutPath path, Function<LayoutPath, T> finalizer, PathElement... elements) {
+        Objects.requireNonNull(elements);
+        for (PathElement e : elements) {
+            path = e.apply(path);
+        }
+        return finalizer.apply(path);
+    }
+
+    public final Layout select(PathElement... elements) {
+        return computePathOp(LayoutPath.rootPath(this), LayoutPath::layout, elements);
+    }
+
+    public final LayoutPath selectPath(PathElement... elements) {
+        return computePathOp(LayoutPath.rootPath(this), obj -> obj, elements);
+    }
 
     public static RawLayout rawLayout(long size) {
         Layout.requireValidSize(size, true);
@@ -264,7 +282,7 @@ public abstract class Layout {
 
     public final MemorySegment allocateNative() {
         Pointer p = Pointer.allocateNative(size(), alignment());
-        return new MemorySegment(p, this);
+        return new MemorySegment(p, this, false);
     }
 
     public final MemorySegment allocateHeap() {
@@ -273,6 +291,14 @@ public abstract class Layout {
             throw new IllegalStateException();
         }
         Pointer p = Pointer.allocateHeap((int) size, (int) alignment);
-        return new MemorySegment(p, this);
+        return new MemorySegment(p, this, false);
+    }
+
+    public final MemorySegment bind(Pointer p, boolean ignore_alignment) {
+        return new MemorySegment(p, this, ignore_alignment);
+    }
+
+    public final MemorySegment bind(Pointer p) {
+        return bind(p, false);
     }
 }

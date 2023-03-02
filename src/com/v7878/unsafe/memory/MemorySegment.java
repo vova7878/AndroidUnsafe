@@ -47,4 +47,8 @@ public class MemorySegment {
         LayoutPath p = layout.selectPath(elements);
         return new MemorySegment(pointer.addOffset(p.offset()), p.layout(), true);
     }
+
+    public Object get() {
+        return pointer.get((ValueLayout) layout);
+    }
 }

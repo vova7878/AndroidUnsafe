@@ -1,7 +1,10 @@
 package com.v7878.unsafe.memory;
 
+import com.v7878.unsafe.AndroidUnsafe2;
 import static com.v7878.unsafe.AndroidUnsafe4.*;
 import static com.v7878.unsafe.Utils.*;
+import java.nio.ByteOrder;
+import java.util.Objects;
 
 public class Pointer {
 
@@ -97,6 +100,36 @@ public class Pointer {
 
     public boolean checkAlignmentShift(int shift) {
         return shift <= alignShift;
+    }
+
+    public Object get(ValueLayout layout) {
+        Objects.requireNonNull(layout);
+        Class<?> carrier = layout.carrier();
+        long offset = getOffset();
+        if (carrier == boolean.class) {
+            return AndroidUnsafe2.getBoolean(base, offset);
+        } else if (carrier == byte.class) {
+            return AndroidUnsafe2.getByte(base, offset);
+        } else if (carrier == char.class) {
+            return AndroidUnsafe2.getCharUnaligned(base, offset, layout.order() == ByteOrder.BIG_ENDIAN);
+        } else if (carrier == short.class) {
+            return AndroidUnsafe2.getShortUnaligned(base, offset, layout.order() == ByteOrder.BIG_ENDIAN);
+        } else if (carrier == int.class) {
+            return AndroidUnsafe2.getIntUnaligned(base, offset, layout.order() == ByteOrder.BIG_ENDIAN);
+        } else if (carrier == float.class) {
+            return AndroidUnsafe2.getFloatUnaligned(base, offset, layout.order() == ByteOrder.BIG_ENDIAN);
+        } else if (carrier == long.class) {
+            return AndroidUnsafe2.getLongUnaligned(base, offset, layout.order() == ByteOrder.BIG_ENDIAN);
+        } else if (carrier == double.class) {
+            return AndroidUnsafe2.getDoubleUnaligned(base, offset, layout.order() == ByteOrder.BIG_ENDIAN);
+        } else if (carrier == Object.class) {
+            return AndroidUnsafe2.getObject(base, offset);
+        }
+        //TODO
+        /*else if (carrier == Pointer.class) {
+            return new Pointer(AndroidUnsafe2.getWord(base, offset));
+        }*/
+        throw new IllegalStateException();
     }
 
     @Override

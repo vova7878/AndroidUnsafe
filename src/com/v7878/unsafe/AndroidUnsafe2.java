@@ -145,6 +145,14 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
         return convEndian(getLongUnaligned(obj, offset), bigEndian);
     }
 
+    public static double getDoubleUnaligned(Object obj, long offset) {
+        return Double.longBitsToDouble(getLongUnaligned(obj, offset));
+    }
+
+    public static double getDoubleUnaligned(Object obj, long offset, boolean bigEndian) {
+        return Double.longBitsToDouble(getLongUnaligned(obj, offset, bigEndian));
+    }
+
     public static int getIntUnaligned(Object obj, long offset) {
         if (UNALIGNED_ACCESS || ((offset & 3) == 0)) {
             return getInt(obj, offset);
@@ -161,6 +169,14 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
 
     public static int getIntUnaligned(Object obj, long offset, boolean bigEndian) {
         return convEndian(getIntUnaligned(obj, offset), bigEndian);
+    }
+
+    public static float getFloatUnaligned(Object obj, long offset) {
+        return Float.intBitsToFloat(getIntUnaligned(obj, offset));
+    }
+
+    public static float getFloatUnaligned(Object obj, long offset, boolean bigEndian) {
+        return Float.intBitsToFloat(getIntUnaligned(obj, offset, bigEndian));
     }
 
     public static short getShortUnaligned(Object obj, long offset) {
@@ -266,6 +282,14 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
         putLongUnaligned(o, offset, convEndian(x, bigEndian));
     }
 
+    public static void putDoubleUnaligned(Object o, long offset, double x) {
+        putLongUnaligned(o, offset, Double.doubleToRawLongBits(x));
+    }
+
+    public static void putDoubleUnaligned(Object o, long offset, double x, boolean bigEndian) {
+        putLongUnaligned(o, offset, Double.doubleToRawLongBits(x), bigEndian);
+    }
+
     public static void putIntUnaligned(Object o, long offset, int x) {
         if (UNALIGNED_ACCESS || ((offset & 3) == 0)) {
             putInt(o, offset, x);
@@ -284,6 +308,14 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
 
     public static void putIntUnaligned(Object o, long offset, int x, boolean bigEndian) {
         putIntUnaligned(o, offset, convEndian(x, bigEndian));
+    }
+
+    public static void putFloatUnaligned(Object o, long offset, float x) {
+        putLongUnaligned(o, offset, Float.floatToRawIntBits(x));
+    }
+
+    public static void putFloatUnaligned(Object o, long offset, float x, boolean bigEndian) {
+        putLongUnaligned(o, offset, Float.floatToRawIntBits(x), bigEndian);
     }
 
     public static void putShortUnaligned(Object o, long offset, short x) {

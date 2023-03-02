@@ -164,11 +164,12 @@ public class AndroidUnsafe {
 
     @TargetApi(Build.VERSION_CODES.N)
     public static boolean getBoolean(Object obj, long offset) {
-        return unsafe.getBoolean(obj, offset);
+        return unsafe.getByte(obj, offset) != 0;
     }
 
     @TargetApi(Build.VERSION_CODES.N)
     public static void putBoolean(Object obj, long offset, boolean newValue) {
+        unsafe.putByte(obj, offset, (byte) (newValue ? 1 : 0));
     }
 
     @TargetApi(Build.VERSION_CODES.N)
@@ -219,6 +220,16 @@ public class AndroidUnsafe {
     @TargetApi(Build.VERSION_CODES.N)
     public static void putDouble(Object obj, long offset, double newValue) {
         unsafe.putDouble(obj, offset, newValue);
+    }
+
+    @TargetApi(Build.VERSION_CODES.N)
+    public static boolean getBoolean(long address) {
+        return unsafe.getByte(address) != 0;
+    }
+
+    @TargetApi(Build.VERSION_CODES.N)
+    public static void putBoolean(long address, boolean x) {
+        unsafe.putByte(address, (byte) (x ? 1 : 0));
     }
 
     @TargetApi(Build.VERSION_CODES.N)

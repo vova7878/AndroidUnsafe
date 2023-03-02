@@ -460,12 +460,17 @@ public abstract class ValueLayout extends Layout {
 
     public static final class OfObject extends ValueLayout {
 
+        private static ByteOrder checkOrder(ByteOrder order) {
+            assert_(order == ByteOrder.nativeOrder(), IllegalArgumentException::new);
+            return order;
+        }
+
         OfObject(ByteOrder order) {
-            super(4, 2, order);
+            super(4, 2, checkOrder(order));
         }
 
         OfObject(int align_shift, ByteOrder order, Optional<String> name) {
-            super(4, align_shift, order, name);
+            super(4, align_shift, checkOrder(order), name);
         }
 
         @Override

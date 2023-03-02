@@ -65,6 +65,10 @@ public abstract class Layout {
         return this instanceof RawLayout.Padding;
     }
 
+    public final boolean isValue() {
+        return this instanceof ValueLayout;
+    }
+
     abstract Layout dup(int align_shift, Optional<String> name);
 
     public Layout withName(String name) {

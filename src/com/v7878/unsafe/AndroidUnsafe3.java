@@ -122,21 +122,21 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     static {
         ClassMirror[] tm = arrayCast(ClassMirror.class, Test.class);
 
-        final int langth_field_size = 4;
+        final int length_field_size = 4;
 
         long am = getArtMethod(Test.am);
         long bm = getArtMethod(Test.bm);
         artMethodSize = (int) (bm - am);
-        artMethodPadding = (int) (am - tm[0].methods - langth_field_size)
-                % artMethodSize + langth_field_size;
+        artMethodPadding = (int) (am - tm[0].methods - length_field_size)
+                % artMethodSize + length_field_size;
 
         mGetArtField = getDeclaredMethod(Field.class, "getArtField");
 
         long af = getArtField(Test.af);
         long bf = getArtField(Test.bf);
         artFieldSize = (int) (bf - af);
-        artFieldPadding = (int) (af - tm[0].sFields - langth_field_size)
-                % artFieldSize + langth_field_size;
+        artFieldPadding = (int) (af - tm[0].sFields - length_field_size)
+                % artFieldSize + length_field_size;
 
         try {
             Class<?> bits = Class.forName("java.nio.Bits");

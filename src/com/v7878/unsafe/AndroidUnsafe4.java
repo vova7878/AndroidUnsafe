@@ -184,6 +184,11 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return out;
     }
 
+    public static int classSizeField(Class<?> clazz) {
+        ClassMirror[] clh = arrayCast(ClassMirror.class, clazz);
+        return clh[0].classSize;
+    }
+
     public static boolean isCompressedString(String s) {
         StringMirror[] sm = arrayCast(StringMirror.class, s);
         return StringMirror.COMPACT_STRINGS && ((sm[0].count & 1) == 0);
@@ -197,8 +202,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
             return roundUp(objectSizeField(StringMirror.class) + data_size, OBJECT_ALIGNMENT);
         }
         if (obj instanceof Class) {
-            ClassMirror[] clh = arrayCast(ClassMirror.class, obj);
-            return clh[0].classSize;
+            return classSizeField((Class<?>) obj);
         }
         @SuppressWarnings("null")
         Class<?> ocl = obj.getClass();

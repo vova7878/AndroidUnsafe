@@ -264,24 +264,61 @@ public abstract class Layout {
         return structLayout(true, elements);
     }
 
+    private static GroupLayout getLayoutForFields(Field[] fields, int full_size) {
+        Arrays.sort(fields, (a, b) -> {
+            return Integer.compare(fieldOffset(a), fieldOffset(b));
+        });
+        ValueLayout[] vls = new ValueLayout[fields.length];
+        for (int i = 0; i < fields.length; i++) {
+            Field ifield = fields[i];
+            Class<?> ft = ifield.getType();
+            vls[i] = Layout.valueLayout(ft.isPrimitive() ? ft : Object.class)
+                    .withName(ifield.getDeclaringClass().getName() + "." + ifield.getName());
+        }
+        GroupLayout out = Layout.structLayout(false, vls).withAlignmentShift(OBJECT_ALIGNMENT_SHIFT);
+
+        //checks
+        assert_(out.size() == full_size, IllegalStateException::new);
+        long offset = 0;
+        int index = 0;
+        for (Layout tmp : out.memberLayouts()) {
+            if (!tmp.isPadding()) {
+                assert_(offset == fieldOffset(fields[index]), IllegalStateException::new);
+                index++;
+            }
+            offset += tmp.size();
+        }
+        assert_(index == fields.length, IllegalStateException::new);
+        return out;
+    }
+
     public static Layout getClassLayout(Class<?> clazz) {
+        Objects.requireNonNull(clazz);
         assert_((clazz != Class.class) && (clazz != String.class) && (!clazz.isArray()),
                 IllegalArgumentException::new);
         if (clazz.isPrimitive()) {
             return Layout.valueLayout(clazz).withName(clazz.getName());
         }
         Field[] ifields = getInstanceFields(clazz);
-        Arrays.sort(ifields, (a, b) -> {
-            return Integer.compare(fieldOffset(a), fieldOffset(b));
-        });
-        ValueLayout[] vls = new ValueLayout[ifields.length];
-        for (int i = 0; i < ifields.length; i++) {
-            Field ifield = ifields[i];
-            Class<?> ft = ifield.getType();
-            vls[i] = Layout.valueLayout(ft.isPrimitive() ? ft : Object.class)
-                    .withName(ifield.getDeclaringClass().getName() + "." + ifield.getName());
+        return getLayoutForFields(ifields, objectSizeField(clazz)).withName(clazz.getName());
+    }
+
+    public static Layout getInstanceLayout(Object obj) {
+        Objects.requireNonNull(obj);
+        if (obj instanceof Class) {
+            Class<?> clazz = (Class<?>) obj;
+            ArrayList<Field> tmp = new ArrayList<>();
+            tmp.addAll(Arrays.asList(getInstanceFields(Class.class)));
+            tmp.addAll(Arrays.asList(getDeclaredFields0(clazz, true)));
+            return getLayoutForFields(tmp.stream().toArray(Field[]::new), classSizeField(clazz));
         }
-        return Layout.structLayout(false, vls).withName(clazz.getName()).withAlignmentShift(OBJECT_ALIGNMENT_SHIFT);
+        if (obj instanceof String) {
+            throw new UnsupportedOperationException("not implemented yet");
+        }
+        if (obj.getClass().isArray()) {
+            throw new UnsupportedOperationException("not implemented yet");
+        }
+        return getClassLayout(obj.getClass());
     }
 
     public final MemorySegment allocateNative() {

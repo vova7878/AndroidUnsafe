@@ -31,7 +31,7 @@ public class LayoutPath {
         return new IllegalArgumentException("Bad layout path: " + cause);
     }
 
-    public LayoutPath groupElement(String name) {
+    private LayoutPath groupElement(String name, boolean throw_if_not_found) {
         Objects.requireNonNull(name);
         assert_(layout instanceof GroupLayout, IllegalArgumentException::new,
                 "attempting to select a group element from a non-group layout");
@@ -40,18 +40,33 @@ public class LayoutPath {
         Layout elem = null;
         for (int i = 0; i < g.memberLayouts().size(); i++) {
             Layout l = g.memberLayouts().get(i);
-            if (l.name().isPresent()
-                    && l.name().get().equals(name)) {
-                elem = l;
-                break;
-            } else if (g.isStruct()) {
+            if (l.name().isPresent()) {
+                if (l.name().get().equals(name)) {
+                    elem = l;
+                    break;
+                }
+            } else if (l instanceof GroupLayout) {
+                LayoutPath tmp = new LayoutPath(elem_offset, l, this);
+                LayoutPath out = tmp.groupElement(name, false);
+                if (out != null) {
+                    return out;
+                }
+            }
+            if (g.isStruct()) {
                 elem_offset += l.size();
             }
         }
         if (elem == null) {
-            throw badLayoutPath("cannot resolve '" + name + "' in layout " + layout);
+            if (throw_if_not_found) {
+                throw badLayoutPath("cannot resolve '" + name + "' in layout " + layout);
+            }
+            return null;
         }
-        return new LayoutPath(offset() + elem_offset, elem, this);
+        return new LayoutPath(elem_offset, elem, this);
+    }
+
+    public LayoutPath groupElement(String name) {
+        return groupElement(name, true);
     }
 
     public static LayoutPath rootPath(Layout layout) {

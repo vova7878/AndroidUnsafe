@@ -1,6 +1,6 @@
 package com.v7878.unsafe.memory;
 
-import static com.v7878.unsafe.AndroidUnsafe2.*;
+import static com.v7878.unsafe.AndroidUnsafe4.*;
 import static com.v7878.unsafe.Utils.*;
 import java.nio.ByteOrder;
 import java.util.Objects;
@@ -465,12 +465,17 @@ public abstract class ValueLayout extends Layout {
             return order;
         }
 
+        private static int checkAlignmentShift(int align_shift) {
+            assert_(align_shift >= OBJECT_FIELD_SIZE_SHIFT, IllegalArgumentException::new);
+            return align_shift;
+        }
+
         OfObject(ByteOrder order) {
             super(4, 2, checkOrder(order));
         }
 
         OfObject(int align_shift, ByteOrder order, Optional<String> name) {
-            super(4, align_shift, checkOrder(order), name);
+            super(4, checkAlignmentShift(align_shift), checkOrder(order), name);
         }
 
         @Override

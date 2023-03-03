@@ -122,17 +122,21 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     static {
         ClassMirror[] tm = arrayCast(ClassMirror.class, Test.class);
 
+        final int langth_field_size = 4;
+
         long am = getArtMethod(Test.am);
         long bm = getArtMethod(Test.bm);
         artMethodSize = (int) (bm - am);
-        artMethodPadding = (int) (am - tm[0].methods) % artMethodSize;
+        artMethodPadding = (int) (am - tm[0].methods - langth_field_size)
+                % artMethodSize + langth_field_size;
 
         mGetArtField = getDeclaredMethod(Field.class, "getArtField");
 
         long af = getArtField(Test.af);
         long bf = getArtField(Test.bf);
         artFieldSize = (int) (bf - af);
-        artFieldPadding = (int) (af - tm[0].sFields) % artFieldSize;
+        artFieldPadding = (int) (af - tm[0].sFields - langth_field_size)
+                % artFieldSize + langth_field_size;
 
         try {
             Class<?> bits = Class.forName("java.nio.Bits");
@@ -195,7 +199,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         if (methods == 0) {
             return new Executable[0];
         }
-        int col = getInt(methods);
+        int col = getIntN(methods);
         Executable[] out = new Executable[col];
         if (out.length == 0) {
             return out;
@@ -218,7 +222,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         if (fields == 0) {
             return new Field[0];
         }
-        int col = getInt(fields);
+        int col = getIntN(fields);
         Field[] out = new Field[col];
         if (out.length == 0) {
             return out;

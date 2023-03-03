@@ -2,120 +2,68 @@ package com.v7878.unsafe;
 
 import android.annotation.TargetApi;
 import android.os.Build;
+import static com.v7878.unsafe.Checks.*;
 import static com.v7878.unsafe.Utils.*;
 import java.nio.ByteOrder;
 
 @DangerLevel(2)
-@TargetApi(Build.VERSION_CODES.N)
+@TargetApi(Build.VERSION_CODES.O)
 public class AndroidUnsafe2 extends AndroidUnsafe {
 
-    public static final int ADDRESS_SIZE = addressSize();
-    public static final boolean IS64BIT = ADDRESS_SIZE == 8;
-    public static final boolean IS_BIG_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
-
-    public static boolean UNALIGNED_ACCESS = false;
-
-    static {
-        String arch = System.getProperty("os.arch");
-        if (arch != null) {
-            UNALIGNED_ACCESS = arch.equals("i386") || arch.equals("x86")
-                    || arch.equals("amd64") || arch.equals("x86_64");
-        }
+    private static short convEndian(short value, ByteOrder order) {
+        return ByteOrder.nativeOrder().equals(order) ? value : Short.reverseBytes(value);
     }
 
-    public static final int ARRAY_BOOLEAN_BASE_OFFSET = arrayBaseOffset(boolean[].class);
-    public static final int ARRAY_BYTE_BASE_OFFSET = arrayBaseOffset(byte[].class);
-    public static final int ARRAY_SHORT_BASE_OFFSET = arrayBaseOffset(short[].class);
-    public static final int ARRAY_CHAR_BASE_OFFSET = arrayBaseOffset(char[].class);
-    public static final int ARRAY_INT_BASE_OFFSET = arrayBaseOffset(int[].class);
-    public static final int ARRAY_LONG_BASE_OFFSET = arrayBaseOffset(long[].class);
-    public static final int ARRAY_FLOAT_BASE_OFFSET = arrayBaseOffset(float[].class);
-    public static final int ARRAY_DOUBLE_BASE_OFFSET = arrayBaseOffset(double[].class);
-    public static final int ARRAY_OBJECT_BASE_OFFSET = arrayBaseOffset(Object[].class);
-
-    public static final int ARRAY_BOOLEAN_INDEX_SCALE = arrayIndexScale(boolean[].class);
-    public static final int ARRAY_BYTE_INDEX_SCALE = arrayIndexScale(byte[].class);
-    public static final int ARRAY_SHORT_INDEX_SCALE = arrayIndexScale(short[].class);
-    public static final int ARRAY_CHAR_INDEX_SCALE = arrayIndexScale(char[].class);
-    public static final int ARRAY_INT_INDEX_SCALE = arrayIndexScale(int[].class);
-    public static final int ARRAY_LONG_INDEX_SCALE = arrayIndexScale(long[].class);
-    public static final int ARRAY_FLOAT_INDEX_SCALE = arrayIndexScale(float[].class);
-    public static final int ARRAY_DOUBLE_INDEX_SCALE = arrayIndexScale(double[].class);
-    public static final int ARRAY_OBJECT_INDEX_SCALE = arrayIndexScale(Object[].class);
-
-    static {
-        assert_(ARRAY_OBJECT_INDEX_SCALE == 4, RuntimeException::new,
-                "ARRAY_OBJECT_INDEX_SCALE must be equal to 4");
-        assert_((ADDRESS_SIZE == 4) || (ADDRESS_SIZE == 8), RuntimeException::new,
-                "ADDRESS_SIZE must be equal to 4 or 8");
+    private static int convEndian(int value, ByteOrder order) {
+        return ByteOrder.nativeOrder().equals(order) ? value : Integer.reverseBytes(value);
     }
 
-    public static boolean unalignedAccess() {
-        return UNALIGNED_ACCESS;
+    private static long convEndian(long value, ByteOrder order) {
+        return ByteOrder.nativeOrder().equals(order) ? value : Long.reverseBytes(value);
     }
 
-    public final boolean isBigEndian() {
-        return IS_BIG_ENDIAN;
+    private static int pickPos(int top, int pos) {
+        return isBigEndian() ? top - pos : pos;
     }
 
-    public static long getWord(Object obj, long offset, boolean is_64_bit) {
-        return is_64_bit ? getLong(obj, offset) : getInt(obj, offset) & 0xffffffffL;
+    private static long makeLong(int i0, int i1) {
+        return (toUnsignedLong(i0) << pickPos(32, 0))
+                | (toUnsignedLong(i1) << pickPos(32, 32));
     }
 
-    public static long getWord(Object obj, long offset) {
-        return getWord(obj, offset, IS64BIT);
+    private static long makeLong(short i0, short i1, short i2, short i3) {
+        return ((toUnsignedLong(i0) << pickPos(48, 0))
+                | (toUnsignedLong(i1) << pickPos(48, 16))
+                | (toUnsignedLong(i2) << pickPos(48, 32))
+                | (toUnsignedLong(i3) << pickPos(48, 48)));
     }
 
-    public static long getWord(long address, boolean is_64_bit) {
-        return is_64_bit ? getLong(address) : getInt(address) & 0xffffffffL;
+    private static long makeLong(byte i0, byte i1, byte i2, byte i3, byte i4, byte i5, byte i6, byte i7) {
+        return ((toUnsignedLong(i0) << pickPos(56, 0))
+                | (toUnsignedLong(i1) << pickPos(56, 8))
+                | (toUnsignedLong(i2) << pickPos(56, 16))
+                | (toUnsignedLong(i3) << pickPos(56, 24))
+                | (toUnsignedLong(i4) << pickPos(56, 32))
+                | (toUnsignedLong(i5) << pickPos(56, 40))
+                | (toUnsignedLong(i6) << pickPos(56, 48))
+                | (toUnsignedLong(i7) << pickPos(56, 56)));
     }
 
-    public static long getWord(long address) {
-        return getWord(address, IS64BIT);
+    private static int makeInt(short i0, short i1) {
+        return (toUnsignedInt(i0) << pickPos(16, 0))
+                | (toUnsignedInt(i1) << pickPos(16, 16));
     }
 
-    public static void putWord(Object obj, long offset, long value, boolean is_64_bit) {
-        if (is_64_bit) {
-            putLong(obj, offset, value);
-        } else {
-            putInt(obj, offset, (int) value);
-        }
+    private static int makeInt(byte i0, byte i1, byte i2, byte i3) {
+        return ((toUnsignedInt(i0) << pickPos(24, 0))
+                | (toUnsignedInt(i1) << pickPos(24, 8))
+                | (toUnsignedInt(i2) << pickPos(24, 16))
+                | (toUnsignedInt(i3) << pickPos(24, 24)));
     }
 
-    public static void putWord(Object obj, long offset, long value) {
-        putWord(obj, offset, value, IS64BIT);
-    }
-
-    public static void putWord(long address, long value, boolean is_64_bit) {
-        if (is_64_bit) {
-            putLong(address, value);
-        } else {
-            putInt(address, (int) value);
-        }
-    }
-
-    public static void putWord(long address, long value) {
-        putWord(address, value, IS64BIT);
-    }
-
-    public static void putWordChecked(Object obj, long offset, long value, boolean is_64_bit) {
-        assert_(checkPointer(obj, offset), IllegalArgumentException::new);
-        assert_(is_64_bit || is32BitOnly(value), IllegalArgumentException::new);
-        putWord(obj, offset, value, is_64_bit);
-    }
-
-    public static void putWordChecked(Object obj, long offset, long value) {
-        putWordChecked(obj, offset, value, IS64BIT);
-    }
-
-    public static void putWordChecked(long address, long value, boolean is_64_bit) {
-        assert_(checkNativeAddress(address), IllegalArgumentException::new);
-        assert_(is_64_bit || is32BitOnly(value), IllegalArgumentException::new);
-        putWord(address, value, is_64_bit);
-    }
-
-    public static void putWordChecked(long address, long value) {
-        putWordChecked(address, value, IS64BIT);
+    private static short makeShort(byte i0, byte i1) {
+        return (short) ((toUnsignedInt(i0) << pickPos(8, 0))
+                | (toUnsignedInt(i1) << pickPos(8, 8)));
     }
 
     public static long getLongUnaligned(Object obj, long offset) {
@@ -141,16 +89,16 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
         }
     }
 
-    public static long getLongUnaligned(Object obj, long offset, boolean bigEndian) {
-        return convEndian(getLongUnaligned(obj, offset), bigEndian);
+    public static long getLongUnaligned(Object obj, long offset, ByteOrder order) {
+        return convEndian(getLongUnaligned(obj, offset), order);
     }
 
     public static double getDoubleUnaligned(Object obj, long offset) {
         return Double.longBitsToDouble(getLongUnaligned(obj, offset));
     }
 
-    public static double getDoubleUnaligned(Object obj, long offset, boolean bigEndian) {
-        return Double.longBitsToDouble(getLongUnaligned(obj, offset, bigEndian));
+    public static double getDoubleUnaligned(Object obj, long offset, ByteOrder order) {
+        return Double.longBitsToDouble(getLongUnaligned(obj, offset, order));
     }
 
     public static int getIntUnaligned(Object obj, long offset) {
@@ -167,16 +115,16 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
         }
     }
 
-    public static int getIntUnaligned(Object obj, long offset, boolean bigEndian) {
-        return convEndian(getIntUnaligned(obj, offset), bigEndian);
+    public static int getIntUnaligned(Object obj, long offset, ByteOrder order) {
+        return convEndian(getIntUnaligned(obj, offset), order);
     }
 
     public static float getFloatUnaligned(Object obj, long offset) {
         return Float.intBitsToFloat(getIntUnaligned(obj, offset));
     }
 
-    public static float getFloatUnaligned(Object obj, long offset, boolean bigEndian) {
-        return Float.intBitsToFloat(getIntUnaligned(obj, offset, bigEndian));
+    public static float getFloatUnaligned(Object obj, long offset, ByteOrder order) {
+        return Float.intBitsToFloat(getIntUnaligned(obj, offset, order));
     }
 
     public static short getShortUnaligned(Object obj, long offset) {
@@ -188,28 +136,46 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
         }
     }
 
-    public static short getShortUnaligned(Object obj, long offset, boolean bigEndian) {
-        return convEndian(getShortUnaligned(obj, offset), bigEndian);
+    public static short getShortUnaligned(Object obj, long offset, ByteOrder order) {
+        return convEndian(getShortUnaligned(obj, offset), order);
     }
 
     public static char getCharUnaligned(Object obj, long offset) {
         return (char) getShortUnaligned(obj, offset);
     }
 
-    public static char getCharUnaligned(Object obj, long offset, boolean bigEndian) {
-        return (char) getShortUnaligned(obj, offset, bigEndian);
+    public static char getCharUnaligned(Object obj, long offset, ByteOrder order) {
+        return (char) getShortUnaligned(obj, offset, order);
+    }
+
+    public static long getWordUnaligned(Object obj, long offset, ByteOrder order, boolean is_64_bit) {
+        return is_64_bit ? getLongUnaligned(obj, offset, order)
+                : getIntUnaligned(obj, offset, order) & 0xffffffffL;
+    }
+
+    public static long getWordUnaligned(Object obj, long offset, ByteOrder order) {
+        return getWordUnaligned(obj, offset, order, IS64BIT);
+    }
+
+    public static long getWordUnaligned(Object obj, long offset, boolean is_64_bit) {
+        return is_64_bit ? getLongUnaligned(obj, offset)
+                : getIntUnaligned(obj, offset) & 0xffffffffL;
+    }
+
+    public static long getWordUnaligned(Object obj, long offset) {
+        return getWordUnaligned(obj, offset, IS64BIT);
     }
 
     private static byte pick(byte le, byte be) {
-        return IS_BIG_ENDIAN ? be : le;
+        return isBigEndian() ? be : le;
     }
 
     private static short pick(short le, short be) {
-        return IS_BIG_ENDIAN ? be : le;
+        return isBigEndian() ? be : le;
     }
 
     private static int pick(int le, int be) {
-        return IS_BIG_ENDIAN ? be : le;
+        return isBigEndian() ? be : le;
     }
 
     private static void putLongParts(Object o, long offset, byte i0, byte i1, byte i2, byte i3, byte i4, byte i5, byte i6, byte i7) {
@@ -252,92 +218,116 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
         putByte(o, offset + 1, pick(i1, i0));
     }
 
-    public static void putLongUnaligned(Object o, long offset, long x) {
+    public static void putLongUnaligned(Object o, long offset, long value) {
         if (UNALIGNED_ACCESS || ((offset & 7) == 0)) {
-            putLong(o, offset, x);
+            putLong(o, offset, value);
         } else if ((offset & 3) == 0) {
             putLongParts(o, offset,
-                    (int) (x >>> 0),
-                    (int) (x >>> 32));
+                    (int) (value >>> 0),
+                    (int) (value >>> 32));
         } else if ((offset & 1) == 0) {
             putLongParts(o, offset,
-                    (short) (x >>> 0),
-                    (short) (x >>> 16),
-                    (short) (x >>> 32),
-                    (short) (x >>> 48));
+                    (short) (value >>> 0),
+                    (short) (value >>> 16),
+                    (short) (value >>> 32),
+                    (short) (value >>> 48));
         } else {
             putLongParts(o, offset,
-                    (byte) (x >>> 0),
-                    (byte) (x >>> 8),
-                    (byte) (x >>> 16),
-                    (byte) (x >>> 24),
-                    (byte) (x >>> 32),
-                    (byte) (x >>> 40),
-                    (byte) (x >>> 48),
-                    (byte) (x >>> 56));
+                    (byte) (value >>> 0),
+                    (byte) (value >>> 8),
+                    (byte) (value >>> 16),
+                    (byte) (value >>> 24),
+                    (byte) (value >>> 32),
+                    (byte) (value >>> 40),
+                    (byte) (value >>> 48),
+                    (byte) (value >>> 56));
         }
     }
 
-    public static void putLongUnaligned(Object o, long offset, long x, boolean bigEndian) {
-        putLongUnaligned(o, offset, convEndian(x, bigEndian));
+    public static void putLongUnaligned(Object o, long offset, long value, ByteOrder order) {
+        putLongUnaligned(o, offset, convEndian(value, order));
     }
 
-    public static void putDoubleUnaligned(Object o, long offset, double x) {
-        putLongUnaligned(o, offset, Double.doubleToRawLongBits(x));
+    public static void putDoubleUnaligned(Object o, long offset, double value) {
+        putLongUnaligned(o, offset, Double.doubleToRawLongBits(value));
     }
 
-    public static void putDoubleUnaligned(Object o, long offset, double x, boolean bigEndian) {
-        putLongUnaligned(o, offset, Double.doubleToRawLongBits(x), bigEndian);
+    public static void putDoubleUnaligned(Object o, long offset, double value, ByteOrder order) {
+        putLongUnaligned(o, offset, Double.doubleToRawLongBits(value), order);
     }
 
-    public static void putIntUnaligned(Object o, long offset, int x) {
+    public static void putIntUnaligned(Object o, long offset, int value) {
         if (UNALIGNED_ACCESS || ((offset & 3) == 0)) {
-            putInt(o, offset, x);
+            putInt(o, offset, value);
         } else if ((offset & 1) == 0) {
             putIntParts(o, offset,
-                    (short) (x >> 0),
-                    (short) (x >>> 16));
+                    (short) (value >> 0),
+                    (short) (value >>> 16));
         } else {
             putIntParts(o, offset,
-                    (byte) (x >>> 0),
-                    (byte) (x >>> 8),
-                    (byte) (x >>> 16),
-                    (byte) (x >>> 24));
+                    (byte) (value >>> 0),
+                    (byte) (value >>> 8),
+                    (byte) (value >>> 16),
+                    (byte) (value >>> 24));
         }
     }
 
-    public static void putIntUnaligned(Object o, long offset, int x, boolean bigEndian) {
-        putIntUnaligned(o, offset, convEndian(x, bigEndian));
+    public static void putIntUnaligned(Object o, long offset, int value, ByteOrder order) {
+        putIntUnaligned(o, offset, convEndian(value, order));
     }
 
-    public static void putFloatUnaligned(Object o, long offset, float x) {
-        putLongUnaligned(o, offset, Float.floatToRawIntBits(x));
+    public static void putFloatUnaligned(Object o, long offset, float value) {
+        putLongUnaligned(o, offset, Float.floatToRawIntBits(value));
     }
 
-    public static void putFloatUnaligned(Object o, long offset, float x, boolean bigEndian) {
-        putLongUnaligned(o, offset, Float.floatToRawIntBits(x), bigEndian);
+    public static void putFloatUnaligned(Object o, long offset, float value, ByteOrder order) {
+        putLongUnaligned(o, offset, Float.floatToRawIntBits(value), order);
     }
 
-    public static void putShortUnaligned(Object o, long offset, short x) {
+    public static void putShortUnaligned(Object o, long offset, short value) {
         if (UNALIGNED_ACCESS || ((offset & 1) == 0)) {
-            putShort(o, offset, x);
+            putShort(o, offset, value);
         } else {
             putShortParts(o, offset,
-                    (byte) (x >>> 0),
-                    (byte) (x >>> 8));
+                    (byte) (value >>> 0),
+                    (byte) (value >>> 8));
         }
     }
 
-    public static void putShortUnaligned(Object o, long offset, short x, boolean bigEndian) {
-        putShortUnaligned(o, offset, convEndian(x, bigEndian));
+    public static void putShortUnaligned(Object o, long offset, short value, ByteOrder order) {
+        putShortUnaligned(o, offset, convEndian(value, order));
     }
 
-    public static void putCharUnaligned(Object o, long offset, char x) {
-        putShortUnaligned(o, offset, (short) x);
+    public static void putCharUnaligned(Object o, long offset, char value) {
+        putShortUnaligned(o, offset, (short) value);
     }
 
-    public static void putCharUnaligned(Object o, long offset, char x, boolean bigEndian) {
-        putShortUnaligned(o, offset, (short) x, bigEndian);
+    public static void putCharUnaligned(Object o, long offset, char value, ByteOrder order) {
+        putShortUnaligned(o, offset, (short) value, order);
+    }
+
+    public static void putWordUnaligned(Object obj, long offset, long value, ByteOrder order, boolean is_64_bit) {
+        if (is_64_bit) {
+            putLongUnaligned(obj, offset, value, order);
+        } else {
+            putIntUnaligned(obj, offset, (int) value, order);
+        }
+    }
+
+    public static void putWordUnaligned(Object obj, long offset, long value, ByteOrder order) {
+        putWordUnaligned(obj, offset, value, order, IS64BIT);
+    }
+
+    public static void putWordUnaligned(Object obj, long offset, long value, boolean is_64_bit) {
+        if (is_64_bit) {
+            putLongUnaligned(obj, offset, value);
+        } else {
+            putIntUnaligned(obj, offset, (int) value);
+        }
+    }
+
+    public static void putWordUnaligned(Object obj, long offset, long value) {
+        putWordUnaligned(obj, offset, value, IS64BIT);
     }
 
     public static void copyMemory(Object srcBase, long srcOffset, Object destBase, long destOffset, long bytes) {
@@ -351,18 +341,18 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
                 return;
             }
             for (long i = 0; i < bytes; i++) {
-                putByte(destBase, destOffset + i, getByte(srcOffset + i));
+                putByteO(destBase, destOffset + i, getByteN(srcOffset + i));
             }
             return;
         }
         if (destBase == null) {
             for (long i = 0; i < bytes; i++) {
-                putByte(destOffset + i, getByte(srcBase, srcOffset + i));
+                putByteN(destOffset + i, getByteO(srcBase, srcOffset + i));
             }
             return;
         }
         for (long i = 0; i < bytes; i++) {
-            putByte(destBase, destOffset + i, getByte(srcBase, srcOffset + i));
+            putByteO(destBase, destOffset + i, getByteO(srcBase, srcOffset + i));
         }
     }
 

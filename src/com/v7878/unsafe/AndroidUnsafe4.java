@@ -36,6 +36,9 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     public static final int OBJECT_ALIGNMENT = 1 << OBJECT_ALIGNMENT_SHIFT;
     public static final int OBJECT_INSTANCE_SIZE = objectSizeField(Object.class);
 
+    public static final int OBJECT_FIELD_SIZE_SHIFT = 2;
+    public static final int OBJECT_FIELD_SIZE = 1 << OBJECT_FIELD_SIZE_SHIFT;
+
     private static Field shadow$_klass_;
     private static Field shadow$_monitor_;
     private static Method newNonMovableArray;
@@ -44,6 +47,8 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     private static Method internalClone;
 
     static {
+        assert_(ARRAY_OBJECT_INDEX_SCALE == OBJECT_FIELD_SIZE, RuntimeException::new,
+                "ARRAY_OBJECT_INDEX_SCALE must be equal to OBJECT_FIELD_SIZE");
         assert_(ARRAY_INT_BASE_OFFSET == 12, RuntimeException::new,
                 "ARRAY_INT_BASE_OFFSET must be equal to 12");
         assert_(OBJECT_INSTANCE_SIZE == 8, RuntimeException::new,

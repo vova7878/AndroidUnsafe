@@ -1,13 +1,10 @@
 package com.v7878.unsafe;
 
-import android.annotation.TargetApi;
 import android.os.Build;
 import com.v7878.Thrower;
-import static com.v7878.unsafe.AndroidUnsafe2.*;
 import java.lang.reflect.*;
 import java.util.function.*;
 
-@TargetApi(Build.VERSION_CODES.O)
 public class Utils {
 
     public static int getSdkInt() {
@@ -214,50 +211,12 @@ public class Utils {
         return (x & (n - 1)) == 0;
     }
 
-    public static boolean checkNativeAddress(long address) {
-        if (ADDRESS_SIZE == 4) {
-            return is32BitOnly(address);
-        }
-        return true;
-    }
-
-    public static boolean checkOffset(long offset) {
-        if (ADDRESS_SIZE == 4) {
-            // Note: this will also check for negative sizes
-            return is32BitOnly(offset);
-        }
-        return offset >= 0;
-    }
-
-    public static boolean checkSize(long size) {
-        return checkOffset(size);
-    }
-
-    public static boolean checkPointer(Object obj, long offset) {
-        if (obj == null) {
-            return checkNativeAddress(offset);
-        }
-        return checkOffset(offset);
-    }
-
     public static int log2(int value) {
         return 31 - Integer.numberOfLeadingZeros(value);
     }
 
     public static int log2(long value) {
         return 63 - Long.numberOfLeadingZeros(value);
-    }
-
-    public static short convEndian(short n, boolean big) {
-        return big == IS_BIG_ENDIAN ? n : Short.reverseBytes(n);
-    }
-
-    public static int convEndian(int n, boolean big) {
-        return big == IS_BIG_ENDIAN ? n : Integer.reverseBytes(n);
-    }
-
-    public static long convEndian(long n, boolean big) {
-        return big == IS_BIG_ENDIAN ? n : Long.reverseBytes(n);
     }
 
     public static int toUnsignedInt(byte n) {
@@ -278,49 +237,5 @@ public class Utils {
 
     public static long toUnsignedLong(int n) {
         return n & 0xffffffffl;
-    }
-
-    public static int pickPos(int top, int pos) {
-        return IS_BIG_ENDIAN ? top - pos : pos;
-    }
-
-    public static long makeLong(int i0, int i1) {
-        return (toUnsignedLong(i0) << pickPos(32, 0))
-                | (toUnsignedLong(i1) << pickPos(32, 32));
-    }
-
-    public static long makeLong(short i0, short i1, short i2, short i3) {
-        return ((toUnsignedLong(i0) << pickPos(48, 0))
-                | (toUnsignedLong(i1) << pickPos(48, 16))
-                | (toUnsignedLong(i2) << pickPos(48, 32))
-                | (toUnsignedLong(i3) << pickPos(48, 48)));
-    }
-
-    public static long makeLong(byte i0, byte i1, byte i2, byte i3, byte i4, byte i5, byte i6, byte i7) {
-        return ((toUnsignedLong(i0) << pickPos(56, 0))
-                | (toUnsignedLong(i1) << pickPos(56, 8))
-                | (toUnsignedLong(i2) << pickPos(56, 16))
-                | (toUnsignedLong(i3) << pickPos(56, 24))
-                | (toUnsignedLong(i4) << pickPos(56, 32))
-                | (toUnsignedLong(i5) << pickPos(56, 40))
-                | (toUnsignedLong(i6) << pickPos(56, 48))
-                | (toUnsignedLong(i7) << pickPos(56, 56)));
-    }
-
-    public static int makeInt(short i0, short i1) {
-        return (toUnsignedInt(i0) << pickPos(16, 0))
-                | (toUnsignedInt(i1) << pickPos(16, 16));
-    }
-
-    public static int makeInt(byte i0, byte i1, byte i2, byte i3) {
-        return ((toUnsignedInt(i0) << pickPos(24, 0))
-                | (toUnsignedInt(i1) << pickPos(24, 8))
-                | (toUnsignedInt(i2) << pickPos(24, 16))
-                | (toUnsignedInt(i3) << pickPos(24, 24)));
-    }
-
-    public static short makeShort(byte i0, byte i1) {
-        return (short) ((toUnsignedInt(i0) << pickPos(8, 0))
-                | (toUnsignedInt(i1) << pickPos(8, 8)));
     }
 }

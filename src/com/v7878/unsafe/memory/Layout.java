@@ -1,7 +1,7 @@
 package com.v7878.unsafe.memory;
 
 import static com.v7878.unsafe.AndroidUnsafe4.*;
-import com.v7878.unsafe.Utils;
+import static com.v7878.unsafe.Checks.*;
 import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.memory.LayoutPath.PathElement;
 import java.lang.reflect.Field;
@@ -26,7 +26,7 @@ public abstract class Layout {
     }
 
     static void requireValidSize(long size, boolean includeZero) {
-        assert_(Utils.checkSize(size) || (includeZero && size == 0),
+        assert_(checkSize(size) || (includeZero && size == 0),
                 IllegalArgumentException::new,
                 "Invalid size: " + size);
     }

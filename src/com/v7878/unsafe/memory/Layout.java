@@ -274,6 +274,7 @@ public abstract class Layout {
     }
 
     public static SequenceLayout sequenceLayout(long elementCount, Layout elementLayout) {
+        assert_(elementLayout.hasAlignedSize(), IllegalArgumentException::new);
         requireValidSize(Math.multiplyExact(elementCount, elementLayout.size()), true);
         return new SequenceLayout(elementCount, elementLayout);
     }

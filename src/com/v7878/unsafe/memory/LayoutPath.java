@@ -69,6 +69,22 @@ public class LayoutPath {
         return groupElement(name, true);
     }
 
+    private void checkSequenceBounds(SequenceLayout seq, long index) {
+        if (index >= seq.elementCount()) {
+            throw badLayoutPath(String.format("Sequence index out of bound; found: %d, size: %d", index, seq.elementCount()));
+        }
+    }
+
+    public LayoutPath sequenceElement(long index) {
+        assert_(layout instanceof SequenceLayout, IllegalArgumentException::new,
+                "attempting to select a sequence element from a non-sequence layout");
+        SequenceLayout seq = (SequenceLayout) layout;
+        checkSequenceBounds(seq, index);
+        long elemSize = seq.elementLayout().size();
+        long elemOffset = elemSize * index;
+        return new LayoutPath(elemOffset, seq.elementLayout(), this);
+    }
+
     public static LayoutPath rootPath(Layout layout) {
         return new LayoutPath(0, layout, null);
     }
@@ -77,7 +93,7 @@ public class LayoutPath {
 
         public enum PathKind {
             //SEQUENCE_ELEMENT("unbound sequence element"),
-            //SEQUENCE_ELEMENT_INDEX("bound sequence element"),
+            SEQUENCE_ELEMENT_INDEX("bound sequence element"),
             //SEQUENCE_RANGE("sequence range"),
             GROUP_ELEMENT("group element");
 
@@ -115,12 +131,12 @@ public class LayoutPath {
                     path -> path.groupElement(name));
         }
 
-        /*static PathElement sequenceElement(long index) {
+        public static PathElement sequenceElement(long index) {
             if (index < 0) {
                 throw new IllegalArgumentException("Index must be positive: " + index);
             }
             return new LayoutPath.PathElement(PathKind.SEQUENCE_ELEMENT_INDEX,
                     path -> path.sequenceElement(index));
-        }*/
+        }
     }
 }

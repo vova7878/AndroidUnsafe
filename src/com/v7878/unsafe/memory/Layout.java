@@ -233,7 +233,8 @@ public abstract class Layout {
                         .collect(Collectors.toList()), size, align_shift);
     }
 
-    public static GroupLayout structLayout(boolean fill_to_alignment, Layout... elements) {
+    public static GroupLayout structLayout(boolean fill_to_alignment,
+            int min_align_shift, Layout... elements) {
         Objects.requireNonNull(elements);
         assert_(elements.length != 0, IllegalArgumentException::new);
         ArrayList<Layout> out_list = new ArrayList<>(elements.length);
@@ -248,6 +249,10 @@ public abstract class Layout {
             out_list.add(element);
             size = Math.addExact(new_size, element.size());
         }
+        if (min_align_shift != -1) {
+            requireValidAlignmentShift(min_align_shift);
+            align_shift = Math.max(align_shift, min_align_shift);
+        }
         if (fill_to_alignment) {
             long new_size = roundUpL(size, 1 << align_shift);
             if (new_size != size) {
@@ -260,8 +265,17 @@ public abstract class Layout {
                 out_list, size, align_shift);
     }
 
+    public static GroupLayout structLayout(boolean fill_to_alignment, Layout... elements) {
+        return structLayout(fill_to_alignment, -1, elements);
+    }
+
     public static GroupLayout structLayout(Layout... elements) {
-        return structLayout(true, elements);
+        return structLayout(true, -1, elements);
+    }
+
+    public static SequenceLayout sequenceLayout(long elementCount, Layout elementLayout) {
+        requireValidSize(Math.multiplyExact(elementCount, elementLayout.size()), true);
+        return new SequenceLayout(elementCount, elementLayout);
     }
 
     private static GroupLayout getLayoutForFields(Field[] fields, int full_size) {
@@ -275,10 +289,10 @@ public abstract class Layout {
             vls[i] = Layout.valueLayout(ft.isPrimitive() ? ft : Object.class)
                     .withName(ifield.getDeclaringClass().getName() + "." + ifield.getName());
         }
-        GroupLayout out = Layout.structLayout(false, vls).withAlignmentShift(OBJECT_ALIGNMENT_SHIFT);
+        GroupLayout out = Layout.structLayout(false, OBJECT_ALIGNMENT_SHIFT, vls);
 
         //checks
-        assert_(out.size() == full_size, IllegalStateException::new);
+        assert_(full_size == -1 || out.size() == full_size, IllegalStateException::new);
         long offset = 0;
         int index = 0;
         for (Layout tmp : out.memberLayouts()) {
@@ -292,15 +306,20 @@ public abstract class Layout {
         return out;
     }
 
-    public static Layout getClassLayout(Class<?> clazz) {
+    private static Layout getClassLayout(Class<?> clazz, boolean allow_string) {
         Objects.requireNonNull(clazz);
-        assert_((clazz != Class.class) && (clazz != String.class) && (!clazz.isArray()),
+        assert_((clazz != Class.class) && (allow_string || clazz != String.class) && (!clazz.isArray()),
                 IllegalArgumentException::new);
         if (clazz.isPrimitive()) {
             return Layout.valueLayout(clazz).withName(clazz.getName());
         }
         Field[] ifields = getInstanceFields(clazz);
-        return getLayoutForFields(ifields, objectSizeField(clazz)).withName(clazz.getName());
+        return getLayoutForFields(ifields, allow_string ? -1
+                : objectSizeField(clazz)).withName(clazz.getName());
+    }
+
+    public static Layout getClassLayout(Class<?> clazz) {
+        return getClassLayout(clazz, false);
     }
 
     public static Layout getInstanceLayout(Object obj) {
@@ -310,15 +329,39 @@ public abstract class Layout {
             ArrayList<Field> tmp = new ArrayList<>();
             tmp.addAll(Arrays.asList(getInstanceFields(Class.class)));
             tmp.addAll(Arrays.asList(getDeclaredFields0(clazz, true)));
-            return getLayoutForFields(tmp.stream().toArray(Field[]::new), classSizeField(clazz));
+            return getLayoutForFields(tmp.stream().toArray(Field[]::new),
+                    classSizeField(clazz))
+                    .withName(clazz.getName() + ".class");
         }
         if (obj instanceof String) {
-            throw new UnsupportedOperationException("not implemented yet");
+            String sobj = (String) obj;
+            int length = sobj.length();
+            Class<?> component = isCompressedString(sobj) ? byte.class : short.class;
+            Layout data = sequenceLayout(length, valueLayout(component));
+            ArrayList<Layout> out = new ArrayList();
+            GroupLayout object = (GroupLayout) getClassLayout(String.class, true);
+            out.addAll(object.memberLayouts());
+            out.add(data.withName("data"));
+            return structLayout(true, OBJECT_ALIGNMENT_SHIFT,
+                    out.stream().toArray(Layout[]::new))
+                    .withName(String.class.getName());
         }
-        if (obj.getClass().isArray()) {
-            throw new UnsupportedOperationException("not implemented yet");
+        Class<?> clazz = obj.getClass();
+        if (clazz.isArray()) {
+            int length = getArrayLength(obj);
+            Class<?> component = obj.getClass().getComponentType();
+            Layout data = sequenceLayout(length,
+                    valueLayout(component.isPrimitive() ? component : Object.class));
+            ArrayList<Layout> out = new ArrayList();
+            GroupLayout object = (GroupLayout) getClassLayout(Object.class);
+            out.addAll(object.memberLayouts());
+            out.add(ValueLayout.JAVA_INT.withName("length"));
+            out.add(data.withName("data"));
+            return structLayout(false, out.stream().toArray(Layout[]::new))
+                    .withAlignmentShift(OBJECT_ALIGNMENT_SHIFT)
+                    .withName(clazz.getName());
         }
-        return getClassLayout(obj.getClass());
+        return getClassLayout(clazz);
     }
 
     public final MemorySegment allocateNative() {

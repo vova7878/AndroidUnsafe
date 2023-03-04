@@ -51,4 +51,8 @@ public class MemorySegment {
     public Object get() {
         return pointer.get((ValueLayout) layout);
     }
+
+    public static MemorySegment getInstanceSegment(Object obj) {
+        return Layout.getInstanceLayout(obj).bind(new Pointer(obj));
+    }
 }

@@ -342,7 +342,7 @@ public abstract class Layout {
             ArrayList<Layout> out = new ArrayList();
             GroupLayout object = (GroupLayout) getClassLayout(String.class, true);
             out.addAll(object.memberLayouts());
-            out.add(data.withName("data"));
+            out.add(data.withName("value")); // classical name
             return structLayout(true, OBJECT_ALIGNMENT_SHIFT,
                     out.stream().toArray(Layout[]::new))
                     .withName(String.class.getName());

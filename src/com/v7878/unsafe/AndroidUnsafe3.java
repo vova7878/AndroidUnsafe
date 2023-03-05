@@ -76,7 +76,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     public static class MethodHandleMirror {
 
         public MethodType type;
-        public Object different;
+        public Object different; // TODO: check offset
         public MethodHandleImplMirror cachedSpreadInvoker;
         public int handleKind;
         public long artFieldOrMethod;

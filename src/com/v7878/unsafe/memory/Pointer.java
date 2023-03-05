@@ -107,39 +107,39 @@ public class Pointer {
     }
 
     public byte get(ValueLayout.OfByte layout) {
-        return getByte(base, offset);
+        return getByte(base, getOffset());
     }
 
     public char get(ValueLayout.OfChar layout) {
-        return getCharUnaligned(base, offset, layout.order());
+        return getCharUnaligned(base, getOffset(), layout.order());
     }
 
     public short get(ValueLayout.OfShort layout) {
-        return getShortUnaligned(base, offset, layout.order());
+        return getShortUnaligned(base, getOffset(), layout.order());
     }
 
     public int get(ValueLayout.OfInt layout) {
-        return getIntUnaligned(base, offset, layout.order());
+        return getIntUnaligned(base, getOffset(), layout.order());
     }
 
     public float get(ValueLayout.OfFloat layout) {
-        return getFloatUnaligned(base, offset, layout.order());
+        return getFloatUnaligned(base, getOffset(), layout.order());
     }
 
     public long get(ValueLayout.OfLong layout) {
-        return getLongUnaligned(base, offset, layout.order());
+        return getLongUnaligned(base, getOffset(), layout.order());
     }
 
     public double get(ValueLayout.OfDouble layout) {
-        return getDoubleUnaligned(base, offset, layout.order());
+        return getDoubleUnaligned(base, getOffset(), layout.order());
     }
 
     public Object get(ValueLayout.OfObject layout) {
-        return getObject(base, offset);
+        return getObject(base, getOffset());
     }
 
     public Pointer get(ValueLayout.OfAddress layout) {
-        return new Pointer(getWordUnaligned(base, offset, layout.order()));
+        return new Pointer(getWordUnaligned(base, getOffset(), layout.order()));
     }
 
     public Object getValue(ValueLayout layout) {

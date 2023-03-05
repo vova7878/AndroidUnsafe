@@ -357,7 +357,7 @@ public abstract class Layout {
             GroupLayout object = (GroupLayout) getClassLayout(Object.class);
             out.addAll(object.memberLayouts());
             out.add(ValueLayout.JAVA_INT.withName("length"));
-            out.add(data.withName("value")); // classical name
+            out.add(data.withName("data"));
             return structLayout(false, out.stream().toArray(Layout[]::new))
                     .withAlignmentShift(OBJECT_ALIGNMENT_SHIFT)
                     .withName(clazz.getName());

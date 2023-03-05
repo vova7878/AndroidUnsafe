@@ -12,6 +12,12 @@ import java.util.*;
 @TargetApi(Build.VERSION_CODES.O)
 public class AndroidUnsafe3 extends AndroidUnsafe2 {
 
+    static {
+        // SDK version checks
+        assert_(Utils.getSdkInt() >= Build.VERSION_CODES.O, IllegalStateException::new);
+        assert_(Utils.getSdkInt() <= 34, IllegalStateException::new);
+    }
+
     public static class ClassMirror {
 
         public ClassLoader classLoader;
@@ -191,7 +197,6 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         return (long) nothrow_run(() -> mGetArtField.invoke(f), true);
     }
 
-    @SuppressWarnings("UseSpecificCatch")
     public static Executable[] getDeclaredExecutables0(Class<?> clazz) {
         Objects.requireNonNull(clazz);
         ClassMirror[] clh = arrayCast(ClassMirror.class, clazz);
@@ -214,7 +219,6 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         return out;
     }
 
-    @SuppressWarnings("UseSpecificCatch")
     public static Field[] getDeclaredFields0(Class<?> clazz, boolean s) {
         Objects.requireNonNull(clazz);
         ClassMirror[] clh = arrayCast(ClassMirror.class, clazz);

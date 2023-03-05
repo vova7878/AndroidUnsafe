@@ -92,6 +92,46 @@ public class MemorySegment {
         return pointer.getValue((ValueLayout) layout);
     }
 
+    public void put(ValueLayout.OfBoolean layout, long offset, boolean value) {
+        pointer.addOffset(offset).put(layout, value);
+    }
+
+    public void put(ValueLayout.OfByte layout, long offset, byte value) {
+        pointer.addOffset(offset).put(layout, value);
+    }
+
+    public void put(ValueLayout.OfChar layout, long offset, char value) {
+        pointer.addOffset(offset).put(layout, value);
+    }
+
+    public void put(ValueLayout.OfShort layout, long offset, short value) {
+        pointer.addOffset(offset).put(layout, value);
+    }
+
+    public void put(ValueLayout.OfInt layout, long offset, int value) {
+        pointer.addOffset(offset).put(layout, value);
+    }
+
+    public void put(ValueLayout.OfFloat layout, long offset, float value) {
+        pointer.addOffset(offset).put(layout, value);
+    }
+
+    public void put(ValueLayout.OfLong layout, long offset, long value) {
+        pointer.addOffset(offset).put(layout, value);
+    }
+
+    public void put(ValueLayout.OfDouble layout, long offset, double value) {
+        pointer.addOffset(offset).put(layout, value);
+    }
+
+    public void put(ValueLayout.OfObject layout, long offset, Object value) {
+        pointer.addOffset(offset).put(layout, value);
+    }
+
+    public void put(ValueLayout.OfAddress layout, long offset, Pointer value) {
+        pointer.addOffset(offset).put(layout, value);
+    }
+
     public static MemorySegment getInstanceSegment(Object obj) {
         return Layout.getInstanceLayout(obj).bind(new Pointer(obj));
     }

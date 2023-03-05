@@ -169,6 +169,46 @@ public class Pointer {
         throw new IllegalStateException();
     }
 
+    public void put(ValueLayout.OfBoolean layout, boolean value) {
+        putBoolean(base, getOffset(), value);
+    }
+
+    public void put(ValueLayout.OfByte layout, byte value) {
+        putByte(base, getOffset(), value);
+    }
+
+    public void put(ValueLayout.OfChar layout, char value) {
+        putCharUnaligned(base, getOffset(), value, layout.order());
+    }
+
+    public void put(ValueLayout.OfShort layout, short value) {
+        putShortUnaligned(base, getOffset(), value, layout.order());
+    }
+
+    public void put(ValueLayout.OfInt layout, int value) {
+        putIntUnaligned(base, getOffset(), value, layout.order());
+    }
+
+    public void put(ValueLayout.OfFloat layout, float value) {
+        putFloatUnaligned(base, getOffset(), value, layout.order());
+    }
+
+    public void put(ValueLayout.OfLong layout, long value) {
+        putLongUnaligned(base, getOffset(), value, layout.order());
+    }
+
+    public void put(ValueLayout.OfDouble layout, double value) {
+        putDoubleUnaligned(base, getOffset(), value, layout.order());
+    }
+
+    public void put(ValueLayout.OfObject layout, Object value) {
+        putObject(base, getOffset(), value);
+    }
+
+    public void put(ValueLayout.OfAddress layout, Pointer value) {
+        putWordUnaligned(base, getOffset(), value.getRawAddress(), layout.order());
+    }
+
     @Override
     public String toString() {
         StringBuilder out = new StringBuilder();

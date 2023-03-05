@@ -3,10 +3,9 @@ package com.v7878.unsafe.memory;
 import static com.v7878.unsafe.AndroidUnsafe4.*;
 import static com.v7878.unsafe.Checks.*;
 import static com.v7878.unsafe.Utils.*;
-import java.nio.ByteOrder;
 import java.util.Objects;
 
-public class Pointer {
+public final class Pointer {
 
     private final Object base;
     private final long base_address;
@@ -142,6 +141,10 @@ public class Pointer {
         return new Pointer(getWordUnaligned(base, getOffset(), layout.order()));
     }
 
+    public Word get(ValueLayout.OfWord layout) {
+        return new Word(getWordUnaligned(base, getOffset(), layout.order()));
+    }
+
     public Object getValue(ValueLayout layout) {
         Objects.requireNonNull(layout);
         Class<?> carrier = layout.carrier();
@@ -165,6 +168,8 @@ public class Pointer {
             return get((ValueLayout.OfObject) layout);
         } else if (carrier == Pointer.class) {
             return get((ValueLayout.OfAddress) layout);
+        } else if (carrier == Word.class) {
+            return get((ValueLayout.OfWord) layout);
         }
         throw new IllegalStateException();
     }
@@ -207,6 +212,10 @@ public class Pointer {
 
     public void put(ValueLayout.OfAddress layout, Pointer value) {
         putWordUnaligned(base, getOffset(), value.getRawAddress(), layout.order());
+    }
+
+    public void put(ValueLayout.OfWord layout, Word value) {
+        putWordUnaligned(base, getOffset(), value.longValue(), layout.order());
     }
 
     @Override

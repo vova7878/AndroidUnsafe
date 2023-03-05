@@ -18,6 +18,7 @@ public abstract class ValueLayout extends Layout {
     public static final OfDouble JAVA_DOUBLE = new OfDouble(ByteOrder.nativeOrder());
     public static final OfObject JAVA_OBJECT = new OfObject(ByteOrder.nativeOrder());
     public static final OfAddress ADDRESS = new OfAddress(ByteOrder.nativeOrder());
+    public static final OfWord WORD = new OfWord(ByteOrder.nativeOrder());
 
     private final ByteOrder order;
 
@@ -557,6 +558,52 @@ public abstract class ValueLayout extends Layout {
         @Override
         public String toString() {
             return super.toString('A');
+        }
+    }
+
+    public static final class OfWord extends ValueLayout {
+
+        OfWord(ByteOrder order) {
+            super(ADDRESS_SIZE, log2(ADDRESS_SIZE), order);
+        }
+
+        OfWord(int align_shift, ByteOrder order, Optional<String> name) {
+            super(ADDRESS_SIZE, align_shift, order, name);
+        }
+
+        @Override
+        public Class<?> carrier() {
+            return Pointer.class;
+        }
+
+        @Override
+        OfWord dup(int align_shift, ByteOrder order, Optional<String> name) {
+            return new OfWord(align_shift, order, name);
+        }
+
+        @Override
+        public OfWord withName(String name) {
+            return (OfWord) super.withName(name);
+        }
+
+        @Override
+        public OfWord withAlignmentShift(int align_shift) {
+            return (OfWord) super.withAlignmentShift(align_shift);
+        }
+
+        @Override
+        public OfWord withAlignment(long alignment) {
+            return (OfWord) super.withAlignment(alignment);
+        }
+
+        @Override
+        public OfWord withOrder(ByteOrder order) {
+            return (OfWord) super.withOrder(order);
+        }
+
+        @Override
+        public String toString() {
+            return super.toString('W');
         }
     }
 }

@@ -182,6 +182,8 @@ public abstract class Layout {
             return new ValueLayout.OfDouble(order);
         } else if (carrier == Pointer.class) {
             return new ValueLayout.OfAddress(order);
+        } else if (carrier == Word.class) {
+            return new ValueLayout.OfWord(order);
         } else if (carrier == Object.class) {
             return new ValueLayout.OfObject(order);
         } else {

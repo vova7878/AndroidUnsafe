@@ -102,30 +102,69 @@ public class Pointer {
         return shift <= alignShift;
     }
 
-    public Object get(ValueLayout layout) {
+    public boolean get(ValueLayout.OfBoolean layout) {
+        return getBoolean(base, getOffset());
+    }
+
+    public byte get(ValueLayout.OfByte layout) {
+        return getByte(base, offset);
+    }
+
+    public char get(ValueLayout.OfChar layout) {
+        return getCharUnaligned(base, offset, layout.order());
+    }
+
+    public short get(ValueLayout.OfShort layout) {
+        return getShortUnaligned(base, offset, layout.order());
+    }
+
+    public int get(ValueLayout.OfInt layout) {
+        return getIntUnaligned(base, offset, layout.order());
+    }
+
+    public float get(ValueLayout.OfFloat layout) {
+        return getFloatUnaligned(base, offset, layout.order());
+    }
+
+    public long get(ValueLayout.OfLong layout) {
+        return getLongUnaligned(base, offset, layout.order());
+    }
+
+    public double get(ValueLayout.OfDouble layout) {
+        return getDoubleUnaligned(base, offset, layout.order());
+    }
+
+    public Object get(ValueLayout.OfObject layout) {
+        return getObject(base, offset);
+    }
+
+    public Pointer get(ValueLayout.OfAddress layout) {
+        return new Pointer(getWordUnaligned(base, offset, layout.order()));
+    }
+
+    public Object getValue(ValueLayout layout) {
         Objects.requireNonNull(layout);
         Class<?> carrier = layout.carrier();
-        long offset = getOffset();
         if (carrier == boolean.class) {
-            return getBoolean(base, offset);
+            return get((ValueLayout.OfBoolean) layout);
         } else if (carrier == byte.class) {
-            return getByte(base, offset);
+            return get((ValueLayout.OfByte) layout);
         } else if (carrier == char.class) {
-            return getCharUnaligned(base, offset, layout.order());
+            return get((ValueLayout.OfChar) layout);
         } else if (carrier == short.class) {
-            return getShortUnaligned(base, offset, layout.order());
+            return get((ValueLayout.OfShort) layout);
         } else if (carrier == int.class) {
-            return getIntUnaligned(base, offset, layout.order());
+            return get((ValueLayout.OfInt) layout);
         } else if (carrier == float.class) {
-            return getFloatUnaligned(base, offset, layout.order());
+            return get((ValueLayout.OfFloat) layout);
         } else if (carrier == long.class) {
-            return getLongUnaligned(base, offset, layout.order());
+            return get((ValueLayout.OfLong) layout);
         } else if (carrier == double.class) {
-            return getDoubleUnaligned(base, offset, layout.order());
+            return get((ValueLayout.OfDouble) layout);
         } else if (carrier == Object.class) {
-            return getObject(base, offset);
+            return get((ValueLayout.OfObject) layout);
         } else if (carrier == Pointer.class) {
-            return new Pointer(getWordUnaligned(base, offset, layout.order()));
+            return get((ValueLayout.OfAddress) layout);
         }
         throw new IllegalStateException();
     }

@@ -48,8 +48,48 @@ public class MemorySegment {
         return new MemorySegment(pointer.addOffset(p.offset()), p.layout(), true);
     }
 
-    public Object get() {
-        return pointer.get((ValueLayout) layout);
+    public boolean get(ValueLayout.OfBoolean layout, long offset) {
+        return pointer.addOffset(offset).get(layout);
+    }
+
+    public byte get(ValueLayout.OfByte layout, long offset) {
+        return pointer.addOffset(offset).get(layout);
+    }
+
+    public char get(ValueLayout.OfChar layout, long offset) {
+        return pointer.addOffset(offset).get(layout);
+    }
+
+    public short get(ValueLayout.OfShort layout, long offset) {
+        return pointer.addOffset(offset).get(layout);
+    }
+
+    public int get(ValueLayout.OfInt layout, long offset) {
+        return pointer.addOffset(offset).get(layout);
+    }
+
+    public float get(ValueLayout.OfFloat layout, long offset) {
+        return pointer.addOffset(offset).get(layout);
+    }
+
+    public long get(ValueLayout.OfLong layout, long offset) {
+        return pointer.addOffset(offset).get(layout);
+    }
+
+    public double get(ValueLayout.OfDouble layout, long offset) {
+        return pointer.addOffset(offset).get(layout);
+    }
+
+    public Object get(ValueLayout.OfObject layout, long offset) {
+        return pointer.addOffset(offset).get(layout);
+    }
+
+    public Pointer get(ValueLayout.OfAddress layout, long offset) {
+        return pointer.addOffset(offset).get(layout);
+    }
+
+    public Object getValue() {
+        return pointer.getValue((ValueLayout) layout);
     }
 
     public static MemorySegment getInstanceSegment(Object obj) {

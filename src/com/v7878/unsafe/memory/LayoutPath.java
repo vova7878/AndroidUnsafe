@@ -3,6 +3,9 @@ package com.v7878.unsafe.memory;
 import static com.v7878.unsafe.Utils.assert_;
 import java.util.List;
 import java.util.Objects;
+import java.util.Spliterator;
+import static java.util.Spliterator.*;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 public class LayoutPath {
@@ -26,6 +29,23 @@ public class LayoutPath {
             return 0;
         }
         return parent.offset() + offset;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("LayoutPath{offset = %s, layout = %s}", offset(), layout);
+    }
+
+    public Spliterator<LayoutPath> spliterator() {
+        if (layout instanceof GroupLayout) {
+            GroupLayout glayout = (GroupLayout) layout;
+            return new GroupSplitter(glayout.memberLayouts(), glayout.isStruct(), this);
+        }
+        if (layout instanceof SequenceLayout) {
+            SequenceLayout slayout = (SequenceLayout) layout;
+            return new SequenceSplitter(slayout.elementLayout(), slayout.elementCount(), this);
+        }
+        throw new IllegalArgumentException("attempting get spliterator for a non-group or non-sequence layout");
     }
 
     private static IllegalArgumentException badLayoutPath(String cause) {
@@ -168,6 +188,130 @@ public class LayoutPath {
             }
             return new LayoutPath.PathElement(PathKind.SEQUENCE_ELEMENT_INDEX,
                     path -> path.sequenceElement(index));
+        }
+    }
+
+    static class GroupSplitter implements Spliterator<LayoutPath> {
+
+        private final LayoutPath parent;
+        private final List<Layout> members;
+        private boolean collect_offset;
+        long currentOffset;
+        int currentIndex;
+
+        GroupSplitter(List<Layout> members, boolean collect_offset, LayoutPath parent) {
+            this.parent = parent;
+            this.members = members;
+            this.collect_offset = collect_offset;
+            currentOffset = 0;
+            currentIndex = 0;
+        }
+
+        @Override
+        public GroupSplitter trySplit() {
+            return null;
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super LayoutPath> action) {
+            Objects.requireNonNull(action);
+            if (currentIndex < members.size()) {
+                Layout elem = members.get(currentIndex);
+                try {
+                    action.accept(new LayoutPath(currentOffset, elem, parent));
+                } finally {
+                    currentIndex++;
+                    if (collect_offset) {
+                        currentOffset += elem.size();
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public void forEachRemaining(Consumer<? super LayoutPath> action) {
+            Objects.requireNonNull(action);
+            try {
+                for (; currentIndex < members.size(); currentIndex++) {
+                    Layout elem = members.get(currentIndex);
+                    action.accept(new LayoutPath(currentOffset, elem, parent));
+                    if (collect_offset) {
+                        currentOffset += elem.size();
+                    }
+                }
+            } finally {
+                currentIndex = members.size();
+            }
+        }
+
+        @Override
+        public long estimateSize() {
+            return members.size();
+        }
+
+        @Override
+        public int characteristics() {
+            return NONNULL | SUBSIZED | SIZED | IMMUTABLE | ORDERED;
+        }
+    }
+
+    static class SequenceSplitter implements Spliterator<LayoutPath> {
+
+        private final LayoutPath parent;
+        private final Layout element;
+        private final long elementCount;
+        long currentIndex;
+
+        SequenceSplitter(Layout element, long elementCount, LayoutPath parent) {
+            this.parent = parent;
+            this.element = element;
+            this.elementCount = elementCount;
+            currentIndex = 0;
+        }
+
+        @Override
+        public GroupSplitter trySplit() {
+            return null;
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super LayoutPath> action) {
+            Objects.requireNonNull(action);
+            if (currentIndex < elementCount) {
+                try {
+                    action.accept(new LayoutPath(currentIndex * element.size(), element, parent));
+                } finally {
+                    currentIndex++;
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public void forEachRemaining(Consumer<? super LayoutPath> action) {
+            Objects.requireNonNull(action);
+            try {
+                for (; currentIndex < elementCount; currentIndex++) {
+                    action.accept(new LayoutPath(currentIndex * element.size(), element, parent));
+                }
+            } finally {
+                currentIndex = elementCount;
+            }
+        }
+
+        @Override
+        public long estimateSize() {
+            return elementCount;
+        }
+
+        @Override
+        public int characteristics() {
+            return NONNULL | SUBSIZED | SIZED | IMMUTABLE | ORDERED;
         }
     }
 }

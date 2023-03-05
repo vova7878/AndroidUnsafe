@@ -147,6 +147,14 @@ public abstract class Layout {
         return computePathOp(LayoutPath.rootPath(this), obj -> obj, elements);
     }
 
+    public Spliterator<LayoutPath> spliterator() {
+        return LayoutPath.rootPath(this).spliterator();
+    }
+
+    public Stream<LayoutPath> elements() {
+        return StreamSupport.stream(spliterator(), false);
+    }
+
     public static RawLayout rawLayout(long size) {
         Layout.requireValidSize(size, true);
         return new RawLayout(size);

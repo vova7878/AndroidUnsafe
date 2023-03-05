@@ -1,6 +1,7 @@
 package com.v7878.unsafe.memory;
 
 import static com.v7878.unsafe.Utils.assert_;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
@@ -69,6 +70,28 @@ public class LayoutPath {
         return groupElement(name, true);
     }
 
+    private void checkGroupBounds(int size, int index) {
+        if (index >= size) {
+            throw badLayoutPath(String.format("Group index out of bound; found: %d, size: %d", index, size));
+        }
+    }
+
+    public LayoutPath groupElement(int index) {
+        assert_(layout instanceof GroupLayout, IllegalArgumentException::new,
+                "attempting to select a group element from a non-group layout");
+        GroupLayout g = (GroupLayout) layout;
+        List<Layout> members = g.memberLayouts();
+        checkGroupBounds(members.size(), index);
+        Layout elem = members.get(index);
+        long elem_offset = 0;
+        if (g.isStruct()) {
+            for (int i = 0; i < g.memberLayouts().size(); i++) {
+                elem_offset += members.get(i).size();
+            }
+        }
+        return new LayoutPath(elem_offset, elem, this);
+    }
+
     private void checkSequenceBounds(SequenceLayout seq, long index) {
         if (index >= seq.elementCount()) {
             throw badLayoutPath(String.format("Sequence index out of bound; found: %d, size: %d", index, seq.elementCount()));
@@ -92,10 +115,10 @@ public class LayoutPath {
     public static final class PathElement implements UnaryOperator<LayoutPath> {
 
         public enum PathKind {
-            //SEQUENCE_ELEMENT("unbound sequence element"),
             SEQUENCE_ELEMENT_INDEX("bound sequence element"),
             //SEQUENCE_RANGE("sequence range"),
-            GROUP_ELEMENT("group element");
+            GROUP_ELEMENT("group element"),
+            GROUP_ELEMENT_INDEX("group element by index");
 
             private final String description;
 
@@ -129,6 +152,14 @@ public class LayoutPath {
             Objects.requireNonNull(name);
             return new PathElement(PathKind.GROUP_ELEMENT,
                     path -> path.groupElement(name));
+        }
+
+        public static PathElement groupElement(int index) {
+            if (index < 0) {
+                throw new IllegalArgumentException("Index must be positive: " + index);
+            }
+            return new LayoutPath.PathElement(PathKind.GROUP_ELEMENT_INDEX,
+                    path -> path.groupElement(index));
         }
 
         public static PathElement sequenceElement(long index) {

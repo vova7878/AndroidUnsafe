@@ -1,5 +1,6 @@
 package com.v7878.unsafe.memory;
 
+import static com.v7878.unsafe.AndroidUnsafe2.*;
 import static com.v7878.unsafe.Utils.*;
 import java.util.Objects;
 
@@ -36,6 +37,47 @@ public class MemorySegment {
 
     public long alignment() {
         return 1L << alignmentShift();
+    }
+
+    private static final String indent = "    ";
+
+    private String readToString(String spaces) {
+        if (layout instanceof ValueLayout) {
+            return spaces + layout + " = " + getValue();
+        }
+        if (layout instanceof GroupLayout || layout instanceof SequenceLayout) {
+            String spaces2 = spaces + indent;
+            String name = layout.name().isEmpty() ? "" : "(" + layout.name().get() + ")";
+            String type;
+            if (layout instanceof GroupLayout) {
+                type = ((GroupLayout) layout).isStruct() ? "struct" : "union";
+            } else {
+                type = "sequence";
+            }
+            String out = "%s[%s%s\n%s%s]";
+            StringBuilder data = new StringBuilder();
+            layout.elements().forEach((pe) -> {
+                data.append(new MemorySegment(
+                        pointer.addOffset(pe.offset()),
+                        pe.layout(), true)
+                        .readToString(spaces2));
+                data.append("\n");
+            });
+            return String.format(out, spaces, type, name, data, spaces);
+        }
+        if (layout instanceof RawLayout) {
+            //TODO: refactor
+            assert_(layout.size() < Integer.MAX_VALUE, IllegalStateException::new);
+            byte[] arr = new byte[(int) layout.size()];
+            copyMemory(pointer.getBase(), pointer.getOffset(), arr, ARRAY_BYTE_BASE_OFFSET, arr.length);
+            return spaces + (layout.isPadding() ? "padding " : "raw ") + layout + " = " + toHexString(arr);
+        }
+        throw new IllegalStateException();
+    }
+
+    public String readToString() {
+        String data = readToString(indent);
+        return "MemorySegment{" + pointer + "\n" + data + "\n}";
     }
 
     @Override

@@ -111,7 +111,7 @@ public class AndroidUnsafe {
     }
 
     public static <T> T allocateInstance(Class<T> clazz) {
-        return (T) nothrow_run(() -> Unsafe.allocateInstance(clazz));
+        return (T) nothrows_run(() -> Unsafe.allocateInstance(clazz));
     }
 
     public static long objectFieldOffset(Field field) {

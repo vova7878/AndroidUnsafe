@@ -89,7 +89,7 @@ public class Utils {
         public void run() throws Throwable;
     }
 
-    public static <T> T nothrow_run(TRun<T> r, boolean tie) {
+    public static <T> T nothrows_run(TRun<T> r, boolean tie) {
         try {
             return r.run();
         } catch (Throwable th) {
@@ -101,11 +101,11 @@ public class Utils {
         }
     }
 
-    public static <T> T nothrow_run(TRun<T> r) {
-        return nothrow_run(r, false);
+    public static <T> T nothrows_run(TRun<T> r) {
+        return nothrows_run(r, false);
     }
 
-    public static void nothrow_run(VTRun r, boolean tie) {
+    public static void nothrows_run(VTRun r, boolean tie) {
         try {
             r.run();
         } catch (Throwable th) {
@@ -117,8 +117,8 @@ public class Utils {
         }
     }
 
-    public static void nothrow_run(VTRun r) {
-        nothrow_run(r, false);
+    public static void nothrows_run(VTRun r) {
+        nothrows_run(r, false);
     }
 
     public static String toHexString(byte[] arr) {

@@ -17,7 +17,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
 
     public static class StringMirror {
 
-        public static final boolean COMPACT_STRINGS = nothrow_run(() -> {
+        public static final boolean COMPACT_STRINGS = nothrows_run(() -> {
             StringMirror[] test = arrayCast(StringMirror.class, "\uffff");
             if (test[0].count == 3) {
                 return true;
@@ -67,13 +67,13 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
 
     private synchronized static void initVMRuntime() {
         if (vmruntime == null) {
-            Class<?> vmrc = nothrow_run(() -> Class.forName("dalvik.system.VMRuntime"));
+            Class<?> vmrc = nothrows_run(() -> Class.forName("dalvik.system.VMRuntime"));
             Method[] mtds = getDeclaredMethods(vmrc);
             newNonMovableArray = searchMethod(mtds, "newNonMovableArray", true,
                     Class.class, int.class);
             addressOf = searchMethod(mtds, "addressOf", true, Object.class);
             Method gr = searchMethod(mtds, "getRuntime", true);
-            vmruntime = nothrow_run(() -> gr.invoke(null), true);
+            vmruntime = nothrows_run(() -> gr.invoke(null), true);
         }
     }
 
@@ -96,24 +96,24 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
 
     public static <T> T internalClone(T obj) {
         initInternalClone();
-        return (T) nothrow_run(() -> internalClone.invoke(obj), true);
+        return (T) nothrows_run(() -> internalClone.invoke(obj), true);
     }
 
     @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static <T> T setObjectClass(Object obj, Class<T> clazz) {
         Field sk = getShadowKlassField();
-        nothrow_run(() -> sk.set(obj, clazz));
+        nothrows_run(() -> sk.set(obj, clazz));
         return (T) obj;
     }
 
     public static Object newNonMovableArrayVM(Class<?> componentType, int length) {
         initVMRuntime();
-        return nothrow_run(() -> newNonMovableArray.invoke(vmruntime, componentType, length), true);
+        return nothrows_run(() -> newNonMovableArray.invoke(vmruntime, componentType, length), true);
     }
 
     public static long addressOfNonMovableArrayData(Object array) {
         initVMRuntime();
-        return (long) nothrow_run(() -> addressOf.invoke(vmruntime, array), true);
+        return (long) nothrows_run(() -> addressOf.invoke(vmruntime, array), true);
     }
 
     public static long addressOfNonMovableArray(Object array) {

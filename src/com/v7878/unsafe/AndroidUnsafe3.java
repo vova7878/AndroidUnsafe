@@ -97,11 +97,11 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
 
         public static final Lookup lp = MethodHandles.lookup();
 
-        public static final Method am = nothrow_run(() -> Test.class.getDeclaredMethod("a"));
-        public static final Method bm = nothrow_run(() -> Test.class.getDeclaredMethod("b"));
+        public static final Method am = nothrows_run(() -> Test.class.getDeclaredMethod("a"));
+        public static final Method bm = nothrows_run(() -> Test.class.getDeclaredMethod("b"));
 
-        public static final Field af = nothrow_run(() -> Test.class.getDeclaredField("sa"));
-        public static final Field bf = nothrow_run(() -> Test.class.getDeclaredField("sb"));
+        public static final Field af = nothrows_run(() -> Test.class.getDeclaredField("sa"));
+        public static final Field bf = nothrows_run(() -> Test.class.getDeclaredField("sb"));
 
         public static int sa, sb;
 
@@ -114,7 +114,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         }
     }
 
-    private static final Class<MethodHandle> MethodHandleImplClass = nothrow_run(() -> {
+    private static final Class<MethodHandle> MethodHandleImplClass = nothrows_run(() -> {
         return (Class<MethodHandle>) Class.forName("java.lang.invoke.MethodHandleImpl");
     });
 
@@ -194,7 +194,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     }
 
     public static long getArtField(Field f) {
-        return (long) nothrow_run(() -> mGetArtField.invoke(f), true);
+        return (long) nothrows_run(() -> mGetArtField.invoke(f), true);
     }
 
     public static Executable[] getDeclaredExecutables0(Class<?> clazz) {

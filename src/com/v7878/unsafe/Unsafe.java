@@ -14,7 +14,7 @@ public class Unsafe {
         Thrower.throwException(th);
     }
 
-    private static final sun.misc.Unsafe unsafe = nothrow_run(() -> {
+    private static final sun.misc.Unsafe unsafe = nothrows_run(() -> {
         Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
         field.setAccessible(true);
         return (sun.misc.Unsafe) field.get(null);

@@ -272,11 +272,21 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return getInt(arr, ARRAY_OBJECT_BASE_OFFSET);
     }
 
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
+    public static void putObjectRaw(long address, Object value) {
+        Unsafe.putInt(address, rawObjectToInt(value));
+    }
+
     @DangerLevel(DangerLevel.MAX)
     public static Object rawIntToObject(int obj) {
         int[] arr = new int[1];
         arr[0] = obj;
         return getObject(arr, ARRAY_INT_BASE_OFFSET);
+    }
+
+    @DangerLevel(DangerLevel.MAX)
+    public static Object getObjectRaw(long address) {
+        return rawIntToObject(Unsafe.getInt(address));
     }
 
     private static Boolean kPoisonReferences;

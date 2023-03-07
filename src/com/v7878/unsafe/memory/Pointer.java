@@ -134,6 +134,9 @@ public final class Pointer {
     }
 
     public Object get(ValueLayout.OfObject layout) {
+        if (base == null) {
+            return getObjectRaw(getOffset());
+        }
         return getObject(base, getOffset());
     }
 
@@ -207,7 +210,11 @@ public final class Pointer {
     }
 
     public void put(ValueLayout.OfObject layout, Object value) {
-        putObject(base, getOffset(), value);
+        if (base == null) {
+            putObjectRaw(getOffset(), value);
+        } else {
+            putObject(base, getOffset(), value);
+        }
     }
 
     public void put(ValueLayout.OfAddress layout, Pointer value) {

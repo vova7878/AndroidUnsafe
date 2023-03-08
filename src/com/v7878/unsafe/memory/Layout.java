@@ -289,18 +289,23 @@ public abstract class Layout {
         return new SequenceLayout(elementCount, elementLayout);
     }
 
-    private static GroupLayout getLayoutForFields(Field[] fields, int full_size) {
+    private static Layout[] fieldsToLayouts(Field[] fields) {
         Arrays.sort(fields, (a, b) -> {
             return Integer.compare(fieldOffset(a), fieldOffset(b));
         });
-        ValueLayout[] vls = new ValueLayout[fields.length];
+        ValueLayout[] out = new ValueLayout[fields.length];
         for (int i = 0; i < fields.length; i++) {
-            Field ifield = fields[i];
-            Class<?> ft = ifield.getType();
-            vls[i] = Layout.valueLayout(ft.isPrimitive() ? ft : Object.class)
-                    .withName(ifield.getDeclaringClass().getName() + "." + ifield.getName());
+            Field field = fields[i];
+            Class<?> ft = field.getType();
+            out[i] = Layout.valueLayout(ft.isPrimitive() ? ft : Object.class)
+                    .withName(field.getDeclaringClass().getName() + "." + field.getName());
         }
-        GroupLayout out = Layout.structLayout(false, OBJECT_ALIGNMENT_SHIFT, vls);
+        return out;
+    }
+
+    private static GroupLayout getLayoutForFields(Field[] fields, int full_size) {
+        GroupLayout out = Layout.structLayout(false,
+                OBJECT_ALIGNMENT_SHIFT, fieldsToLayouts(fields));
 
         //checks
         assert_(full_size == -1 || out.size() == full_size, IllegalStateException::new);
@@ -317,20 +322,16 @@ public abstract class Layout {
         return out;
     }
 
-    private static Layout getClassLayout(Class<?> clazz, boolean allow_string) {
+    public static Layout getClassLayout(Class<?> clazz) {
         Objects.requireNonNull(clazz);
-        assert_((clazz != Class.class) && (allow_string || clazz != String.class) && (!clazz.isArray()),
+        assert_((clazz != Class.class) && (clazz != String.class) && (!clazz.isArray()),
                 IllegalArgumentException::new);
         if (clazz.isPrimitive()) {
             return Layout.valueLayout(clazz).withName(clazz.getName());
         }
         Field[] ifields = getInstanceFields(clazz);
-        return getLayoutForFields(ifields, allow_string ? -1
-                : objectSizeField(clazz)).withName(clazz.getName());
-    }
-
-    public static Layout getClassLayout(Class<?> clazz) {
-        return getClassLayout(clazz, false);
+        return getLayoutForFields(ifields, objectSizeField(clazz))
+                .withName(clazz.getName());
     }
 
     public static Layout getInstanceLayout(Object obj) {
@@ -345,29 +346,27 @@ public abstract class Layout {
                     .withName(clazz.getName() + ".class");
         }
         if (obj instanceof String) {
+            ArrayList<Layout> out = new ArrayList();
+            out.addAll(Arrays.asList(fieldsToLayouts(getInstanceFields(String.class))));
             String sobj = (String) obj;
             int length = sobj.length();
             Class<?> component = isCompressedString(sobj) ? byte.class : short.class;
-            Layout data = sequenceLayout(length, valueLayout(component));
-            ArrayList<Layout> out = new ArrayList();
-            GroupLayout object = (GroupLayout) getClassLayout(String.class, true);
-            out.addAll(object.memberLayouts());
-            out.add(data.withName("value")); // classical name
+            Layout chars = sequenceLayout(length, valueLayout(component));
+            out.add(chars.withName("value")); // classical name
             return structLayout(true, OBJECT_ALIGNMENT_SHIFT,
                     out.stream().toArray(Layout[]::new))
                     .withName(String.class.getName());
         }
         Class<?> clazz = obj.getClass();
         if (clazz.isArray()) {
+            ArrayList<Layout> out = new ArrayList();
+            out.addAll(Arrays.asList(fieldsToLayouts(getInstanceFields(Object.class))));
+            out.add(ValueLayout.JAVA_INT.withName("length"));
             int length = getArrayLength(obj);
             Class<?> component = obj.getClass().getComponentType();
-            Layout data = sequenceLayout(length,
+            Layout elements = sequenceLayout(length,
                     valueLayout(component.isPrimitive() ? component : Object.class));
-            ArrayList<Layout> out = new ArrayList();
-            GroupLayout object = (GroupLayout) getClassLayout(Object.class);
-            out.addAll(object.memberLayouts());
-            out.add(ValueLayout.JAVA_INT.withName("length"));
-            out.add(data.withName("data"));
+            out.add(elements.withName("data"));
             return structLayout(false, out.stream().toArray(Layout[]::new))
                     .withAlignmentShift(OBJECT_ALIGNMENT_SHIFT)
                     .withName(clazz.getName());

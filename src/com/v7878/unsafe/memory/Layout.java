@@ -337,13 +337,23 @@ public abstract class Layout {
     public static Layout getInstanceLayout(Object obj) {
         Objects.requireNonNull(obj);
         if (obj instanceof Class) {
+            ArrayList<Layout> out = new ArrayList();
+            out.addAll(Arrays.asList(fieldsToLayouts(getInstanceFields(Class.class))));
             Class<?> clazz = (Class<?>) obj;
-            ArrayList<Field> tmp = new ArrayList<>();
-            tmp.addAll(Arrays.asList(getInstanceFields(Class.class)));
-            tmp.addAll(Arrays.asList(getDeclaredFields0(clazz, true)));
-            return getLayoutForFields(tmp.stream().toArray(Field[]::new),
-                    classSizeField(clazz))
-                    .withName(clazz.getName() + ".class");
+            if (shouldHaveEmbeddedVTableAndImt(clazz)) {
+                out.add(ValueLayout.JAVA_INT.withName("embedded_vtable_length_"));
+                out.add(ValueLayout.ADDRESS.withName("embedded_imtable_"));
+                int vtable_length = getEmbeddedVTableLength(clazz);
+                out.add(Layout.sequenceLayout(vtable_length,
+                        ValueLayout.ADDRESS).withName("embedded_vtable_"));
+            }
+            out.addAll(Arrays.asList(fieldsToLayouts(getDeclaredFields0(clazz, true))));
+            Layout tmp = Layout.structLayout(false,
+                    OBJECT_ALIGNMENT_SHIFT,
+                    out.stream().toArray(Layout[]::new));
+            assert_(classSizeField(clazz) == tmp.size(), IllegalStateException::new);
+            //TODO: more checks
+            return tmp.withName(clazz.getName() + ".class");
         }
         if (obj instanceof String) {
             ArrayList<Layout> out = new ArrayList();

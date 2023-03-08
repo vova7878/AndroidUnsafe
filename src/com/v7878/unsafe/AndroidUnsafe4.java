@@ -189,6 +189,22 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return clh[0].classSize;
     }
 
+    public static int emptyClassSize() {
+        return classSizeField(void.class);
+    }
+
+    public static boolean shouldHaveEmbeddedVTableAndImt(Class<?> clazz) {
+        return clazz.isArray()
+                || !(clazz.isInterface()
+                || clazz.isPrimitive()
+                || Modifier.isAbstract(clazz.getModifiers()));
+    }
+
+    public static int getEmbeddedVTableLength(Class<?> clazz) {
+        assert_(shouldHaveEmbeddedVTableAndImt(clazz), IllegalArgumentException::new);
+        return getIntO(clazz, emptyClassSize());
+    }
+
     public static boolean isCompressedString(String s) {
         StringMirror[] sm = arrayCast(StringMirror.class, s);
         return StringMirror.COMPACT_STRINGS && ((sm[0].count & 1) == 0);

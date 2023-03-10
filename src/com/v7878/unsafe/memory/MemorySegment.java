@@ -130,6 +130,10 @@ public class MemorySegment {
         return pointer.addOffset(offset).get(layout);
     }
 
+    public Word get(ValueLayout.OfWord layout, long offset) {
+        return pointer.addOffset(offset).get(layout);
+    }
+
     public Object getValue() {
         return pointer.getValue((ValueLayout) layout);
     }
@@ -171,6 +175,10 @@ public class MemorySegment {
     }
 
     public void put(ValueLayout.OfAddress layout, long offset, Pointer value) {
+        pointer.addOffset(offset).put(layout, value);
+    }
+
+    public void put(ValueLayout.OfWord layout, long offset, Word value) {
         pointer.addOffset(offset).put(layout, value);
     }
 

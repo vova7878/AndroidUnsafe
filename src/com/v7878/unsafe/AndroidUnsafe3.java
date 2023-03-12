@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import static com.v7878.unsafe.Utils.*;
 import java.lang.invoke.*;
-import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -94,8 +93,6 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     }
 
     private static class Test {
-
-        public static final Lookup lp = MethodHandles.lookup();
 
         public static final Method am = nothrows_run(() -> Test.class.getDeclaredMethod("a"));
         public static final Method bm = nothrows_run(() -> Test.class.getDeclaredMethod("b"));

@@ -6,12 +6,20 @@ import com.v7878.unsafe.io.RandomInput;
 public abstract class InstructionReader {
 
     private static final InstructionReader[] readers = new InstructionReader[256];
+    private static final InstructionReader[] extraReaders = new InstructionReader[256];
 
     static void register(int opcode, InstructionReader reader) {
         if (readers[opcode] != null) {
             throw new IllegalArgumentException("opcode " + opcode + " already registered");
         }
         readers[opcode] = reader;
+    }
+
+    static void registerExtra(int opcode, InstructionReader reader) {
+        if (extraReaders[opcode] != null) {
+            throw new IllegalArgumentException("extra opcode " + opcode + " already registered");
+        }
+        extraReaders[opcode] = reader;
     }
 
     static {
@@ -65,7 +73,9 @@ public abstract class InstructionReader {
 
         NewArray.init();                            // 0x23
 
-        // TODO: 24-26
+        // TODO: 24-25
+        FillArrayData.init();                       // 0x26
+
         Throw.init();                               // 0x27
 
         // TODO: branch offset to instruction offset
@@ -97,15 +107,31 @@ public abstract class InstructionReader {
         // <unused> e3-f9
         // TODO: fa-fd
         // TODO: fe-ff
+        // TODO: extra 01-02
+        FillArrayDataPayload.init();                // extra 0x03
     }
 
     public static Instruction read(RandomInput in, ReadContext rc) {
         int code = in.readUnsignedShort();
-        InstructionReader reader = readers[code & 0xff];
-        if (reader == null) {
-            throw new IllegalArgumentException("unknown opcode " + (code & 0xff));
+
+        int opcode = code & 0xff;
+        int arg = code >> 8;
+        boolean is_extra = false;
+
+        InstructionReader reader;
+        if (opcode == 0x00 && arg != 0) {
+            opcode = arg;
+            arg = 0;
+            reader = extraReaders[opcode];
+            is_extra = true;
+        } else {
+            reader = readers[opcode];
         }
-        return reader.read(in, rc, code >> 8);
+
+        if (reader == null) {
+            throw new IllegalArgumentException("unknown " + (is_extra ? "extra " : "") + "opcode " + opcode);
+        }
+        return reader.read(in, rc, arg);
     }
 
     abstract Instruction read(RandomInput in, ReadContext rc, int arg);
@@ -433,6 +459,29 @@ public abstract class InstructionReader {
             int D = (FEDC >> 4) & 0xf;
             int C = FEDC & 0xf;
             return factory.make(rc, A, BBBB, C, D, E, F, G);
+        }
+    }
+
+    static class Reader_fill_array_data_payload extends InstructionReader {
+
+        @FunctionalInterface
+        public interface Factory {
+
+            public Instruction make(int element_width, int size, byte[] data);
+        }
+
+        public final Factory factory;
+
+        public Reader_fill_array_data_payload(Factory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        Instruction read(RandomInput in, ReadContext rc, int _00) {
+            int element_width = in.readUnsignedShort();
+            int size = in.readInt();
+            byte[] data = in.readByteArray(size * element_width);
+            return factory.make(element_width, size, data);
         }
     }
 }

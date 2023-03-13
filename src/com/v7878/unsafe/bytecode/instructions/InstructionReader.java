@@ -404,7 +404,7 @@ public abstract class InstructionReader {
             long BBBBhilo = in.readUnsignedShort();
             long BBBBlohi = in.readUnsignedShort();
             long BBBBhihi = in.readUnsignedShort();
-            return factory.make(AA, (BBBBhihi << 48) | (BBBBlohi << 32) | (BBBBlohi << 16) | BBBBlolo);
+            return factory.make(AA, (BBBBhihi << 48) | (BBBBlohi << 32) | (BBBBhilo << 16) | BBBBlolo);
         }
     }
 

@@ -481,6 +481,9 @@ public abstract class InstructionReader {
             int element_width = in.readUnsignedShort();
             int size = in.readInt();
             byte[] data = in.readByteArray(size * element_width);
+            if ((size & 1) != 0) {
+                in.readByte(); // padding
+            }
             return factory.make(element_width, size, data);
         }
     }

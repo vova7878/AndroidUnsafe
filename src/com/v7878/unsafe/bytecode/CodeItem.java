@@ -1,18 +1,18 @@
 package com.v7878.unsafe.bytecode;
 
 import android.util.Pair;
+import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.bytecode.instructions.*;
-import com.v7878.unsafe.bytecode.instructions.InstructionReader.*;
 import com.v7878.unsafe.io.RandomInput;
-import java.util.ArrayList;
+import java.util.*;
 
 public class CodeItem {
 
     public int registers_size;
     public int ins_size;
     public int outs_size;
-    //public short[] insns;
-    //public TryItem[] tries;
+    public Instruction[] insns;
+    public TryItem[] tries;
 
     public static CodeItem read(RandomInput in, ReadContext rc) {
         CodeItem out = new CodeItem();
@@ -24,45 +24,46 @@ public class CodeItem {
         //TODO
         in.readInt(); //out.debug_info_off = in.readInt();
 
-        ArrayList<Pair<Integer, Instruction>> insns = Instruction.readArray(in, rc);
-        for (Pair<Integer, Instruction> pair : insns) {
-            System.out.println(pair.first + " " + pair.second);
+        Pair<int[], Instruction[]> insns_data = Instruction.readArray(in, rc);
+        out.insns = insns_data.second;
+
+        int[] offsets = insns_data.first;
+        int insns_size = offsets[out.insns.length]; // in code units
+        offsets = Arrays.copyOf(offsets, out.insns.length);
+
+        for (int i = 0; i < out.insns.length; i++) {
+            System.out.println(offsets[i] + " " + out.insns[i]);
         }
 
-        /*int insns_size = in.readInt();
-        short[] insns = in.readShortArray(insns_size);
-        System.out.print("instructions: [");
-        for (int i = 0; i < insns_size; i++) {
-            System.out.print(Integer.toHexString(out.insns[i] & 0xffff) + ", ");
-        }
-        System.out.println("]");*/
-
- /*if (tries_size > 0) {
-            if (insns_size % 2 == 1) {
+        if (tries_size > 0) {
+            if ((insns_size & 1) != 0) {
                 in.readShort(); // padding
             }
-            long old = in.getCurrent();
-            long base = old + tries_size * TryItem.getSize();
-            in.setCurrent(base);
+
+            long tries_pos = in.position();
+            in.skipBytes(tries_size * TryItem.SIZE);
+
+            long handlers_start = in.position();
             int handlers_size = in.readULeb128();
-            assert_(tries_size >= handlers_size, () -> "tries_size: "
-                    + tries_size + " handlers_size: " + handlers_size,
-                    IllegalArgumentException::new);
-            Pair<CatchHandler, Integer>[] handlers = new Pair[handlers_size];
+            assert_(tries_size >= handlers_size, IllegalArgumentException::new,
+                    String.format("tries_size(%s) less than handlers_size(%s)",
+                            tries_size, handlers_size));
+
+            Map<Integer, CatchHandler> handlers = new HashMap<>(handlers_size);
             for (int i = 0; i < handlers_size; i++) {
-                int off = (int) (in.getCurrent() - base);
-                handlers[i] = new Pair<>(CatchHandler.read(in), off);
+                int offset = (int) (in.position() - handlers_start);
+                handlers.put(offset, CatchHandler.read(in, rc));
             }
-            in.setCurrent(old);
-            old = in.getCurrent();
+
+            in.position(tries_pos);
             out.tries = new TryItem[tries_size];
             for (int i = 0; i < tries_size; i++) {
                 out.tries[i] = TryItem.read(in, handlers);
+                System.out.println(out.tries[i]);
             }
-            in.setCurrent(old);
         } else {
             out.tries = new TryItem[0];
-        }*/
+        }
         return out;
     }
 }

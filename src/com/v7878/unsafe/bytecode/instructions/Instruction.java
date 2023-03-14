@@ -4,25 +4,41 @@ import android.util.Pair;
 import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.bytecode.ReadContext;
 import com.v7878.unsafe.io.RandomInput;
-import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Instruction {
 
-    public static ArrayList<Pair<Integer, Instruction>> readArray(
+    public static Pair<int[], Instruction[]> readArray(
             RandomInput in, ReadContext rc) {
         int insns_size = in.readInt();
-        int insns_data_size = insns_size * 2;
+
+        Instruction[] insns = new Instruction[insns_size];
+        int[] offsets = new int[insns_size + 1];
+
+        int insns_data_size = insns_size * 2; // 2-byte code units
+        int index = 0;
         long start = in.position();
-        ArrayList<Pair<Integer, Instruction>> out = new ArrayList<>();
+
         while (in.position() - start < insns_data_size) {
             int offset = (int) (in.position() - start);
-            assert_((offset & 1) == 0, IllegalStateException::new, "");
-            Instruction i = InstructionReader.read(in, rc);
-            out.add(new Pair<>(offset, i));
+            assert_((offset & 1) == 0, IllegalStateException::new,
+                    "Unaligned code unit");
+            insns[index] = InstructionReader.read(in, rc);
+            offsets[index] = offset / 2;
+            index++;
         }
+        offsets[index] = insns_size;
+
+        assert_(in.position() - start == insns_data_size,
+                IllegalStateException::new,
+                "Read more code units than expected");
+
         System.out.println("start = " + start
                 + ", end = " + in.position()
                 + ", size = " + insns_size);
-        return out;
+
+        offsets = Arrays.copyOf(offsets, index + 1);
+        insns = Arrays.copyOf(insns, index);
+        return new Pair<>(offsets, insns);
     }
 }

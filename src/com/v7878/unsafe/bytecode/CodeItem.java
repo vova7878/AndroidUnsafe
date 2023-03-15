@@ -14,6 +14,13 @@ public class CodeItem {
     public Instruction[] insns;
     public TryItem[] tries;
 
+    static int getInstructionIndex(int[] offsets, int addr) {
+        addr = Arrays.binarySearch(offsets, addr);
+        assert_(addr >= 0, IllegalStateException::new,
+                "unable to find instruction with offset " + addr);
+        return addr;
+    }
+
     public static CodeItem read(RandomInput in, ReadContext rc) {
         CodeItem out = new CodeItem();
         out.registers_size = in.readUnsignedShort();
@@ -29,7 +36,6 @@ public class CodeItem {
 
         int[] offsets = insns_data.first;
         int insns_size = offsets[out.insns.length]; // in code units
-        offsets = Arrays.copyOf(offsets, out.insns.length);
 
         for (int i = 0; i < out.insns.length; i++) {
             System.out.println(offsets[i] + " " + out.insns[i]);
@@ -51,14 +57,15 @@ public class CodeItem {
 
             Map<Integer, CatchHandler> handlers = new HashMap<>(handlers_size);
             for (int i = 0; i < handlers_size; i++) {
-                int offset = (int) (in.position() - handlers_start);
-                handlers.put(offset, CatchHandler.read(in, rc));
+                int handler_offset = (int) (in.position() - handlers_start);
+                handlers.put(handler_offset,
+                        CatchHandler.read(in, rc, offsets));
             }
 
             in.position(tries_pos);
             out.tries = new TryItem[tries_size];
             for (int i = 0; i < tries_size; i++) {
-                out.tries[i] = TryItem.read(in, handlers);
+                out.tries[i] = TryItem.read(in, handlers, offsets);
                 System.out.println(out.tries[i]);
             }
         } else {

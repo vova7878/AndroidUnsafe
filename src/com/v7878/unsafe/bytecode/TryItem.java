@@ -12,14 +12,22 @@ public class TryItem {
     public int insn_count;
     public CatchHandler handler;
 
-    public static TryItem read(RandomInput in, Map<Integer, CatchHandler> handlers) {
+    public static TryItem read(RandomInput in,
+            Map<Integer, CatchHandler> handlers,
+            int[] offsets) {
         TryItem out = new TryItem();
-        out.start_addr = in.readInt();
-        out.insn_count = in.readUnsignedShort();
+
+        int tmp = in.readInt(); // start_addr in code units
+        out.start_addr = CodeItem.getInstructionIndex(offsets, tmp);
+
+        tmp += in.readUnsignedShort(); // insn_count in code units
+        out.insn_count = CodeItem.getInstructionIndex(offsets, tmp);
+        out.insn_count -= out.start_addr;
+
         int handler_off = in.readUnsignedShort();
         out.handler = handlers.get(handler_off);
         assert_(out.handler != null, IllegalStateException::new,
-                "can't find catch handler with offset " + handler_off);
+                "unable to find catch handler with offset " + handler_off);
         return out;
     }
 

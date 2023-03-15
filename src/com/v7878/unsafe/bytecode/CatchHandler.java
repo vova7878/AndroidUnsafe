@@ -1,6 +1,7 @@
 package com.v7878.unsafe.bytecode;
 
 import android.util.Pair;
+import static com.v7878.unsafe.bytecode.DexConstants.NO_INDEX;
 import com.v7878.unsafe.io.RandomInput;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -10,17 +11,19 @@ public class CatchHandler {
     public Pair<TypeId, Integer>[] handlers;
     public int catch_all_addr;
 
-    public static CatchHandler read(RandomInput in, ReadContext rc) {
+    public static CatchHandler read(RandomInput in,
+            ReadContext rc, int[] offsets) {
         CatchHandler out = new CatchHandler();
         int size = in.readSLeb128();
         int handlersCount = Math.abs(size);
         out.handlers = new Pair[handlersCount];
+
         for (int i = 0; i < handlersCount; i++) {
-            out.handlers[i] = new Pair<>(
-                    rc.types[in.readULeb128()],
-                    in.readULeb128());
+            out.handlers[i] = new Pair<>(rc.types[in.readULeb128()],
+                    CodeItem.getInstructionIndex(offsets, in.readULeb128()));
         }
-        out.catch_all_addr = size <= 0 ? in.readULeb128() : -1;
+        out.catch_all_addr = size <= 0
+                ? CodeItem.getInstructionIndex(offsets, in.readULeb128()) : NO_INDEX;
         return out;
     }
 

@@ -30,6 +30,13 @@ public class EncodedField {
         return out;
     }
 
+    public void fillContext(DataSet data) {
+        data.addField(field);
+        for (AnnotationItem tmp : annotations) {
+            tmp.fillContext(data);
+        }
+    }
+
     @Override
     public String toString() {
         String flags = Modifier.toString(access_flags);

@@ -44,6 +44,19 @@ public class EncodedMethod {
         return out;
     }
 
+    public void fillContext(DataSet data) {
+        data.addMethod(method);
+        for (AnnotationItem tmp : annotations) {
+            tmp.fillContext(data);
+        }
+        for (AnnotationItem[] tmp : parameter_annotations) {
+            for (AnnotationItem tmp2 : tmp) {
+                tmp2.fillContext(data);
+            }
+        }
+        code.fillContext(data);
+    }
+
     @Override
     public String toString() {
         String flags = Modifier.toString(access_flags);

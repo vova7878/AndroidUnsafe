@@ -1,6 +1,6 @@
 package com.v7878.unsafe.bytecode.instructions;
 
-import com.v7878.unsafe.bytecode.TypeId;
+import com.v7878.unsafe.bytecode.*;
 import com.v7878.unsafe.bytecode.instructions.InstructionReader.*;
 
 public class NewArray extends Instruction {
@@ -21,6 +21,11 @@ public class NewArray extends Instruction {
         destination_register = A;
         size_register = B;
         type = C;
+    }
+
+    @Override
+    public void fillContext(DataSet data) {
+        data.addType(type);
     }
 
     @Override

@@ -15,6 +15,10 @@ public class FieldId extends FieldOrMethodId {
         return out;
     }
 
+    public void fillContext(DataSet data) {
+        data.addType(type);
+    }
+
     @Override
     public String toString() {
         return declaring_class + "." + name + ":" + type;

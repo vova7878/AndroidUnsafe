@@ -40,4 +40,19 @@ public class ClassData {
                 annotations.annotated_parameters);
         return out;
     }
+
+    public void fillContext(DataSet data) {
+        for (Pair<EncodedField, EncodedValue> tmp : static_fields) {
+            tmp.first.fillContext(data);
+        }
+        for (EncodedField tmp : instance_fields) {
+            tmp.fillContext(data);
+        }
+        for (EncodedMethod tmp : direct_methods) {
+            tmp.fillContext(data);
+        }
+        for (EncodedMethod tmp : virtual_methods) {
+            tmp.fillContext(data);
+        }
+    }
 }

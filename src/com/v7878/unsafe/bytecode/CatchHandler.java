@@ -27,6 +27,12 @@ public class CatchHandler {
         return out;
     }
 
+    public void fillContext(DataSet data) {
+        for (Pair<TypeId, Integer> tmp : handlers) {
+            data.addType(tmp.first);
+        }
+    }
+
     @Override
     public String toString() {
         return "catch handler " + catch_all_addr + " "

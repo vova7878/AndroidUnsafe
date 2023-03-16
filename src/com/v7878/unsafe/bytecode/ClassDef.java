@@ -49,4 +49,17 @@ public class ClassDef {
         }
         return out;
     }
+
+    public void fillContext(DataSet data) {
+        data.addString(source_file);
+        data.addType(clazz);
+        data.addType(superclass);
+        for (TypeId tmp : interfaces) {
+            data.addType(tmp);
+        }
+        for (AnnotationItem tmp : class_annotations) {
+            tmp.fillContext(data);
+        }
+        class_data.fillContext(data);
+    }
 }

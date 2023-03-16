@@ -31,6 +31,10 @@ public class TryItem {
         return out;
     }
 
+    public void fillContext(DataSet data) {
+        handler.fillContext(data);
+    }
+
     @Override
     public String toString() {
         return "try item " + start_addr + " " + insn_count + " " + handler;

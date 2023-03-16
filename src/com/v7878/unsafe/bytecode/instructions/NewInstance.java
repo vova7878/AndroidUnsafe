@@ -1,6 +1,6 @@
 package com.v7878.unsafe.bytecode.instructions;
 
-import com.v7878.unsafe.bytecode.TypeId;
+import com.v7878.unsafe.bytecode.*;
 import com.v7878.unsafe.bytecode.instructions.InstructionReader.*;
 
 public class NewInstance extends Instruction {
@@ -19,6 +19,11 @@ public class NewInstance extends Instruction {
     public NewInstance(int A, TypeId B) {
         destination_register = A;
         type = B;
+    }
+
+    @Override
+    public void fillContext(DataSet data) {
+        data.addType(type);
     }
 
     @Override

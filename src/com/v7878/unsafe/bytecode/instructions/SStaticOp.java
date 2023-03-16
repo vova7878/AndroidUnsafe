@@ -1,6 +1,6 @@
 package com.v7878.unsafe.bytecode.instructions;
 
-import com.v7878.unsafe.bytecode.FieldId;
+import com.v7878.unsafe.bytecode.*;
 import com.v7878.unsafe.bytecode.instructions.InstructionReader.*;
 
 public abstract class SStaticOp extends Instruction {
@@ -29,6 +29,11 @@ public abstract class SStaticOp extends Instruction {
     public SStaticOp(int A, FieldId B) {
         value_register_or_pair = A;
         static_field = B;
+    }
+
+    @Override
+    public void fillContext(DataSet data) {
+        data.addField(static_field);
     }
 
     private String toString(String name) {

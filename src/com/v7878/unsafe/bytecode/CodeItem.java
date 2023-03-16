@@ -73,4 +73,13 @@ public class CodeItem {
         }
         return out;
     }
+
+    public void fillContext(DataSet data) {
+        for (Instruction tmp : insns) {
+            tmp.fillContext(data);
+        }
+        for (TryItem tmp : tries) {
+            tmp.fillContext(data);
+        }
+    }
 }

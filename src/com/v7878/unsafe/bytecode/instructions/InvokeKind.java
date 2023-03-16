@@ -1,6 +1,6 @@
 package com.v7878.unsafe.bytecode.instructions;
 
-import com.v7878.unsafe.bytecode.MethodId;
+import com.v7878.unsafe.bytecode.*;
 import com.v7878.unsafe.bytecode.instructions.InstructionReader.*;
 
 public abstract class InvokeKind extends Instruction {
@@ -29,6 +29,11 @@ public abstract class InvokeKind extends Instruction {
         argument_register_3 = E;
         argument_register_4 = F;
         argument_register_5 = G;
+    }
+
+    @Override
+    public void fillContext(DataSet data) {
+        data.addMethod(method_reference);
     }
 
     private String toString(String name) {

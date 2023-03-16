@@ -1,6 +1,6 @@
 package com.v7878.unsafe.bytecode.instructions;
 
-import com.v7878.unsafe.bytecode.TypeId;
+import com.v7878.unsafe.bytecode.*;
 import com.v7878.unsafe.bytecode.instructions.InstructionReader.Reader_20bc_21c;
 
 public class ConstClass extends Instruction {
@@ -19,6 +19,11 @@ public class ConstClass extends Instruction {
     public ConstClass(int A, TypeId B) {
         destination_register = A;
         value = B;
+    }
+
+    @Override
+    public void fillContext(DataSet data) {
+        data.addType(value);
     }
 
     @Override

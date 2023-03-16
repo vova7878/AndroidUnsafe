@@ -1,5 +1,6 @@
 package com.v7878.unsafe.bytecode.instructions;
 
+import com.v7878.unsafe.bytecode.*;
 import com.v7878.unsafe.bytecode.instructions.InstructionReader.*;
 
 public class ConstString extends Instruction {
@@ -18,6 +19,11 @@ public class ConstString extends Instruction {
     public ConstString(int A, String B) {
         destination_register = A;
         value = B;
+    }
+
+    @Override
+    public void fillContext(DataSet data) {
+        data.addString(value);
     }
 
     @Override

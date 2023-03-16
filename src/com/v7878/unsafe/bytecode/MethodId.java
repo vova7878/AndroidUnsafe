@@ -15,6 +15,10 @@ public class MethodId extends FieldOrMethodId {
         return out;
     }
 
+    public void fillContext(DataSet data) {
+        data.addProto(proto);
+    }
+
     @Override
     public String toString() {
         return declaring_class + "." + name + proto;

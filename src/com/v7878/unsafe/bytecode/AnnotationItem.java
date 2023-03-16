@@ -39,6 +39,10 @@ public class AnnotationItem {
         return out;
     }
 
+    public void fillContext(DataSet data) {
+        annotation.fillContext(data);
+    }
+
     @Override
     public String toString() {
         return "AnnotationItem{" + "visibility = " + visibility + "; " + annotation + "}";

@@ -21,6 +21,13 @@ public class EncodedAnnotation {
         return out;
     }
 
+    public void fillContext(DataSet data) {
+        data.addType(type);
+        for (AnnotationElement tmp : elements) {
+            tmp.fillContext(data);
+        }
+    }
+
     @Override
     public String toString() {
         String elems = Arrays.stream(elements)

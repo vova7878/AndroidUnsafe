@@ -24,6 +24,14 @@ public class ProtoId {
         return out;
     }
 
+    public void fillContext(DataSet data) {
+        data.addString(shorty);
+        data.addType(return_type);
+        for (TypeId tmp : parameters) {
+            data.addType(tmp);
+        }
+    }
+
     @Override
     public String toString() {
         String params = Arrays.stream(parameters)

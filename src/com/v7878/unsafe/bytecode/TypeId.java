@@ -22,6 +22,10 @@ public class TypeId {
         return out;
     }
 
+    public void fillContext(DataSet data) {
+        data.addString(descriptor);
+    }
+
     @Override
     public String toString() {
         return descriptor;

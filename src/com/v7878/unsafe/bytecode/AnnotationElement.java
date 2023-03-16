@@ -16,6 +16,11 @@ public class AnnotationElement {
         return out;
     }
 
+    void fillContext(DataSet data) {
+        data.addString(name);
+        value.fillContext(data);
+    }
+
     @Override
     public String toString() {
         return "AnnotationElement{" + name + " = " + value + "}";

@@ -2,7 +2,7 @@ package com.v7878.unsafe.bytecode.instructions;
 
 import android.util.Pair;
 import static com.v7878.unsafe.Utils.*;
-import com.v7878.unsafe.bytecode.Context;
+import com.v7878.unsafe.bytecode.*;
 import com.v7878.unsafe.io.RandomInput;
 import java.util.Arrays;
 
@@ -40,5 +40,8 @@ public class Instruction {
         offsets = Arrays.copyOf(offsets, index + 1);
         insns = Arrays.copyOf(insns, index);
         return new Pair<>(offsets, insns);
+    }
+
+    public void fillContext(DataSet data) {
     }
 }

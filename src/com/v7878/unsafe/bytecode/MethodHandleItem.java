@@ -21,6 +21,14 @@ public class MethodHandleItem {
         return out;
     }
 
+    public void fillContext(DataSet data) {
+        if (field_or_method instanceof MethodId) {
+            data.addMethod((MethodId) field_or_method);
+        } else {
+            data.addField((FieldId) field_or_method);
+        }
+    }
+
     public static boolean isMethodType(int type) {
         return type >= METHOD_HANDLE_TYPE_INVOKE_STATIC;
     }

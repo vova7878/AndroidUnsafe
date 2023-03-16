@@ -16,6 +16,9 @@ public abstract class EncodedValue {
 
     public abstract Object getValue();
 
+    public void fillContext(DataSet data) {
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof EncodedValue) {
@@ -280,6 +283,11 @@ public abstract class EncodedValue {
         }
 
         @Override
+        public void fillContext(DataSet data) {
+            data.addProto(value);
+        }
+
+        @Override
         public boolean isDefault() {
             return value == null;
         }
@@ -301,6 +309,11 @@ public abstract class EncodedValue {
 
         public MethodHandleValue() {
             super(VALUE_METHOD_HANDLE);
+        }
+
+        @Override
+        public void fillContext(DataSet data) {
+            data.addMethodHandle(value);
         }
 
         @Override
@@ -328,6 +341,11 @@ public abstract class EncodedValue {
         }
 
         @Override
+        public void fillContext(DataSet data) {
+            data.addString(value);
+        }
+
+        @Override
         public boolean isDefault() {
             return value == null;
         }
@@ -349,6 +367,11 @@ public abstract class EncodedValue {
 
         public TypeValue() {
             super(VALUE_TYPE);
+        }
+
+        @Override
+        public void fillContext(DataSet data) {
+            data.addType(value);
         }
 
         @Override
@@ -376,6 +399,11 @@ public abstract class EncodedValue {
         }
 
         @Override
+        public void fillContext(DataSet data) {
+            data.addField(value);
+        }
+
+        @Override
         public boolean isDefault() {
             return value == null;
         }
@@ -397,6 +425,11 @@ public abstract class EncodedValue {
 
         public MethodValue() {
             super(VALUE_METHOD);
+        }
+
+        @Override
+        public void fillContext(DataSet data) {
+            data.addMethod(value);
         }
 
         @Override
@@ -424,6 +457,11 @@ public abstract class EncodedValue {
         }
 
         @Override
+        public void fillContext(DataSet data) {
+            data.addField(value);
+        }
+
+        @Override
         public boolean isDefault() {
             return value == null;
         }
@@ -448,6 +486,13 @@ public abstract class EncodedValue {
         }
 
         @Override
+        public void fillContext(DataSet data) {
+            for (EncodedValue tmp : value) {
+                tmp.fillContext(data);
+            }
+        }
+
+        @Override
         public boolean isDefault() {
             return value == null;
         }
@@ -469,6 +514,11 @@ public abstract class EncodedValue {
 
         public AnnotationValue() {
             super(VALUE_ANNOTATION);
+        }
+
+        @Override
+        public void fillContext(DataSet data) {
+            value.fillContext(data);
         }
 
         @Override

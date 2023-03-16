@@ -77,4 +77,10 @@ public class Dex {
         System.out.println("class_defs " + Arrays.toString(out.class_defs));
         return out;
     }
+
+    public void fillContext(DataSet data) {
+        for (ClassDef tmp : class_defs) {
+            tmp.fillContext(data);
+        }
+    }
 }

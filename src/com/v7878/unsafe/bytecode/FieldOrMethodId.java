@@ -5,7 +5,7 @@ import java.util.Objects;
 public abstract class FieldOrMethodId {
 
     public TypeId declaring_class;
-    public StringId name;
+    public String name;
 
     @Override
     public boolean equals(Object obj) {

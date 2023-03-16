@@ -5,7 +5,7 @@ import java.util.Objects;
 
 public class AnnotationElement {
 
-    public StringId name;
+    public String name;
     public EncodedValue value;
 
     public static AnnotationElement read(RandomInput in, Context context) {

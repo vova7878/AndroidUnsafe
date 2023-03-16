@@ -1,6 +1,5 @@
 package com.v7878.unsafe.bytecode.instructions;
 
-import com.v7878.unsafe.bytecode.StringId;
 import com.v7878.unsafe.bytecode.instructions.InstructionReader.*;
 
 public class ConstString extends Instruction {
@@ -14,9 +13,9 @@ public class ConstString extends Instruction {
     }
 
     public final int destination_register;
-    public final StringId value;
+    public final String value;
 
-    public ConstString(int A, StringId B) {
+    public ConstString(int A, String B) {
         destination_register = A;
         value = B;
     }

@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 public class ProtoId {
 
-    public StringId shorty;
+    public String shorty;
     public TypeId return_type;
     public TypeId[] parameters;
 

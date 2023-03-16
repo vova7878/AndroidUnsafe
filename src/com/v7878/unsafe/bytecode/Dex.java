@@ -11,7 +11,7 @@ public class Dex {
         Dex out = new Dex();
         FileMap map = FileMap.read(in);
         Context context = new Context();
-        StringId[] strings = new StringId[map.string_ids_size];
+        String[] strings = new String[map.string_ids_size];
         if (map.string_ids_size != 0) {
             RandomInput in2 = in.duplicate(map.string_ids_off);
             for (int i = 0; i < map.string_ids_size; i++) {

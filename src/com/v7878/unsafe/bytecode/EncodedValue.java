@@ -32,7 +32,7 @@ public abstract class EncodedValue {
     }
 
     public static EncodedValue getDefaultValue(TypeId type) {
-        String name = type.descriptor.data;
+        String name = type.descriptor;
         switch (name) {
             case "V":
                 throw new IllegalArgumentException();
@@ -321,7 +321,7 @@ public abstract class EncodedValue {
 
     public static class StringValue extends EncodedValue {
 
-        public StringId value;
+        public String value;
 
         public StringValue() {
             super(VALUE_STRING);

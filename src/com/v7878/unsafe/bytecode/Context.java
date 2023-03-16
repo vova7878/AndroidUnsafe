@@ -2,7 +2,7 @@ package com.v7878.unsafe.bytecode;
 
 public class Context {
 
-    private StringId[] strings;
+    private String[] strings;
     private TypeId[] types;
     private ProtoId[] protos;
     private FieldId[] fields;
@@ -10,7 +10,7 @@ public class Context {
     private MethodHandleItem[] method_handles;
     private CallSiteId[] call_sites;
 
-    public StringId string(int index) {
+    public String string(int index) {
         return strings[index];
     }
 
@@ -38,7 +38,7 @@ public class Context {
         return call_sites[index];
     }
 
-    public void setStrings(StringId[] strings) {
+    public void setStrings(String[] strings) {
         this.strings = strings;
     }
 

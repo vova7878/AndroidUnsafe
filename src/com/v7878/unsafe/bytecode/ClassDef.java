@@ -9,7 +9,7 @@ public class ClassDef {
     public int access_flags;
     public TypeId superclass;
     public TypeId[] interfaces;
-    public StringId source_file;
+    public String source_file;
     public AnnotationItem[] class_annotations;
     public ClassData class_data;
 

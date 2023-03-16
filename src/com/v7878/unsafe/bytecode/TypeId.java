@@ -5,7 +5,7 @@ import java.util.Objects;
 
 public class TypeId {
 
-    public StringId descriptor;
+    public String descriptor;
 
     public static TypeId read(RandomInput in, Context context) {
         TypeId out = new TypeId();
@@ -24,7 +24,7 @@ public class TypeId {
 
     @Override
     public String toString() {
-        return descriptor.data;
+        return descriptor;
     }
 
     @Override

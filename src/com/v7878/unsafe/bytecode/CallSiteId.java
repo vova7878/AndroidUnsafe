@@ -9,11 +9,11 @@ public class CallSiteId {
 
     public ArrayValue value;
 
-    public static CallSiteId read(RandomInput in, ReadContext rc) {
+    public static CallSiteId read(RandomInput in, Context context) {
         CallSiteId out = new CallSiteId();
         RandomInput in2 = in.duplicate(in.readInt());
         EncodedValueReader reader = new EncodedValueReader(in2, VALUE_ARRAY);
-        out.value = reader.readArray(rc);
+        out.value = reader.readArray(context);
         return out;
     }
 

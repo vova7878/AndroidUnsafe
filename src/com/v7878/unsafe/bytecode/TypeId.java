@@ -7,17 +7,17 @@ public class TypeId {
 
     public StringId descriptor;
 
-    public static TypeId read(RandomInput in, ReadContext rc) {
+    public static TypeId read(RandomInput in, Context context) {
         TypeId out = new TypeId();
-        out.descriptor = rc.strings[in.readInt()];
+        out.descriptor = context.string(in.readInt());
         return out;
     }
 
-    public static TypeId[] readTypeList(RandomInput in, ReadContext rc) {
+    public static TypeId[] readTypeList(RandomInput in, Context context) {
         int size = in.readInt();
         TypeId[] out = new TypeId[size];
         for (int i = 0; i < size; i++) {
-            out[i] = rc.types[in.readUnsignedShort()];
+            out[i] = context.type(in.readUnsignedShort());
         }
         return out;
     }

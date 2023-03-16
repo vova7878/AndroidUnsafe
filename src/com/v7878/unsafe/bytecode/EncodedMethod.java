@@ -12,7 +12,7 @@ public class EncodedMethod {
     public AnnotationItem[][] parameter_annotations;
     public CodeItem code;
 
-    public static EncodedMethod read(RandomInput in, ReadContext rc,
+    public static EncodedMethod read(RandomInput in, Context context,
             MethodId method,
             Map<MethodId, AnnotationItem[]> annotated_methods,
             Map<MethodId, AnnotationItem[][]> annotated_parameters) {
@@ -25,20 +25,20 @@ public class EncodedMethod {
                 .getOrDefault(method, new AnnotationItem[0][0]);
         int code_off = in.readULeb128();
         if (code_off != 0) {
-            out.code = CodeItem.read(in.duplicate(code_off), rc);
+            out.code = CodeItem.read(in.duplicate(code_off), context);
         }
         return out;
     }
 
     public static EncodedMethod[] readArray(RandomInput in,
-            ReadContext rc, int size,
+            Context context, int size,
             Map<MethodId, AnnotationItem[]> annotated_methods,
             Map<MethodId, AnnotationItem[][]> annotated_parameters) {
         EncodedMethod[] out = new EncodedMethod[size];
         int methodIndex = 0;
         for (int i = 0; i < size; i++) {
             methodIndex += in.readULeb128();
-            out[i] = read(in, rc, rc.methods[methodIndex],
+            out[i] = read(in, context, context.method(methodIndex),
                     annotated_methods, annotated_parameters);
         }
         return out;

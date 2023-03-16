@@ -10,13 +10,13 @@ public class EncodedAnnotation {
     public TypeId type;
     public AnnotationElement[] elements;
 
-    public static EncodedAnnotation read(RandomInput in, ReadContext rc) {
+    public static EncodedAnnotation read(RandomInput in, Context context) {
         EncodedAnnotation out = new EncodedAnnotation();
-        out.type = rc.types[in.readULeb128()];
+        out.type = context.type(in.readULeb128());
         int size = in.readULeb128();
         out.elements = new AnnotationElement[size];
         for (int i = 0; i < size; i++) {
-            out.elements[i] = AnnotationElement.read(in, rc);
+            out.elements[i] = AnnotationElement.read(in, context);
         }
         return out;
     }

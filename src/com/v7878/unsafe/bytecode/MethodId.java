@@ -7,11 +7,11 @@ public class MethodId extends FieldOrMethodId {
 
     public ProtoId proto;
 
-    public static MethodId read(RandomInput in, ReadContext rc) {
+    public static MethodId read(RandomInput in, Context context) {
         MethodId out = new MethodId();
-        out.declaring_class = rc.types[in.readUnsignedShort()];
-        out.proto = rc.protos[in.readUnsignedShort()];
-        out.name = rc.strings[in.readInt()];
+        out.declaring_class = context.type(in.readUnsignedShort());
+        out.proto = context.proto(in.readUnsignedShort());
+        out.name = context.string(in.readInt());
         return out;
     }
 

@@ -30,23 +30,23 @@ public class EncodedValueReader {
         return type;
     }
 
-    public ArrayValue readArray(ReadContext rc) {
+    public ArrayValue readArray(Context context) {
         checkType(VALUE_ARRAY);
         type = MUST_READ;
         int size = in.readULeb128();
         ArrayValue out = new ArrayValue();
         out.value = new EncodedValue[size];
         for (int i = 0; i < size; i++) {
-            out.value[i] = readValue(rc);
+            out.value[i] = readValue(context);
         }
         return out;
     }
 
-    public AnnotationValue readAnnotation(ReadContext rc) {
+    public AnnotationValue readAnnotation(Context context) {
         checkType(VALUE_ANNOTATION);
         type = MUST_READ;
         AnnotationValue out = new AnnotationValue();
-        out.value = EncodedAnnotation.read(in, rc);
+        out.value = EncodedAnnotation.read(in, context);
         return out;
     }
 
@@ -106,59 +106,59 @@ public class EncodedValueReader {
         return out;
     }
 
-    public MethodTypeValue readMethodType(ReadContext rc) {
+    public MethodTypeValue readMethodType(Context context) {
         checkType(VALUE_METHOD_TYPE);
         type = MUST_READ;
         MethodTypeValue out = new MethodTypeValue();
-        out.value = rc.protos[ValueCoder.readUnsignedInt(in, arg, false)];
+        out.value = context.proto(ValueCoder.readUnsignedInt(in, arg, false));
         return out;
     }
 
-    public MethodHandleValue readMethodHandle(ReadContext rc) {
+    public MethodHandleValue readMethodHandle(Context context) {
         checkType(VALUE_METHOD_HANDLE);
         type = MUST_READ;
         MethodHandleValue out = new MethodHandleValue();
-        out.value = rc.method_handles[ValueCoder.readUnsignedInt(in, arg, false)];
+        out.value = context.method_handle(ValueCoder.readUnsignedInt(in, arg, false));
         return out;
     }
 
-    public StringValue readString(ReadContext rc) {
+    public StringValue readString(Context context) {
         checkType(VALUE_STRING);
         type = MUST_READ;
         StringValue out = new StringValue();
-        out.value = rc.strings[ValueCoder.readUnsignedInt(in, arg, false)];
+        out.value = context.string(ValueCoder.readUnsignedInt(in, arg, false));
         return out;
     }
 
-    public TypeValue readType(ReadContext rc) {
+    public TypeValue readType(Context context) {
         checkType(VALUE_TYPE);
         type = MUST_READ;
         TypeValue out = new TypeValue();
-        out.value = rc.types[ValueCoder.readUnsignedInt(in, arg, false)];
+        out.value = context.type(ValueCoder.readUnsignedInt(in, arg, false));
         return out;
     }
 
-    public FieldValue readField(ReadContext rc) {
+    public FieldValue readField(Context context) {
         checkType(VALUE_FIELD);
         type = MUST_READ;
         FieldValue out = new FieldValue();
-        out.value = rc.fields[ValueCoder.readUnsignedInt(in, arg, false)];
+        out.value = context.field(ValueCoder.readUnsignedInt(in, arg, false));
         return out;
     }
 
-    public EnumValue readEnum(ReadContext rc) {
+    public EnumValue readEnum(Context context) {
         checkType(VALUE_ENUM);
         type = MUST_READ;
         EnumValue out = new EnumValue();
-        out.value = rc.fields[ValueCoder.readUnsignedInt(in, arg, false)];
+        out.value = context.field(ValueCoder.readUnsignedInt(in, arg, false));
         return out;
     }
 
-    public MethodValue readMethod(ReadContext rc) {
+    public MethodValue readMethod(Context context) {
         checkType(VALUE_METHOD);
         type = MUST_READ;
         MethodValue out = new MethodValue();
-        out.value = rc.methods[ValueCoder.readUnsignedInt(in, arg, false)];
+        out.value = context.method(ValueCoder.readUnsignedInt(in, arg, false));
         return out;
     }
 
@@ -176,7 +176,7 @@ public class EncodedValueReader {
         return out;
     }
 
-    public EncodedValue readValue(ReadContext rc) {
+    public EncodedValue readValue(Context context) {
         switch (peek()) {
             case VALUE_BYTE:
                 return readByte();
@@ -193,23 +193,23 @@ public class EncodedValueReader {
             case VALUE_DOUBLE:
                 return readDouble();
             case VALUE_METHOD_TYPE:
-                return readMethodType(rc);
+                return readMethodType(context);
             case VALUE_METHOD_HANDLE:
-                return readMethodHandle(rc);
+                return readMethodHandle(context);
             case VALUE_STRING:
-                return readString(rc);
+                return readString(context);
             case VALUE_TYPE:
-                return readType(rc);
+                return readType(context);
             case VALUE_FIELD:
-                return readField(rc);
+                return readField(context);
             case VALUE_ENUM:
-                return readEnum(rc);
+                return readEnum(context);
             case VALUE_METHOD:
-                return readMethod(rc);
+                return readMethod(context);
             case VALUE_ARRAY:
-                return readArray(rc);
+                return readArray(context);
             case VALUE_ANNOTATION:
-                return readAnnotation(rc);
+                return readAnnotation(context);
             case VALUE_NULL:
                 return readNull();
             case VALUE_BOOLEAN:

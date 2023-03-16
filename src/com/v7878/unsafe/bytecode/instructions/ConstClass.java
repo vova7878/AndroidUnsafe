@@ -8,8 +8,8 @@ public class ConstClass extends Instruction {
     public static final int OPCODE = 0x1c;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_20bc_21c((rc, A, B) -> {
-            return new ConstClass(A, rc.types[B]);
+        InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
+            return new ConstClass(A, context.type(B));
         }));
     }
 

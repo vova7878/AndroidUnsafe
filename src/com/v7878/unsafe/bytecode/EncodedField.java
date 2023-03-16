@@ -19,13 +19,13 @@ public class EncodedField {
         return out;
     }
 
-    public static EncodedField[] readArray(RandomInput in, ReadContext rc,
+    public static EncodedField[] readArray(RandomInput in, Context context,
             int size, Map<FieldId, AnnotationItem[]> annotated_fields) {
         EncodedField[] out = new EncodedField[size];
         int fieldIndex = 0;
         for (int i = 0; i < size; i++) {
             fieldIndex += in.readULeb128();
-            out[i] = read(in, rc.fields[fieldIndex], annotated_fields);
+            out[i] = read(in, context.field(fieldIndex), annotated_fields);
         }
         return out;
     }

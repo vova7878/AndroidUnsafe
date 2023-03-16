@@ -8,11 +8,11 @@ public class AnnotationElement {
     public StringId name;
     public EncodedValue value;
 
-    public static AnnotationElement read(RandomInput in, ReadContext rc) {
+    public static AnnotationElement read(RandomInput in, Context context) {
         AnnotationElement out = new AnnotationElement();
-        out.name = rc.strings[in.readULeb128()];
+        out.name = context.string(in.readULeb128());
         EncodedValueReader reader = new EncodedValueReader(in);
-        out.value = reader.readValue(rc);
+        out.value = reader.readValue(context);
         return out;
     }
 

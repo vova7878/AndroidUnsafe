@@ -9,15 +9,15 @@ public class MethodHandleItem {
     public int type;
     public FieldOrMethodId field_or_method;
 
-    public static MethodHandleItem read(RandomInput in, ReadContext rc) {
+    public static MethodHandleItem read(RandomInput in, Context context) {
         MethodHandleItem out = new MethodHandleItem();
         out.type = in.readUnsignedShort();
         in.skipBytes(2); //unused
         int field_or_method_id = in.readUnsignedShort();
         in.skipBytes(2); //unused
         out.field_or_method = isMethodType(out.type)
-                ? rc.methods[field_or_method_id]
-                : rc.fields[field_or_method_id];
+                ? context.method(field_or_method_id)
+                : context.field(field_or_method_id);
         return out;
     }
 

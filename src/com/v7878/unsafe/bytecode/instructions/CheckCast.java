@@ -8,8 +8,8 @@ public class CheckCast extends Instruction {
     public static final int OPCODE = 0x1f;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_20bc_21c((rc, A, B) -> {
-            return new CheckCast(A, rc.types[B]);
+        InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
+            return new CheckCast(A, context.type(B));
         }));
     }
 

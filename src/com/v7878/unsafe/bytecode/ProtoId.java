@@ -11,13 +11,13 @@ public class ProtoId {
     public TypeId return_type;
     public TypeId[] parameters;
 
-    public static ProtoId read(RandomInput in, ReadContext rc) {
+    public static ProtoId read(RandomInput in, Context context) {
         ProtoId out = new ProtoId();
-        out.shorty = rc.strings[in.readInt()];
-        out.return_type = rc.types[in.readInt()];
+        out.shorty = context.string(in.readInt());
+        out.return_type = context.type(in.readInt());
         int parameters_off = in.readInt();
         if (parameters_off != 0) {
-            out.parameters = TypeId.readTypeList(in.duplicate(parameters_off), rc);
+            out.parameters = TypeId.readTypeList(in.duplicate(parameters_off), context);
         } else {
             out.parameters = new TypeId[0];
         }

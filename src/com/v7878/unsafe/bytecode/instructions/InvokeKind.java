@@ -46,8 +46,8 @@ public abstract class InvokeKind extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_35c_35ms_35mi(
-                    (rc, A, B, C, D, E, F, G) -> {
-                        return new InvokeVirtual(A, rc.methods[B], C, D, E, F, G);
+                    (context, A, B, C, D, E, F, G) -> {
+                        return new InvokeVirtual(A, context.method(B), C, D, E, F, G);
                     }));
         }
 
@@ -67,8 +67,8 @@ public abstract class InvokeKind extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_35c_35ms_35mi(
-                    (rc, A, B, C, D, E, F, G) -> {
-                        return new InvokeSuper(A, rc.methods[B], C, D, E, F, G);
+                    (context, A, B, C, D, E, F, G) -> {
+                        return new InvokeSuper(A, context.method(B), C, D, E, F, G);
                     }));
         }
 
@@ -88,8 +88,8 @@ public abstract class InvokeKind extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_35c_35ms_35mi(
-                    (rc, A, B, C, D, E, F, G) -> {
-                        return new InvokeDirect(A, rc.methods[B], C, D, E, F, G);
+                    (context, A, B, C, D, E, F, G) -> {
+                        return new InvokeDirect(A, context.method(B), C, D, E, F, G);
                     }));
         }
 
@@ -109,8 +109,8 @@ public abstract class InvokeKind extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_35c_35ms_35mi(
-                    (rc, A, B, C, D, E, F, G) -> {
-                        return new InvokeStatic(A, rc.methods[B], C, D, E, F, G);
+                    (context, A, B, C, D, E, F, G) -> {
+                        return new InvokeStatic(A, context.method(B), C, D, E, F, G);
                     }));
         }
 
@@ -130,8 +130,8 @@ public abstract class InvokeKind extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_35c_35ms_35mi(
-                    (rc, A, B, C, D, E, F, G) -> {
-                        return new InvokeInterface(A, rc.methods[B], C, D, E, F, G);
+                    (context, A, B, C, D, E, F, G) -> {
+                        return new InvokeInterface(A, context.method(B), C, D, E, F, G);
                     }));
         }
 

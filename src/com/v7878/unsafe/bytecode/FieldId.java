@@ -7,11 +7,11 @@ public class FieldId extends FieldOrMethodId {
 
     public TypeId type;
 
-    public static FieldId read(RandomInput in, ReadContext rc) {
+    public static FieldId read(RandomInput in, Context context) {
         FieldId out = new FieldId();
-        out.declaring_class = rc.types[in.readUnsignedShort()];
-        out.type = rc.types[in.readUnsignedShort()];
-        out.name = rc.strings[in.readInt()];
+        out.declaring_class = context.type(in.readUnsignedShort());
+        out.type = context.type(in.readUnsignedShort());
+        out.name = context.string(in.readInt());
         return out;
     }
 

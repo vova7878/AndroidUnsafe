@@ -21,7 +21,7 @@ public class CodeItem {
         return addr;
     }
 
-    public static CodeItem read(RandomInput in, ReadContext rc) {
+    public static CodeItem read(RandomInput in, Context context) {
         CodeItem out = new CodeItem();
         out.registers_size = in.readUnsignedShort();
         out.ins_size = in.readUnsignedShort();
@@ -31,7 +31,7 @@ public class CodeItem {
         //TODO
         in.readInt(); //out.debug_info_off = in.readInt();
 
-        Pair<int[], Instruction[]> insns_data = Instruction.readArray(in, rc);
+        Pair<int[], Instruction[]> insns_data = Instruction.readArray(in, context);
         out.insns = insns_data.second;
 
         int[] offsets = insns_data.first;
@@ -59,7 +59,7 @@ public class CodeItem {
             for (int i = 0; i < handlers_size; i++) {
                 int handler_offset = (int) (in.position() - handlers_start);
                 handlers.put(handler_offset,
-                        CatchHandler.read(in, rc, offsets));
+                        CatchHandler.read(in, context, offsets));
             }
 
             in.position(tries_pos);

@@ -12,14 +12,14 @@ public class CatchHandler {
     public int catch_all_addr;
 
     public static CatchHandler read(RandomInput in,
-            ReadContext rc, int[] offsets) {
+            Context context, int[] offsets) {
         CatchHandler out = new CatchHandler();
         int size = in.readSLeb128();
         int handlersCount = Math.abs(size);
         out.handlers = new Pair[handlersCount];
 
         for (int i = 0; i < handlersCount; i++) {
-            out.handlers[i] = new Pair<>(rc.types[in.readULeb128()],
+            out.handlers[i] = new Pair<>(context.type(in.readULeb128()),
                     CodeItem.getInstructionIndex(offsets, in.readULeb128()));
         }
         out.catch_all_addr = size <= 0

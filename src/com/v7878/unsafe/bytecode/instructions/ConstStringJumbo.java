@@ -8,8 +8,8 @@ public class ConstStringJumbo extends Instruction {
     public static final int OPCODE = 0x1b;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_31c((rc, A, B) -> {
-            return new ConstStringJumbo(A, rc.strings[B]);
+        InstructionReader.register(OPCODE, new Reader_31c((context, A, B) -> {
+            return new ConstStringJumbo(A, context.string(B));
         }));
     }
 

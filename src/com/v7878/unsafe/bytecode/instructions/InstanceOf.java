@@ -8,8 +8,8 @@ public class InstanceOf extends Instruction {
     public static final int OPCODE = 0x20;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_22c_22cs((rc, A, B, C) -> {
-            return new InstanceOf(A, B, rc.types[C]);
+        InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
+            return new InstanceOf(A, B, context.type(C));
         }));
     }
 

@@ -2,14 +2,14 @@ package com.v7878.unsafe.bytecode.instructions;
 
 import android.util.Pair;
 import static com.v7878.unsafe.Utils.*;
-import com.v7878.unsafe.bytecode.ReadContext;
+import com.v7878.unsafe.bytecode.Context;
 import com.v7878.unsafe.io.RandomInput;
 import java.util.Arrays;
 
 public class Instruction {
 
     public static Pair<int[], Instruction[]> readArray(
-            RandomInput in, ReadContext rc) {
+            RandomInput in, Context context) {
         int insns_size = in.readInt();
 
         Instruction[] insns = new Instruction[insns_size];
@@ -23,7 +23,7 @@ public class Instruction {
             int offset = (int) (in.position() - start);
             assert_((offset & 1) == 0, IllegalStateException::new,
                     "Unaligned code unit");
-            insns[index] = InstructionReader.read(in, rc);
+            insns[index] = InstructionReader.read(in, context);
             offsets[index] = offset / 2;
             index++;
         }

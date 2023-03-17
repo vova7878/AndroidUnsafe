@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public interface RandomInput extends AutoCloseable {
 
-    public default void readFully(byte[] b) {
-        readFully(b, 0, b.length);
+    public default void readFully(byte[] arr) {
+        readFully(arr, 0, arr.length);
     }
 
     public default void readFully(byte[] arr, int off, int len) {

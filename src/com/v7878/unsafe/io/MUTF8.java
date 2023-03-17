@@ -44,8 +44,8 @@ public class MUTF8 {
         return result;
     }
 
-    /*private static long countBytes(String s, boolean shortLength) {
-        long result = 0;
+    private static int countBytes(String s, boolean shortLength) {
+        int result = 0;
         final int length = s.length();
         for (int i = 0; i < length; ++i) {
             char ch = s.charAt(i);
@@ -63,27 +63,25 @@ public class MUTF8 {
         return result;
     }
 
-    public static void encode(byte[] dst, int offset, String s) {
+    public static void encode(RandomOutput out, String s) {
         final int length = s.length();
         for (int i = 0; i < length; i++) {
             char ch = s.charAt(i);
             if (ch != 0 && ch <= 127) { // U+0000 uses two bytes.
-                dst[offset++] = (byte) ch;
+                out.writeByte(ch);
             } else if (ch <= 2047) {
-                dst[offset++] = (byte) (0xc0 | (0x1f & (ch >> 6)));
-                dst[offset++] = (byte) (0x80 | (0x3f & ch));
+                out.writeByte(0xc0 | (0x1f & (ch >> 6)));
+                out.writeByte(0x80 | (0x3f & ch));
             } else {
-                dst[offset++] = (byte) (0xe0 | (0x0f & (ch >> 12)));
-                dst[offset++] = (byte) (0x80 | (0x3f & (ch >> 6)));
-                dst[offset++] = (byte) (0x80 | (0x3f & ch));
+                out.writeByte(0xe0 | (0x0f & (ch >> 12)));
+                out.writeByte(0x80 | (0x3f & (ch >> 6)));
+                out.writeByte(0x80 | (0x3f & ch));
             }
         }
     }
 
-    public static byte[] encode(String s) {
-        int utfCount = (int) countBytes(s, true);
-        byte[] result = new byte[utfCount];
-        encode(result, 0, s);
-        return result;
-    }*/
+    public static void writeMUTF8(RandomOutput out, String s) {
+        out.writeULeb128(countBytes(s, true));
+        encode(out, s);
+    }
 }

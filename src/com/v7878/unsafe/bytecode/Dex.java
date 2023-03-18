@@ -1,7 +1,7 @@
 package com.v7878.unsafe.bytecode;
 
 import com.v7878.unsafe.io.*;
-import java.util.Arrays;
+import java.util.*;
 
 public class Dex {
 
@@ -80,7 +80,58 @@ public class Dex {
 
     public void fillContext(DataSet data) {
         for (ClassDef tmp : class_defs) {
-            tmp.fillContext(data);
+            data.addClassDef(tmp);
         }
+    }
+
+    public void write(RandomOutput out) {
+        DataSet data = new DataSet();
+        fillContext(data);
+
+        WriteContext context = new WriteContext(data);
+
+        FileMap map = new FileMap();
+
+        int offset = FileMap.HEADER_SIZE;
+
+        map.string_ids_off = offset;
+        map.string_ids_size = context.getStringsCount();
+        offset += map.string_ids_size * StringId.SIZE;
+
+        map.type_ids_off = offset;
+        map.type_ids_size = context.getTypesCount();
+        offset += map.type_ids_size * TypeId.SIZE;
+
+        map.proto_ids_off = offset;
+        map.proto_ids_size = context.getProtosCount();
+        offset += map.proto_ids_size * ProtoId.SIZE;
+
+        map.field_ids_off = offset;
+        map.field_ids_size = context.getFieldsCount();
+        offset += map.field_ids_size * FieldId.SIZE;
+
+        map.method_ids_off = offset;
+        map.method_ids_size = context.getMethodsCount();
+        offset += map.method_ids_size * MethodId.SIZE;
+
+        map.class_defs_off = offset;
+        map.class_defs_size = context.getClassDefsCount();
+        offset += map.class_defs_size * ClassDef.SIZE;
+
+        map.call_site_ids_off = offset;
+        map.call_site_ids_size = context.getCallSitesCount();
+        offset += map.call_site_ids_size * CallSiteId.SIZE;
+
+        map.method_handles_off = offset;
+        map.method_handles_size = context.getMethodHandlesCount();
+        offset += map.method_handles_size * MethodHandleItem.SIZE;
+
+        //TODO: other sections
+        map.data_off = offset;
+
+        map.string_data_items_off = offset;
+        map.string_data_items_size = map.string_ids_size;
+
+        throw new UnsupportedOperationException("not implemented yet");
     }
 }

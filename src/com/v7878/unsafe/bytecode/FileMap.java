@@ -6,6 +6,8 @@ import com.v7878.unsafe.io.RandomInput;
 
 public class FileMap {
 
+    public static final int HEADER_SIZE = 0x70;
+
     public int string_ids_size;
     public int string_ids_off;
     public int type_ids_size;
@@ -24,6 +26,9 @@ public class FileMap {
     public int method_handles_off;
 
     //extra data for write
+    public int data_size;
+    public int data_off;
+
     public int type_lists_size;
     public int type_lists_off;
     public int annotation_set_refs_size;

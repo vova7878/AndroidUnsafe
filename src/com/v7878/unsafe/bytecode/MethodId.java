@@ -5,6 +5,8 @@ import java.util.Objects;
 
 public class MethodId extends FieldOrMethodId {
 
+    public static final int SIZE = 0x08;
+
     public ProtoId proto;
 
     public static MethodId read(RandomInput in, Context context) {

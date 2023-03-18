@@ -6,6 +6,8 @@ import java.util.Objects;
 
 public class MethodHandleItem {
 
+    public static final int SIZE = 0x08;
+
     public int type;
     public FieldOrMethodId field_or_method;
 

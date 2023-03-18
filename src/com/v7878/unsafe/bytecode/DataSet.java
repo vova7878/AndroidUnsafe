@@ -11,6 +11,7 @@ public class DataSet {
     private final Set<MethodId> methods;
     private final Set<MethodHandleItem> method_handles;
     private final Set<CallSiteId> call_sites;
+    private final Set<ClassDef> class_defs;
 
     public DataSet() {
         strings = new HashSet<>();
@@ -20,6 +21,7 @@ public class DataSet {
         methods = new HashSet<>();
         method_handles = new HashSet<>();
         call_sites = new HashSet<>();
+        class_defs = new HashSet<>();
     }
 
     public void addString(String string) {
@@ -56,6 +58,11 @@ public class DataSet {
         call_sites.add(call_site);
     }
 
+    public void addClassDef(ClassDef class_def) {
+        class_def.fillContext(this);
+        class_defs.add(class_def);
+    }
+
     public String[] getStrings() {
         return strings.stream().toArray(String[]::new);
     }
@@ -82,5 +89,9 @@ public class DataSet {
 
     public CallSiteId[] getCallSites() {
         return call_sites.stream().toArray(CallSiteId[]::new);
+    }
+
+    public ClassDef[] getClassDefs() {
+        return class_defs.stream().toArray(ClassDef[]::new);
     }
 }

@@ -5,6 +5,8 @@ import java.util.Objects;
 
 public class TypeId {
 
+    public static final int SIZE = 0x04;
+
     public String descriptor;
 
     public static TypeId read(RandomInput in, Context context) {

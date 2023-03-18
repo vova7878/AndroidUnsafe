@@ -6,9 +6,11 @@ import com.v7878.unsafe.io.RandomInput;
 import java.util.Objects;
 
 public class CallSiteId {
-    
+
+    public static final int SIZE = 0x04;
+
     public ArrayValue value;
-    
+
     public static CallSiteId read(RandomInput in, Context context) {
         CallSiteId out = new CallSiteId();
         RandomInput in2 = in.duplicate(in.readInt());
@@ -16,16 +18,16 @@ public class CallSiteId {
         out.value = reader.readArray(context);
         return out;
     }
-    
+
     public void fillContext(DataSet data) {
         value.fillContext(data);
     }
-    
+
     @Override
     public String toString() {
         return "CallSiteId" + value;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof CallSiteId) {
@@ -34,7 +36,7 @@ public class CallSiteId {
         }
         return false;
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hashCode(value);

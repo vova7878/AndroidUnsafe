@@ -5,6 +5,8 @@ import com.v7878.unsafe.io.RandomInput;
 
 public class ClassDef {
 
+    public static final int SIZE = 0x20;
+
     public TypeId clazz;
     public int access_flags;
     public TypeId superclass;

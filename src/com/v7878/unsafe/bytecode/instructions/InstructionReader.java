@@ -92,7 +92,7 @@ public abstract class InstructionReader {
 
         // <unused> 3e-43
         // TODO: 44-51
-        // TODO: 52-5f
+        IInstanceOp.init();                         // 0x52-5f
         SStaticOp.init();                           // 0x60-6d
         InvokeKind.init();                          // 0x6e-72
 

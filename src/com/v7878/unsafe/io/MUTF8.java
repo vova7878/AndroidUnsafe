@@ -83,5 +83,6 @@ public class MUTF8 {
     public static void writeMUTF8(RandomOutput out, String s) {
         out.writeULeb128(countBytes(s, true));
         encode(out, s);
+        out.writeByte(0);
     }
 }

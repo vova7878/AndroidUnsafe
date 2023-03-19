@@ -2,11 +2,50 @@ package com.v7878.unsafe.bytecode;
 
 import static com.v7878.unsafe.Utils.*;
 import static com.v7878.unsafe.bytecode.DexConstants.*;
-import com.v7878.unsafe.io.RandomInput;
+import com.v7878.unsafe.io.*;
+import java.security.MessageDigest;
+import java.util.*;
+import java.util.zip.Adler32;
 
 public class FileMap {
 
+    public static class MapItem {
+
+        public static final Comparator<MapItem> COMPARATOR = (a, b) -> {
+            return Integer.compare(a.offset, b.offset);
+        };
+
+        public int type;
+        public int offset;
+        public int size;
+
+        public MapItem(int type, int offset, int size) {
+            this.type = type;
+            this.offset = offset;
+            this.size = size;
+        }
+
+        public static MapItem read(RandomInput in) {
+            int type = in.readUnsignedShort();
+            in.skipBytes(2); //unused
+            int size = in.readInt();
+            int offset = in.readInt();
+            return new MapItem(type, offset, size);
+        }
+
+        public void write(RandomOutput out) {
+            out.writeShort(type);
+            out.writeShort(0);
+            out.writeInt(size);
+            out.writeInt(offset);
+        }
+    }
+
     public static final int HEADER_SIZE = 0x70;
+
+    public static final int CHECKSUM_OFFSET = 8;
+    public static final int SIGNATURE_OFFSET = CHECKSUM_OFFSET + 4;
+    public static final int FILE_SIZE_OFFSET = SIGNATURE_OFFSET + 20;
 
     public int string_ids_size;
     public int string_ids_off;
@@ -24,6 +63,8 @@ public class FileMap {
     public int call_site_ids_off;
     public int method_handles_size;
     public int method_handles_off;
+
+    public int map_list_off;
 
     //extra data for write
     public int data_size;
@@ -70,7 +111,7 @@ public class FileMap {
                 "invalid endian_tag: " + Integer.toHexString(endian_tag));
         in.skipBytes(4); //link_size
         in.skipBytes(4); //link_off
-        int map_list_off = in.readInt();
+        out.map_list_off = in.readInt();
         out.string_ids_size = in.readInt();
         out.string_ids_off = in.readInt();
         out.type_ids_size = in.readInt();
@@ -85,55 +126,51 @@ public class FileMap {
         out.class_defs_off = in.readInt();
         in.skipBytes(4); //data_size
         in.skipBytes(4); //data_off
-        RandomInput in2 = in.duplicate(map_list_off);
+        RandomInput in2 = in.duplicate(out.map_list_off);
         int map_size = in2.readInt();
         for (int i = 0; i < map_size; i++) {
-            int type = in2.readUnsignedShort();
-            in2.skipBytes(2); //unused
-            int size = in2.readInt();
-            assert_(size > 0, IllegalStateException::new);
-            int offset = in2.readInt();
-            System.out.println("type: " + Integer.toHexString(type)
-                    + " off: " + offset + " size: " + size);
-            switch (type) {
+            MapItem item = MapItem.read(in2);
+            System.out.println("type: " + Integer.toHexString(item.type)
+                    + " off: " + item.offset + " size: " + item.size);
+            switch (item.type) {
                 case TYPE_HEADER_ITEM:
-                    assert_(size == 1, IllegalStateException::new);
-                    assert_(offset == 0, IllegalStateException::new);
+                    assert_(item.size == 1, IllegalStateException::new);
+                    assert_(item.offset == 0, IllegalStateException::new);
                     break;
                 case TYPE_STRING_ID_ITEM:
-                    assert_(size == out.string_ids_size, IllegalStateException::new);
-                    assert_(offset == out.string_ids_off, IllegalStateException::new);
+                    assert_(item.size == out.string_ids_size, IllegalStateException::new);
+                    assert_(item.offset == out.string_ids_off, IllegalStateException::new);
                     break;
                 case TYPE_TYPE_ID_ITEM:
-                    assert_(size == out.type_ids_size, IllegalStateException::new);
-                    assert_(offset == out.type_ids_off, IllegalStateException::new);
+                    assert_(item.size == out.type_ids_size, IllegalStateException::new);
+                    assert_(item.offset == out.type_ids_off, IllegalStateException::new);
                     break;
                 case TYPE_PROTO_ID_ITEM:
-                    assert_(size == out.proto_ids_size, IllegalStateException::new);
-                    assert_(offset == out.proto_ids_off, IllegalStateException::new);
+                    assert_(item.size == out.proto_ids_size, IllegalStateException::new);
+                    assert_(item.offset == out.proto_ids_off, IllegalStateException::new);
                     break;
                 case TYPE_FIELD_ID_ITEM:
-                    assert_(size == out.field_ids_size, IllegalStateException::new);
-                    assert_(offset == out.field_ids_off, IllegalStateException::new);
+                    assert_(item.size == out.field_ids_size, IllegalStateException::new);
+                    assert_(item.offset == out.field_ids_off, IllegalStateException::new);
                     break;
                 case TYPE_METHOD_ID_ITEM:
-                    assert_(size == out.method_ids_size, IllegalStateException::new);
-                    assert_(offset == out.method_ids_off, IllegalStateException::new);
+                    assert_(item.size == out.method_ids_size, IllegalStateException::new);
+                    assert_(item.offset == out.method_ids_off, IllegalStateException::new);
                     break;
                 case TYPE_CLASS_DEF_ITEM:
-                    assert_(size == out.class_defs_size, IllegalStateException::new);
-                    assert_(offset == out.class_defs_off, IllegalStateException::new);
+                    assert_(item.size == out.class_defs_size, IllegalStateException::new);
+                    assert_(item.offset == out.class_defs_off, IllegalStateException::new);
                     break;
                 case TYPE_CALL_SITE_ID_ITEM:
-                    out.call_site_ids_size = size;
-                    out.call_site_ids_off = offset;
+                    out.call_site_ids_size = item.size;
+                    out.call_site_ids_off = item.offset;
                     break;
                 case TYPE_METHOD_HANDLE_ITEM:
-                    out.method_handles_size = size;
-                    out.method_handles_off = offset;
+                    out.method_handles_size = item.size;
+                    out.method_handles_off = item.offset;
                     break;
                 case TYPE_MAP_LIST:
-                    assert_(size == 1, IllegalStateException::new);
+                    assert_(item.size == 1, IllegalStateException::new);
                     break;
                 case TYPE_TYPE_LIST:
                 case TYPE_ANNOTATION_SET_REF_LIST:
@@ -148,9 +185,145 @@ public class FileMap {
                 case TYPE_HIDDENAPI_CLASS_DATA_ITEM:
                     break; // ok
                 default:
-                    throw new IllegalStateException("unknown map_item type: " + type);
+                    throw new IllegalStateException("unknown map_item type: " + item.type);
             }
         }
         return out;
+    }
+
+    public void writeMap(RandomOutput out) {
+        map_list_off = (int) out.position();
+        ArrayList<MapItem> list = new ArrayList<>();
+        list.add(new MapItem(TYPE_HEADER_ITEM, 0, 1));
+
+        if (string_ids_size > 0) {
+            list.add(new MapItem(TYPE_STRING_ID_ITEM,
+                    string_ids_off, string_ids_size));
+        }
+        if (type_ids_size > 0) {
+            list.add(new MapItem(TYPE_TYPE_ID_ITEM,
+                    type_ids_off, type_ids_size));
+        }
+        if (proto_ids_size > 0) {
+            list.add(new MapItem(TYPE_PROTO_ID_ITEM,
+                    proto_ids_off, proto_ids_size));
+        }
+        if (field_ids_size > 0) {
+            list.add(new MapItem(TYPE_FIELD_ID_ITEM,
+                    field_ids_off, field_ids_size));
+        }
+        if (method_ids_size > 0) {
+            list.add(new MapItem(TYPE_METHOD_ID_ITEM,
+                    method_ids_off, method_ids_size));
+        }
+        if (class_defs_size > 0) {
+            list.add(new MapItem(TYPE_CLASS_DEF_ITEM,
+                    class_defs_off, class_defs_size));
+        }
+        if (call_site_ids_size > 0) {
+            list.add(new MapItem(TYPE_CALL_SITE_ID_ITEM,
+                    call_site_ids_off, call_site_ids_size));
+        }
+        if (method_handles_size > 0) {
+            list.add(new MapItem(TYPE_METHOD_HANDLE_ITEM,
+                    method_handles_off, method_handles_size));
+        }
+
+        if (type_lists_size > 0) {
+            list.add(new MapItem(TYPE_TYPE_LIST,
+                    type_lists_off, type_lists_size));
+        }
+        if (annotation_set_refs_size > 0) {
+            list.add(new MapItem(TYPE_ANNOTATION_SET_REF_LIST,
+                    annotation_set_refs_off, annotation_set_refs_size));
+        }
+        if (annotation_sets_size > 0) {
+            list.add(new MapItem(TYPE_ANNOTATION_SET_ITEM,
+                    annotation_sets_off, annotation_sets_size));
+        }
+        if (class_data_items_size > 0) {
+            list.add(new MapItem(TYPE_CLASS_DATA_ITEM,
+                    class_data_items_off, class_data_items_size));
+        }
+        if (code_items_size > 0) {
+            list.add(new MapItem(TYPE_CODE_ITEM,
+                    code_items_off, code_items_size));
+        }
+        if (string_data_items_size > 0) {
+            list.add(new MapItem(TYPE_STRING_DATA_ITEM,
+                    string_data_items_off, string_data_items_size));
+        }
+        if (debug_info_items_size > 0) {
+            list.add(new MapItem(TYPE_DEBUG_INFO_ITEM,
+                    debug_info_items_off, debug_info_items_size));
+        }
+        if (annotations_size > 0) {
+            list.add(new MapItem(TYPE_ANNOTATION_ITEM,
+                    annotations_off, annotations_size));
+        }
+        if (encoded_arrays_size > 0) {
+            list.add(new MapItem(TYPE_ENCODED_ARRAY_ITEM,
+                    encoded_arrays_off, encoded_arrays_size));
+        }
+        if (annotations_directories_size > 0) {
+            list.add(new MapItem(TYPE_ANNOTATIONS_DIRECTORY_ITEM,
+                    annotations_directories_off, annotations_directories_size));
+        }
+        if (hiddenapi_class_data_items_size > 0) {
+            list.add(new MapItem(TYPE_HIDDENAPI_CLASS_DATA_ITEM,
+                    hiddenapi_class_data_items_off, hiddenapi_class_data_items_size));
+        }
+
+        list.add(new MapItem(TYPE_MAP_LIST, map_list_off, 1));
+
+        Collections.sort(list, MapItem.COMPARATOR);
+
+        out.writeInt(list.size());
+        for (MapItem tmp : list) {
+            tmp.write(out);
+        }
+    }
+
+    public void writeHeader(RandomIO out, int file_size) {
+        out.position(0);
+        out.writeByteArray(new byte[]{'d', 'e', 'x', '\n'});
+        //TODO: version check
+        out.writeByteArray(new byte[]{'0', '3', '7', '\0'});
+        out.skipBytes(4); //checksum
+        out.skipBytes(20); //signature
+        out.writeInt(file_size);
+        out.writeInt(HEADER_SIZE);
+        out.writeInt(ENDIAN_CONSTANT);
+        out.writeInt(0); //link_size
+        out.writeInt(0); //link_off
+
+        out.writeInt(map_list_off);
+        out.writeInt(string_ids_size);
+        out.writeInt(string_ids_off);
+        out.writeInt(type_ids_size);
+        out.writeInt(type_ids_off);
+        out.writeInt(proto_ids_size);
+        out.writeInt(proto_ids_off);
+        out.writeInt(field_ids_size);
+        out.writeInt(field_ids_off);
+        out.writeInt(method_ids_size);
+        out.writeInt(method_ids_off);
+        out.writeInt(class_defs_size);
+        out.writeInt(class_defs_off);
+        out.writeInt(data_size);
+        out.writeInt(data_off);
+
+        out.position(SIGNATURE_OFFSET);
+        MessageDigest md = nothrows_run(() -> MessageDigest.getInstance("SHA-1"));
+        byte[] signature = md.digest(out.duplicate(FILE_SIZE_OFFSET)
+                .readByteArray(file_size - FILE_SIZE_OFFSET));
+        out.writeByteArray(signature);
+
+        out.position(CHECKSUM_OFFSET);
+        Adler32 adler = new Adler32();
+        adler.update(out.duplicate(SIGNATURE_OFFSET)
+                .readByteArray(file_size - SIGNATURE_OFFSET));
+
+        out.writeInt((int) adler.getValue());
     }
 }

@@ -1,6 +1,8 @@
 package com.v7878.unsafe.bytecode;
 
+import static com.v7878.unsafe.Utils.*;
 import java.util.*;
+import java.util.stream.*;
 
 public class WriteContext {
 
@@ -13,20 +15,30 @@ public class WriteContext {
     private final CallSiteId[] call_sites;
     private final MethodHandleItem[] method_handles;
 
+    private final Comparator<TypeId> type_comparator
+            = TypeId.getComparator(this);
+
     public WriteContext(DataSet data) {
         strings = data.getStrings();
-
-        //TODO: right?
-        Arrays.sort(strings, String.CASE_INSENSITIVE_ORDER);
+        Arrays.sort(strings, StringId.COMPARATOR);
+        types = data.getTypes();
+        Arrays.sort(types, type_comparator);
 
         //TODO: sort
-        types = data.getTypes();
         protos = data.getProtos();
         fields = data.getFields();
         methods = data.getMethods();
         class_defs = data.getClassDefs();
         call_sites = data.getCallSites();
         method_handles = data.getMethodHandles();
+    }
+
+    public Stream<String> stringsStream() {
+        return Arrays.stream(strings);
+    }
+
+    public Stream<TypeId> typesStream() {
+        return Arrays.stream(types);
     }
 
     public int getStringsCount() {
@@ -59,5 +71,19 @@ public class WriteContext {
 
     public int getMethodHandlesCount() {
         return method_handles.length;
+    }
+
+    public int getStringIndex(String value) {
+        int out = Arrays.binarySearch(strings, value, StringId.COMPARATOR);
+        assert_(out >= 0, IllegalArgumentException::new,
+                "unable to find string \"" + value + "\"");
+        return out;
+    }
+
+    public int getTypeIndex(TypeId value) {
+        int out = Arrays.binarySearch(types, value, type_comparator);
+        assert_(out >= 0, IllegalArgumentException::new,
+                "unable to find type \"" + value + "\"");
+        return out;
     }
 }

@@ -1,11 +1,21 @@
 package com.v7878.unsafe.bytecode;
 
-import com.v7878.unsafe.io.RandomInput;
-import java.util.Objects;
+import com.v7878.unsafe.io.*;
+import java.util.*;
 
 public class TypeId {
 
     public static final int SIZE = 0x04;
+
+    public static final Comparator<TypeId> getComparator(WriteContext context) {
+        return (a, b) -> {
+            if (a.equals(b)) {
+                return 0;
+            }
+            return Integer.compare(context.getStringIndex(a.descriptor),
+                    context.getStringIndex(b.descriptor));
+        };
+    }
 
     public String descriptor;
 
@@ -26,6 +36,10 @@ public class TypeId {
 
     public void fillContext(DataSet data) {
         data.addString(descriptor);
+    }
+
+    public void write(WriteContext context, RandomOutput out) {
+        out.writeInt(context.getStringIndex(descriptor));
     }
 
     @Override

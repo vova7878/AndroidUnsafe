@@ -1,5 +1,6 @@
 package com.v7878.unsafe.bytecode;
 
+import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
@@ -84,7 +85,9 @@ public class Dex {
         }
     }
 
-    public void write(RandomOutput out) {
+    public void write(RandomIO out) {
+        assert_(out.position() == 0, IllegalArgumentException::new);
+
         DataSet data = new DataSet();
         fillContext(data);
 
@@ -102,7 +105,7 @@ public class Dex {
         map.type_ids_size = context.getTypesCount();
         offset += map.type_ids_size * TypeId.SIZE;
 
-        map.proto_ids_off = offset;
+        /*map.proto_ids_off = offset;
         map.proto_ids_size = context.getProtosCount();
         offset += map.proto_ids_size * ProtoId.SIZE;
 
@@ -124,14 +127,36 @@ public class Dex {
 
         map.method_handles_off = offset;
         map.method_handles_size = context.getMethodHandlesCount();
-        offset += map.method_handles_size * MethodHandleItem.SIZE;
+        offset += map.method_handles_size * MethodHandleItem.SIZE;*/
+        // writing
+        out.position(map.type_ids_off);
+        context.typesStream().forEach((value) -> {
+            value.write(context, out);
+        });
 
-        //TODO: other sections
         map.data_off = offset;
+
+        RandomOutput data_out = out.duplicate();
 
         map.string_data_items_off = offset;
         map.string_data_items_size = map.string_ids_size;
+        out.position(map.string_ids_off);
+        data_out.position(map.string_data_items_off);
+        context.stringsStream().forEach((value) -> {
+            StringId.write(value, context, out, data_out);
+        });
+        offset = (int) data_out.position();
 
-        throw new UnsupportedOperationException("not implemented yet");
+        //TODO: other sections
+        offset = roundUp(offset, 4);
+        data_out.position(offset);
+        map.writeMap(data_out);
+        offset = (int) data_out.position();
+
+        map.data_size = offset - map.data_off;
+
+        int file_size = offset;
+
+        map.writeHeader(out, file_size);
     }
 }

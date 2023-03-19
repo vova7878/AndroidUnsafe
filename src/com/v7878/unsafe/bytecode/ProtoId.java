@@ -34,7 +34,12 @@ public class ProtoId {
         ProtoId out = new ProtoId();
         out.shorty = context.string(in.readInt());
         out.return_type = context.type(in.readInt());
-        out.parameters = TypeList.read(in, context);
+        int parameters_off = in.readInt();
+        if (parameters_off != 0) {
+            out.parameters = TypeList.read(in.duplicate(parameters_off), context);
+        } else {
+            out.parameters = TypeList.empty();
+        }
         return out;
     }
 

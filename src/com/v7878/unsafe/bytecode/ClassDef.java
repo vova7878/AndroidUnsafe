@@ -22,7 +22,12 @@ public class ClassDef {
         out.access_flags = in.readInt();
         int superclass_idx = in.readInt();
         out.superclass = superclass_idx == NO_INDEX ? null : context.type(superclass_idx);
-        out.interfaces = TypeList.read(in, context);
+        int interfaces_off = in.readInt();
+        if (interfaces_off != 0) {
+            out.interfaces = TypeList.read(in.duplicate(interfaces_off), context);
+        } else {
+            out.interfaces = TypeList.empty();
+        }
         int source_file_idx = in.readInt();
         out.source_file = source_file_idx == NO_INDEX ? null : context.string(source_file_idx);
         int annotations_off = in.readInt();
@@ -57,6 +62,8 @@ public class ClassDef {
         for (AnnotationItem tmp : class_annotations) {
             tmp.fillContext(data);
         }
-        class_data.fillContext(data);
+        if (class_data != null) {
+            class_data.fillContext(data);
+        }
     }
 }

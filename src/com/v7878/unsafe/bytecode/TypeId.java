@@ -41,14 +41,18 @@ public class TypeId {
         TypeId[] list;
 
         public static TypeList read(RandomInput in, Context context) {
-            int offset = in.readInt();
-            in = in.duplicate(offset);
-            int size = offset == 0 ? 0 : in.readInt();
+            int size = in.readInt();
             TypeList out = new TypeList();
             out.list = new TypeId[size];
             for (int i = 0; i < size; i++) {
                 out.list[i] = context.type(in.readUnsignedShort());
             }
+            return out;
+        }
+
+        public static TypeList empty() {
+            TypeList out = new TypeList();
+            out.list = new TypeId[0];
             return out;
         }
 

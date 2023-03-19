@@ -1,6 +1,7 @@
 package com.v7878.unsafe.bytecode;
 
 import static com.v7878.unsafe.Utils.*;
+import com.v7878.unsafe.bytecode.TypeId.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
@@ -105,18 +106,19 @@ public class Dex {
         map.type_ids_size = context.getTypesCount();
         offset += map.type_ids_size * TypeId.SIZE;
 
-        /*map.proto_ids_off = offset;
+        map.proto_ids_off = offset;
         map.proto_ids_size = context.getProtosCount();
-        offset += map.proto_ids_size * ProtoId.SIZE;*/
+        offset += map.proto_ids_size * ProtoId.SIZE;
+
         map.field_ids_off = offset;
         map.field_ids_size = context.getFieldsCount();
         offset += map.field_ids_size * FieldId.SIZE;
 
-        /*map.method_ids_off = offset;
+        map.method_ids_off = offset;
         map.method_ids_size = context.getMethodsCount();
         offset += map.method_ids_size * MethodId.SIZE;
 
-        map.class_defs_off = offset;
+        /*map.class_defs_off = offset;
         map.class_defs_size = context.getClassDefsCount();
         offset += map.class_defs_size * ClassDef.SIZE;
 
@@ -142,7 +144,21 @@ public class Dex {
         });
         offset = (int) data_out.position();
 
-        offset = roundUp(offset, 4);
+        TypeList[] lists = data.getTypeLists();
+        if (lists.length != 0) {
+            offset = roundUp(offset, TypeList.ALIGNMENT);
+            map.type_lists_off = offset;
+            map.type_lists_size = lists.length;
+            for (TypeList tmp : lists) {
+                offset = roundUp(offset, TypeList.ALIGNMENT);
+                data_out.position(offset);
+                tmp.write(context, data_out);
+                context.addTypeList(tmp, offset);
+                offset = (int) data_out.position();
+            }
+        }
+
+        offset = roundUp(offset, FileMap.MAP_ALIGNMENT);
         data_out.position(offset);
         map.writeMap(data_out);
         offset = (int) data_out.position();
@@ -158,6 +174,16 @@ public class Dex {
 
         out.position(map.field_ids_off);
         context.fieldsStream().forEach((value) -> {
+            value.write(context, out);
+        });
+
+        out.position(map.proto_ids_off);
+        context.protosStream().forEach((value) -> {
+            value.write(context, out);
+        });
+
+        out.position(map.method_ids_off);
+        context.methodsStream().forEach((value) -> {
             value.write(context, out);
         });
 

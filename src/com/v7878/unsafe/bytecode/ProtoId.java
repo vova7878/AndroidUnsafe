@@ -1,7 +1,7 @@
 package com.v7878.unsafe.bytecode;
 
 import com.v7878.unsafe.bytecode.TypeId.*;
-import com.v7878.unsafe.io.RandomInput;
+import com.v7878.unsafe.io.*;
 import java.util.*;
 import java.util.stream.*;
 
@@ -46,15 +46,21 @@ public class ProtoId {
     public void fillContext(DataSet data) {
         data.addString(shorty);
         data.addType(return_type);
-        data.addTypeList(parameters);
+        if (!parameters.isEmpty()) {
+            data.addTypeList(parameters);
+        }
+    }
+
+    public void write(WriteContext context, RandomOutput out) {
+        out.writeInt(context.getStringIndex(shorty));
+        out.writeInt(context.getTypeIndex(return_type));
+        out.writeInt(parameters.isEmpty() ? 0
+                : context.getTypeListOffset(parameters));
     }
 
     @Override
     public String toString() {
-        String params = Arrays.stream(parameters.list)
-                .map((p) -> p.toString())
-                .collect(Collectors.joining("", "(", ")"));
-        return params + return_type;
+        return "" + parameters + return_type;
     }
 
     @Override

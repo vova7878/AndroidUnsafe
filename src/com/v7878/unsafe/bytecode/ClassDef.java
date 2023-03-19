@@ -58,7 +58,9 @@ public class ClassDef {
         data.addString(source_file);
         data.addType(clazz);
         data.addType(superclass);
-        data.addTypeList(interfaces);
+        if (!interfaces.isEmpty()) {
+            data.addTypeList(interfaces);
+        }
         for (AnnotationItem tmp : class_annotations) {
             tmp.fillContext(data);
         }

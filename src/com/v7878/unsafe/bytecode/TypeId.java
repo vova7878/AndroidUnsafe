@@ -2,10 +2,13 @@ package com.v7878.unsafe.bytecode;
 
 import com.v7878.unsafe.io.*;
 import java.util.*;
+import java.util.stream.*;
 
 public class TypeId {
 
     public static class TypeList {
+
+        public static final int ALIGNMENT = 4;
 
         public static final Comparator<TypeList> getComparator(WriteContext context) {
             return (a, b) -> {
@@ -60,6 +63,24 @@ public class TypeId {
             for (TypeId tmp : list) {
                 data.addType(tmp);
             }
+        }
+
+        public void write(WriteContext context, RandomOutput out) {
+            out.writeInt(list.length);
+            for (TypeId tmp : list) {
+                out.writeShort(context.getTypeIndex(tmp));
+            }
+        }
+
+        public boolean isEmpty() {
+            return list.length == 0;
+        }
+
+        @Override
+        public String toString() {
+            return Arrays.stream(list)
+                    .map((p) -> p.toString())
+                    .collect(Collectors.joining("", "(", ")"));
         }
 
         @Override

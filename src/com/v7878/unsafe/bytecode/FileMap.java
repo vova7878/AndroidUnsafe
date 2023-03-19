@@ -42,6 +42,7 @@ public class FileMap {
     }
 
     public static final int HEADER_SIZE = 0x70;
+    public static final int MAP_ALIGNMENT = 4;
 
     public static final int CHECKSUM_OFFSET = 8;
     public static final int SIGNATURE_OFFSET = CHECKSUM_OFFSET + 4;
@@ -299,19 +300,19 @@ public class FileMap {
 
         out.writeInt(map_list_off);
         out.writeInt(string_ids_size);
-        out.writeInt(string_ids_off);
+        out.writeInt(string_ids_size > 0 ? string_ids_off : 0);
         out.writeInt(type_ids_size);
-        out.writeInt(type_ids_off);
+        out.writeInt(type_ids_size > 0 ? type_ids_off : 0);
         out.writeInt(proto_ids_size);
-        out.writeInt(proto_ids_off);
+        out.writeInt(proto_ids_size > 0 ? proto_ids_off : 0);
         out.writeInt(field_ids_size);
-        out.writeInt(field_ids_off);
+        out.writeInt(field_ids_size > 0 ? field_ids_off : 0);
         out.writeInt(method_ids_size);
-        out.writeInt(method_ids_off);
+        out.writeInt(method_ids_size > 0 ? method_ids_off : 0);
         out.writeInt(class_defs_size);
-        out.writeInt(class_defs_off);
+        out.writeInt(class_defs_size > 0 ? class_defs_off : 0);
         out.writeInt(data_size);
-        out.writeInt(data_off);
+        out.writeInt(data_size > 0 ? data_off : 0);
 
         out.position(SIGNATURE_OFFSET);
         MessageDigest md = nothrows_run(() -> MessageDigest.getInstance("SHA-1"));

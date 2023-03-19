@@ -126,6 +126,11 @@ public class TypeId {
         out.writeInt(context.getStringIndex(descriptor));
     }
 
+    public char getShorty() {
+        char c = descriptor.charAt(0);
+        return c == '[' ? 'L' : c;
+    }
+
     @Override
     public String toString() {
         return descriptor;

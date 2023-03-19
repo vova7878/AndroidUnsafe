@@ -37,21 +37,21 @@ class ModifiableArray {
     }
 }
 
-public class ByteArrayOutput implements RandomOutput {
+public class ByteArrayIO implements RandomIO {
 
     private final ModifiableArray arr;
     private int offset;
 
-    private ByteArrayOutput(ModifiableArray arr) {
+    private ByteArrayIO(ModifiableArray arr) {
         this.arr = arr;
         this.offset = 0;
     }
 
-    public ByteArrayOutput(int size) {
+    public ByteArrayIO(int size) {
         this(new ModifiableArray(size));
     }
 
-    public ByteArrayOutput() {
+    public ByteArrayIO() {
         this(0);
     }
 
@@ -93,7 +93,31 @@ public class ByteArrayOutput implements RandomOutput {
         putLongUnaligned(arr.data(), arr_offset, value);
     }
 
-    public byte[] tyByteArray() {
+    @Override
+    public byte readByte() {
+        int arr_offset = ARRAY_BYTE_BASE_OFFSET + (int) grow(1);
+        return getByteO(arr.data(), arr_offset);
+    }
+
+    @Override
+    public short readShort() {
+        int arr_offset = ARRAY_BYTE_BASE_OFFSET + (int) grow(2);
+        return getShortUnaligned(arr.data(), arr_offset);
+    }
+
+    @Override
+    public int readInt() {
+        int arr_offset = ARRAY_BYTE_BASE_OFFSET + (int) grow(4);
+        return getIntUnaligned(arr.data(), arr_offset);
+    }
+
+    @Override
+    public long readLong() {
+        int arr_offset = ARRAY_BYTE_BASE_OFFSET + (int) grow(8);
+        return getLongUnaligned(arr.data(), arr_offset);
+    }
+
+    public byte[] toByteArray() {
         return arr.copyData();
     }
 
@@ -116,7 +140,7 @@ public class ByteArrayOutput implements RandomOutput {
     }
 
     @Override
-    public ByteArrayOutput duplicate() {
-        return new ByteArrayOutput(arr);
+    public ByteArrayIO duplicate() {
+        return new ByteArrayIO(arr);
     }
 }

@@ -7,6 +7,11 @@ public abstract class FieldOrMethodId {
     public TypeId declaring_class;
     public String name;
 
+    public void fillContext(DataSet data) {
+        data.addType(declaring_class);
+        data.addString(name);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof FieldOrMethodId) {

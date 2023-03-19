@@ -107,13 +107,12 @@ public class Dex {
 
         /*map.proto_ids_off = offset;
         map.proto_ids_size = context.getProtosCount();
-        offset += map.proto_ids_size * ProtoId.SIZE;
-
+        offset += map.proto_ids_size * ProtoId.SIZE;*/
         map.field_ids_off = offset;
         map.field_ids_size = context.getFieldsCount();
         offset += map.field_ids_size * FieldId.SIZE;
 
-        map.method_ids_off = offset;
+        /*map.method_ids_off = offset;
         map.method_ids_size = context.getMethodsCount();
         offset += map.method_ids_size * MethodId.SIZE;
 
@@ -123,17 +122,13 @@ public class Dex {
 
         map.call_site_ids_off = offset;
         map.call_site_ids_size = context.getCallSitesCount();
-        offset += map.call_site_ids_size * CallSiteId.SIZE;
-
+        offset += map.call_site_ids_size * CallSiteId.SIZE;*/
         map.method_handles_off = offset;
         map.method_handles_size = context.getMethodHandlesCount();
-        offset += map.method_handles_size * MethodHandleItem.SIZE;*/
-        // writing
-        out.position(map.type_ids_off);
-        context.typesStream().forEach((value) -> {
-            value.write(context, out);
-        });
+        offset += map.method_handles_size * MethodHandleItem.SIZE;
 
+        // writing
+        //TODO: all sections
         map.data_off = offset;
 
         RandomOutput data_out = out.duplicate();
@@ -147,7 +142,6 @@ public class Dex {
         });
         offset = (int) data_out.position();
 
-        //TODO: other sections
         offset = roundUp(offset, 4);
         data_out.position(offset);
         map.writeMap(data_out);
@@ -156,6 +150,21 @@ public class Dex {
         map.data_size = offset - map.data_off;
 
         int file_size = offset;
+
+        out.position(map.type_ids_off);
+        context.typesStream().forEach((value) -> {
+            value.write(context, out);
+        });
+
+        out.position(map.field_ids_off);
+        context.fieldsStream().forEach((value) -> {
+            value.write(context, out);
+        });
+
+        out.position(map.method_handles_off);
+        context.methodHandlesStream().forEach((value) -> {
+            value.write(context, out);
+        });
 
         map.writeHeader(out, file_size);
     }

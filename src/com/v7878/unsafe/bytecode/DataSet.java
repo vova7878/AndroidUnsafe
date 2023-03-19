@@ -1,5 +1,6 @@
 package com.v7878.unsafe.bytecode;
 
+import com.v7878.unsafe.bytecode.TypeId.*;
 import java.util.*;
 
 public class DataSet {
@@ -12,6 +13,7 @@ public class DataSet {
     private final Set<MethodHandleItem> method_handles;
     private final Set<CallSiteId> call_sites;
     private final Set<ClassDef> class_defs;
+    private final Set<TypeList> type_lists;
 
     public DataSet() {
         strings = new HashSet<>();
@@ -22,6 +24,7 @@ public class DataSet {
         method_handles = new HashSet<>();
         call_sites = new HashSet<>();
         class_defs = new HashSet<>();
+        type_lists = new HashSet<>();
     }
 
     public void addString(String string) {
@@ -63,6 +66,11 @@ public class DataSet {
         class_defs.add(class_def);
     }
 
+    public void addTypeList(TypeList type_list) {
+        type_list.fillContext(this);
+        type_lists.add(type_list);
+    }
+
     public String[] getStrings() {
         return strings.stream().toArray(String[]::new);
     }
@@ -93,5 +101,9 @@ public class DataSet {
 
     public ClassDef[] getClassDefs() {
         return class_defs.stream().toArray(ClassDef[]::new);
+    }
+
+    public TypeList[] getTypeLists() {
+        return type_lists.stream().toArray(TypeList[]::new);
     }
 }

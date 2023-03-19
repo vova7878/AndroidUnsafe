@@ -1,12 +1,36 @@
 package com.v7878.unsafe.bytecode;
 
 import static com.v7878.unsafe.bytecode.DexConstants.*;
-import com.v7878.unsafe.io.RandomInput;
-import java.util.Objects;
+import com.v7878.unsafe.io.*;
+import java.util.*;
 
 public class MethodHandleItem {
 
     public static final int SIZE = 0x08;
+
+    public static final Comparator<MethodHandleItem> getComparator(WriteContext context) {
+        return (a, b) -> {
+            if (a.equals(b)) {
+                return 0;
+            }
+
+            int out = Integer.compare(a.type, b.type);
+            if (out != 0) {
+                return out;
+            }
+
+            // now a.type == b.type
+            if (isMethodType(a.type)) {
+                return context.method_comparator
+                        .compare((MethodId) a.field_or_method,
+                                (MethodId) b.field_or_method);
+            } else {
+                return context.field_comparator
+                        .compare((FieldId) a.field_or_method,
+                                (FieldId) b.field_or_method);
+            }
+        };
+    }
 
     public int type;
     public FieldOrMethodId field_or_method;
@@ -23,8 +47,17 @@ public class MethodHandleItem {
         return out;
     }
 
+    public void write(WriteContext context, RandomOutput out) {
+        out.writeShort(type);
+        out.writeShort(0);
+        out.writeShort(isMethodType(type)
+                ? context.getMethodIndex((MethodId) field_or_method)
+                : context.getFieldIndex((FieldId) field_or_method));
+        out.writeShort(0);
+    }
+
     public void fillContext(DataSet data) {
-        if (field_or_method instanceof MethodId) {
+        if (isMethodType(type)) {
             data.addMethod((MethodId) field_or_method);
         } else {
             data.addField((FieldId) field_or_method);

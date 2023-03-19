@@ -1,6 +1,7 @@
 package com.v7878.unsafe.bytecode;
 
 import static com.v7878.unsafe.bytecode.DexConstants.*;
+import com.v7878.unsafe.bytecode.TypeId.*;
 import com.v7878.unsafe.io.RandomInput;
 
 public class ClassDef {
@@ -10,7 +11,7 @@ public class ClassDef {
     public TypeId clazz;
     public int access_flags;
     public TypeId superclass;
-    public TypeId[] interfaces;
+    public TypeList interfaces;
     public String source_file;
     public AnnotationItem[] class_annotations;
     public ClassData class_data;
@@ -21,11 +22,7 @@ public class ClassDef {
         out.access_flags = in.readInt();
         int superclass_idx = in.readInt();
         out.superclass = superclass_idx == NO_INDEX ? null : context.type(superclass_idx);
-        int interfaces_off = in.readInt();
-        out.interfaces = new TypeId[0];
-        if (interfaces_off != 0) {
-            out.interfaces = TypeId.readTypeList(in.duplicate(interfaces_off), context);
-        }
+        out.interfaces = TypeList.read(in, context);
         int source_file_idx = in.readInt();
         out.source_file = source_file_idx == NO_INDEX ? null : context.string(source_file_idx);
         int annotations_off = in.readInt();
@@ -56,9 +53,7 @@ public class ClassDef {
         data.addString(source_file);
         data.addType(clazz);
         data.addType(superclass);
-        for (TypeId tmp : interfaces) {
-            data.addType(tmp);
-        }
+        data.addTypeList(interfaces);
         for (AnnotationItem tmp : class_annotations) {
             tmp.fillContext(data);
         }

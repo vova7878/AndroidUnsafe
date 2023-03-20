@@ -1,6 +1,6 @@
 package com.v7878.unsafe.bytecode.instructions;
 
-import com.v7878.unsafe.bytecode.Context;
+import com.v7878.unsafe.bytecode.ReadContext;
 import com.v7878.unsafe.io.RandomInput;
 
 public abstract class InstructionReader {
@@ -111,7 +111,7 @@ public abstract class InstructionReader {
         FillArrayDataPayload.init();                // extra 0x03
     }
 
-    public static Instruction read(RandomInput in, Context context) {
+    public static Instruction read(RandomInput in, ReadContext context) {
         int code = in.readUnsignedShort();
 
         int opcode = code & 0xff;
@@ -134,7 +134,7 @@ public abstract class InstructionReader {
         return reader.read(in, context, arg);
     }
 
-    abstract Instruction read(RandomInput in, Context context, int arg);
+    abstract Instruction read(RandomInput in, ReadContext context, int arg);
 
     static class Reader_10x extends InstructionReader {
 
@@ -151,7 +151,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int _00) {
+        Instruction read(RandomInput in, ReadContext context, int _00) {
             return factory.make();
         }
     }
@@ -171,7 +171,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int BA) {
+        Instruction read(RandomInput in, ReadContext context, int BA) {
             return factory.make(BA & 0xf, BA >> 4);
         }
     }
@@ -191,7 +191,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int AA) {
+        Instruction read(RandomInput in, ReadContext context, int AA) {
             return factory.make(AA);
         }
     }
@@ -211,7 +211,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int _00) {
+        Instruction read(RandomInput in, ReadContext context, int _00) {
             int AAAA = in.readUnsignedShort();
             return factory.make(AAAA);
         }
@@ -222,7 +222,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(Context context, int AA, int BBBB);
+            public Instruction make(ReadContext context, int AA, int BBBB);
         }
 
         public final Factory factory;
@@ -232,7 +232,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int AA) {
+        Instruction read(RandomInput in, ReadContext context, int AA) {
             int BBBB = in.readUnsignedShort();
             return factory.make(context, AA, BBBB);
         }
@@ -253,7 +253,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int AA) {
+        Instruction read(RandomInput in, ReadContext context, int AA) {
             int BBBB = in.readUnsignedShort();
             return factory.make(AA, BBBB);
         }
@@ -274,7 +274,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int AA) {
+        Instruction read(RandomInput in, ReadContext context, int AA) {
             int CCBB = in.readUnsignedShort();
             return factory.make(AA, CCBB & 0xff, CCBB >> 8);
         }
@@ -295,7 +295,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int BA) {
+        Instruction read(RandomInput in, ReadContext context, int BA) {
             int CCCC = in.readUnsignedShort();
             return factory.make(BA & 0xf, BA >> 4, CCCC);
         }
@@ -306,7 +306,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(Context context, int A, int B, int CCCC);
+            public Instruction make(ReadContext context, int A, int B, int CCCC);
         }
 
         public final Factory factory;
@@ -316,7 +316,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int BA) {
+        Instruction read(RandomInput in, ReadContext context, int BA) {
             int CCCC = in.readUnsignedShort();
             return factory.make(context, BA & 0xf, BA >> 4, CCCC);
         }
@@ -337,7 +337,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int _00) {
+        Instruction read(RandomInput in, ReadContext context, int _00) {
             int AAAAlo = in.readUnsignedShort();
             int AAAAhi = in.readUnsignedShort();
             return factory.make(AAAAlo | (AAAAhi << 16));
@@ -359,7 +359,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int _00) {
+        Instruction read(RandomInput in, ReadContext context, int _00) {
             int AAAA = in.readUnsignedShort();
             int BBBB = in.readUnsignedShort();
             return factory.make(AAAA, BBBB);
@@ -381,7 +381,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int AA) {
+        Instruction read(RandomInput in, ReadContext context, int AA) {
             int BBBBlo = in.readUnsignedShort();
             int BBBBhi = in.readUnsignedShort();
             return factory.make(AA, BBBBlo | (BBBBhi << 16));
@@ -393,7 +393,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(Context context, int AA, int BBBBBBBB);
+            public Instruction make(ReadContext context, int AA, int BBBBBBBB);
         }
 
         public final Factory factory;
@@ -403,7 +403,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int AA) {
+        Instruction read(RandomInput in, ReadContext context, int AA) {
             int BBBBlo = in.readUnsignedShort();
             int BBBBhi = in.readUnsignedShort();
             return factory.make(context, AA, BBBBlo | (BBBBhi << 16));
@@ -425,7 +425,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int AA) {
+        Instruction read(RandomInput in, ReadContext context, int AA) {
             long BBBBlolo = in.readUnsignedShort();
             long BBBBhilo = in.readUnsignedShort();
             long BBBBlohi = in.readUnsignedShort();
@@ -439,7 +439,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(Context context, int A, int BBBB, int C, int D, int E, int F, int G);
+            public Instruction make(ReadContext context, int A, int BBBB, int C, int D, int E, int F, int G);
         }
 
         public final Factory factory;
@@ -449,7 +449,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int AG) {
+        Instruction read(RandomInput in, ReadContext context, int AG) {
             int A = AG >> 4;
             int G = AG & 0xf;
             int BBBB = in.readUnsignedShort();
@@ -477,7 +477,7 @@ public abstract class InstructionReader {
         }
 
         @Override
-        Instruction read(RandomInput in, Context context, int _00) {
+        Instruction read(RandomInput in, ReadContext context, int _00) {
             int element_width = in.readUnsignedShort();
             int size = in.readInt();
             byte[] data = in.readByteArray(size * element_width);

@@ -3,20 +3,40 @@ package com.v7878.unsafe.bytecode;
 import com.v7878.unsafe.io.RandomInput;
 import java.util.Objects;
 
-public class AnnotationElement {
+public class AnnotationElement implements Cloneable {
 
-    public String name;
-    public EncodedValue value;
+    private String name;
+    private EncodedValue value;
 
-    public static AnnotationElement read(RandomInput in, Context context) {
-        AnnotationElement out = new AnnotationElement();
-        out.name = context.string(in.readULeb128());
-        EncodedValueReader reader = new EncodedValueReader(in);
-        out.value = reader.readValue(context);
-        return out;
+    public AnnotationElement(String name, EncodedValue value) {
+        setName(name);
+        setValue(value);
     }
 
-    void fillContext(DataSet data) {
+    public final void setName(String name) {
+        this.name = Objects.requireNonNull(name, "name can`t be null");
+    }
+
+    public final String getName() {
+        return name;
+    }
+
+    public final void setValue(EncodedValue value) {
+        this.value = Objects.requireNonNull(value,
+                "value can`t be null").clone();
+    }
+
+    public final EncodedValue getValue() {
+        return value;
+    }
+
+    public static AnnotationElement read(RandomInput in, ReadContext context) {
+        String name = context.string(in.readULeb128());
+        EncodedValue value = EncodedValueReader.readValue(in, context);
+        return new AnnotationElement(name, value);
+    }
+
+    public void fillContext(DataSet data) {
         data.addString(name);
         value.fillContext(data);
     }
@@ -39,5 +59,10 @@ public class AnnotationElement {
     @Override
     public int hashCode() {
         return Objects.hash(name, value);
+    }
+
+    @Override
+    public AnnotationElement clone() {
+        return new AnnotationElement(name, value);
     }
 }

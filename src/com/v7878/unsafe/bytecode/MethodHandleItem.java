@@ -4,7 +4,7 @@ import static com.v7878.unsafe.bytecode.DexConstants.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class MethodHandleItem {
+public class MethodHandleItem implements Cloneable {
 
     public static final int SIZE = 0x08;
 
@@ -21,30 +21,52 @@ public class MethodHandleItem {
 
             // now a.type == b.type
             if (isMethodType(a.type)) {
-                return context.method_comparator
+                return context.method_comparator()
                         .compare((MethodId) a.field_or_method,
                                 (MethodId) b.field_or_method);
             } else {
-                return context.field_comparator
+                return context.field_comparator()
                         .compare((FieldId) a.field_or_method,
                                 (FieldId) b.field_or_method);
             }
         };
     }
 
-    public int type;
-    public FieldOrMethodId field_or_method;
+    private int type;
+    private FieldOrMethodId field_or_method;
 
-    public static MethodHandleItem read(RandomInput in, Context context) {
-        MethodHandleItem out = new MethodHandleItem();
-        out.type = in.readUnsignedShort();
+    public MethodHandleItem(int type, FieldOrMethodId field_or_method) {
+        setType(type);
+        setFieldOrMethod(field_or_method);
+    }
+
+    //TODO: check
+    public final void setType(int type) {
+        this.type = type;
+    }
+
+    public final int getType() {
+        return type;
+    }
+
+    public final void setFieldOrMethod(FieldOrMethodId field_or_method) {
+        this.field_or_method = Objects.requireNonNull(field_or_method,
+                "field_or_method can`t be null").clone();
+    }
+
+    public final FieldOrMethodId getFieldOrMethod() {
+        return field_or_method;
+    }
+
+    public static MethodHandleItem read(RandomInput in, ReadContext context) {
+        int type = in.readUnsignedShort();
         in.skipBytes(2); //unused
         int field_or_method_id = in.readUnsignedShort();
         in.skipBytes(2); //unused
-        out.field_or_method = isMethodType(out.type)
+        FieldOrMethodId field_or_method = isMethodType(type)
                 ? context.method(field_or_method_id)
                 : context.field(field_or_method_id);
-        return out;
+        return new MethodHandleItem(type, field_or_method);
     }
 
     public void write(WriteContext context, RandomOutput out) {
@@ -86,5 +108,10 @@ public class MethodHandleItem {
     @Override
     public int hashCode() {
         return Objects.hash(type, field_or_method);
+    }
+
+    @Override
+    public MethodHandleItem clone() {
+        return new MethodHandleItem(type, field_or_method);
     }
 }

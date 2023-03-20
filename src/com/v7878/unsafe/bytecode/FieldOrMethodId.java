@@ -2,10 +2,32 @@ package com.v7878.unsafe.bytecode;
 
 import java.util.Objects;
 
-public abstract class FieldOrMethodId {
+public abstract class FieldOrMethodId implements Cloneable {
 
-    public TypeId declaring_class;
-    public String name;
+    private TypeId declaring_class;
+    private String name;
+
+    public FieldOrMethodId(TypeId declaring_class, String name) {
+        setDeclaringClass(declaring_class);
+        setName(name);
+    }
+
+    public final void setDeclaringClass(TypeId declaring_class) {
+        this.declaring_class = Objects.requireNonNull(declaring_class,
+                "declaring_class can`t be null").clone();
+    }
+
+    public final TypeId getDeclaringClass() {
+        return declaring_class;
+    }
+
+    public final void setName(String name) {
+        this.name = Objects.requireNonNull(name, "name can`t be null");
+    }
+
+    public final String getName() {
+        return name;
+    }
 
     public void fillContext(DataSet data) {
         data.addType(declaring_class);
@@ -26,4 +48,7 @@ public abstract class FieldOrMethodId {
     public int hashCode() {
         return Objects.hash(declaring_class, name);
     }
+
+    @Override
+    public abstract FieldOrMethodId clone();
 }

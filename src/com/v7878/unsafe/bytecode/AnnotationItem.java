@@ -3,19 +3,40 @@ package com.v7878.unsafe.bytecode;
 import com.v7878.unsafe.io.RandomInput;
 import java.util.Objects;
 
-public class AnnotationItem {
+public final class AnnotationItem implements Cloneable {
 
-    public byte visibility;
-    public EncodedAnnotation annotation;
+    private byte visibility;
+    private EncodedAnnotation annotation;
 
-    public static AnnotationItem read(RandomInput in, Context context) {
-        AnnotationItem out = new AnnotationItem();
-        out.visibility = in.readByte();
-        out.annotation = EncodedAnnotation.read(in, context);
-        return out;
+    public AnnotationItem(byte visibility, EncodedAnnotation annotation) {
+        setVisibility(visibility);
+        setAnnotation(annotation);
     }
 
-    public static AnnotationItem[] readSet(RandomInput in, Context context) {
+    //TODO: check
+    public void setVisibility(byte visibility) {
+        this.visibility = visibility;
+    }
+
+    public byte getVisibility() {
+        return visibility;
+    }
+
+    public void setAnnotation(EncodedAnnotation annotation) {
+        this.annotation = Objects.requireNonNull(annotation,
+                "annotation can`t be null").clone();
+    }
+
+    public EncodedAnnotation getAnnotation() {
+        return annotation;
+    }
+
+    public static AnnotationItem read(RandomInput in, ReadContext context) {
+        return new AnnotationItem(in.readByte(),
+                EncodedAnnotation.read(in, context));
+    }
+
+    public static AnnotationItem[] readSet(RandomInput in, ReadContext context) {
         int size = in.readInt();
         AnnotationItem[] out = new AnnotationItem[size];
         for (int i = 0; i < size; i++) {
@@ -24,7 +45,7 @@ public class AnnotationItem {
         return out;
     }
 
-    public static AnnotationItem[][] readSetList(RandomInput in, Context context) {
+    public static AnnotationItem[][] readSetList(RandomInput in, ReadContext context) {
         int size = in.readInt();
         AnnotationItem[][] out = new AnnotationItem[size][];
         for (int i = 0; i < size; i++) {
@@ -61,5 +82,10 @@ public class AnnotationItem {
     @Override
     public int hashCode() {
         return Objects.hash(visibility, annotation);
+    }
+
+    @Override
+    public AnnotationItem clone() {
+        return new AnnotationItem(visibility, annotation);
     }
 }

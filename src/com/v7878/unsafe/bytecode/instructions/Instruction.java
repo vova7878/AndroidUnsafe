@@ -9,7 +9,7 @@ import java.util.Arrays;
 public class Instruction {
 
     public static Pair<int[], Instruction[]> readArray(
-            RandomInput in, Context context) {
+            RandomInput in, ReadContext context) {
         int insns_size = in.readInt();
 
         Instruction[] insns = new Instruction[insns_size];

@@ -10,7 +10,7 @@ public class ClassData {
     public EncodedMethod[] direct_methods;
     public EncodedMethod[] virtual_methods;
 
-    public static ClassData read(RandomInput in, Context context,
+    public static ClassData read(RandomInput in, ReadContext context,
             EncodedValue[] static_values,
             AnnotationsDirectory annotations) {
         ClassData out = new ClassData();
@@ -27,7 +27,7 @@ public class ClassData {
                         = new Pair<>(static_fields[i], static_values[i]);
             } else {
                 out.static_fields[i] = new Pair<>(static_fields[i],
-                        EncodedValue.getDefaultValue(static_fields[i].field.type));
+                        EncodedValue.getDefaultValue(static_fields[i].field.getType()));
             }
         }
         out.instance_fields = EncodedField.readArray(in, context,

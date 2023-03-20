@@ -1,10 +1,9 @@
 package com.v7878.unsafe.bytecode;
 
-import com.v7878.unsafe.bytecode.TypeId.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class ProtoId {
+public class ProtoId implements Cloneable {
 
     public static final int SIZE = 0x0c;
 
@@ -14,37 +13,58 @@ public class ProtoId {
                 return 0;
             }
 
-            int out = context.type_comparator
+            int out = context.type_comparator()
                     .compare(a.return_type, b.return_type);
             if (out != 0) {
                 return out;
             }
 
-            return context.type_list_comparator
+            return context.type_list_comparator()
                     .compare(a.parameters, b.parameters);
         };
     }
 
-    public TypeId return_type;
-    public TypeList parameters;
+    private TypeId return_type;
+    private TypeList parameters;
 
-    public static ProtoId read(RandomInput in, Context context) {
-        ProtoId out = new ProtoId();
+    public ProtoId(TypeId return_type, TypeList parameters) {
+        setReturnType(return_type);
+        setParameters(parameters);
+    }
+
+    public final void setReturnType(TypeId return_type) {
+        this.return_type = Objects.requireNonNull(return_type,
+                "return_type can`t be null").clone();
+    }
+
+    public final TypeId getReturnType() {
+        return return_type;
+    }
+
+    public final void setParameters(TypeList parameters) {
+        this.parameters = parameters == null
+                ? TypeList.empty() : parameters.clone();
+    }
+
+    public final TypeList getParameters() {
+        return parameters;
+    }
+
+    public static ProtoId read(RandomInput in, ReadContext context) {
         in.readInt(); // shorty
-        out.return_type = context.type(in.readInt());
+        TypeId return_type = context.type(in.readInt());
         int parameters_off = in.readInt();
+        TypeList parameters = TypeList.empty();
         if (parameters_off != 0) {
-            out.parameters = TypeList.read(in.duplicate(parameters_off), context);
-        } else {
-            out.parameters = TypeList.empty();
+            parameters = TypeList.read(in.duplicate(parameters_off), context);
         }
-        return out;
+        return new ProtoId(return_type, parameters);
     }
 
     public String getShorty() {
         StringBuilder out = new StringBuilder();
         out.append(return_type.getShorty());
-        for (TypeId tmp : parameters.list) {
+        for (TypeId tmp : parameters) {
             out.append(tmp.getShorty());
         }
         return out.toString();
@@ -83,5 +103,10 @@ public class ProtoId {
     @Override
     public int hashCode() {
         return Objects.hash(return_type, parameters);
+    }
+
+    @Override
+    public ProtoId clone() {
+        return new ProtoId(return_type, parameters);
     }
 }

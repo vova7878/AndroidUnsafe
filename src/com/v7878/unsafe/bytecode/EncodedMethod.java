@@ -12,7 +12,7 @@ public class EncodedMethod {
     public AnnotationItem[][] parameter_annotations;
     public CodeItem code;
 
-    public static EncodedMethod read(RandomInput in, Context context,
+    public static EncodedMethod read(RandomInput in, ReadContext context,
             MethodId method,
             Map<MethodId, AnnotationItem[]> annotated_methods,
             Map<MethodId, AnnotationItem[][]> annotated_parameters) {
@@ -31,7 +31,7 @@ public class EncodedMethod {
     }
 
     public static EncodedMethod[] readArray(RandomInput in,
-            Context context, int size,
+            ReadContext context, int size,
             Map<MethodId, AnnotationItem[]> annotated_methods,
             Map<MethodId, AnnotationItem[][]> annotated_parameters) {
         EncodedMethod[] out = new EncodedMethod[size];

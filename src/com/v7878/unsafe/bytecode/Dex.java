@@ -1,18 +1,54 @@
 package com.v7878.unsafe.bytecode;
 
 import static com.v7878.unsafe.Utils.*;
-import com.v7878.unsafe.bytecode.TypeId.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class Dex {
+public class Dex extends AbstractList<ClassDef> implements Cloneable {
 
-    public ClassDef[] class_defs;
+    private final List<ClassDef> class_defs;
+
+    public Dex(ClassDef... class_defs) {
+        if (class_defs == null) {
+            class_defs = new ClassDef[0];
+        }
+        this.class_defs = new ArrayList<>(class_defs.length);
+        addAll(Arrays.asList(class_defs));
+    }
+
+    private ClassDef check(ClassDef class_def) {
+        return Objects.requireNonNull(class_def,
+                "Dex can`t contain null class def");
+    }
+
+    @Override
+    public final void add(int index, ClassDef class_def) {
+        class_defs.add(check(class_def).clone());
+    }
+
+    @Override
+    public final ClassDef set(int index, ClassDef class_def) {
+        return class_defs.set(index, check(class_def).clone());
+    }
+
+    @Override
+    public final ClassDef get(int index) {
+        return class_defs.get(index);
+    }
+
+    @Override
+    public final ClassDef remove(int index) {
+        return class_defs.remove(index);
+    }
+
+    @Override
+    public final int size() {
+        return class_defs.size();
+    }
 
     public static Dex read(RandomInput in) {
-        Dex out = new Dex();
         FileMap map = FileMap.read(in);
-        Context context = new Context();
+        ReadContextImpl context = new ReadContextImpl();
         String[] strings = new String[map.string_ids_size];
         if (map.string_ids_size != 0) {
             RandomInput in2 = in.duplicate(map.string_ids_off);
@@ -69,15 +105,14 @@ public class Dex {
             }
         }
         context.setCallSites(call_sites);
-        out.class_defs = new ClassDef[map.class_defs_size];
+        ClassDef[] class_defs = new ClassDef[map.class_defs_size];
         if (map.class_defs_size != 0) {
             RandomInput in2 = in.duplicate(map.class_defs_off);
             for (int i = 0; i < map.class_defs_size; i++) {
-                out.class_defs[i] = ClassDef.read(in2, context);
+                class_defs[i] = ClassDef.read(in2, context);
             }
         }
-        System.out.println("class_defs " + Arrays.toString(out.class_defs));
-        return out;
+        return new Dex(class_defs);
     }
 
     public void fillContext(DataSet data) {
@@ -92,7 +127,7 @@ public class Dex {
         DataSet data = new DataSet();
         fillContext(data);
 
-        WriteContext context = new WriteContext(data);
+        WriteContextImpl context = new WriteContextImpl(data);
 
         FileMap map = new FileMap();
 
@@ -200,5 +235,18 @@ public class Dex {
         });
 
         map.writeHeader(out, file_size);
+    }
+
+    public byte[] compile() {
+        ByteArrayIO out = new ByteArrayIO();
+        write(out);
+        return out.toByteArray();
+    }
+
+    @Override
+    public Dex clone() {
+        Dex out = new Dex();
+        out.addAll(class_defs);
+        return out;
     }
 }

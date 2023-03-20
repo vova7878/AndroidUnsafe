@@ -3,7 +3,7 @@ package com.v7878.unsafe.bytecode;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class MethodId extends FieldOrMethodId {
+public class MethodId extends FieldOrMethodId implements Cloneable {
 
     public static final int SIZE = 0x08;
 
@@ -13,31 +13,45 @@ public class MethodId extends FieldOrMethodId {
                 return 0;
             }
 
-            int out = context.type_comparator
-                    .compare(a.declaring_class, b.declaring_class);
+            int out = context.type_comparator()
+                    .compare(a.getDeclaringClass(), b.getDeclaringClass());
             if (out != 0) {
                 return out;
             }
 
             out = StringId.COMPARATOR
-                    .compare(a.name, b.name);
+                    .compare(a.getName(), b.getName());
             if (out != 0) {
                 return out;
             }
 
-            return context.proto_comparator
+            return context.proto_comparator()
                     .compare(a.proto, b.proto);
         };
     }
 
-    public ProtoId proto;
+    private ProtoId proto;
 
-    public static MethodId read(RandomInput in, Context context) {
-        MethodId out = new MethodId();
-        out.declaring_class = context.type(in.readUnsignedShort());
-        out.proto = context.proto(in.readUnsignedShort());
-        out.name = context.string(in.readInt());
-        return out;
+    public MethodId(TypeId declaring_class, ProtoId proto, String name) {
+        super(declaring_class, name);
+        setProto(proto);
+    }
+
+    public final void setProto(ProtoId proto) {
+        this.proto = Objects.requireNonNull(proto,
+                "proto can`t be null").clone();
+    }
+
+    public final ProtoId getProto() {
+        return proto;
+    }
+
+    public static MethodId read(RandomInput in, ReadContext context) {
+        return new MethodId(
+                context.type(in.readUnsignedShort()),
+                context.proto(in.readUnsignedShort()),
+                context.string(in.readInt())
+        );
     }
 
     @Override
@@ -47,14 +61,14 @@ public class MethodId extends FieldOrMethodId {
     }
 
     public void write(WriteContext context, RandomOutput out) {
-        out.writeShort(context.getTypeIndex(declaring_class));
+        out.writeShort(context.getTypeIndex(getDeclaringClass()));
         out.writeShort(context.getProtoIndex(proto));
-        out.writeInt(context.getStringIndex(name));
+        out.writeInt(context.getStringIndex(getName()));
     }
 
     @Override
     public String toString() {
-        return declaring_class + "." + name + proto;
+        return getDeclaringClass() + "." + getName() + proto;
     }
 
     @Override
@@ -72,5 +86,10 @@ public class MethodId extends FieldOrMethodId {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), proto);
+    }
+
+    @Override
+    public MethodId clone() {
+        return new MethodId(getDeclaringClass(), proto, getName());
     }
 }

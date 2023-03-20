@@ -12,7 +12,7 @@ public class CatchHandler {
     public int catch_all_addr;
 
     public static CatchHandler read(RandomInput in,
-            Context context, int[] offsets) {
+            ReadContext context, int[] offsets) {
         CatchHandler out = new CatchHandler();
         int size = in.readSLeb128();
         int handlersCount = Math.abs(size);

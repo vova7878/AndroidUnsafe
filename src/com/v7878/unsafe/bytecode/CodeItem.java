@@ -21,7 +21,7 @@ public class CodeItem {
         return addr;
     }
 
-    public static CodeItem read(RandomInput in, Context context) {
+    public static CodeItem read(RandomInput in, ReadContext context) {
         CodeItem out = new CodeItem();
         out.registers_size = in.readUnsignedShort();
         out.ins_size = in.readUnsignedShort();

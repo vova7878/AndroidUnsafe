@@ -11,7 +11,7 @@ public class AnnotationsDirectory {
     public Map<MethodId, AnnotationItem[]> annotated_methods;
     public Map<MethodId, AnnotationItem[][]> annotated_parameters;
 
-    public static AnnotationsDirectory read(RandomInput in, Context context) {
+    public static AnnotationsDirectory read(RandomInput in, ReadContext context) {
         AnnotationsDirectory out = new AnnotationsDirectory();
         int class_annotations_off = in.readInt();
         if (class_annotations_off != 0) {

@@ -3,7 +3,7 @@ package com.v7878.unsafe.bytecode;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class FieldId extends FieldOrMethodId {
+public class FieldId extends FieldOrMethodId implements Cloneable {
 
     public static final int SIZE = 0x08;
 
@@ -13,31 +13,45 @@ public class FieldId extends FieldOrMethodId {
                 return 0;
             }
 
-            int out = context.type_comparator
-                    .compare(a.declaring_class, b.declaring_class);
+            int out = context.type_comparator()
+                    .compare(a.getDeclaringClass(), b.getDeclaringClass());
             if (out != 0) {
                 return out;
             }
 
             out = StringId.COMPARATOR
-                    .compare(a.name, b.name);
+                    .compare(a.getName(), b.getName());
             if (out != 0) {
                 return out;
             }
 
-            return context.type_comparator
+            return context.type_comparator()
                     .compare(a.type, b.type);
         };
     }
 
-    public TypeId type;
+    private TypeId type;
 
-    public static FieldId read(RandomInput in, Context context) {
-        FieldId out = new FieldId();
-        out.declaring_class = context.type(in.readUnsignedShort());
-        out.type = context.type(in.readUnsignedShort());
-        out.name = context.string(in.readInt());
-        return out;
+    public FieldId(TypeId declaring_class, TypeId type, String name) {
+        super(declaring_class, name);
+        setType(type);
+    }
+
+    public final void setType(TypeId type) {
+        this.type = Objects.requireNonNull(type,
+                "type can`t be null").clone();
+    }
+
+    public final TypeId getType() {
+        return type;
+    }
+
+    public static FieldId read(RandomInput in, ReadContext context) {
+        return new FieldId(
+                context.type(in.readUnsignedShort()),
+                context.type(in.readUnsignedShort()),
+                context.string(in.readInt())
+        );
     }
 
     @Override
@@ -47,14 +61,14 @@ public class FieldId extends FieldOrMethodId {
     }
 
     public void write(WriteContext context, RandomOutput out) {
-        out.writeShort(context.getTypeIndex(declaring_class));
+        out.writeShort(context.getTypeIndex(getDeclaringClass()));
         out.writeShort(context.getTypeIndex(type));
-        out.writeInt(context.getStringIndex(name));
+        out.writeInt(context.getStringIndex(getName()));
     }
 
     @Override
     public String toString() {
-        return declaring_class + "." + name + ":" + type;
+        return getDeclaringClass() + "." + getName() + ":" + type;
     }
 
     @Override
@@ -72,5 +86,10 @@ public class FieldId extends FieldOrMethodId {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), type);
+    }
+
+    @Override
+    public FieldId clone() {
+        return new FieldId(getDeclaringClass(), type, getName());
     }
 }

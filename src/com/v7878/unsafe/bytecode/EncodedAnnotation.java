@@ -5,20 +5,48 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class EncodedAnnotation {
+public class EncodedAnnotation implements Cloneable {
 
-    public TypeId type;
-    public AnnotationElement[] elements;
+    private TypeId type;
+    private AnnotationElement[] elements;
 
-    public static EncodedAnnotation read(RandomInput in, Context context) {
-        EncodedAnnotation out = new EncodedAnnotation();
-        out.type = context.type(in.readULeb128());
-        int size = in.readULeb128();
-        out.elements = new AnnotationElement[size];
-        for (int i = 0; i < size; i++) {
-            out.elements[i] = AnnotationElement.read(in, context);
+    public EncodedAnnotation(TypeId type, AnnotationElement[] elements) {
+        setType(type);
+        setElements(elements);
+    }
+
+    public final void setType(TypeId type) {
+        this.type = Objects.requireNonNull(type,
+                "type can`t be null").clone();
+    }
+
+    public final TypeId getType() {
+        return type;
+    }
+
+    public final void setElements(AnnotationElement[] elements) {
+        if (elements == null) {
+            elements = new AnnotationElement[0];
         }
-        return out;
+        this.elements = Arrays.stream(elements)
+                .map(tmp -> Objects.requireNonNull(tmp,
+                "annotation elements can`t contain null element"))
+                .map(AnnotationElement::clone)
+                .toArray(AnnotationElement[]::new);
+    }
+
+    public final AnnotationElement[] getElements() {
+        return Arrays.copyOf(elements, elements.length);
+    }
+
+    public static EncodedAnnotation read(RandomInput in, ReadContext context) {
+        TypeId type = context.type(in.readULeb128());
+        int size = in.readULeb128();
+        AnnotationElement[] elements = new AnnotationElement[size];
+        for (int i = 0; i < size; i++) {
+            elements[i] = AnnotationElement.read(in, context);
+        }
+        return new EncodedAnnotation(type, elements);
     }
 
     public void fillContext(DataSet data) {
@@ -49,5 +77,10 @@ public class EncodedAnnotation {
     @Override
     public int hashCode() {
         return Objects.hash(type, Arrays.hashCode(elements));
+    }
+
+    @Override
+    public EncodedAnnotation clone() {
+        return new EncodedAnnotation(type, elements);
     }
 }

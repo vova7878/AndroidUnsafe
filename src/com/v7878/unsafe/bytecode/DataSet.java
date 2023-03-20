@@ -1,6 +1,5 @@
 package com.v7878.unsafe.bytecode;
 
-import com.v7878.unsafe.bytecode.TypeId.*;
 import java.util.*;
 
 public class DataSet {

@@ -19,7 +19,7 @@ public class EncodedField {
         return out;
     }
 
-    public static EncodedField[] readArray(RandomInput in, Context context,
+    public static EncodedField[] readArray(RandomInput in, ReadContext context,
             int size, Map<FieldId, AnnotationItem[]> annotated_fields) {
         EncodedField[] out = new EncodedField[size];
         int fieldIndex = 0;

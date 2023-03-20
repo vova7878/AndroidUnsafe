@@ -1,6 +1,6 @@
 package com.v7878.unsafe.bytecode;
 
-public class Context {
+public class ReadContextImpl implements ReadContext {
 
     private String[] strings;
     private TypeId[] types;
@@ -10,30 +10,37 @@ public class Context {
     private MethodHandleItem[] method_handles;
     private CallSiteId[] call_sites;
 
+    @Override
     public String string(int index) {
         return strings[index];
     }
 
+    @Override
     public TypeId type(int index) {
         return types[index];
     }
 
+    @Override
     public ProtoId proto(int index) {
         return protos[index];
     }
 
+    @Override
     public FieldId field(int index) {
         return fields[index];
     }
 
+    @Override
     public MethodId method(int index) {
         return methods[index];
     }
 
+    @Override
     public MethodHandleItem method_handle(int index) {
         return method_handles[index];
     }
 
+    @Override
     public CallSiteId call_site(int index) {
         return call_sites[index];
     }

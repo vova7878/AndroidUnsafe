@@ -1,8 +1,8 @@
 package com.v7878.unsafe.bytecode;
 
 import static com.v7878.unsafe.bytecode.DexConstants.*;
-import java.util.Arrays;
-import java.util.Objects;
+import com.v7878.unsafe.io.*;
+import java.util.*;
 
 public abstract class EncodedValue implements Cloneable {
 
@@ -18,6 +18,8 @@ public abstract class EncodedValue implements Cloneable {
 
     public void fillContext(DataSet data) {
     }
+
+    public abstract void write(WriteContext context, RandomOutput out);
 
     @Override
     public boolean equals(Object obj) {
@@ -77,6 +79,11 @@ public abstract class EncodedValue implements Cloneable {
         }
 
         @Override
+        public void write(WriteContext context, RandomOutput out) {
+            out.writeByte(type | ((value ? 1 : 0) << 5));
+        }
+
+        @Override
         public boolean isDefault() {
             return !value;
         }
@@ -108,6 +115,11 @@ public abstract class EncodedValue implements Cloneable {
         public ByteValue(byte value) {
             this();
             this.value = value;
+        }
+
+        @Override
+        public void write(WriteContext context, RandomOutput out) {
+            ValueCoder.writeSignedIntegralValue(out, type, value);
         }
 
         @Override
@@ -145,6 +157,11 @@ public abstract class EncodedValue implements Cloneable {
         }
 
         @Override
+        public void write(WriteContext context, RandomOutput out) {
+            ValueCoder.writeSignedIntegralValue(out, type, value);
+        }
+
+        @Override
         public boolean isDefault() {
             return value == 0;
         }
@@ -176,6 +193,11 @@ public abstract class EncodedValue implements Cloneable {
         public CharValue(char value) {
             this();
             this.value = value;
+        }
+
+        @Override
+        public void write(WriteContext context, RandomOutput out) {
+            ValueCoder.writeUnsignedIntegralValue(out, type, value);
         }
 
         @Override
@@ -213,6 +235,11 @@ public abstract class EncodedValue implements Cloneable {
         }
 
         @Override
+        public void write(WriteContext context, RandomOutput out) {
+            ValueCoder.writeSignedIntegralValue(out, type, value);
+        }
+
+        @Override
         public boolean isDefault() {
             return value == 0;
         }
@@ -244,6 +271,11 @@ public abstract class EncodedValue implements Cloneable {
         public LongValue(long value) {
             this();
             this.value = value;
+        }
+
+        @Override
+        public void write(WriteContext context, RandomOutput out) {
+            ValueCoder.writeSignedIntegralValue(out, type, value);
         }
 
         @Override
@@ -281,6 +313,12 @@ public abstract class EncodedValue implements Cloneable {
         }
 
         @Override
+        public void write(WriteContext context, RandomOutput out) {
+            ValueCoder.writeRightZeroExtendedValue(out, type,
+                    ((long) Float.floatToRawIntBits(value)) << 32);
+        }
+
+        @Override
         public boolean isDefault() {
             return value == 0f;
         }
@@ -315,6 +353,12 @@ public abstract class EncodedValue implements Cloneable {
         }
 
         @Override
+        public void write(WriteContext context, RandomOutput out) {
+            ValueCoder.writeRightZeroExtendedValue(out, type,
+                    Double.doubleToRawLongBits(value));
+        }
+
+        @Override
         public boolean isDefault() {
             return value == 0d;
         }
@@ -339,6 +383,11 @@ public abstract class EncodedValue implements Cloneable {
 
         public NullValue() {
             super(VALUE_NULL);
+        }
+
+        @Override
+        public void write(WriteContext context, RandomOutput out) {
+            out.writeByte(type);
         }
 
         @Override
@@ -380,6 +429,12 @@ public abstract class EncodedValue implements Cloneable {
             if (value != null) {
                 data.addProto(value);
             }
+        }
+
+        @Override
+        public void write(WriteContext context, RandomOutput out) {
+            ValueCoder.writeUnsignedIntegralValue(out, type,
+                    context.getProtoIndex(value));
         }
 
         @Override
@@ -428,6 +483,12 @@ public abstract class EncodedValue implements Cloneable {
         }
 
         @Override
+        public void write(WriteContext context, RandomOutput out) {
+            ValueCoder.writeUnsignedIntegralValue(out, type,
+                    context.getMethodHandleIndex(value));
+        }
+
+        @Override
         public boolean isDefault() {
             return value == null;
         }
@@ -470,6 +531,12 @@ public abstract class EncodedValue implements Cloneable {
             if (value != null) {
                 data.addString(value);
             }
+        }
+
+        @Override
+        public void write(WriteContext context, RandomOutput out) {
+            ValueCoder.writeUnsignedIntegralValue(out, type,
+                    context.getStringIndex(value));
         }
 
         @Override
@@ -518,6 +585,12 @@ public abstract class EncodedValue implements Cloneable {
         }
 
         @Override
+        public void write(WriteContext context, RandomOutput out) {
+            ValueCoder.writeUnsignedIntegralValue(out, type,
+                    context.getTypeIndex(value));
+        }
+
+        @Override
         public boolean isDefault() {
             return value == null;
         }
@@ -560,6 +633,12 @@ public abstract class EncodedValue implements Cloneable {
             if (value != null) {
                 data.addField(value);
             }
+        }
+
+        @Override
+        public void write(WriteContext context, RandomOutput out) {
+            ValueCoder.writeUnsignedIntegralValue(out, type,
+                    context.getFieldIndex(value));
         }
 
         @Override
@@ -608,6 +687,12 @@ public abstract class EncodedValue implements Cloneable {
         }
 
         @Override
+        public void write(WriteContext context, RandomOutput out) {
+            ValueCoder.writeUnsignedIntegralValue(out, type,
+                    context.getMethodIndex(value));
+        }
+
+        @Override
         public boolean isDefault() {
             return value == null;
         }
@@ -650,6 +735,12 @@ public abstract class EncodedValue implements Cloneable {
             if (value != null) {
                 data.addField(value);
             }
+        }
+
+        @Override
+        public void write(WriteContext context, RandomOutput out) {
+            ValueCoder.writeUnsignedIntegralValue(out, type,
+                    context.getFieldIndex(value));
         }
 
         @Override
@@ -700,6 +791,19 @@ public abstract class EncodedValue implements Cloneable {
         }
 
         @Override
+        public void write(WriteContext context, RandomOutput out) {
+            out.writeByte(type);
+            writeData(context, out);
+        }
+
+        public void writeData(WriteContext context, RandomOutput out) {
+            out.writeULeb128(value.length);
+            for (EncodedValue tmp : value) {
+                tmp.write(context, out);
+            }
+        }
+
+        @Override
         public boolean isDefault() {
             return value == null;
         }
@@ -746,6 +850,12 @@ public abstract class EncodedValue implements Cloneable {
             if (value != null) {
                 value.fillContext(data);
             }
+        }
+
+        @Override
+        public void write(WriteContext context, RandomOutput out) {
+            //TODO
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override

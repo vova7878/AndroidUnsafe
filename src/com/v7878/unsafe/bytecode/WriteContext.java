@@ -43,13 +43,14 @@ public class WriteContext {
         methods = data.getMethods();
         Arrays.sort(methods, method_comparator);
 
+        class_defs = data.getClassDefs();
+
         method_handles = data.getMethodHandles();
         Arrays.sort(method_handles, method_handle_comparator);
 
         type_lists = new HashMap<>();
 
         //TODO: sort
-        class_defs = data.getClassDefs();
         call_sites = data.getCallSites();
     }
 
@@ -75,6 +76,10 @@ public class WriteContext {
 
     public Stream<MethodId> methodsStream() {
         return Arrays.stream(methods);
+    }
+
+    public Stream<ClassDef> classDefsStream() {
+        return Arrays.stream(class_defs);
     }
 
     public Stream<MethodHandleItem> methodHandlesStream() {

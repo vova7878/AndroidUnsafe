@@ -1,8 +1,10 @@
 package com.v7878.unsafe.bytecode;
 
+import static com.v7878.unsafe.Utils.*;
 import static com.v7878.unsafe.bytecode.DexConstants.*;
 import com.v7878.unsafe.bytecode.TypeId.*;
-import com.v7878.unsafe.io.RandomInput;
+import com.v7878.unsafe.io.*;
+import java.util.*;
 
 public class ClassDef {
 
@@ -15,6 +17,46 @@ public class ClassDef {
     public String source_file;
     public AnnotationItem[] class_annotations;
     public ClassData class_data;
+
+    private static void add(Map<TypeId, ClassDef> map,
+            Set<ClassDef> added, ArrayList<ClassDef> out, TypeId type) {
+        ClassDef value = map.get(type);
+        if (value == null) {
+            return;
+        }
+        if (added.contains(value)) {
+            return;
+        }
+        if (value.superclass != null) {
+            add(map, added, out, value.superclass);
+        }
+        for (TypeId tmp : value.interfaces.list) {
+            add(map, added, out, tmp);
+        }
+        out.add(value);
+        added.add(value);
+    }
+
+    public static ClassDef[] sort(Set<ClassDef> class_defs) {
+        Map<TypeId, ClassDef> map = new HashMap<>();
+        class_defs.stream().forEach((value) -> {
+            if (map.putIfAbsent(value.clazz, value) != null) {
+                throw new IllegalStateException(
+                        "class defs contain duplicates: " + value.clazz);
+            }
+        });
+
+        Set<ClassDef> added = new HashSet<>();
+        ArrayList<ClassDef> out = new ArrayList<>(class_defs.size());
+
+        class_defs.stream().forEach((value) -> {
+            add(map, added, out, value.clazz);
+        });
+
+        assert_(out.size() == class_defs.size(), IllegalStateException::new,
+                "sorted.length(" + out.size() + ") != input.length(" + class_defs.size() + ")");
+        return out.stream().toArray(ClassDef[]::new);
+    }
 
     public static ClassDef read(RandomInput in, Context context) {
         ClassDef out = new ClassDef();
@@ -67,5 +109,16 @@ public class ClassDef {
         if (class_data != null) {
             class_data.fillContext(data);
         }
+    }
+
+    public void write(WriteContext context, RandomOutput out) {
+        out.writeInt(context.getTypeIndex(clazz));
+        out.writeInt(access_flags);
+        out.writeInt(superclass == null ? NO_INDEX : context.getTypeIndex(superclass));
+        out.writeInt(interfaces.isEmpty() ? 0 : context.getTypeListOffset(interfaces));
+        out.writeInt(source_file == null ? NO_INDEX : context.getStringIndex(source_file));
+        out.writeInt(0);  // TODO: annotations
+        out.writeInt(0);  // TODO: class_data
+        out.writeInt(0);  // TODO: static_values
     }
 }

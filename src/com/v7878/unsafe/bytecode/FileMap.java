@@ -324,7 +324,6 @@ public class FileMap {
         Adler32 adler = new Adler32();
         adler.update(out.duplicate(SIGNATURE_OFFSET)
                 .readByteArray(file_size - SIGNATURE_OFFSET));
-
         out.writeInt((int) adler.getValue());
     }
 }

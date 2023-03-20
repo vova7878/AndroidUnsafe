@@ -118,11 +118,11 @@ public class Dex {
         map.method_ids_size = context.getMethodsCount();
         offset += map.method_ids_size * MethodId.SIZE;
 
-        /*map.class_defs_off = offset;
+        map.class_defs_off = offset;
         map.class_defs_size = context.getClassDefsCount();
         offset += map.class_defs_size * ClassDef.SIZE;
 
-        map.call_site_ids_off = offset;
+        /*map.call_site_ids_off = offset;
         map.call_site_ids_size = context.getCallSitesCount();
         offset += map.call_site_ids_size * CallSiteId.SIZE;*/
         map.method_handles_off = offset;
@@ -146,6 +146,7 @@ public class Dex {
 
         TypeList[] lists = data.getTypeLists();
         if (lists.length != 0) {
+            Arrays.sort(lists, context.type_list_comparator);
             offset = roundUp(offset, TypeList.ALIGNMENT);
             map.type_lists_off = offset;
             map.type_lists_size = lists.length;
@@ -158,6 +159,7 @@ public class Dex {
             }
         }
 
+        //TODO: class data
         offset = roundUp(offset, FileMap.MAP_ALIGNMENT);
         data_out.position(offset);
         map.writeMap(data_out);
@@ -184,6 +186,11 @@ public class Dex {
 
         out.position(map.method_ids_off);
         context.methodsStream().forEach((value) -> {
+            value.write(context, out);
+        });
+
+        out.position(map.class_defs_off);
+        context.classDefsStream().forEach((value) -> {
             value.write(context, out);
         });
 

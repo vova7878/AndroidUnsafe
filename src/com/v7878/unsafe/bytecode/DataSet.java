@@ -100,7 +100,7 @@ public class DataSet {
     }
 
     public ClassDef[] getClassDefs() {
-        return class_defs.stream().toArray(ClassDef[]::new);
+        return ClassDef.sort(class_defs);
     }
 
     public TypeList[] getTypeLists() {

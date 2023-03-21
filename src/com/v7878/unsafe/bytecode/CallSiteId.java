@@ -5,18 +5,30 @@ import com.v7878.unsafe.bytecode.EncodedValue.ArrayValue;
 import com.v7878.unsafe.io.RandomInput;
 import java.util.Objects;
 
-public class CallSiteId {
+public class CallSiteId implements PublicCloneable {
 
     public static final int SIZE = 0x04;
 
-    public ArrayValue value;
+    private ArrayValue value;
+
+    public CallSiteId(ArrayValue value) {
+        setValue(value);
+    }
+
+    public final void setValue(ArrayValue value) {
+        this.value = Objects.requireNonNull(value,
+                "call site value can`t be null").clone();
+    }
+
+    public final ArrayValue getValue() {
+        return value;
+    }
 
     public static CallSiteId read(RandomInput in, ReadContext context) {
-        CallSiteId out = new CallSiteId();
         RandomInput in2 = in.duplicate(in.readInt());
-        out.value = (ArrayValue) EncodedValueReader
+        ArrayValue value = (ArrayValue) EncodedValueReader
                 .readValue(in2, context, VALUE_ARRAY);
-        return out;
+        return new CallSiteId(value);
     }
 
     public void fillContext(DataSet data) {
@@ -40,5 +52,10 @@ public class CallSiteId {
     @Override
     public int hashCode() {
         return Objects.hashCode(value);
+    }
+
+    @Override
+    public CallSiteId clone() {
+        return new CallSiteId(value);
     }
 }

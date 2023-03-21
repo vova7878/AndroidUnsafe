@@ -4,7 +4,7 @@ import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class Dex extends AbstractList<ClassDef> implements Cloneable {
+public class Dex extends AbstractList<ClassDef> implements PublicCloneable {
 
     private final List<ClassDef> class_defs;
 
@@ -157,6 +157,7 @@ public class Dex extends AbstractList<ClassDef> implements Cloneable {
         map.class_defs_size = context.getClassDefsCount();
         offset += map.class_defs_size * ClassDef.SIZE;
 
+        //TODO
         /*map.call_site_ids_off = offset;
         map.call_site_ids_size = context.getCallSitesCount();
         offset += map.call_site_ids_size * CallSiteId.SIZE;*/
@@ -181,7 +182,6 @@ public class Dex extends AbstractList<ClassDef> implements Cloneable {
 
         TypeList[] lists = data.getTypeLists();
         if (lists.length != 0) {
-            Arrays.sort(lists, context.type_list_comparator);
             offset = roundUp(offset, TypeList.ALIGNMENT);
             map.type_lists_off = offset;
             map.type_lists_size = lists.length;
@@ -194,7 +194,58 @@ public class Dex extends AbstractList<ClassDef> implements Cloneable {
             }
         }
 
-        //TODO: class data
+        AnnotationItem[] annotations = data.getAnnotations();
+        if (annotations.length != 0) {
+            map.annotations_off = offset;
+            map.annotations_size = annotations.length;
+            for (AnnotationItem tmp : annotations) {
+                data_out.position(offset);
+                tmp.write(context, data_out);
+                context.addAnnotation(tmp, offset);
+                offset = (int) data_out.position();
+            }
+        }
+
+        AnnotationSet[] annotation_sets = data.getAnnotationSets();
+        if (annotation_sets.length != 0) {
+            offset = roundUp(offset, AnnotationSet.ALIGNMENT);
+            map.annotation_sets_off = offset;
+            map.annotation_sets_size = annotation_sets.length;
+            for (AnnotationSet tmp : annotation_sets) {
+                offset = roundUp(offset, AnnotationSet.ALIGNMENT);
+                data_out.position(offset);
+                tmp.write(context, data_out);
+                context.addAnnotationSet(tmp, offset);
+                offset = (int) data_out.position();
+            }
+        }
+
+        AnnotationSetList[] annotation_set_lists = data.getAnnotationSetLists();
+        if (annotation_set_lists.length != 0) {
+            offset = roundUp(offset, AnnotationSet.ALIGNMENT);
+            map.annotation_set_refs_off = offset;
+            map.annotation_set_refs_size = annotation_set_lists.length;
+            for (AnnotationSetList tmp : annotation_set_lists) {
+                offset = roundUp(offset, AnnotationSet.ALIGNMENT);
+                data_out.position(offset);
+                tmp.write(context, data_out);
+                context.addAnnotationSetList(tmp, offset);
+                offset = (int) data_out.position();
+            }
+        }
+
+        ClassData[] class_data_items = data.getClassDataItems();
+        if (class_data_items.length != 0) {
+            map.class_data_items_off = offset;
+            map.class_data_items_size = class_data_items.length;
+            for (ClassData tmp : class_data_items) {
+                data_out.position(offset);
+                tmp.write(context, data_out);
+                context.addClassData(tmp, offset);
+                offset = (int) data_out.position();
+            }
+        }
+
         offset = roundUp(offset, FileMap.MAP_ALIGNMENT);
         data_out.position(offset);
         map.writeMap(data_out);

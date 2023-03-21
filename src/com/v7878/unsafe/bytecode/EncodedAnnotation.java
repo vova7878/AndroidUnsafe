@@ -1,11 +1,10 @@
 package com.v7878.unsafe.bytecode;
 
-import com.v7878.unsafe.io.RandomInput;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import com.v7878.unsafe.io.*;
+import java.util.*;
+import java.util.stream.*;
 
-public class EncodedAnnotation implements Cloneable {
+public class EncodedAnnotation implements PublicCloneable {
 
     private TypeId type;
     private AnnotationElement[] elements;
@@ -53,6 +52,14 @@ public class EncodedAnnotation implements Cloneable {
         data.addType(type);
         for (AnnotationElement tmp : elements) {
             tmp.fillContext(data);
+        }
+    }
+
+    public void write(WriteContext context, RandomOutput out) {
+        out.writeULeb128(context.getTypeIndex(type));
+        out.writeULeb128(elements.length);
+        for (AnnotationElement tmp : elements) {
+            tmp.write(context, out);
         }
     }
 

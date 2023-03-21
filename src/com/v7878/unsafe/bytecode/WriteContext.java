@@ -16,6 +16,12 @@ public interface WriteContext {
 
     public Comparator<MethodHandleItem> method_handle_comparator();
 
+    public Comparator<AnnotationItem> annotation_comparator();
+
+    public Comparator<EncodedField> encoded_field_comparator();
+
+    public Comparator<EncodedMethod> encoded_method_comparator();
+
     public int getStringIndex(String value);
 
     public int getTypeIndex(TypeId value);
@@ -29,4 +35,12 @@ public interface WriteContext {
     public int getMethodHandleIndex(MethodHandleItem value);
 
     public int getTypeListOffset(TypeList value);
+
+    public int getAnnotationOffset(AnnotationItem value);
+
+    public int getAnnotationSetOffset(AnnotationSet value);
+
+    public int getAnnotationSetListOffset(AnnotationSetList value);
+
+    public int getClassDataOffset(ClassData value);
 }

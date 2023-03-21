@@ -3,7 +3,7 @@ package com.v7878.unsafe.bytecode;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class FieldId extends FieldOrMethodId implements Cloneable {
+public class FieldId extends FieldOrMethodId {
 
     public static final int SIZE = 0x08;
 

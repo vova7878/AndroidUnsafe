@@ -4,7 +4,7 @@ import com.v7878.unsafe.io.*;
 import java.util.*;
 import java.util.stream.*;
 
-public class TypeList extends AbstractList<TypeId> implements Cloneable {
+public class TypeList extends PCList<TypeId> {
 
     public static final int ALIGNMENT = 4;
 
@@ -37,44 +37,14 @@ public class TypeList extends AbstractList<TypeId> implements Cloneable {
         };
     }
 
-    private final List<TypeId> types;
-
     public TypeList(TypeId... types) {
-        if (types == null) {
-            types = new TypeId[0];
-        }
-        this.types = new ArrayList<>(types.length);
-        addAll(Arrays.asList(types));
+        super(types);
     }
 
-    private TypeId check(TypeId type) {
+    @Override
+    protected TypeId check(TypeId type) {
         return Objects.requireNonNull(type,
                 "TypeList can`t contain null type");
-    }
-
-    @Override
-    public final void add(int index, TypeId type) {
-        types.add(check(type).clone());
-    }
-
-    @Override
-    public final TypeId set(int index, TypeId type) {
-        return types.set(index, check(type).clone());
-    }
-
-    @Override
-    public final TypeId get(int index) {
-        return types.get(index);
-    }
-
-    @Override
-    public final TypeId remove(int index) {
-        return types.remove(index);
-    }
-
-    @Override
-    public final int size() {
-        return types.size();
     }
 
     public static TypeList read(RandomInput in, ReadContext context) {
@@ -91,48 +61,41 @@ public class TypeList extends AbstractList<TypeId> implements Cloneable {
     }
 
     public void fillContext(DataSet data) {
-        for (TypeId tmp : types) {
+        for (TypeId tmp : this) {
             data.addType(tmp);
         }
     }
 
     public void write(WriteContext context, RandomOutput out) {
         out.writeInt(size());
-        for (TypeId tmp : types) {
+        for (TypeId tmp : this) {
             out.writeShort(context.getTypeIndex(tmp));
         }
     }
 
     @Override
-    public boolean isEmpty() {
-        return size() == 0;
-    }
-
-    @Override
     public String toString() {
-        return types.stream()
-                .map((p) -> p.toString())
+        return stream().map((p) -> p.toString())
                 .collect(Collectors.joining("", "(", ")"));
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof TypeList) {
-            TypeList tlobj = (TypeList) obj;
-            return Objects.equals(types, tlobj.types);
+            return super.equals(obj);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(types);
+        return super.hashCode();
     }
 
     @Override
     public TypeList clone() {
         TypeList out = new TypeList();
-        out.addAll(types);
+        out.addAll(this);
         return out;
     }
 }

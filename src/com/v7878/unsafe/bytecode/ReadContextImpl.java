@@ -1,5 +1,6 @@
 package com.v7878.unsafe.bytecode;
 
+// Temporary object. Needed to read or write
 public class ReadContextImpl implements ReadContext {
 
     private String[] strings;

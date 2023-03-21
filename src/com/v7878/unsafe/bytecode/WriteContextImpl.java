@@ -4,6 +4,7 @@ import static com.v7878.unsafe.Utils.*;
 import java.util.*;
 import java.util.stream.*;
 
+// Temporary object. Needed to read or write
 public final class WriteContextImpl implements WriteContext {
 
     public final Comparator<TypeId> type_comparator
@@ -18,6 +19,12 @@ public final class WriteContextImpl implements WriteContext {
             = MethodId.getComparator(this);
     public final Comparator<MethodHandleItem> method_handle_comparator
             = MethodHandleItem.getComparator(this);
+    public final Comparator<AnnotationItem> annotation_comparator
+            = AnnotationItem.getComparator(this);
+    public final Comparator<EncodedField> encoded_field_comparator
+            = EncodedField.getComparator(this);
+    public final Comparator<EncodedMethod> encoded_method_comparator
+            = EncodedMethod.getComparator(this);
 
     @Override
     public Comparator<TypeId> type_comparator() {
@@ -49,6 +56,21 @@ public final class WriteContextImpl implements WriteContext {
         return method_handle_comparator;
     }
 
+    @Override
+    public Comparator<AnnotationItem> annotation_comparator() {
+        return annotation_comparator;
+    }
+
+    @Override
+    public Comparator<EncodedField> encoded_field_comparator() {
+        return encoded_field_comparator;
+    }
+
+    @Override
+    public Comparator<EncodedMethod> encoded_method_comparator() {
+        return encoded_method_comparator;
+    }
+
     private final String[] strings;
     private final TypeId[] types;
     private final ProtoId[] protos;
@@ -58,6 +80,10 @@ public final class WriteContextImpl implements WriteContext {
     private final CallSiteId[] call_sites;
     private final MethodHandleItem[] method_handles;
     private final Map<TypeList, Integer> type_lists;
+    private final Map<AnnotationItem, Integer> annotations;
+    private final Map<AnnotationSet, Integer> annotation_sets;
+    private final Map<AnnotationSetList, Integer> annotation_set_lists;
+    private final Map<ClassData, Integer> class_data_items;
 
     public WriteContextImpl(DataSet data) {
         strings = data.getStrings();
@@ -77,13 +103,33 @@ public final class WriteContextImpl implements WriteContext {
         Arrays.sort(method_handles, method_handle_comparator);
 
         type_lists = new HashMap<>();
+        annotations = new HashMap<>();
+        annotation_sets = new HashMap<>();
+        annotation_set_lists = new HashMap<>();
+        class_data_items = new HashMap<>();
 
         //TODO: sort
         call_sites = data.getCallSites();
     }
 
-    public void addTypeList(TypeList type_list, int offset) {
-        type_lists.put(type_list, offset);
+    public void addTypeList(TypeList value, int offset) {
+        type_lists.put(value, offset);
+    }
+
+    public void addAnnotation(AnnotationItem value, int offset) {
+        annotations.put(value, offset);
+    }
+
+    public void addAnnotationSet(AnnotationSet value, int offset) {
+        annotation_sets.put(value, offset);
+    }
+
+    public void addAnnotationSetList(AnnotationSetList value, int offset) {
+        annotation_set_lists.put(value, offset);
+    }
+
+    public void addClassData(ClassData value, int offset) {
+        class_data_items.put(value, offset);
     }
 
     public Stream<String> stringsStream() {
@@ -199,6 +245,38 @@ public final class WriteContextImpl implements WriteContext {
         Integer out = type_lists.get(value);
         assert_(out != null, IllegalArgumentException::new,
                 "unable to find type list \"" + value + "\"");
+        return out;
+    }
+
+    @Override
+    public int getAnnotationOffset(AnnotationItem value) {
+        Integer out = annotations.get(value);
+        assert_(out != null, IllegalArgumentException::new,
+                "unable to find annotation \"" + value + "\"");
+        return out;
+    }
+
+    @Override
+    public int getAnnotationSetOffset(AnnotationSet value) {
+        Integer out = annotation_sets.get(value);
+        assert_(out != null, IllegalArgumentException::new,
+                "unable to find annotation set \"" + value + "\"");
+        return out;
+    }
+
+    @Override
+    public int getAnnotationSetListOffset(AnnotationSetList value) {
+        Integer out = annotation_set_lists.get(value);
+        assert_(out != null, IllegalArgumentException::new,
+                "unable to find annotation set list \"" + value + "\"");
+        return out;
+    }
+
+    @Override
+    public int getClassDataOffset(ClassData value) {
+        Integer out = class_data_items.get(value);
+        assert_(out != null, IllegalArgumentException::new,
+                "unable to find class data \"" + value + "\"");
         return out;
     }
 }

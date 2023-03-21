@@ -3,7 +3,7 @@ package com.v7878.unsafe.bytecode;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class ProtoId implements Cloneable {
+public class ProtoId implements PublicCloneable {
 
     public static final int SIZE = 0x0c;
 
@@ -26,6 +26,11 @@ public class ProtoId implements Cloneable {
 
     private TypeId return_type;
     private TypeList parameters;
+
+    public ProtoId(TypeId return_type, TypeId... parameters) {
+        setReturnType(return_type);
+        setParameters(new TypeList(parameters));
+    }
 
     public ProtoId(TypeId return_type, TypeList parameters) {
         setReturnType(return_type);
@@ -54,7 +59,7 @@ public class ProtoId implements Cloneable {
         in.readInt(); // shorty
         TypeId return_type = context.type(in.readInt());
         int parameters_off = in.readInt();
-        TypeList parameters = TypeList.empty();
+        TypeList parameters = null;
         if (parameters_off != 0) {
             parameters = TypeList.read(in.duplicate(parameters_off), context);
         }

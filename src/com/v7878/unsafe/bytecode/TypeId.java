@@ -3,7 +3,7 @@ package com.v7878.unsafe.bytecode;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class TypeId implements Cloneable {
+public class TypeId implements PublicCloneable {
 
     public static final int SIZE = 0x04;
 

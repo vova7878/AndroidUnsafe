@@ -1,9 +1,26 @@
 package com.v7878.unsafe.bytecode;
 
-import com.v7878.unsafe.io.RandomInput;
-import java.util.Objects;
+import com.v7878.unsafe.io.*;
+import java.util.*;
 
-public final class AnnotationItem implements Cloneable {
+public final class AnnotationItem implements PublicCloneable {
+
+    public static final Comparator<AnnotationItem> getComparator(WriteContext context) {
+        return (a, b) -> {
+            if (a.equals(b)) {
+                return 0;
+            }
+
+            int out = context.type_comparator()
+                    .compare(a.annotation.getType(), b.annotation.getType());
+            if (out != 0) {
+                return out;
+            }
+
+            // a != b, but a.type == b.type
+            throw new IllegalStateException("can`t compare annotations " + a + " " + b);
+        };
+    }
 
     private byte visibility;
     private EncodedAnnotation annotation;
@@ -36,32 +53,13 @@ public final class AnnotationItem implements Cloneable {
                 EncodedAnnotation.read(in, context));
     }
 
-    public static AnnotationItem[] readSet(RandomInput in, ReadContext context) {
-        int size = in.readInt();
-        AnnotationItem[] out = new AnnotationItem[size];
-        for (int i = 0; i < size; i++) {
-            out[i] = AnnotationItem.read(in.duplicate(in.readInt()), context);
-        }
-        return out;
-    }
-
-    public static AnnotationItem[][] readSetList(RandomInput in, ReadContext context) {
-        int size = in.readInt();
-        AnnotationItem[][] out = new AnnotationItem[size][];
-        for (int i = 0; i < size; i++) {
-            int annotations_off = in.readInt();
-            if (annotations_off != 0) {
-                out[i] = AnnotationItem.readSet(
-                        in.duplicate(annotations_off), context);
-            } else {
-                out[i] = new AnnotationItem[0];
-            }
-        }
-        return out;
-    }
-
     public void fillContext(DataSet data) {
         annotation.fillContext(data);
+    }
+
+    public void write(WriteContextImpl context, RandomOutput out) {
+        out.writeByte(visibility);
+        annotation.write(context, out);
     }
 
     @Override

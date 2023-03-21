@@ -4,7 +4,7 @@ import static com.v7878.unsafe.bytecode.DexConstants.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class MethodHandleItem implements Cloneable {
+public class MethodHandleItem implements PublicCloneable {
 
     public static final int SIZE = 0x08;
 

@@ -7,6 +7,7 @@ import java.security.MessageDigest;
 import java.util.*;
 import java.util.zip.Adler32;
 
+// Temporary object. Needed to read or write
 public class FileMap {
 
     public static class MapItem {

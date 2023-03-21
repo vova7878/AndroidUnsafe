@@ -4,7 +4,7 @@ import static com.v7878.unsafe.bytecode.DexConstants.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public abstract class EncodedValue implements Cloneable {
+public abstract class EncodedValue implements PublicCloneable {
 
     public final int type;
 
@@ -65,7 +65,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class BooleanValue extends EncodedValue implements Cloneable {
+    public static class BooleanValue extends EncodedValue {
 
         public boolean value;
 
@@ -104,7 +104,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class ByteValue extends EncodedValue implements Cloneable {
+    public static class ByteValue extends EncodedValue {
 
         public byte value;
 
@@ -143,7 +143,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class ShortValue extends EncodedValue implements Cloneable {
+    public static class ShortValue extends EncodedValue {
 
         public short value;
 
@@ -182,7 +182,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class CharValue extends EncodedValue implements Cloneable {
+    public static class CharValue extends EncodedValue {
 
         public char value;
 
@@ -221,7 +221,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class IntValue extends EncodedValue implements Cloneable {
+    public static class IntValue extends EncodedValue {
 
         public int value;
 
@@ -260,7 +260,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class LongValue extends EncodedValue implements Cloneable {
+    public static class LongValue extends EncodedValue {
 
         public long value;
 
@@ -299,7 +299,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class FloatValue extends EncodedValue implements Cloneable {
+    public static class FloatValue extends EncodedValue {
 
         public float value;
 
@@ -339,7 +339,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class DoubleValue extends EncodedValue implements Cloneable {
+    public static class DoubleValue extends EncodedValue {
 
         public double value;
 
@@ -379,7 +379,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class NullValue extends EncodedValue implements Cloneable {
+    public static class NullValue extends EncodedValue {
 
         public NullValue() {
             super(VALUE_NULL);
@@ -411,7 +411,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class MethodTypeValue extends EncodedValue implements Cloneable {
+    public static class MethodTypeValue extends EncodedValue {
 
         private ProtoId value;
 
@@ -462,7 +462,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class MethodHandleValue extends EncodedValue implements Cloneable {
+    public static class MethodHandleValue extends EncodedValue {
 
         private MethodHandleItem value;
 
@@ -513,7 +513,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class StringValue extends EncodedValue implements Cloneable {
+    public static class StringValue extends EncodedValue {
 
         private String value;
 
@@ -564,7 +564,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class TypeValue extends EncodedValue implements Cloneable {
+    public static class TypeValue extends EncodedValue {
 
         private TypeId value;
 
@@ -615,7 +615,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class FieldValue extends EncodedValue implements Cloneable {
+    public static class FieldValue extends EncodedValue {
 
         private FieldId value;
 
@@ -666,7 +666,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class MethodValue extends EncodedValue implements Cloneable {
+    public static class MethodValue extends EncodedValue {
 
         private MethodId value;
 
@@ -717,7 +717,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class EnumValue extends EncodedValue implements Cloneable {
+    public static class EnumValue extends EncodedValue {
 
         private FieldId value;
 
@@ -768,7 +768,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class ArrayValue extends EncodedValue implements Cloneable {
+    public static class ArrayValue extends EncodedValue {
 
         private EncodedValue[] value;
 
@@ -832,7 +832,7 @@ public abstract class EncodedValue implements Cloneable {
         }
     }
 
-    public static class AnnotationValue extends EncodedValue implements Cloneable {
+    public static class AnnotationValue extends EncodedValue {
 
         private EncodedAnnotation value;
 
@@ -854,8 +854,8 @@ public abstract class EncodedValue implements Cloneable {
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            //TODO
-            throw new UnsupportedOperationException("Not supported yet.");
+            out.writeByte(type);
+            value.write(context, out);
         }
 
         @Override

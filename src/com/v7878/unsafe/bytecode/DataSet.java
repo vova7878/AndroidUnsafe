@@ -1,7 +1,9 @@
 package com.v7878.unsafe.bytecode;
 
+import static com.v7878.unsafe.Utils.*;
 import java.util.*;
 
+// Temporary object. Needed to read or write
 public class DataSet {
 
     private final Set<String> strings;
@@ -11,8 +13,14 @@ public class DataSet {
     private final Set<MethodId> methods;
     private final Set<MethodHandleItem> method_handles;
     private final Set<CallSiteId> call_sites;
-    private final Set<ClassDef> class_defs;
+
+    private final List<ClassDef> class_defs;
+    private final List<ClassData> class_data_items;
+
     private final Set<TypeList> type_lists;
+    private final Set<AnnotationItem> annotations;
+    private final Set<AnnotationSet> annotation_sets;
+    private final Set<AnnotationSetList> annotation_set_lists;
 
     public DataSet() {
         strings = new HashSet<>();
@@ -22,52 +30,82 @@ public class DataSet {
         methods = new HashSet<>();
         method_handles = new HashSet<>();
         call_sites = new HashSet<>();
-        class_defs = new HashSet<>();
+
+        class_defs = new ArrayList<>();
+        class_data_items = new ArrayList<>();
+
         type_lists = new HashSet<>();
+        annotations = new HashSet<>();
+        annotation_sets = new HashSet<>();
+        annotation_set_lists = new HashSet<>();
     }
 
-    public void addString(String string) {
-        strings.add(string);
+    public void addString(String value) {
+        strings.add(value);
     }
 
-    public void addType(TypeId type) {
-        type.fillContext(this);
-        types.add(type);
+    public void addType(TypeId value) {
+        value.fillContext(this);
+        types.add(value);
     }
 
-    public void addProto(ProtoId proto) {
-        proto.fillContext(this);
-        protos.add(proto);
+    public void addProto(ProtoId value) {
+        value.fillContext(this);
+        protos.add(value);
     }
 
-    public void addField(FieldId field) {
-        field.fillContext(this);
-        fields.add(field);
+    public void addField(FieldId value) {
+        value.fillContext(this);
+        fields.add(value);
     }
 
-    public void addMethod(MethodId method) {
-        method.fillContext(this);
-        methods.add(method);
+    public void addMethod(MethodId value) {
+        value.fillContext(this);
+        methods.add(value);
     }
 
-    public void addMethodHandle(MethodHandleItem method_handle) {
-        method_handle.fillContext(this);
-        method_handles.add(method_handle);
+    public void addMethodHandle(MethodHandleItem value) {
+        value.fillContext(this);
+        method_handles.add(value);
     }
 
-    public void addCallSite(CallSiteId call_site) {
-        call_site.fillContext(this);
-        call_sites.add(call_site);
+    public void addCallSite(CallSiteId value) {
+        value.fillContext(this);
+        call_sites.add(value);
     }
 
-    public void addClassDef(ClassDef class_def) {
-        class_def.fillContext(this);
-        class_defs.add(class_def);
+    public void addClassDef(ClassDef value) {
+        value.fillContext(this);
+        class_defs.add(value);
     }
 
-    public void addTypeList(TypeList type_list) {
-        type_list.fillContext(this);
-        type_lists.add(type_list);
+    public void addClassData(ClassData value) {
+        value.fillContext(this);
+        class_data_items.add(value);
+    }
+
+    public void addTypeList(TypeList value) {
+        value.fillContext(this);
+        type_lists.add(value);
+    }
+
+    public void addAnnotation(AnnotationItem value) {
+        value.fillContext(this);
+        annotations.add(value);
+    }
+
+    public void addAnnotationSet(AnnotationSet value) {
+        assert_(!value.isEmpty(), IllegalStateException::new,
+                "annotation_set is empty");
+        value.fillContext(this);
+        annotation_sets.add(value);
+    }
+
+    public void addAnnotationSetList(AnnotationSetList value) {
+        assert_(!value.isEmpty(), IllegalStateException::new,
+                "annotation_set_list is empty");
+        value.fillContext(this);
+        annotation_set_lists.add(value);
     }
 
     public String[] getStrings() {
@@ -102,7 +140,23 @@ public class DataSet {
         return ClassDef.sort(class_defs);
     }
 
+    public ClassData[] getClassDataItems() {
+        return class_data_items.stream().toArray(ClassData[]::new);
+    }
+
     public TypeList[] getTypeLists() {
         return type_lists.stream().toArray(TypeList[]::new);
+    }
+
+    public AnnotationItem[] getAnnotations() {
+        return annotations.stream().toArray(AnnotationItem[]::new);
+    }
+
+    public AnnotationSet[] getAnnotationSets() {
+        return annotation_sets.stream().toArray(AnnotationSet[]::new);
+    }
+
+    public AnnotationSetList[] getAnnotationSetLists() {
+        return annotation_set_lists.stream().toArray(AnnotationSetList[]::new);
     }
 }

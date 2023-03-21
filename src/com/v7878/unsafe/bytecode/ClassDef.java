@@ -5,7 +5,7 @@ import static com.v7878.unsafe.bytecode.DexConstants.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class ClassDef implements Cloneable {
+public class ClassDef implements PublicCloneable {
 
     public static final int SIZE = 0x20;
 
@@ -29,7 +29,7 @@ public class ClassDef implements Cloneable {
     }
 
     // TODO: cycle test
-    public static ClassDef[] sort(Set<ClassDef> class_defs) {
+    public static ClassDef[] sort(List<ClassDef> class_defs) {
         Map<TypeId, ClassDef> map = new HashMap<>();
         class_defs.stream().forEach((value) -> {
             if (map.putIfAbsent(value.clazz, value) != null) {
@@ -55,7 +55,7 @@ public class ClassDef implements Cloneable {
     private TypeId superclass;
     private TypeList interfaces;
     private String source_file;
-    private AnnotationItem[] class_annotations;
+    private AnnotationSet annotations;
     private ClassData class_data;
 
     public ClassDef(TypeId clazz) {
@@ -64,19 +64,19 @@ public class ClassDef implements Cloneable {
         setSuperClass(null);
         setInterfaces(null);
         setSourceFile(null);
-        setClassAnnotations(null);
+        setAnnotations(null);
         setClassData(null);
     }
 
     public ClassDef(TypeId clazz, int access_flags, TypeId superclass,
             TypeList interfaces, String source_file,
-            AnnotationItem[] class_annotations, ClassData class_data) {
+            AnnotationSet annotations, ClassData class_data) {
         setType(clazz);
         setAccessFlags(access_flags);
         setSuperClass(superclass);
         setInterfaces(interfaces);
         setSourceFile(source_file);
-        setClassAnnotations(class_annotations);
+        setAnnotations(annotations);
         setClassData(class_data);
     }
 
@@ -122,24 +122,18 @@ public class ClassDef implements Cloneable {
         return source_file;
     }
 
-    public final void setClassAnnotations(AnnotationItem[] class_annotations) {
-        if (class_annotations == null) {
-            class_annotations = new AnnotationItem[0];
-        }
-        this.class_annotations = Arrays.stream(class_annotations)
-                .map(tmp -> Objects.requireNonNull(tmp,
-                "class annotations can`t contain null annotation"))
-                .map(AnnotationItem::clone)
-                .toArray(AnnotationItem[]::new);
+    public final void setAnnotations(AnnotationSet annotations) {
+        this.annotations = annotations == null
+                ? AnnotationSet.empty() : annotations.clone();
     }
 
-    public final AnnotationItem[] getClassAnnotations() {
-        return Arrays.copyOf(class_annotations, class_annotations.length);
+    public final AnnotationSet getAnnotations() {
+        return annotations;
     }
 
-    //TODO: clone
     public final void setClassData(ClassData class_data) {
-        this.class_data = class_data;
+        this.class_data = class_data == null
+                ? ClassData.empty() : class_data.clone();
     }
 
     public final ClassData getClassData() {
@@ -155,7 +149,7 @@ public class ClassDef implements Cloneable {
             superclass = context.type(superclass_idx);
         }
         int interfaces_off = in.readInt();
-        TypeList interfaces = TypeList.empty();
+        TypeList interfaces = null;
         if (interfaces_off != 0) {
             interfaces = TypeList.read(in.duplicate(interfaces_off), context);
         }
@@ -170,7 +164,7 @@ public class ClassDef implements Cloneable {
             RandomInput in2 = in.duplicate(annotations_off);
             annotations = AnnotationsDirectory.read(in2, context);
         }
-        AnnotationItem[] class_annotations = annotations.class_annotations;
+        AnnotationSet class_annotations = annotations.class_annotations;
         int class_data_off = in.readInt();
         EncodedValue[] static_values = new EncodedValue[0];
         int static_values_off = in.readInt();
@@ -199,12 +193,11 @@ public class ClassDef implements Cloneable {
         if (source_file != null) {
             data.addString(source_file);
         }
-        for (AnnotationItem tmp : class_annotations) {
-            tmp.fillContext(data);
+        if (!annotations.isEmpty()) {
+            data.addAnnotationSet(annotations);
         }
-        // TODO: add class_data
-        if (class_data != null) {
-            class_data.fillContext(data);
+        if (!class_data.isEmpty()) {
+            data.addClassData(class_data);
         }
     }
 
@@ -215,13 +208,13 @@ public class ClassDef implements Cloneable {
         out.writeInt(interfaces.isEmpty() ? 0 : context.getTypeListOffset(interfaces));
         out.writeInt(source_file == null ? NO_INDEX : context.getStringIndex(source_file));
         out.writeInt(0);  // TODO: annotations
-        out.writeInt(0);  // TODO: class_data
+        out.writeInt(class_data.isEmpty() ? 0 : context.getClassDataOffset(class_data));
         out.writeInt(0);  // TODO: static_values
     }
 
     @Override
     public ClassDef clone() {
         return new ClassDef(clazz, access_flags, superclass, interfaces,
-                source_file, class_annotations, class_data);
+                source_file, annotations, class_data);
     }
 }

@@ -2,7 +2,7 @@ package com.v7878.unsafe.bytecode;
 
 import java.util.Objects;
 
-public abstract class FieldOrMethodId implements Cloneable {
+public abstract class FieldOrMethodId implements PublicCloneable {
 
     private TypeId declaring_class;
     private String name;

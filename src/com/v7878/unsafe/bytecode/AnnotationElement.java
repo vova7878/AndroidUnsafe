@@ -1,9 +1,9 @@
 package com.v7878.unsafe.bytecode;
 
-import com.v7878.unsafe.io.RandomInput;
-import java.util.Objects;
+import com.v7878.unsafe.io.*;
+import java.util.*;
 
-public class AnnotationElement implements Cloneable {
+public class AnnotationElement implements PublicCloneable {
 
     private String name;
     private EncodedValue value;
@@ -39,6 +39,11 @@ public class AnnotationElement implements Cloneable {
     public void fillContext(DataSet data) {
         data.addString(name);
         value.fillContext(data);
+    }
+
+    public void write(WriteContext context, RandomOutput out) {
+        out.writeULeb128(context.getStringIndex(name));
+        value.write(context, out);
     }
 
     @Override

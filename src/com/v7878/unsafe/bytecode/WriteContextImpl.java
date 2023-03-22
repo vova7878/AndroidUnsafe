@@ -84,6 +84,7 @@ public final class WriteContextImpl implements WriteContext {
     private final Map<AnnotationSet, Integer> annotation_sets;
     private final Map<AnnotationSetList, Integer> annotation_set_lists;
     private final Map<ClassData, Integer> class_data_items;
+    private final Map<ClassDef, Integer> annotations_directories;
 
     public WriteContextImpl(DataSet data) {
         strings = data.getStrings();
@@ -107,6 +108,7 @@ public final class WriteContextImpl implements WriteContext {
         annotation_sets = new HashMap<>();
         annotation_set_lists = new HashMap<>();
         class_data_items = new HashMap<>();
+        annotations_directories = new HashMap<>();
 
         //TODO: sort
         call_sites = data.getCallSites();
@@ -130,6 +132,10 @@ public final class WriteContextImpl implements WriteContext {
 
     public void addClassData(ClassData value, int offset) {
         class_data_items.put(value, offset);
+    }
+
+    public void addAnnotationsDirectoryOffset(ClassDef value, int offset) {
+        annotations_directories.put(value, offset);
     }
 
     public Stream<String> stringsStream() {
@@ -277,6 +283,14 @@ public final class WriteContextImpl implements WriteContext {
         Integer out = class_data_items.get(value);
         assert_(out != null, IllegalArgumentException::new,
                 "unable to find class data \"" + value + "\"");
+        return out;
+    }
+
+    @Override
+    public int getAnnotationsDirectoryOffset(ClassDef value) {
+        Integer out = annotations_directories.get(value);
+        assert_(out != null, IllegalArgumentException::new,
+                "unable to find annotations directory for class def \"" + value + "\"");
         return out;
     }
 }

@@ -27,14 +27,13 @@ public class ProtoId implements PublicCloneable {
     private TypeId return_type;
     private TypeList parameters;
 
-    public ProtoId(TypeId return_type, TypeId... parameters) {
-        setReturnType(return_type);
-        setParameters(new TypeList(parameters));
-    }
-
     public ProtoId(TypeId return_type, TypeList parameters) {
         setReturnType(return_type);
         setParameters(parameters);
+    }
+
+    public ProtoId(TypeId return_type, TypeId... parameters) {
+        this(return_type, new TypeList(parameters));
     }
 
     public final void setReturnType(TypeId return_type) {

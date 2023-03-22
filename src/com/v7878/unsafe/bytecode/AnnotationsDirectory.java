@@ -1,15 +1,47 @@
 package com.v7878.unsafe.bytecode;
 
-import com.v7878.unsafe.io.RandomInput;
-import java.util.HashMap;
-import java.util.Map;
+import static com.v7878.unsafe.Utils.*;
+import com.v7878.unsafe.io.*;
+import java.util.*;
 
+//TODO: clean up code
 public class AnnotationsDirectory {
+
+    public static final int ALIGNMENT = 4;
 
     public AnnotationSet class_annotations;
     public Map<FieldId, AnnotationSet> annotated_fields;
     public Map<MethodId, AnnotationSet> annotated_methods;
     public Map<MethodId, AnnotationSetList> annotated_parameters;
+
+    public void setClassAnnotations(AnnotationSet class_annotations) {
+        this.class_annotations = class_annotations;
+    }
+
+    public void addFieldAnnotations(FieldId field, AnnotationSet annotations) {
+        assert_(!annotations.isEmpty(), IllegalStateException::new,
+                "field annotations is empty");
+        if (annotated_fields.putIfAbsent(field, annotations) != null) {
+            throw new IllegalStateException("annotated_fields contain duplicates");
+        }
+    }
+
+    public void addMethodAnnotations(MethodId method, AnnotationSet annotations) {
+        assert_(!annotations.isEmpty(), IllegalStateException::new,
+                "method annotations is empty");
+        if (annotated_methods.putIfAbsent(method, annotations) != null) {
+            throw new IllegalStateException("annotated_methods contain duplicates");
+        }
+    }
+
+    public void addMethodParameterAnnotations(MethodId method,
+            AnnotationSetList annotations) {
+        assert_(!annotations.isEmpty(), IllegalStateException::new,
+                "parameter annotations is empty");
+        if (annotated_parameters.putIfAbsent(method, annotations) != null) {
+            throw new IllegalStateException("annotated_parameters contain duplicates");
+        }
+    }
 
     public static AnnotationsDirectory read(RandomInput in, ReadContext context) {
         AnnotationsDirectory out = new AnnotationsDirectory();
@@ -48,6 +80,47 @@ public class AnnotationsDirectory {
             out.annotated_parameters.put(method, parameters_annotations);
         }
         return out;
+    }
+
+    public void write(WriteContext context, RandomOutput out) {
+        out.writeInt(class_annotations.isEmpty() ? 0
+                : context.getAnnotationSetOffset(class_annotations));
+
+        out.writeInt(annotated_fields.size());
+        out.writeInt(annotated_methods.size());
+        out.writeInt(annotated_parameters.size());
+
+        FieldId[] fields = annotated_fields.keySet().stream()
+                .toArray(FieldId[]::new);
+        Arrays.sort(fields, context.field_comparator());
+        for (FieldId tmp : fields) {
+            out.writeInt(context.getFieldIndex(tmp));
+            out.writeInt(context.getAnnotationSetOffset(
+                    annotated_fields.get(tmp)));
+        }
+
+        MethodId[] methods = annotated_methods.keySet().stream()
+                .toArray(MethodId[]::new);
+        Arrays.sort(methods, context.method_comparator());
+        for (MethodId tmp : methods) {
+            out.writeInt(context.getMethodIndex(tmp));
+            out.writeInt(context.getAnnotationSetOffset(
+                    annotated_methods.get(tmp)));
+        }
+
+        methods = annotated_parameters.keySet().stream()
+                .toArray(MethodId[]::new);
+        Arrays.sort(methods, context.method_comparator());
+        for (MethodId tmp : methods) {
+            out.writeInt(context.getMethodIndex(tmp));
+            out.writeInt(context.getAnnotationSetListOffset(
+                    annotated_parameters.get(tmp)));
+        }
+    }
+
+    public boolean isEmpty() {
+        return class_annotations.isEmpty() && annotated_fields.isEmpty()
+                && annotated_methods.isEmpty() && annotated_parameters.isEmpty();
     }
 
     public static AnnotationsDirectory empty() {

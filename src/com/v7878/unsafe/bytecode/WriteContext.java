@@ -43,4 +43,6 @@ public interface WriteContext {
     public int getAnnotationSetListOffset(AnnotationSetList value);
 
     public int getClassDataOffset(ClassData value);
+
+    public int getAnnotationsDirectoryOffset(ClassDef value);
 }

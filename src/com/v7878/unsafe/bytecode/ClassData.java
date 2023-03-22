@@ -131,4 +131,40 @@ public class ClassData implements PublicCloneable {
         return new ClassData(static_fields, instance_fields,
                 direct_methods, virtual_methods);
     }
+
+    public void fillAnnotations(AnnotationsDirectory all_annotations) {
+        static_fields.stream().forEach((pair) -> {
+            EncodedField field = pair.first;
+            AnnotationSet fannotations = field.getAnnotations();
+            if (!fannotations.isEmpty()) {
+                all_annotations.addFieldAnnotations(field.getField(), fannotations);
+            }
+        });
+        instance_fields.stream().forEach((field) -> {
+            AnnotationSet fannotations = field.getAnnotations();
+            if (!fannotations.isEmpty()) {
+                all_annotations.addFieldAnnotations(field.getField(), fannotations);
+            }
+        });
+        direct_methods.stream().forEach((method) -> {
+            AnnotationSet mannotations = method.getAnnotations();
+            if (!mannotations.isEmpty()) {
+                all_annotations.addMethodAnnotations(method.getMethod(), mannotations);
+            }
+            AnnotationSetList pannotations = method.getParameterAnnotations();
+            if (!pannotations.isEmpty()) {
+                all_annotations.addMethodParameterAnnotations(method.getMethod(), pannotations);
+            }
+        });
+        virtual_methods.stream().forEach((method) -> {
+            AnnotationSet mannotations = method.getAnnotations();
+            if (!mannotations.isEmpty()) {
+                all_annotations.addMethodAnnotations(method.getMethod(), mannotations);
+            }
+            AnnotationSetList pannotations = method.getParameterAnnotations();
+            if (!pannotations.isEmpty()) {
+                all_annotations.addMethodParameterAnnotations(method.getMethod(), pannotations);
+            }
+        });
+    }
 }

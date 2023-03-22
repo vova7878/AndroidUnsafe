@@ -17,6 +17,8 @@ public class DataSet {
     private final List<ClassDef> class_defs;
     private final List<ClassData> class_data_items;
 
+    private final Map<ClassDef, AnnotationsDirectory> annotations_directories;
+
     private final Set<TypeList> type_lists;
     private final Set<AnnotationItem> annotations;
     private final Set<AnnotationSet> annotation_sets;
@@ -33,6 +35,8 @@ public class DataSet {
 
         class_defs = new ArrayList<>();
         class_data_items = new ArrayList<>();
+
+        annotations_directories = new HashMap<>();
 
         type_lists = new HashSet<>();
         annotations = new HashSet<>();
@@ -80,6 +84,8 @@ public class DataSet {
     }
 
     public void addClassData(ClassData value) {
+        assert_(!value.isEmpty(), IllegalStateException::new,
+                "class_data is empty");
         value.fillContext(this);
         class_data_items.add(value);
     }
@@ -106,6 +112,14 @@ public class DataSet {
                 "annotation_set_list is empty");
         value.fillContext(this);
         annotation_set_lists.add(value);
+    }
+
+    public void addAnnotationsDirectory(ClassDef clazz,
+            AnnotationsDirectory value) {
+        if (annotations_directories.putIfAbsent(clazz, value) != null) {
+            throw new IllegalStateException(
+                    "annotations_directories contain duplicates");
+        }
     }
 
     public String[] getStrings() {
@@ -158,5 +172,9 @@ public class DataSet {
 
     public AnnotationSetList[] getAnnotationSetLists() {
         return annotation_set_lists.stream().toArray(AnnotationSetList[]::new);
+    }
+
+    public Map<ClassDef, AnnotationsDirectory> getAnnotationsDirectories() {
+        return annotations_directories;
     }
 }

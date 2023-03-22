@@ -17,6 +17,7 @@ public final class AnnotationItem implements PublicCloneable {
                 return out;
             }
 
+            // TODO: repeatable?
             // a != b, but a.type == b.type
             throw new IllegalStateException("can`t compare annotations " + a + " " + b);
         };
@@ -28,6 +29,11 @@ public final class AnnotationItem implements PublicCloneable {
     public AnnotationItem(byte visibility, EncodedAnnotation annotation) {
         setVisibility(visibility);
         setAnnotation(annotation);
+    }
+
+    public AnnotationItem(byte visibility, TypeId type, AnnotationElement... elements) {
+        setVisibility(visibility);
+        setAnnotation(new EncodedAnnotation(type, elements));
     }
 
     //TODO: check
@@ -57,7 +63,7 @@ public final class AnnotationItem implements PublicCloneable {
         annotation.fillContext(data);
     }
 
-    public void write(WriteContextImpl context, RandomOutput out) {
+    public void write(WriteContext context, RandomOutput out) {
         out.writeByte(visibility);
         annotation.write(context, out);
     }

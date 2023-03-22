@@ -1,7 +1,6 @@
 package com.v7878.unsafe.bytecode;
 
 import com.v7878.unsafe.io.*;
-import java.util.*;
 
 public class AnnotationSetList extends PCList<AnnotationSet> {
 
@@ -37,8 +36,13 @@ public class AnnotationSetList extends PCList<AnnotationSet> {
     }
 
     public void write(WriteContext context, RandomOutput out) {
-        out.writeInt(size());
-        for (AnnotationSet tmp : this) {
+        int max_size = size();
+        while (get(max_size - 1).isEmpty()) {
+            max_size--;
+        }
+        out.writeInt(max_size);
+        for (int i = 0; i < max_size; i++) {
+            AnnotationSet tmp = get(i);
             if (tmp.isEmpty()) {
                 out.writeInt(0);
             } else {
@@ -48,9 +52,20 @@ public class AnnotationSetList extends PCList<AnnotationSet> {
     }
 
     @Override
+    public boolean isEmpty() {
+        if (super.isEmpty()) {
+            return true;
+        }
+        boolean out = true;
+        for (int i = 0; i < size() && out; i++) {
+            out &= get(i).isEmpty();
+        }
+        return out;
+    }
+
+    @Override
     protected AnnotationSet check(AnnotationSet annotation_set) {
-        return Objects.requireNonNull(annotation_set,
-                "AnnotationSetList can`t contain null annotation_set");
+        return annotation_set == null ? AnnotationSet.empty() : annotation_set;
     }
 
     @Override

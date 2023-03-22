@@ -7,11 +7,16 @@ import java.util.stream.*;
 public class EncodedAnnotation implements PublicCloneable {
 
     private TypeId type;
-    private AnnotationElement[] elements;
 
-    public EncodedAnnotation(TypeId type, AnnotationElement[] elements) {
+    private PCList<AnnotationElement> elements;
+
+    public EncodedAnnotation(TypeId type, PCList<AnnotationElement> elements) {
         setType(type);
         setElements(elements);
+    }
+
+    public EncodedAnnotation(TypeId type, AnnotationElement... elements) {
+        this(type, new PCList<>(elements));
     }
 
     public final void setType(TypeId type) {
@@ -23,27 +28,21 @@ public class EncodedAnnotation implements PublicCloneable {
         return type;
     }
 
-    public final void setElements(AnnotationElement[] elements) {
-        if (elements == null) {
-            elements = new AnnotationElement[0];
-        }
-        this.elements = Arrays.stream(elements)
-                .map(tmp -> Objects.requireNonNull(tmp,
-                "annotation elements can`t contain null element"))
-                .map(AnnotationElement::clone)
-                .toArray(AnnotationElement[]::new);
+    public final void setElements(PCList<AnnotationElement> elements) {
+        this.elements = elements == null
+                ? PCList.empty() : elements.clone();
     }
 
-    public final AnnotationElement[] getElements() {
-        return Arrays.copyOf(elements, elements.length);
+    public final PCList<AnnotationElement> getElements() {
+        return elements;
     }
 
     public static EncodedAnnotation read(RandomInput in, ReadContext context) {
         TypeId type = context.type(in.readULeb128());
         int size = in.readULeb128();
-        AnnotationElement[] elements = new AnnotationElement[size];
+        PCList<AnnotationElement> elements = PCList.empty();
         for (int i = 0; i < size; i++) {
-            elements[i] = AnnotationElement.read(in, context);
+            elements.add(AnnotationElement.read(in, context));
         }
         return new EncodedAnnotation(type, elements);
     }
@@ -57,7 +56,7 @@ public class EncodedAnnotation implements PublicCloneable {
 
     public void write(WriteContext context, RandomOutput out) {
         out.writeULeb128(context.getTypeIndex(type));
-        out.writeULeb128(elements.length);
+        out.writeULeb128(elements.size());
         for (AnnotationElement tmp : elements) {
             tmp.write(context, out);
         }
@@ -65,10 +64,10 @@ public class EncodedAnnotation implements PublicCloneable {
 
     @Override
     public String toString() {
-        String elems = Arrays.stream(elements)
+        String elems = elements.stream()
                 .map((p) -> p.toString())
                 .collect(Collectors.joining(", "));
-        return "EncodedAnnotation{" + type + "; " + elems + "}";
+        return "EncodedAnnotation{" + type + " " + elems + "}";
     }
 
     @Override
@@ -76,14 +75,14 @@ public class EncodedAnnotation implements PublicCloneable {
         if (obj instanceof EncodedAnnotation) {
             EncodedAnnotation eaobj = (EncodedAnnotation) obj;
             return Objects.equals(type, eaobj.type)
-                    && Arrays.equals(elements, eaobj.elements);
+                    && Objects.equals(elements, eaobj.elements);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, Arrays.hashCode(elements));
+        return Objects.hash(type, elements);
     }
 
     @Override

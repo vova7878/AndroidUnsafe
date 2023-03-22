@@ -196,9 +196,13 @@ public class ClassDef implements PublicCloneable {
         if (!annotations.isEmpty()) {
             data.addAnnotationSet(annotations);
         }
+        AnnotationsDirectory all_annotations = AnnotationsDirectory.empty();
+        all_annotations.setClassAnnotations(annotations);
         if (!class_data.isEmpty()) {
             data.addClassData(class_data);
+            class_data.fillAnnotations(all_annotations);
         }
+        data.addAnnotationsDirectory(this, all_annotations);
     }
 
     public void write(WriteContext context, RandomOutput out) {
@@ -207,7 +211,7 @@ public class ClassDef implements PublicCloneable {
         out.writeInt(superclass == null ? NO_INDEX : context.getTypeIndex(superclass));
         out.writeInt(interfaces.isEmpty() ? 0 : context.getTypeListOffset(interfaces));
         out.writeInt(source_file == null ? NO_INDEX : context.getStringIndex(source_file));
-        out.writeInt(0);  // TODO: annotations
+        out.writeInt(context.getAnnotationsDirectoryOffset(this));
         out.writeInt(class_data.isEmpty() ? 0 : context.getClassDataOffset(class_data));
         out.writeInt(0);  // TODO: static_values
     }

@@ -246,6 +246,28 @@ public class Dex extends AbstractList<ClassDef> implements PublicCloneable {
             }
         }
 
+        Map<ClassDef, AnnotationsDirectory> annotations_directories
+                = data.getAnnotationsDirectories();
+        if (!annotations_directories.isEmpty()) {
+            offset = roundUp(offset, AnnotationsDirectory.ALIGNMENT);
+            map.annotations_directories_off = offset;
+            map.annotations_directories_size = 0;
+            for (Map.Entry<ClassDef, AnnotationsDirectory> tmp
+                    : annotations_directories.entrySet()) {
+                AnnotationsDirectory ad = tmp.getValue();
+                if (!ad.isEmpty()) {
+                    map.annotations_directories_size++;
+                    offset = roundUp(offset, AnnotationsDirectory.ALIGNMENT);
+                    data_out.position(offset);
+                    ad.write(context, data_out);
+                    context.addAnnotationsDirectoryOffset(tmp.getKey(), offset);
+                    offset = (int) data_out.position();
+                } else {
+                    context.addAnnotationsDirectoryOffset(tmp.getKey(), 0);
+                }
+            }
+        }
+
         offset = roundUp(offset, FileMap.MAP_ALIGNMENT);
         data_out.position(offset);
         map.writeMap(data_out);

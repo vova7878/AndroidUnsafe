@@ -17,6 +17,56 @@ public class TypeId implements PublicCloneable {
         };
     }
 
+    public static TypeId of(String class_name) {
+        int array_depth = 0;
+        while (class_name.endsWith("[]")) {
+            array_depth++;
+            class_name = class_name.substring(0, class_name.length() - 2);
+        }
+        switch (class_name) {
+            case "void":
+                class_name = "V";
+                break;
+            case "boolean":
+                class_name = "Z";
+                break;
+            case "byte":
+                class_name = "B";
+                break;
+            case "short":
+                class_name = "S";
+                break;
+            case "char":
+                class_name = "C";
+                break;
+            case "int":
+                class_name = "I";
+                break;
+            case "float":
+                class_name = "F";
+                break;
+            case "long":
+                class_name = "J";
+                break;
+            case "double":
+                class_name = "D";
+                break;
+            default:
+                class_name = "L" + class_name.replace('.', '/') + ";";
+                break;
+        }
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < array_depth; i++) {
+            out.append('[');
+        }
+        out.append(class_name);
+        return new TypeId(out.toString());
+    }
+
+    public static TypeId of(Class<?> clazz) {
+        return of(clazz.getName());
+    }
+
     private String descriptor;
 
     public TypeId(String descriptor) {

@@ -1,6 +1,7 @@
 package com.v7878.unsafe.dex;
 
 import com.v7878.unsafe.io.*;
+import java.lang.reflect.*;
 import java.util.*;
 
 public class MethodId extends FieldOrMethodId {
@@ -28,6 +29,19 @@ public class MethodId extends FieldOrMethodId {
             return context.proto_comparator()
                     .compare(a.proto, b.proto);
         };
+    }
+
+    private static String getName(Executable ex) {
+        if (ex instanceof Constructor) {
+            return (ex.getModifiers() & Modifier.STATIC) == 0 ? "<init>" : "<clinit>";
+        }
+        return ex.getName();
+    }
+
+    public static MethodId of(Executable ex) {
+        Objects.requireNonNull(ex, "trying to get MethodId of null");
+        return new MethodId(TypeId.of(ex.getDeclaringClass()),
+                ProtoId.of(ex), getName(ex));
     }
 
     private ProtoId proto;

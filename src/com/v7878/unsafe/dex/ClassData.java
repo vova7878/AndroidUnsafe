@@ -82,7 +82,7 @@ public class ClassData implements PublicCloneable {
                 static_fields.add(new PCPair<>(field, static_values[i]));
             } else {
                 static_fields.add(new PCPair<>(field,
-                        EncodedValue.getDefaultValue(
+                        EncodedValue.defaultValue(
                                 field.getField().getType())));
             }
         }

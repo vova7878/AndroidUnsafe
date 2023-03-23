@@ -1,6 +1,7 @@
 package com.v7878.unsafe.dex;
 
 import com.v7878.unsafe.io.*;
+import java.lang.reflect.*;
 import java.util.*;
 
 public class ProtoId implements PublicCloneable {
@@ -22,6 +23,15 @@ public class ProtoId implements PublicCloneable {
             return context.type_list_comparator()
                     .compare(a.parameters, b.parameters);
         };
+    }
+
+    public static ProtoId of(Executable ex) {
+        Objects.requireNonNull(ex, "trying to get ProtoId of null");
+        Class<?> return_type = ex instanceof Method
+                ? ((Method) ex).getReturnType() : void.class;
+        return new ProtoId(TypeId.of(return_type),
+                Arrays.stream(ex.getParameterTypes())
+                        .map(TypeId::of).toArray(TypeId[]::new));
     }
 
     private TypeId return_type;

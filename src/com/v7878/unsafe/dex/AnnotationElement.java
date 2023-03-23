@@ -5,6 +5,14 @@ import java.util.*;
 
 public class AnnotationElement implements PublicCloneable {
 
+    public static final Comparator<AnnotationElement> COMPARATOR = (a, b) -> {
+        if (a.equals(b)) {
+            return 0;
+        }
+
+        return StringId.COMPARATOR.compare(a.name, b.name);
+    };
+
     private String name;
     private EncodedValue value;
 

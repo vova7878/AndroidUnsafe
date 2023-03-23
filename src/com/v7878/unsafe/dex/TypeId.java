@@ -18,6 +18,7 @@ public class TypeId implements PublicCloneable {
     }
 
     public static TypeId of(String class_name) {
+        Objects.requireNonNull(class_name, "trying to get TypeId of null");
         int array_depth = 0;
         while (class_name.endsWith("[]")) {
             array_depth++;

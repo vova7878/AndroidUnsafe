@@ -2,6 +2,7 @@ package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.*;
 import static com.v7878.unsafe.dex.DexConstants.*;
+import com.v7878.unsafe.dex.EncodedValue.ArrayValue;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
@@ -171,7 +172,7 @@ public class ClassDef implements PublicCloneable {
         if (static_values_off != 0) {
             RandomInput in2 = in.duplicate(static_values_off);
             static_values = (EncodedValue[]) EncodedValueReader
-                    .readValue(in2, context, VALUE_ARRAY).getValue();
+                    .readValue(in2, context, VALUE_ARRAY).value();
         }
         ClassData class_data = null;
         if (class_data_off != 0) {

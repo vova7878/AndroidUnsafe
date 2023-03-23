@@ -2,44 +2,27 @@ package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.dex.DexConstants.*;
 import com.v7878.unsafe.io.*;
+import java.lang.invoke.*;
+import java.lang.reflect.*;
 import java.util.*;
 
-public abstract class EncodedValue implements PublicCloneable {
+public interface EncodedValue extends PublicCloneable {
 
-    public final int type;
+    public boolean isDefault();
 
-    private EncodedValue(int type) {
-        this.type = type;
+    public int type();
+
+    public Object value();
+
+    public default void fillContext(DataSet data) {
     }
 
-    public abstract boolean isDefault();
-
-    public abstract Object getValue();
-
-    public void fillContext(DataSet data) {
-    }
-
-    public abstract void write(WriteContext context, RandomOutput out);
+    public void write(WriteContext context, RandomOutput out);
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof EncodedValue) {
-            EncodedValue evobj = (EncodedValue) obj;
-            return type == evobj.type && (type == VALUE_NULL
-                    || Objects.deepEquals(getValue(), evobj.getValue()));
-        }
-        return false;
-    }
+    public EncodedValue clone();
 
-    @Override
-    public int hashCode() {
-        return Arrays.deepHashCode(new Object[]{type, getValue()});
-    }
-
-    @Override
-    public abstract EncodedValue clone();
-
-    public static EncodedValue getDefaultValue(TypeId type) {
+    public static EncodedValue defaultValue(TypeId type) {
         String name = type.getDescriptor();
         switch (name) {
             case "V":
@@ -65,7 +48,214 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class BooleanValue extends EncodedValue {
+    public static EncodedValue of(Object obj) {
+        if (obj == null) {
+            return new NullValue();
+        }
+
+        if (obj instanceof EncodedValue) {
+            return (EncodedValue) obj;
+        }
+
+        if (obj instanceof Boolean) {
+            return new BooleanValue((Boolean) obj);
+        }
+
+        if (obj instanceof Byte) {
+            return new ByteValue((Byte) obj);
+        }
+
+        if (obj instanceof Short) {
+            return new ShortValue((Short) obj);
+        }
+
+        if (obj instanceof Character) {
+            return new CharValue((Character) obj);
+        }
+
+        if (obj instanceof Integer) {
+            return new IntValue((Integer) obj);
+        }
+
+        if (obj instanceof Float) {
+            return new FloatValue((Float) obj);
+        }
+
+        if (obj instanceof Long) {
+            return new LongValue((Long) obj);
+        }
+
+        if (obj instanceof Double) {
+            return new DoubleValue((Double) obj);
+        }
+
+        if (obj instanceof String) {
+            return new StringValue((String) obj);
+        }
+
+        if (obj instanceof TypeId) {
+            return new TypeValue((TypeId) obj);
+        }
+        if (obj instanceof Class) {
+            return new TypeValue(TypeId.of((Class<?>) obj));
+        }
+
+        if (obj instanceof ProtoId) {
+            return new MethodTypeValue((ProtoId) obj);
+        }
+
+        if (obj instanceof MethodId) {
+            return new MethodValue((MethodId) obj);
+        }
+        if (obj instanceof Executable) {
+            return new MethodValue(MethodId.of((Executable) obj));
+        }
+
+        if (obj instanceof FieldId) {
+            return new FieldValue((FieldId) obj);
+        }
+        if (obj instanceof Field) {
+            return new FieldValue(FieldId.of((Field) obj));
+        }
+
+        if (obj instanceof Enum) {
+            return new EnumValue(FieldId.of((Enum) obj));
+        }
+
+        if (obj instanceof MethodHandleItem) {
+            return new MethodHandleValue((MethodHandleItem) obj);
+        }
+        if (obj instanceof MethodHandle) {
+            //TODO: implement by unsafe
+            throw new UnsupportedOperationException("not implemented yet");
+        }
+
+        if (obj instanceof EncodedAnnotation) {
+            return new AnnotationValue((EncodedAnnotation) obj);
+        }
+        if (obj.getClass().isAnnotation()) {
+            //TODO: implement by reflection
+            throw new UnsupportedOperationException("not implemented yet");
+        }
+
+        if (obj instanceof boolean[]) {
+            ArrayValue out = new ArrayValue();
+            for (boolean tmp : (boolean[]) obj) {
+                out.add(new BooleanValue(tmp));
+            }
+            return out;
+        }
+
+        if (obj instanceof byte[]) {
+            ArrayValue out = new ArrayValue();
+            for (byte tmp : (byte[]) obj) {
+                out.add(new ByteValue(tmp));
+            }
+            return out;
+        }
+
+        if (obj instanceof short[]) {
+            ArrayValue out = new ArrayValue();
+            for (short tmp : (short[]) obj) {
+                out.add(new ShortValue(tmp));
+            }
+            return out;
+        }
+
+        if (obj instanceof char[]) {
+            ArrayValue out = new ArrayValue();
+            for (char tmp : (char[]) obj) {
+                out.add(new CharValue(tmp));
+            }
+            return out;
+        }
+
+        if (obj instanceof int[]) {
+            ArrayValue out = new ArrayValue();
+            for (int tmp : (int[]) obj) {
+                out.add(new IntValue(tmp));
+            }
+            return out;
+        }
+
+        if (obj instanceof float[]) {
+            ArrayValue out = new ArrayValue();
+            for (float tmp : (float[]) obj) {
+                out.add(new FloatValue(tmp));
+            }
+            return out;
+        }
+
+        if (obj instanceof long[]) {
+            ArrayValue out = new ArrayValue();
+            for (long tmp : (long[]) obj) {
+                out.add(new LongValue(tmp));
+            }
+            return out;
+        }
+
+        if (obj instanceof double[]) {
+            ArrayValue out = new ArrayValue();
+            for (double tmp : (double[]) obj) {
+                out.add(new DoubleValue(tmp));
+            }
+            return out;
+        }
+
+        if (obj instanceof Object[]) {
+            ArrayValue out = new ArrayValue();
+            for (Object tmp : (Object[]) obj) {
+                out.add(of(tmp));
+            }
+            return out;
+        }
+
+        throw new IllegalArgumentException("unable to convert " + obj + " to EncodedValue");
+    }
+
+    abstract static class SimpleValue implements EncodedValue {
+
+        private final int type;
+
+        public SimpleValue(int type) {
+            this.type = type;
+        }
+
+        @Override
+        public int type() {
+            return type;
+        }
+
+        @Override
+        public boolean isDefault() {
+            return false;
+        }
+
+        @Override
+        public abstract SimpleValue clone();
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(value());
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof SimpleValue) {
+                EncodedValue evobj = (EncodedValue) obj;
+                return type() == evobj.type()
+                        && Objects.equals(value(), evobj.value());
+            }
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return value().toString();
+        }
+    }
+
+    public static class BooleanValue extends SimpleValue {
 
         public boolean value;
 
@@ -80,7 +270,7 @@ public abstract class EncodedValue implements PublicCloneable {
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            out.writeByte(type | ((value ? 1 : 0) << 5));
+            out.writeByte(type() | ((value ? 1 : 0) << 5));
         }
 
         @Override
@@ -89,12 +279,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
 
         @Override
-        public String toString() {
-            return Boolean.toString(value);
-        }
-
-        @Override
-        public Object getValue() {
+        public Object value() {
             return value;
         }
 
@@ -104,7 +289,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class ByteValue extends EncodedValue {
+    public static class ByteValue extends SimpleValue {
 
         public byte value;
 
@@ -119,7 +304,7 @@ public abstract class EncodedValue implements PublicCloneable {
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            ValueCoder.writeSignedIntegralValue(out, type, value);
+            ValueCoder.writeSignedIntegralValue(out, type(), value);
         }
 
         @Override
@@ -128,12 +313,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
 
         @Override
-        public String toString() {
-            return Byte.toString(value);
-        }
-
-        @Override
-        public Object getValue() {
+        public Object value() {
             return value;
         }
 
@@ -143,7 +323,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class ShortValue extends EncodedValue {
+    public static class ShortValue extends SimpleValue {
 
         public short value;
 
@@ -158,7 +338,7 @@ public abstract class EncodedValue implements PublicCloneable {
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            ValueCoder.writeSignedIntegralValue(out, type, value);
+            ValueCoder.writeSignedIntegralValue(out, type(), value);
         }
 
         @Override
@@ -167,12 +347,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
 
         @Override
-        public String toString() {
-            return Short.toString(value);
-        }
-
-        @Override
-        public Object getValue() {
+        public Object value() {
             return value;
         }
 
@@ -182,7 +357,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class CharValue extends EncodedValue {
+    public static class CharValue extends SimpleValue {
 
         public char value;
 
@@ -197,7 +372,7 @@ public abstract class EncodedValue implements PublicCloneable {
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            ValueCoder.writeUnsignedIntegralValue(out, type, value);
+            ValueCoder.writeUnsignedIntegralValue(out, type(), value);
         }
 
         @Override
@@ -206,12 +381,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
 
         @Override
-        public String toString() {
-            return Character.toString(value);
-        }
-
-        @Override
-        public Object getValue() {
+        public Object value() {
             return value;
         }
 
@@ -221,7 +391,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class IntValue extends EncodedValue {
+    public static class IntValue extends SimpleValue {
 
         public int value;
 
@@ -236,7 +406,7 @@ public abstract class EncodedValue implements PublicCloneable {
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            ValueCoder.writeSignedIntegralValue(out, type, value);
+            ValueCoder.writeSignedIntegralValue(out, type(), value);
         }
 
         @Override
@@ -245,12 +415,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
 
         @Override
-        public String toString() {
-            return Integer.toString(value);
-        }
-
-        @Override
-        public Object getValue() {
+        public Object value() {
             return value;
         }
 
@@ -260,7 +425,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class LongValue extends EncodedValue {
+    public static class LongValue extends SimpleValue {
 
         public long value;
 
@@ -275,7 +440,7 @@ public abstract class EncodedValue implements PublicCloneable {
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            ValueCoder.writeSignedIntegralValue(out, type, value);
+            ValueCoder.writeSignedIntegralValue(out, type(), value);
         }
 
         @Override
@@ -284,12 +449,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
 
         @Override
-        public String toString() {
-            return Long.toString(value);
-        }
-
-        @Override
-        public Object getValue() {
+        public Object value() {
             return value;
         }
 
@@ -299,7 +459,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class FloatValue extends EncodedValue {
+    public static class FloatValue extends SimpleValue {
 
         public float value;
 
@@ -314,7 +474,7 @@ public abstract class EncodedValue implements PublicCloneable {
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            ValueCoder.writeRightZeroExtendedValue(out, type,
+            ValueCoder.writeRightZeroExtendedValue(out, type(),
                     ((long) Float.floatToRawIntBits(value)) << 32);
         }
 
@@ -324,12 +484,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
 
         @Override
-        public String toString() {
-            return Float.toString(value);
-        }
-
-        @Override
-        public Object getValue() {
+        public Object value() {
             return value;
         }
 
@@ -339,7 +494,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class DoubleValue extends EncodedValue {
+    public static class DoubleValue extends SimpleValue {
 
         public double value;
 
@@ -354,8 +509,9 @@ public abstract class EncodedValue implements PublicCloneable {
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            ValueCoder.writeRightZeroExtendedValue(out, type,
-                    Double.doubleToRawLongBits(value));
+            ValueCoder.writeRightZeroExtendedValue(out, type(),
+                    Double.doubleToRawLongBits(value)
+            );
         }
 
         @Override
@@ -364,12 +520,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
 
         @Override
-        public String toString() {
-            return Double.toString(value);
-        }
-
-        @Override
-        public Object getValue() {
+        public Object value() {
             return value;
         }
 
@@ -379,7 +530,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class NullValue extends EncodedValue {
+    public static class NullValue extends SimpleValue {
 
         public NullValue() {
             super(VALUE_NULL);
@@ -387,7 +538,7 @@ public abstract class EncodedValue implements PublicCloneable {
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            out.writeByte(type);
+            out.writeByte(type());
         }
 
         @Override
@@ -401,7 +552,7 @@ public abstract class EncodedValue implements PublicCloneable {
         }
 
         @Override
-        public Object getValue() {
+        public Object value() {
             return null;
         }
 
@@ -411,48 +562,34 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class MethodTypeValue extends EncodedValue {
+    public static class MethodTypeValue extends SimpleValue {
 
         private ProtoId value;
 
-        public MethodTypeValue() {
-            super(VALUE_METHOD_TYPE);
-        }
-
         public MethodTypeValue(ProtoId value) {
-            this();
+            super(VALUE_METHOD_TYPE);
             setValue(value);
         }
 
         @Override
         public void fillContext(DataSet data) {
-            if (value != null) {
-                data.addProto(value);
-            }
+            data.addProto(value);
         }
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            ValueCoder.writeUnsignedIntegralValue(out, type,
-                    context.getProtoIndex(value));
-        }
-
-        @Override
-        public boolean isDefault() {
-            return value == null;
-        }
-
-        @Override
-        public String toString() {
-            return Objects.toString(value);
+            ValueCoder.writeUnsignedIntegralValue(out, type(),
+                    context.getProtoIndex(value)
+            );
         }
 
         public final void setValue(ProtoId value) {
-            this.value = value == null ? null : value.clone();
+            this.value = Objects.requireNonNull(value,
+                    "value can`t be null").clone();
         }
 
         @Override
-        public final ProtoId getValue() {
+        public final ProtoId value() {
             return value;
         }
 
@@ -462,48 +599,33 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class MethodHandleValue extends EncodedValue {
+    public static class MethodHandleValue extends SimpleValue {
 
         private MethodHandleItem value;
 
-        public MethodHandleValue() {
-            super(VALUE_METHOD_HANDLE);
-        }
-
         public MethodHandleValue(MethodHandleItem value) {
-            this();
+            super(VALUE_METHOD_HANDLE);
             setValue(value);
         }
 
         @Override
         public void fillContext(DataSet data) {
-            if (value != null) {
-                data.addMethodHandle(value);
-            }
+            data.addMethodHandle(value);
         }
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            ValueCoder.writeUnsignedIntegralValue(out, type,
+            ValueCoder.writeUnsignedIntegralValue(out, type(),
                     context.getMethodHandleIndex(value));
         }
 
-        @Override
-        public boolean isDefault() {
-            return value == null;
-        }
-
-        @Override
-        public String toString() {
-            return Objects.toString(value);
-        }
-
         public final void setValue(MethodHandleItem value) {
-            this.value = value == null ? null : value.clone();
+            this.value = Objects.requireNonNull(value,
+                    "value can`t be null").clone();
         }
 
         @Override
-        public final MethodHandleItem getValue() {
+        public final MethodHandleItem value() {
             return value;
         }
 
@@ -513,48 +635,33 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class StringValue extends EncodedValue {
+    public static class StringValue extends SimpleValue {
 
         private String value;
 
-        public StringValue() {
-            super(VALUE_STRING);
-        }
-
         public StringValue(String value) {
-            this();
+            super(VALUE_STRING);
             setValue(value);
         }
 
         @Override
         public void fillContext(DataSet data) {
-            if (value != null) {
-                data.addString(value);
-            }
+            data.addString(value);
         }
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            ValueCoder.writeUnsignedIntegralValue(out, type,
+            ValueCoder.writeUnsignedIntegralValue(out, type(),
                     context.getStringIndex(value));
         }
 
-        @Override
-        public boolean isDefault() {
-            return value == null;
-        }
-
-        @Override
-        public String toString() {
-            return Objects.toString(value);
-        }
-
         public final void setValue(String value) {
-            this.value = value;
+            this.value = Objects.requireNonNull(value,
+                    "value can`t be null");
         }
 
         @Override
-        public final String getValue() {
+        public final String value() {
             return value;
         }
 
@@ -564,48 +671,33 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class TypeValue extends EncodedValue {
+    public static class TypeValue extends SimpleValue {
 
         private TypeId value;
 
-        public TypeValue() {
-            super(VALUE_TYPE);
-        }
-
         public TypeValue(TypeId value) {
-            this();
+            super(VALUE_TYPE);
             setValue(value);
         }
 
         @Override
         public void fillContext(DataSet data) {
-            if (value != null) {
-                data.addType(value);
-            }
+            data.addType(value);
         }
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            ValueCoder.writeUnsignedIntegralValue(out, type,
+            ValueCoder.writeUnsignedIntegralValue(out, type(),
                     context.getTypeIndex(value));
         }
 
-        @Override
-        public boolean isDefault() {
-            return value == null;
-        }
-
-        @Override
-        public String toString() {
-            return Objects.toString(value);
-        }
-
         public final void setValue(TypeId value) {
-            this.value = value == null ? null : value.clone();
+            this.value = Objects.requireNonNull(value,
+                    "value can`t be null").clone();
         }
 
         @Override
-        public final TypeId getValue() {
+        public final TypeId value() {
             return value;
         }
 
@@ -615,48 +707,33 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class FieldValue extends EncodedValue {
+    public static class FieldValue extends SimpleValue {
 
         private FieldId value;
 
-        public FieldValue() {
-            super(VALUE_FIELD);
-        }
-
         public FieldValue(FieldId value) {
-            this();
+            super(VALUE_FIELD);
             setValue(value);
         }
 
         @Override
         public void fillContext(DataSet data) {
-            if (value != null) {
-                data.addField(value);
-            }
+            data.addField(value);
         }
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            ValueCoder.writeUnsignedIntegralValue(out, type,
+            ValueCoder.writeUnsignedIntegralValue(out, type(),
                     context.getFieldIndex(value));
         }
 
-        @Override
-        public boolean isDefault() {
-            return value == null;
-        }
-
-        @Override
-        public String toString() {
-            return Objects.toString(value);
-        }
-
         public final void setValue(FieldId value) {
-            this.value = value == null ? null : value.clone();
+            this.value = Objects.requireNonNull(value,
+                    "value can`t be null").clone();
         }
 
         @Override
-        public final FieldId getValue() {
+        public final FieldId value() {
             return value;
         }
 
@@ -666,48 +743,33 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class MethodValue extends EncodedValue {
+    public static class MethodValue extends SimpleValue {
 
         private MethodId value;
 
-        public MethodValue() {
-            super(VALUE_METHOD);
-        }
-
         public MethodValue(MethodId value) {
-            this();
+            super(VALUE_METHOD);
             setValue(value);
         }
 
         @Override
         public void fillContext(DataSet data) {
-            if (value != null) {
-                data.addMethod(value);
-            }
+            data.addMethod(value);
         }
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            ValueCoder.writeUnsignedIntegralValue(out, type,
+            ValueCoder.writeUnsignedIntegralValue(out, type(),
                     context.getMethodIndex(value));
         }
 
-        @Override
-        public boolean isDefault() {
-            return value == null;
-        }
-
-        @Override
-        public String toString() {
-            return Objects.toString(value);
-        }
-
         public final void setValue(MethodId value) {
-            this.value = value == null ? null : value.clone();
+            this.value = Objects.requireNonNull(value,
+                    "value can`t be null").clone();
         }
 
         @Override
-        public final MethodId getValue() {
+        public final MethodId value() {
             return value;
         }
 
@@ -717,48 +779,33 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class EnumValue extends EncodedValue {
+    public static class EnumValue extends SimpleValue {
 
         private FieldId value;
 
-        public EnumValue() {
-            super(VALUE_ENUM);
-        }
-
         public EnumValue(FieldId value) {
-            this();
+            super(VALUE_ENUM);
             setValue(value);
         }
 
         @Override
         public void fillContext(DataSet data) {
-            if (value != null) {
-                data.addField(value);
-            }
+            data.addField(value);
         }
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            ValueCoder.writeUnsignedIntegralValue(out, type,
+            ValueCoder.writeUnsignedIntegralValue(out, type(),
                     context.getFieldIndex(value));
         }
 
-        @Override
-        public boolean isDefault() {
-            return value == null;
-        }
-
-        @Override
-        public String toString() {
-            return Objects.toString(value);
-        }
-
         public final void setValue(FieldId value) {
-            this.value = value == null ? null : value.clone();
+            this.value = Objects.requireNonNull(value,
+                    "value can`t be null").clone();
         }
 
         @Override
-        public final FieldId getValue() {
+        public final FieldId value() {
             return value;
         }
 
@@ -768,112 +815,96 @@ public abstract class EncodedValue implements PublicCloneable {
         }
     }
 
-    public static class ArrayValue extends EncodedValue {
+    public static class ArrayValue extends PCList<EncodedValue>
+            implements EncodedValue {
 
-        private EncodedValue[] value;
-
-        public ArrayValue() {
-            super(VALUE_ARRAY);
+        public ArrayValue(EncodedValue... value) {
+            super(value);
         }
 
-        public ArrayValue(EncodedValue[] value) {
-            this();
-            setValue(value);
+        @Override
+        public int type() {
+            return VALUE_ARRAY;
+        }
+
+        @Override
+        public boolean isDefault() {
+            return false;
         }
 
         @Override
         public void fillContext(DataSet data) {
-            if (value != null) {
-                for (EncodedValue tmp : value) {
-                    tmp.fillContext(data);
-                }
+            for (EncodedValue tmp : this) {
+                tmp.fillContext(data);
             }
         }
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            out.writeByte(type);
+            out.writeByte(type());
             writeData(context, out);
         }
 
         public void writeData(WriteContext context, RandomOutput out) {
-            out.writeULeb128(value.length);
-            for (EncodedValue tmp : value) {
+            out.writeULeb128(size());
+            for (EncodedValue tmp : this) {
                 tmp.write(context, out);
             }
         }
 
         @Override
-        public boolean isDefault() {
-            return value == null;
+        public final ArrayValue value() {
+            return this;
         }
 
         @Override
-        public String toString() {
-            return Arrays.toString(value);
-        }
-
-        public final void setValue(EncodedValue[] value) {
-            this.value = value == null ? null
-                    : Arrays.stream(value)
-                            .map(EncodedValue::clone)
-                            .toArray(EncodedValue[]::new);
+        public boolean equals(Object obj) {
+            if (obj instanceof ArrayValue) {
+                return super.equals(obj);
+            }
+            return false;
         }
 
         @Override
-        public final EncodedValue[] getValue() {
-            return value == null ? null
-                    : Arrays.copyOf(value, value.length);
+        public int hashCode() {
+            return super.hashCode();
         }
 
         @Override
         public ArrayValue clone() {
-            return new ArrayValue(value);
+            ArrayValue out = new ArrayValue();
+            out.addAll(this);
+            return out;
         }
     }
 
-    public static class AnnotationValue extends EncodedValue {
+    public static class AnnotationValue extends SimpleValue {
 
         private EncodedAnnotation value;
 
-        public AnnotationValue() {
-            super(VALUE_ANNOTATION);
-        }
-
         public AnnotationValue(EncodedAnnotation value) {
-            this();
+            super(VALUE_ANNOTATION);
             setValue(value);
         }
 
         @Override
         public void fillContext(DataSet data) {
-            if (value != null) {
-                value.fillContext(data);
-            }
+            value.fillContext(data);
         }
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            out.writeByte(type);
+            out.writeByte(type());
             value.write(context, out);
         }
 
-        @Override
-        public boolean isDefault() {
-            return value == null;
-        }
-
-        @Override
-        public String toString() {
-            return Objects.toString(value);
-        }
-
         public final void setValue(EncodedAnnotation value) {
-            this.value = value == null ? null : value.clone();
+            this.value = Objects.requireNonNull(value,
+                    "value can`t be null").clone();
         }
 
         @Override
-        public final EncodedAnnotation getValue() {
+        public final EncodedAnnotation value() {
             return value;
         }
 

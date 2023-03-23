@@ -1,6 +1,7 @@
 package com.v7878.unsafe.dex;
 
 import com.v7878.unsafe.io.*;
+import java.lang.reflect.*;
 import java.util.*;
 
 public class FieldId extends FieldOrMethodId {
@@ -28,6 +29,18 @@ public class FieldId extends FieldOrMethodId {
             return context.type_comparator()
                     .compare(a.type, b.type);
         };
+    }
+
+    public static FieldId of(Field field) {
+        Objects.requireNonNull(field, "trying to get FieldId of null");
+        return new FieldId(TypeId.of(field.getDeclaringClass()),
+                TypeId.of(field.getType()), field.getName());
+    }
+
+    public static FieldId of(Enum e) {
+        Objects.requireNonNull(e, "trying to get FieldId of null");
+        TypeId declaring_class = TypeId.of(e.getDeclaringClass());
+        return new FieldId(declaring_class, declaring_class, e.name());
     }
 
     private TypeId type;

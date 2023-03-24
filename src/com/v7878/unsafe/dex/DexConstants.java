@@ -58,7 +58,6 @@ public class DexConstants {
     //TODO
     public static final int TYPE_DEBUG_INFO_ITEM = 0x2003;
     public static final int TYPE_ANNOTATION_ITEM = 0x2004;
-    //TODO
     public static final int TYPE_ENCODED_ARRAY_ITEM = 0x2005;
     public static final int TYPE_ANNOTATIONS_DIRECTORY_ITEM = 0x2006;
     //TODO?

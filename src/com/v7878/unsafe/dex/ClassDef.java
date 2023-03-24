@@ -185,18 +185,18 @@ public class ClassDef implements PublicCloneable {
 
     private ArrayValue getStaticFieldValues() {
         ArrayValue out = new ArrayValue();
-        List<EncodedValue> tmp = class_data.getStaticFields()
-                .stream().map(PCPair::second).toList();
-        if (tmp.isEmpty()) {
+        EncodedValue[] tmp = class_data.getStaticFields()
+                .stream().map(PCPair::second).toArray(EncodedValue[]::new);
+        if (tmp.length == 0) {
             return out;
         }
-        int size = tmp.size();
+        int size = tmp.length;
         for (; size > 0; size--) {
-            if (!tmp.get(size - 1).isDefault()) {
+            if (!tmp[size - 1].isDefault()) {
                 break;
             }
         }
-        out.addAll(tmp.subList(0, size));
+        out.addAll(Arrays.asList(Arrays.copyOf(tmp, size)));
         return out;
     }
 

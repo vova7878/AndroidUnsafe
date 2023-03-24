@@ -1,6 +1,7 @@
 package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.*;
+import com.v7878.unsafe.dex.EncodedValue.*;
 import java.util.*;
 
 // Temporary object. Needed to read or write
@@ -23,6 +24,7 @@ public class DataSet {
     private final Set<AnnotationItem> annotations;
     private final Set<AnnotationSet> annotation_sets;
     private final Set<AnnotationSetList> annotation_set_lists;
+    private final Set<ArrayValue> array_values;
 
     public DataSet() {
         strings = new HashSet<>();
@@ -42,6 +44,7 @@ public class DataSet {
         annotations = new HashSet<>();
         annotation_sets = new HashSet<>();
         annotation_set_lists = new HashSet<>();
+        array_values = new HashSet<>();
     }
 
     public void addString(String value) {
@@ -122,6 +125,10 @@ public class DataSet {
         }
     }
 
+    public void addArrayValue(ArrayValue value) {
+        array_values.add(value);
+    }
+
     public String[] getStrings() {
         return strings.stream().toArray(String[]::new);
     }
@@ -176,5 +183,9 @@ public class DataSet {
 
     public Map<ClassDef, AnnotationsDirectory> getAnnotationsDirectories() {
         return annotations_directories;
+    }
+
+    public ArrayValue[] getArrayValues() {
+        return array_values.stream().toArray(ArrayValue[]::new);
     }
 }

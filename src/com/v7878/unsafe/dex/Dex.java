@@ -1,6 +1,7 @@
 package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.*;
+import com.v7878.unsafe.dex.EncodedValue.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
@@ -260,11 +261,23 @@ public class Dex extends AbstractList<ClassDef> implements PublicCloneable {
                     offset = roundUp(offset, AnnotationsDirectory.ALIGNMENT);
                     data_out.position(offset);
                     ad.write(context, data_out);
-                    context.addAnnotationsDirectoryOffset(tmp.getKey(), offset);
+                    context.addAnnotationsDirectory(tmp.getKey(), offset);
                     offset = (int) data_out.position();
                 } else {
-                    context.addAnnotationsDirectoryOffset(tmp.getKey(), 0);
+                    context.addAnnotationsDirectory(tmp.getKey(), 0);
                 }
+            }
+        }
+
+        ArrayValue[] array_values = data.getArrayValues();
+        if (array_values.length != 0) {
+            map.encoded_arrays_off = offset;
+            map.encoded_arrays_size = array_values.length;
+            for (ArrayValue tmp : array_values) {
+                data_out.position(offset);
+                tmp.writeData(context, data_out);
+                context.addArrayValue(tmp, offset);
+                offset = (int) data_out.position();
             }
         }
 

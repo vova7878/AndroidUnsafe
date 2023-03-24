@@ -1,6 +1,7 @@
 package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.*;
+import com.v7878.unsafe.dex.EncodedValue.*;
 import java.util.*;
 import java.util.stream.*;
 
@@ -83,6 +84,7 @@ public final class WriteContextImpl implements WriteContext {
     private final Map<AnnotationItem, Integer> annotations;
     private final Map<AnnotationSet, Integer> annotation_sets;
     private final Map<AnnotationSetList, Integer> annotation_set_lists;
+    private final Map<ArrayValue, Integer> array_values;
     private final Map<ClassData, Integer> class_data_items;
     private final Map<ClassDef, Integer> annotations_directories;
 
@@ -109,6 +111,7 @@ public final class WriteContextImpl implements WriteContext {
         annotation_set_lists = new HashMap<>();
         class_data_items = new HashMap<>();
         annotations_directories = new HashMap<>();
+        array_values = new HashMap<>();
 
         //TODO: sort
         call_sites = data.getCallSites();
@@ -134,8 +137,12 @@ public final class WriteContextImpl implements WriteContext {
         class_data_items.put(value, offset);
     }
 
-    public void addAnnotationsDirectoryOffset(ClassDef value, int offset) {
+    public void addAnnotationsDirectory(ClassDef value, int offset) {
         annotations_directories.put(value, offset);
+    }
+
+    public void addArrayValue(ArrayValue value, int offset) {
+        array_values.put(value, offset);
     }
 
     public Stream<String> stringsStream() {
@@ -291,6 +298,14 @@ public final class WriteContextImpl implements WriteContext {
         Integer out = annotations_directories.get(value);
         assert_(out != null, IllegalArgumentException::new,
                 "unable to find annotations directory for class def \"" + value + "\"");
+        return out;
+    }
+
+    @Override
+    public int getArrayValueOffset(ArrayValue value) {
+        Integer out = array_values.get(value);
+        assert_(out != null, IllegalArgumentException::new,
+                "unable to find array value \"" + value + "\"");
         return out;
     }
 }

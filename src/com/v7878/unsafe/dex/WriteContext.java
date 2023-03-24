@@ -1,5 +1,6 @@
 package com.v7878.unsafe.dex;
 
+import com.v7878.unsafe.dex.EncodedValue.*;
 import java.util.Comparator;
 
 public interface WriteContext {
@@ -45,4 +46,6 @@ public interface WriteContext {
     public int getClassDataOffset(ClassData value);
 
     public int getAnnotationsDirectoryOffset(ClassDef value);
+
+    public int getArrayValueOffset(ArrayValue value);
 }

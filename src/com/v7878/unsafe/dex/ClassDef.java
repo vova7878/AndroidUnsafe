@@ -167,12 +167,12 @@ public class ClassDef implements PublicCloneable {
         }
         AnnotationSet class_annotations = annotations.class_annotations;
         int class_data_off = in.readInt();
-        EncodedValue[] static_values = new EncodedValue[0];
+        ArrayValue static_values = new ArrayValue();
         int static_values_off = in.readInt();
         if (static_values_off != 0) {
             RandomInput in2 = in.duplicate(static_values_off);
-            static_values = (EncodedValue[]) EncodedValueReader
-                    .readValue(in2, context, VALUE_ARRAY).value();
+            static_values = (ArrayValue) EncodedValueReader
+                    .readValue(in2, context, VALUE_ARRAY);
         }
         ClassData class_data = null;
         if (class_data_off != 0) {
@@ -181,6 +181,23 @@ public class ClassDef implements PublicCloneable {
         }
         return new ClassDef(clazz, access_flags, superclass, interfaces,
                 source_file, class_annotations, class_data);
+    }
+
+    private ArrayValue getStaticFieldValues() {
+        ArrayValue out = new ArrayValue();
+        List<EncodedValue> tmp = class_data.getStaticFields()
+                .stream().map(PCPair::second).toList();
+        if (tmp.isEmpty()) {
+            return out;
+        }
+        int size = tmp.size();
+        for (; size > 0; size--) {
+            if (!tmp.get(size - 1).isDefault()) {
+                break;
+            }
+        }
+        out.addAll(tmp.subList(0, size));
+        return out;
     }
 
     public void fillContext(DataSet data) {
@@ -204,6 +221,10 @@ public class ClassDef implements PublicCloneable {
             class_data.fillAnnotations(all_annotations);
         }
         data.addAnnotationsDirectory(this, all_annotations);
+        ArrayValue static_values = getStaticFieldValues();
+        if (!static_values.containsOnlyDefaults()) {
+            data.addArrayValue(static_values);
+        }
     }
 
     public void write(WriteContext context, RandomOutput out) {
@@ -214,7 +235,9 @@ public class ClassDef implements PublicCloneable {
         out.writeInt(source_file == null ? NO_INDEX : context.getStringIndex(source_file));
         out.writeInt(context.getAnnotationsDirectoryOffset(this));
         out.writeInt(class_data.isEmpty() ? 0 : context.getClassDataOffset(class_data));
-        out.writeInt(0);  // TODO: static_values
+        ArrayValue static_values = getStaticFieldValues();
+        out.writeInt(static_values.containsOnlyDefaults() ? 0
+                : context.getArrayValueOffset(static_values));
     }
 
     @Override

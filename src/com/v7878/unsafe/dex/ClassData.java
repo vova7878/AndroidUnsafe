@@ -1,5 +1,6 @@
 package com.v7878.unsafe.dex;
 
+import com.v7878.unsafe.dex.EncodedValue.*;
 import com.v7878.unsafe.io.*;
 
 public class ClassData implements PublicCloneable {
@@ -66,7 +67,7 @@ public class ClassData implements PublicCloneable {
     }
 
     public static ClassData read(RandomInput in, ReadContext context,
-            EncodedValue[] static_values, AnnotationsDirectory annotations) {
+            ArrayValue static_values, AnnotationsDirectory annotations) {
         ClassData out = empty();
         int static_fields_size = in.readULeb128();
         int instance_fields_size = in.readULeb128();
@@ -78,8 +79,9 @@ public class ClassData implements PublicCloneable {
                 = out.getStaticFields();
         for (int i = 0; i < static_fields_size; i++) {
             EncodedField field = static_fields_list.get(i);
-            if (i < static_values.length) {
-                static_fields.add(new PCPair<>(field, static_values[i]));
+            if (i < static_values.size()) {
+                static_fields.add(new PCPair<>(field,
+                        static_values.get(i)));
             } else {
                 static_fields.add(new PCPair<>(field,
                         EncodedValue.defaultValue(

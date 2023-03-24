@@ -857,6 +857,15 @@ public interface EncodedValue extends PublicCloneable {
             return this;
         }
 
+        public boolean containsOnlyDefaults() {
+            for (EncodedValue tmp : this) {
+                if (!tmp.isDefault()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         @Override
         public boolean equals(Object obj) {
             if (obj instanceof ArrayValue) {

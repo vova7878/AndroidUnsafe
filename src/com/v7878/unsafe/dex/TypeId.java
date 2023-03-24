@@ -65,7 +65,11 @@ public class TypeId implements PublicCloneable {
     }
 
     public static TypeId of(Class<?> clazz) {
-        return of(clazz.getName());
+        String class_name = clazz.getName();
+        if (class_name.startsWith("[")) {
+            return new TypeId(class_name.replace('.', '/'));
+        }
+        return of(class_name);
     }
 
     private String descriptor;

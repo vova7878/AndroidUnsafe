@@ -1,5 +1,6 @@
 package com.v7878.unsafe.dex;
 
+import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.io.*;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -26,12 +27,19 @@ public class EncodedField implements PublicCloneable {
     private FieldId field;
     private int access_flags;
     private AnnotationSet annotations;
+    private EncodedValue value;
 
     public EncodedField(FieldId field, int access_flags,
-            AnnotationSet annotations) {
+            AnnotationSet annotations, EncodedValue value) {
         setField(field);
         setAccessFlags(access_flags);
         setAnnotations(annotations);
+        setValue(value);
+    }
+
+    public EncodedField(FieldId field, int access_flags,
+            AnnotationSet annotations) {
+        this(field, access_flags, annotations, null);
     }
 
     public final void setField(FieldId field) {
@@ -58,6 +66,18 @@ public class EncodedField implements PublicCloneable {
 
     public final AnnotationSet getAnnotations() {
         return annotations;
+    }
+
+    public final void setValue(EncodedValue value) {
+        this.value = value == null ? null : value.clone();
+    }
+
+    public final EncodedValue getValue() {
+        return value == null ? EncodedValue.defaultValue(field.getType()) : value;
+    }
+
+    public final boolean hasValue() {
+        return value != null;
     }
 
     public static EncodedField read(RandomInput in, FieldId field,
@@ -89,11 +109,26 @@ public class EncodedField implements PublicCloneable {
         out.writeULeb128(access_flags);
     }
 
-    public static void writeArray(WriteContext context, RandomOutput out,
+    private static void check(boolean static_fields, EncodedField encoded_field) {
+        if (static_fields) {
+            assert_((encoded_field.access_flags & Modifier.STATIC) != 0,
+                    IllegalStateException::new, "field must be static");
+        } else {
+            assert_((encoded_field.access_flags & Modifier.STATIC) == 0,
+                    IllegalStateException::new, "field must not be static");
+            assert_(!encoded_field.getValue().isDefault(),
+                    IllegalStateException::new,
+                    "instance field can`t have value");
+        }
+    }
+
+    public static void writeArray(boolean static_fields,
+            WriteContext context, RandomOutput out,
             EncodedField[] encoded_fields) {
         Arrays.sort(encoded_fields, context.encoded_field_comparator());
         int fieldIndex = 0;
         for (EncodedField tmp : encoded_fields) {
+            check(static_fields, tmp);
             int diff = context.getFieldIndex(tmp.field) - fieldIndex;
             fieldIndex += diff;
             out.writeULeb128(diff);
@@ -101,9 +136,10 @@ public class EncodedField implements PublicCloneable {
         }
     }
 
-    public static void writeArray(WriteContext context, RandomOutput out,
+    public static void writeArray(boolean static_fields,
+            WriteContext context, RandomOutput out,
             PCList<EncodedField> encoded_fields) {
-        writeArray(context, out, encoded_fields
+        writeArray(static_fields, context, out, encoded_fields
                 .stream().toArray(EncodedField[]::new));
     }
 
@@ -113,11 +149,12 @@ public class EncodedField implements PublicCloneable {
         if (flags.length() != 0) {
             flags += " ";
         }
-        return flags + field;
+        String v = value == null ? "" : " = " + value;
+        return flags + field + v;
     }
 
     @Override
     public PublicCloneable clone() {
-        return new EncodedField(field, access_flags, annotations);
+        return new EncodedField(field, access_flags, annotations, value);
     }
 }

@@ -7,14 +7,8 @@ import java.util.*;
 
 public class Dex extends PCList<ClassDef> {
 
-    private final List<ClassDef> class_defs;
-
     public Dex(ClassDef... class_defs) {
-        if (class_defs == null) {
-            class_defs = new ClassDef[0];
-        }
-        this.class_defs = new ArrayList<>(class_defs.length);
-        addAll(class_defs);
+        super(class_defs);
     }
 
     @Override
@@ -93,7 +87,7 @@ public class Dex extends PCList<ClassDef> {
     }
 
     public void fillContext(DataSet data) {
-        for (ClassDef tmp : class_defs) {
+        for (ClassDef tmp : this) {
             data.addClassDef(tmp);
         }
     }
@@ -308,7 +302,7 @@ public class Dex extends PCList<ClassDef> {
     @Override
     public Dex clone() {
         Dex out = new Dex();
-        out.addAll(class_defs);
+        out.addAll(this);
         return out;
     }
 }

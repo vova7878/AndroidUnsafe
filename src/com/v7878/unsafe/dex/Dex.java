@@ -5,7 +5,7 @@ import com.v7878.unsafe.dex.EncodedValue.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class Dex extends AbstractList<ClassDef> implements PublicCloneable {
+public class Dex extends PCList<ClassDef> {
 
     private final List<ClassDef> class_defs;
 
@@ -14,37 +14,13 @@ public class Dex extends AbstractList<ClassDef> implements PublicCloneable {
             class_defs = new ClassDef[0];
         }
         this.class_defs = new ArrayList<>(class_defs.length);
-        addAll(Arrays.asList(class_defs));
+        addAll(class_defs);
     }
 
-    private ClassDef check(ClassDef class_def) {
+    @Override
+    protected ClassDef check(ClassDef class_def) {
         return Objects.requireNonNull(class_def,
                 "Dex can`t contain null class def");
-    }
-
-    @Override
-    public final void add(int index, ClassDef class_def) {
-        class_defs.add(check(class_def).clone());
-    }
-
-    @Override
-    public final ClassDef set(int index, ClassDef class_def) {
-        return class_defs.set(index, check(class_def).clone());
-    }
-
-    @Override
-    public final ClassDef get(int index) {
-        return class_defs.get(index);
-    }
-
-    @Override
-    public final ClassDef remove(int index) {
-        return class_defs.remove(index);
-    }
-
-    @Override
-    public final int size() {
-        return class_defs.size();
     }
 
     public static Dex read(RandomInput in) {

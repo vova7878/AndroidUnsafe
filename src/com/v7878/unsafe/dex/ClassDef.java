@@ -196,7 +196,7 @@ public class ClassDef implements PublicCloneable {
                 break;
             }
         }
-        out.addAll(Arrays.asList(Arrays.copyOf(tmp, size)));
+        out.addAll(tmp, 0, size);
         return out;
     }
 

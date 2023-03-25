@@ -85,8 +85,7 @@ public class EncodedMethod implements PublicCloneable {
     }
 
     public static EncodedMethod read(RandomInput in, ReadContext context,
-            MethodId method,
-            Map<MethodId, AnnotationSet> annotated_methods,
+            MethodId method, Map<MethodId, AnnotationSet> annotated_methods,
             Map<MethodId, AnnotationSetList> annotated_parameters) {
         int access_flags = in.readULeb128();
         AnnotationSet annotations = annotated_methods.get(method);

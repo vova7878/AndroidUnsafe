@@ -112,6 +112,8 @@ public class ClassData implements PublicCloneable {
 
         EncodedField.writeArray(true, context, out, static_fields);
         EncodedField.writeArray(false, context, out, instance_fields);
+
+        //TODO: check direct
         EncodedMethod.writeArray(context, out, direct_methods);
         EncodedMethod.writeArray(context, out, virtual_methods);
     }

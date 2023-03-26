@@ -5,7 +5,7 @@ import com.v7878.unsafe.dex.EncodedValue.*;
 import java.util.*;
 
 // Temporary object. Needed to read or write
-public class DataSet {
+public class DataSet extends DataFilter {
 
     private final Set<String> strings;
     private final Set<TypeId> types;
@@ -47,77 +47,91 @@ public class DataSet {
         array_values = new HashSet<>();
     }
 
-    public void addString(String value) {
+    @Override
+    public void add(String value) {
         strings.add(value);
     }
 
-    public void addType(TypeId value) {
-        value.fillContext(this);
+    @Override
+    public void add(TypeId value) {
+        super.add(value);
         types.add(value);
     }
 
-    public void addProto(ProtoId value) {
-        value.fillContext(this);
+    @Override
+    public void add(ProtoId value) {
+        super.add(value);
         protos.add(value);
     }
 
-    public void addField(FieldId value) {
-        value.fillContext(this);
+    @Override
+    public void add(FieldId value) {
+        super.add(value);
         fields.add(value);
     }
 
-    public void addMethod(MethodId value) {
-        value.fillContext(this);
+    @Override
+    public void add(MethodId value) {
+        super.add(value);
         methods.add(value);
     }
 
-    public void addMethodHandle(MethodHandleItem value) {
-        value.fillContext(this);
+    @Override
+    public void add(MethodHandleItem value) {
+        super.add(value);
         method_handles.add(value);
     }
 
-    public void addCallSite(CallSiteId value) {
-        value.fillContext(this);
+    @Override
+    public void add(CallSiteId value) {
+        super.add(value);
         call_sites.add(value);
     }
 
-    public void addClassDef(ClassDef value) {
-        value.fillContext(this);
+    @Override
+    public void add(ClassDef value) {
+        super.add(value);
         class_defs.add(value);
     }
 
-    public void addClassData(ClassData value) {
+    @Override
+    public void add(ClassData value) {
         assert_(!value.isEmpty(), IllegalStateException::new,
                 "class_data is empty");
-        value.fillContext(this);
+        super.add(value);
         class_data_items.add(value);
     }
 
-    public void addTypeList(TypeList value) {
-        value.fillContext(this);
+    @Override
+    public void add(TypeList value) {
+        super.add(value);
         type_lists.add(value);
     }
 
-    public void addAnnotation(AnnotationItem value) {
-        value.fillContext(this);
+    @Override
+    public void add(AnnotationItem value) {
+        super.add(value);
         annotations.add(value);
     }
 
-    public void addAnnotationSet(AnnotationSet value) {
+    @Override
+    public void add(AnnotationSet value) {
         assert_(!value.isEmpty(), IllegalStateException::new,
                 "annotation_set is empty");
-        value.fillContext(this);
+        super.add(value);
         annotation_sets.add(value);
     }
 
-    public void addAnnotationSetList(AnnotationSetList value) {
+    @Override
+    public void add(AnnotationSetList value) {
         assert_(!value.isEmpty(), IllegalStateException::new,
                 "annotation_set_list is empty");
-        value.fillContext(this);
+        super.add(value);
         annotation_set_lists.add(value);
     }
 
-    public void addAnnotationsDirectory(ClassDef clazz,
+    @Override
+    public void add(ClassDef clazz,
             AnnotationsDirectory value) {
         if (annotations_directories.putIfAbsent(clazz, value) != null) {
             throw new IllegalStateException(
@@ -125,8 +139,15 @@ public class DataSet {
         }
     }
 
-    public void addArrayValue(ArrayValue value) {
+    @Override
+    public void add(ArrayValue value) {
         array_values.add(value);
+    }
+
+    @Override
+    public void add(CodeItem value) {
+        //TODO
+        super.add(value);
     }
 
     public String[] getStrings() {

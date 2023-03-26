@@ -31,8 +31,8 @@ public class CallSiteId implements PublicCloneable {
         return new CallSiteId(value);
     }
 
-    public void fillContext(DataSet data) {
-        value.fillContext(data);
+    public void collectData(DataCollector data) {
+        data.fill(value);
     }
 
     @Override

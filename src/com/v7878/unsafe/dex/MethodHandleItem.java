@@ -78,11 +78,11 @@ public class MethodHandleItem implements PublicCloneable {
         out.writeShort(0);
     }
 
-    public void fillContext(DataSet data) {
+    public void collectData(DataCollector data) {
         if (isMethodType(type)) {
-            data.addMethod((MethodId) field_or_method);
+            data.add((MethodId) field_or_method);
         } else {
-            data.addField((FieldId) field_or_method);
+            data.add((FieldId) field_or_method);
         }
     }
 

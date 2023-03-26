@@ -96,8 +96,8 @@ public class TypeId implements PublicCloneable {
         return new TypeId(context.string(in.readInt()));
     }
 
-    public void fillContext(DataSet data) {
-        data.addString(descriptor);
+    public void collectData(DataCollector data) {
+        data.add(descriptor);
     }
 
     public void write(WriteContext context, RandomOutput out) {

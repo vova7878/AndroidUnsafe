@@ -60,9 +60,9 @@ public class TypeList extends PCList<TypeId> {
         return new TypeList();
     }
 
-    public void fillContext(DataSet data) {
+    public void collectData(DataCollector data) {
         for (TypeId tmp : this) {
-            data.addType(tmp);
+            data.add(tmp);
         }
     }
 

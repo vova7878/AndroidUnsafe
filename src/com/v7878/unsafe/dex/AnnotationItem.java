@@ -120,8 +120,8 @@ public final class AnnotationItem implements PublicCloneable {
                 EncodedAnnotation.read(in, context));
     }
 
-    public void fillContext(DataSet data) {
-        annotation.fillContext(data);
+    public void collectData(DataCollector data) {
+        data.fill(annotation);
     }
 
     public void write(WriteContext context, RandomOutput out) {

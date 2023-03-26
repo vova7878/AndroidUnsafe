@@ -31,8 +31,8 @@ public class TryItem {
         return out;
     }
 
-    public void fillContext(DataSet data) {
-        handler.fillContext(data);
+    public void collectData(DataCollector data) {
+        data.fill(handler);
     }
 
     @Override

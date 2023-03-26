@@ -1,8 +1,8 @@
 package com.v7878.unsafe.dex.bytecode;
 
-import com.v7878.unsafe.dex.DataSet;
 import com.v7878.unsafe.dex.FieldId;
 import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.DataCollector;
 
 public abstract class IInstanceOp extends Instruction {
 
@@ -35,8 +35,8 @@ public abstract class IInstanceOp extends Instruction {
     }
 
     @Override
-    public void fillContext(DataSet data) {
-        data.addField(instance_field);
+    public void collectData(DataCollector data) {
+        data.add(instance_field);
     }
 
     private String toString(String name) {

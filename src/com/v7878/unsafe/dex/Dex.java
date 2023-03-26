@@ -86,9 +86,9 @@ public class Dex extends PCList<ClassDef> {
         return new Dex(class_defs);
     }
 
-    public void fillContext(DataSet data) {
+    public void collectData(DataCollector data) {
         for (ClassDef tmp : this) {
-            data.addClassDef(tmp);
+            data.add(tmp);
         }
     }
 
@@ -96,7 +96,7 @@ public class Dex extends PCList<ClassDef> {
         assert_(out.position() == 0, IllegalArgumentException::new);
 
         DataSet data = new DataSet();
-        fillContext(data);
+        collectData(data);
 
         WriteContextImpl context = new WriteContextImpl(data);
 

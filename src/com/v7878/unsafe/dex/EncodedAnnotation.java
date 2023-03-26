@@ -47,10 +47,10 @@ public class EncodedAnnotation implements PublicCloneable {
         return new EncodedAnnotation(type, elements);
     }
 
-    public void fillContext(DataSet data) {
-        data.addType(type);
+    public void collectData(DataCollector data) {
+        data.add(type);
         for (AnnotationElement tmp : elements) {
-            tmp.fillContext(data);
+            tmp.collectData(data);
         }
     }
 

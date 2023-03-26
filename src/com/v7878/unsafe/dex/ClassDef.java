@@ -200,30 +200,30 @@ public class ClassDef implements PublicCloneable {
         return out;
     }
 
-    public void fillContext(DataSet data) {
-        data.addType(clazz);
+    public void collectData(DataCollector data) {
+        data.add(clazz);
         if (superclass != null) {
-            data.addType(superclass);
+            data.add(superclass);
         }
         if (!interfaces.isEmpty()) {
-            data.addTypeList(interfaces);
+            data.add(interfaces);
         }
         if (source_file != null) {
-            data.addString(source_file);
+            data.add(source_file);
         }
         if (!annotations.isEmpty()) {
-            data.addAnnotationSet(annotations);
+            data.add(annotations);
         }
         AnnotationsDirectory all_annotations = AnnotationsDirectory.empty();
         all_annotations.setClassAnnotations(annotations);
         if (!class_data.isEmpty()) {
-            data.addClassData(class_data);
+            data.add(class_data);
             class_data.fillAnnotations(all_annotations);
         }
-        data.addAnnotationsDirectory(this, all_annotations);
+        data.add(this, all_annotations);
         ArrayValue static_values = getStaticFieldValues();
         if (!static_values.containsOnlyDefaults()) {
-            data.addArrayValue(static_values);
+            data.add(static_values);
         }
     }
 

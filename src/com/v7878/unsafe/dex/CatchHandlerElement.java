@@ -39,8 +39,8 @@ public class CatchHandlerElement implements PublicCloneable {
                 CodeItem.getInstructionIndex(offsets, in.readULeb128()));
     }
 
-    public void fillContext(DataSet data) {
-        data.addType(type);
+    public void collectData(DataCollector data) {
+        data.add(type);
     }
 
     @Override

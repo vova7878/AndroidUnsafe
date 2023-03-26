@@ -1,8 +1,8 @@
 package com.v7878.unsafe.dex.bytecode;
 
-import com.v7878.unsafe.dex.DataSet;
 import com.v7878.unsafe.dex.FieldId;
 import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.DataCollector;
 
 public abstract class SStaticOp extends Instruction {
 
@@ -33,8 +33,8 @@ public abstract class SStaticOp extends Instruction {
     }
 
     @Override
-    public void fillContext(DataSet data) {
-        data.addField(static_field);
+    public void collectData(DataCollector data) {
+        data.add(static_field);
     }
 
     private String toString(String name) {

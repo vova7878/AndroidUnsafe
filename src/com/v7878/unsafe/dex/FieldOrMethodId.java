@@ -29,9 +29,9 @@ public abstract class FieldOrMethodId implements PublicCloneable {
         return name;
     }
 
-    public void fillContext(DataSet data) {
-        data.addType(declaring_class);
-        data.addString(name);
+    public void collectData(DataCollector data) {
+        data.add(declaring_class);
+        data.add(name);
     }
 
     @Override

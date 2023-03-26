@@ -1,8 +1,8 @@
 package com.v7878.unsafe.dex.bytecode;
 
 import com.v7878.unsafe.dex.TypeId;
-import com.v7878.unsafe.dex.DataSet;
 import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.DataCollector;
 
 public class NewArray extends Instruction {
 
@@ -25,8 +25,8 @@ public class NewArray extends Instruction {
     }
 
     @Override
-    public void fillContext(DataSet data) {
-        data.addType(type);
+    public void collectData(DataCollector data) {
+        data.add(type);
     }
 
     @Override

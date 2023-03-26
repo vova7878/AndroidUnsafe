@@ -74,12 +74,12 @@ public class CodeItem {
         return out;
     }
 
-    public void fillContext(DataSet data) {
+    public void collectData(DataCollector data) {
         for (Instruction tmp : insns) {
-            tmp.fillContext(data);
+            data.fill(tmp);
         }
         for (TryItem tmp : tries) {
-            tmp.fillContext(data);
+            data.fill(tmp);
         }
     }
 }

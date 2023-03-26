@@ -98,10 +98,13 @@ public class EncodedField implements PublicCloneable {
         return out;
     }
 
-    public void fillContext(DataSet data) {
-        data.addField(field);
+    public void collectData(DataCollector data) {
+        data.add(field);
         if (!annotations.isEmpty()) {
-            data.addAnnotationSet(annotations);
+            data.add(annotations);
+        }
+        if (value != null && !value.isDefault()) {
+            data.fill(value);
         }
     }
 

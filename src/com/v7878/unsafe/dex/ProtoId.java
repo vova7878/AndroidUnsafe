@@ -84,11 +84,11 @@ public class ProtoId implements PublicCloneable {
         return out.toString();
     }
 
-    public void fillContext(DataSet data) {
-        data.addString(getShorty());
-        data.addType(return_type);
+    public void collectData(DataCollector data) {
+        data.add(getShorty());
+        data.add(return_type);
         if (!parameters.isEmpty()) {
-            data.addTypeList(parameters);
+            data.add(parameters);
         }
     }
 

@@ -1,11 +1,11 @@
 package com.v7878.unsafe.dex.bytecode;
 
 import com.v7878.unsafe.dex.ReadContext;
-import com.v7878.unsafe.dex.DataSet;
 import android.util.Pair;
 import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.io.RandomInput;
 import java.util.Arrays;
+import com.v7878.unsafe.dex.DataCollector;
 
 public class Instruction {
 
@@ -43,6 +43,6 @@ public class Instruction {
         return new Pair<>(offsets, insns);
     }
 
-    public void fillContext(DataSet data) {
+    public void collectData(DataCollector data) {
     }
 }

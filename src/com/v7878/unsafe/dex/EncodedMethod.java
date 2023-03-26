@@ -114,16 +114,16 @@ public class EncodedMethod implements PublicCloneable {
         return out;
     }
 
-    public void fillContext(DataSet data) {
-        data.addMethod(method);
+    public void collectData(DataCollector data) {
+        data.add(method);
         if (!annotations.isEmpty()) {
-            data.addAnnotationSet(annotations);
+            data.add(annotations);
         }
         if (!parameter_annotations.isEmpty()) {
-            data.addAnnotationSetList(parameter_annotations);
+            data.add(parameter_annotations);
         }
         if (code != null) {
-            code.fillContext(data);
+            data.add(code);
         }
     }
 

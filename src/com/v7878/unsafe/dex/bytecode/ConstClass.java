@@ -1,8 +1,8 @@
 package com.v7878.unsafe.dex.bytecode;
 
 import com.v7878.unsafe.dex.TypeId;
-import com.v7878.unsafe.dex.DataSet;
 import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_20bc_21c;
+import com.v7878.unsafe.dex.DataCollector;
 
 public class ConstClass extends Instruction {
 
@@ -23,8 +23,8 @@ public class ConstClass extends Instruction {
     }
 
     @Override
-    public void fillContext(DataSet data) {
-        data.addType(value);
+    public void collectData(DataCollector data) {
+        data.add(value);
     }
 
     @Override

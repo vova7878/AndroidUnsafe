@@ -1,8 +1,8 @@
 package com.v7878.unsafe.dex.bytecode;
 
 import com.v7878.unsafe.dex.MethodId;
-import com.v7878.unsafe.dex.DataSet;
 import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.DataCollector;
 
 public abstract class InvokeKind extends Instruction {
 
@@ -33,8 +33,8 @@ public abstract class InvokeKind extends Instruction {
     }
 
     @Override
-    public void fillContext(DataSet data) {
-        data.addMethod(method_reference);
+    public void collectData(DataCollector data) {
+        data.add(method_reference);
     }
 
     private String toString(String name) {

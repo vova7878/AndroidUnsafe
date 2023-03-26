@@ -89,18 +89,18 @@ public class ClassData implements PublicCloneable {
         return out;
     }
 
-    public void fillContext(DataSet data) {
+    public void collectData(DataCollector data) {
         for (EncodedField tmp : static_fields) {
-            tmp.fillContext(data);
+            data.fill(tmp);
         }
         for (EncodedField tmp : instance_fields) {
-            tmp.fillContext(data);
+            data.fill(tmp);
         }
         for (EncodedMethod tmp : direct_methods) {
-            tmp.fillContext(data);
+            data.fill(tmp);
         }
         for (EncodedMethod tmp : virtual_methods) {
-            tmp.fillContext(data);
+            data.fill(tmp);
         }
     }
 

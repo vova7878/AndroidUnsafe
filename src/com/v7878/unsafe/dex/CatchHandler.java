@@ -24,9 +24,9 @@ public class CatchHandler {
         return out;
     }
 
-    public void fillContext(DataSet data) {
+    public void collectData(DataCollector data) {
         for (CatchHandlerElement tmp : handlers) {
-            tmp.fillContext(data);
+            data.fill(tmp);
         }
     }
 

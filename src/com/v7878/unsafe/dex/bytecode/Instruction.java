@@ -1,48 +1,44 @@
 package com.v7878.unsafe.dex.bytecode;
 
-import com.v7878.unsafe.dex.ReadContext;
-import android.util.Pair;
 import static com.v7878.unsafe.Utils.*;
-import com.v7878.unsafe.io.RandomInput;
-import java.util.Arrays;
-import com.v7878.unsafe.dex.DataCollector;
+import com.v7878.unsafe.dex.*;
+import com.v7878.unsafe.io.*;
+import java.util.*;
 
-public class Instruction {
+public class Instruction implements PublicCloneable {
 
-    public static Pair<int[], Instruction[]> readArray(
-            RandomInput in, ReadContext context) {
+    public static int[] readArray(RandomInput in,
+            ReadContext context, PCList<Instruction> insns) {
         int insns_size = in.readInt();
-
-        Instruction[] insns = new Instruction[insns_size];
         int[] offsets = new int[insns_size + 1];
 
-        int insns_data_size = insns_size * 2; // 2-byte code units
+        int insns_bytes = insns_size * 2; // 2-byte code units
         int index = 0;
         long start = in.position();
 
-        while (in.position() - start < insns_data_size) {
+        while (in.position() - start < insns_bytes) {
             int offset = (int) (in.position() - start);
             assert_((offset & 1) == 0, IllegalStateException::new,
                     "Unaligned code unit");
-            insns[index] = InstructionReader.read(in, context);
+            insns.add(InstructionReader.read(in, context));
             offsets[index] = offset / 2;
             index++;
         }
         offsets[index] = insns_size;
 
-        assert_(in.position() - start == insns_data_size,
+        assert_(in.position() - start == insns_bytes,
                 IllegalStateException::new,
                 "Read more code units than expected");
 
-        System.out.println("start = " + start
-                + ", end = " + in.position()
-                + ", size = " + insns_size);
-
-        offsets = Arrays.copyOf(offsets, index + 1);
-        insns = Arrays.copyOf(insns, index);
-        return new Pair<>(offsets, insns);
+        return Arrays.copyOf(offsets, index + 1);
     }
 
     public void collectData(DataCollector data) {
+    }
+
+    @Override
+    public Instruction clone() {
+        //TODO
+        return this;
     }
 }

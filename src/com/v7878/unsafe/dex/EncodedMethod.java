@@ -76,8 +76,7 @@ public class EncodedMethod implements PublicCloneable {
     }
 
     public final void setCode(CodeItem code) {
-        //TODO: clone
-        this.code = code;
+        this.code = code == null ? null : code.clone();
     }
 
     public final CodeItem getCode() {

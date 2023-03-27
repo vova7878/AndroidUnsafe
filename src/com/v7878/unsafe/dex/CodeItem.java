@@ -1,18 +1,74 @@
 package com.v7878.unsafe.dex;
 
-import com.v7878.unsafe.dex.bytecode.Instruction;
-import android.util.Pair;
 import static com.v7878.unsafe.Utils.*;
+import com.v7878.unsafe.dex.bytecode.Instruction;
 import com.v7878.unsafe.io.RandomInput;
 import java.util.*;
 
-public class CodeItem {
+public class CodeItem implements PublicCloneable {
 
-    public int registers_size;
-    public int ins_size;
-    public int outs_size;
-    public Instruction[] insns;
-    public TryItem[] tries;
+    private int registers_size;
+    private int ins_size;
+    private int outs_size;
+    private PCList<Instruction> insns;
+    private PCList<TryItem> tries;
+
+    public CodeItem(int registers_size, int ins_size, int outs_size,
+            PCList<Instruction> insns, PCList<TryItem> tries) {
+        setRegistersSize(registers_size);
+        setInputsSize(ins_size);
+        setOutputsSize(outs_size);
+        setInstructions(insns);
+        setTries(tries);
+    }
+
+    public final void setRegistersSize(int registers_size) {
+        assert_(registers_size >= 0, IllegalArgumentException::new,
+                "registers_size can`t be negative");
+        this.registers_size = registers_size;
+    }
+
+    public final int getRegistersSize() {
+        return registers_size;
+    }
+
+    public final void setInputsSize(int ins_size) {
+        assert_(ins_size >= 0, IllegalArgumentException::new,
+                "ins_size can`t be negative");
+        this.ins_size = ins_size;
+    }
+
+    public final int getInputsSize() {
+        return ins_size;
+    }
+
+    public final void setOutputsSize(int outs_size) {
+        assert_(outs_size >= 0, IllegalArgumentException::new,
+                "outs_size can`t be negative");
+        this.outs_size = outs_size;
+    }
+
+    public final int getOutputsSize() {
+        return outs_size;
+    }
+
+    public final void setInstructions(PCList<Instruction> insns) {
+        this.insns = insns == null
+                ? PCList.empty() : insns.clone();
+    }
+
+    public final PCList<Instruction> getInstructions() {
+        return insns;
+    }
+
+    public final void setTries(PCList<TryItem> tries) {
+        this.tries = tries == null
+                ? PCList.empty() : tries.clone();
+    }
+
+    public final PCList<TryItem> getTries() {
+        return tries;
+    }
 
     static int getInstructionIndex(int[] offsets, int addr) {
         addr = Arrays.binarySearch(offsets, addr);
@@ -22,23 +78,20 @@ public class CodeItem {
     }
 
     public static CodeItem read(RandomInput in, ReadContext context) {
-        CodeItem out = new CodeItem();
-        out.registers_size = in.readUnsignedShort();
-        out.ins_size = in.readUnsignedShort();
-        out.outs_size = in.readUnsignedShort();
+        int registers_size = in.readUnsignedShort();
+        int ins_size = in.readUnsignedShort();
+        int outs_size = in.readUnsignedShort();
+        CodeItem out = new CodeItem(registers_size, ins_size, outs_size, null, null);
         int tries_size = in.readUnsignedShort();
 
         //TODO
         in.readInt(); //out.debug_info_off = in.readInt();
 
-        Pair<int[], Instruction[]> insns_data = Instruction.readArray(in, context);
-        out.insns = insns_data.second;
+        int[] offsets = Instruction.readArray(in, context, out.insns);
+        int insns_size = offsets[out.insns.size()]; // in code units
 
-        int[] offsets = insns_data.first;
-        int insns_size = offsets[out.insns.length]; // in code units
-
-        for (int i = 0; i < out.insns.length; i++) {
-            System.out.println(offsets[i] + " " + out.insns[i]);
+        for (int i = 0; i < out.insns.size(); i++) {
+            System.out.println(offsets[i] + " " + out.insns.get(i));
         }
 
         if (tries_size > 0) {
@@ -63,13 +116,9 @@ public class CodeItem {
             }
 
             in.position(tries_pos);
-            out.tries = new TryItem[tries_size];
             for (int i = 0; i < tries_size; i++) {
-                out.tries[i] = TryItem.read(in, handlers, offsets);
-                System.out.println(out.tries[i]);
+                out.tries.add(TryItem.read(in, handlers, offsets));
             }
-        } else {
-            out.tries = new TryItem[0];
         }
         return out;
     }
@@ -81,5 +130,10 @@ public class CodeItem {
         for (TryItem tmp : tries) {
             data.fill(tmp);
         }
+    }
+
+    @Override
+    public CodeItem clone() {
+        return new CodeItem(registers_size, ins_size, outs_size, insns, tries);
     }
 }

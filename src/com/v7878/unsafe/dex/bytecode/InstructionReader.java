@@ -457,7 +457,7 @@ public abstract class InstructionReader {
         @Override
         Instruction read(RandomInput in, ReadContext context, int BA) {
             int CCCC = in.readUnsignedShort();
-            return factory.make(BA & 0xf, BA >> 4, CCCC);
+            return factory.make(BA & 0xf, BA >> 4, extend_sign(CCCC, 16));
         }
     }
 
@@ -566,7 +566,7 @@ public abstract class InstructionReader {
         Instruction read(RandomInput in, ReadContext context, int AA) {
             int BBBBlo = in.readUnsignedShort();
             int BBBBhi = in.readUnsignedShort();
-            return factory.make(AA, BBBBlo | (BBBBhi << 16));
+            return factory.make(AA, extend_sign64(BBBBlo | (BBBBhi << 16), 32));
         }
     }
 

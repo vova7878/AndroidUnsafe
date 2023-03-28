@@ -18,7 +18,27 @@ public class Dex extends PCList<ClassDef> {
     }
 
     public static Dex read(RandomInput in) {
+        return read(in, null);
+    }
+
+    public static Dex read(RandomInput in, int[] class_def_ids) {
         FileMap map = FileMap.read(in);
+
+        if (class_def_ids == null) {
+            class_def_ids = new int[map.class_defs_size];
+            for (int i = 0; i < map.class_defs_size; i++) {
+                class_def_ids[i] = i;
+            }
+        } else {
+            for (int id : class_def_ids) {
+                Objects.checkIndex(id, map.class_defs_size);
+            }
+        }
+
+        if (class_def_ids.length == 0) {
+            return new Dex();
+        }
+
         ReadContextImpl context = new ReadContextImpl();
         String[] strings = new String[map.string_ids_size];
         if (map.string_ids_size != 0) {
@@ -76,12 +96,11 @@ public class Dex extends PCList<ClassDef> {
             }
         }
         context.setCallSites(call_sites);
-        ClassDef[] class_defs = new ClassDef[map.class_defs_size];
-        if (map.class_defs_size != 0) {
-            RandomInput in2 = in.duplicate(map.class_defs_off);
-            for (int i = 0; i < map.class_defs_size; i++) {
-                class_defs[i] = ClassDef.read(in2, context);
-            }
+        ClassDef[] class_defs = new ClassDef[class_def_ids.length];
+        for (int i = 0; i < class_def_ids.length; i++) {
+            int offset = map.class_defs_off + ClassDef.SIZE * class_def_ids[i];
+            RandomInput in2 = in.duplicate(offset);
+            class_defs[i] = ClassDef.read(in2, context);
         }
         return new Dex(class_defs);
     }
@@ -306,6 +325,15 @@ public class Dex extends PCList<ClassDef> {
         });
 
         map.writeHeader(out, file_size);
+    }
+
+    public ClassDef findClassDef(TypeId type) {
+        for (ClassDef tmp : this) {
+            if (tmp.getType().equals(type)) {
+                return tmp;
+            }
+        }
+        return null;
     }
 
     public byte[] compile() {

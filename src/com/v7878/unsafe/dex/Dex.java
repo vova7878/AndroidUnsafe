@@ -231,6 +231,7 @@ public class Dex extends PCList<ClassDef> {
             }
         }
 
+        //TODO: delete duplicates
         Map<ClassDef, AnnotationsDirectory> annotations_directories
                 = data.getAnnotationsDirectories();
         if (!annotations_directories.isEmpty()) {

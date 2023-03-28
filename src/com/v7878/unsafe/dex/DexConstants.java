@@ -52,7 +52,6 @@ public class DexConstants {
     public static final int TYPE_ANNOTATION_SET_REF_LIST = 0x1002;
     public static final int TYPE_ANNOTATION_SET_ITEM = 0x1003;
     public static final int TYPE_CLASS_DATA_ITEM = 0x2000;
-    //TODO
     public static final int TYPE_CODE_ITEM = 0x2001;
     public static final int TYPE_STRING_DATA_ITEM = 0x2002;
     //TODO

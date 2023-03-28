@@ -1,8 +1,10 @@
 package com.v7878.unsafe.dex.bytecode;
 
-import com.v7878.unsafe.dex.TypeId;
-import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
 import com.v7878.unsafe.dex.DataCollector;
+import com.v7878.unsafe.dex.TypeId;
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_22c_22cs;
+import com.v7878.unsafe.io.RandomOutput;
 
 public class NewArray extends Instruction {
 
@@ -30,7 +32,29 @@ public class NewArray extends Instruction {
     }
 
     @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_22c_22cs(out, OPCODE,
+                destination_register, size_register,
+                context.getTypeIndex(type));
+    }
+
+    @Override
+    public int opcode() {
+        return OPCODE;
+    }
+
+    @Override
+    public String name() {
+        return "new-array";
+    }
+
+    @Override
     public String toString() {
-        return "new-array " + destination_register + " " + size_register + " " + type;
+        return name() + " " + destination_register + " " + size_register + " " + type;
+    }
+
+    @Override
+    public NewArray clone() {
+        return new NewArray(destination_register, size_register, type);
     }
 }

@@ -1,6 +1,8 @@
 package com.v7878.unsafe.dex.bytecode;
 
-import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_30t;
+import com.v7878.unsafe.io.RandomOutput;
 
 public class Goto32 extends Instruction {
 
@@ -19,7 +21,27 @@ public class Goto32 extends Instruction {
     }
 
     @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_30t(out, OPCODE, signed_branch_offset);
+    }
+
+    @Override
+    public int opcode() {
+        return OPCODE;
+    }
+
+    @Override
+    public String name() {
+        return "goto/32";
+    }
+
+    @Override
     public String toString() {
-        return "goto/32 " + signed_branch_offset;
+        return name() + " " + signed_branch_offset;
+    }
+
+    @Override
+    public Goto32 clone() {
+        return new Goto32(signed_branch_offset);
     }
 }

@@ -128,7 +128,7 @@ public class EncodedMethod implements PublicCloneable {
 
     public void write(WriteContext context, RandomOutput out) {
         out.writeULeb128(access_flags);
-        out.writeULeb128(0); // TODO: code
+        out.writeULeb128(code == null ? 0 : context.getCodeItemOffset(code));
     }
 
     public static void writeArray(WriteContext context, RandomOutput out,

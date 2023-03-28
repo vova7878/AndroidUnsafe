@@ -2,6 +2,7 @@ package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.io.RandomInput;
+import com.v7878.unsafe.io.RandomOutput;
 import java.util.*;
 
 public class TryItem implements PublicCloneable {
@@ -65,6 +66,17 @@ public class TryItem implements PublicCloneable {
 
     public void collectData(DataCollector data) {
         data.fill(handler);
+    }
+
+    public void write(WriteContext context, RandomOutput tries_out,
+            RandomOutput handlers_out, long handlers_start, int[] offsets) {
+        int handler_offset = (int) (handlers_out.position() - handlers_start);
+        int tmp = offsets[start_addr];
+        tries_out.writeInt(tmp);
+        tmp = offsets[start_addr + insn_count] - tmp;
+        tries_out.writeShort(tmp);
+        tries_out.writeShort(handler_offset);
+        handler.write(context, handlers_out, offsets);
     }
 
     @Override

@@ -48,4 +48,6 @@ public interface WriteContext {
     public int getAnnotationsDirectoryOffset(ClassDef value);
 
     public int getArrayValueOffset(ArrayValue value);
+
+    public int getCodeItemOffset(CodeItem value);
 }

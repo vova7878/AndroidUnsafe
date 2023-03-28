@@ -1,13 +1,15 @@
 package com.v7878.unsafe.dex.bytecode;
 
-import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_31i32_31t;
+import com.v7878.unsafe.io.RandomOutput;
 
 public class Const extends Instruction {
 
     public static final int OPCODE = 0x14;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_31i_31t((A, B) -> {
+        InstructionReader.register(OPCODE, new Reader_31i32_31t((A, B) -> {
             return new Const(A, B);
         }));
     }
@@ -20,7 +22,28 @@ public class Const extends Instruction {
     }
 
     @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_31i32_31t_31c(out, OPCODE,
+                destination_register, value);
+    }
+
+    @Override
+    public int opcode() {
+        return OPCODE;
+    }
+
+    @Override
+    public String name() {
+        return "const";
+    }
+
+    @Override
     public String toString() {
-        return "const " + destination_register + " " + value;
+        return name() + " " + destination_register + " " + value;
+    }
+
+    @Override
+    public Const clone() {
+        return new Const(destination_register, value);
     }
 }

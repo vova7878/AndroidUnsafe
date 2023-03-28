@@ -2,10 +2,12 @@ package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.dex.bytecode.Instruction;
-import com.v7878.unsafe.io.RandomInput;
+import com.v7878.unsafe.io.*;
 import java.util.*;
 
 public class CodeItem implements PublicCloneable {
+
+    public static final int ALIGNMENT = 4;
 
     private int registers_size;
     private int ins_size;
@@ -16,6 +18,7 @@ public class CodeItem implements PublicCloneable {
     public CodeItem(int registers_size, int ins_size, int outs_size,
             PCList<Instruction> insns, PCList<TryItem> tries) {
         setRegistersSize(registers_size);
+        //TODO: checks
         setInputsSize(ins_size);
         setOutputsSize(outs_size);
         setInstructions(insns);
@@ -88,14 +91,14 @@ public class CodeItem implements PublicCloneable {
         in.readInt(); //out.debug_info_off = in.readInt();
 
         int[] offsets = Instruction.readArray(in, context, out.insns);
-        int insns_size = offsets[out.insns.size()]; // in code units
+        int insns_units_size = offsets[out.insns.size()]; // in code units
 
         for (int i = 0; i < out.insns.size(); i++) {
             System.out.println(offsets[i] + " " + out.insns.get(i));
         }
 
         if (tries_size > 0) {
-            if ((insns_size & 1) != 0) {
+            if ((insns_units_size & 1) != 0) {
                 in.readShort(); // padding
             }
 
@@ -132,8 +135,57 @@ public class CodeItem implements PublicCloneable {
         }
     }
 
+    //TODO: refactor
+    public void write(WriteContext context, RandomOutput out) {
+        out.writeShort(registers_size);
+        out.writeShort(ins_size);
+        out.writeShort(outs_size);
+
+        int tries_size = tries.size();
+        out.writeShort(tries_size);
+
+        out.writeInt(0); // TODO: debug_info_off
+
+        long insns_size_pos = out.position();
+        int insns_size = insns.size();
+        out.skipBytes(4);
+
+        long insns_start = (int) out.position();
+        int[] offsets = new int[insns_size + 1];
+        int offset = 0;
+        for (int i = 0; i <= insns_size; i++) {
+            offset = (int) (out.position() - insns_start);
+            assert_((offset & 1) == 0, IllegalStateException::new,
+                    "Unaligned code unit");
+            offsets[i] = offset / 2;
+            if (i != insns_size) {
+                insns.get(i).write(context, out);
+            }
+        }
+
+        out.position(insns_size_pos);
+        out.writeInt(offsets[insns_size]);
+        out.position(insns_start + offset);
+
+        //TODO: delete duplicates in catch_handlers
+        if (tries_size != 0) {
+            if ((offsets[insns_size] & 1) != 0) {
+                out.writeShort(0); // padding
+            }
+            RandomOutput tries_out = out.duplicate(out.position());
+            out.skipBytes(TryItem.SIZE * tries_size);
+            long handlers_start = out.position();
+            out.writeULeb128(tries_size); // handlers_size
+            for (TryItem tmp : tries) {
+                tmp.write(context, tries_out, out, handlers_start, offsets);
+            }
+        }
+    }
+
     @Override
     public CodeItem clone() {
         return new CodeItem(registers_size, ins_size, outs_size, insns, tries);
     }
+
+    //TODO: equals
 }

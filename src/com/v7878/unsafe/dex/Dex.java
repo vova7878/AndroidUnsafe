@@ -205,6 +205,20 @@ public class Dex extends PCList<ClassDef> {
             }
         }
 
+        CodeItem[] code_items = data.getCodeItems();
+        if (code_items.length != 0) {
+            offset = roundUp(offset, CodeItem.ALIGNMENT);
+            map.code_items_off = offset;
+            map.code_items_size = code_items.length;
+            for (CodeItem tmp : code_items) {
+                offset = roundUp(offset, CodeItem.ALIGNMENT);
+                data_out.position(offset);
+                tmp.write(context, data_out);
+                context.addCodeItem(tmp, offset);
+                offset = (int) data_out.position();
+            }
+        }
+
         ClassData[] class_data_items = data.getClassDataItems();
         if (class_data_items.length != 0) {
             map.class_data_items_off = offset;

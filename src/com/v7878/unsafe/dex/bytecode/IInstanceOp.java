@@ -1,8 +1,10 @@
 package com.v7878.unsafe.dex.bytecode;
 
-import com.v7878.unsafe.dex.FieldId;
-import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
 import com.v7878.unsafe.dex.DataCollector;
+import com.v7878.unsafe.dex.FieldId;
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_22c_22cs;
+import com.v7878.unsafe.io.RandomOutput;
 
 public abstract class IInstanceOp extends Instruction {
 
@@ -39,11 +41,22 @@ public abstract class IInstanceOp extends Instruction {
         data.add(instance_field);
     }
 
-    private String toString(String name) {
-        return name + " " + value_register_or_pair
+    @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_22c_22cs(out, opcode(),
+                value_register_or_pair, object_register,
+                context.getFieldIndex(instance_field));
+    }
+
+    @Override
+    public String toString() {
+        return name() + " " + value_register_or_pair
                 + " " + object_register
                 + " " + instance_field;
     }
+
+    @Override
+    public abstract IInstanceOp clone();
 
     public static class IGet extends IInstanceOp {
 
@@ -60,8 +73,19 @@ public abstract class IInstanceOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("iget");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "iget";
+        }
+
+        @Override
+        public IGet clone() {
+            return new IGet(value_register_or_pair,
+                    object_register, instance_field);
         }
     }
 
@@ -80,8 +104,19 @@ public abstract class IInstanceOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("iget-wide");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "iget-wide";
+        }
+
+        @Override
+        public IGetWide clone() {
+            return new IGetWide(value_register_or_pair,
+                    object_register, instance_field);
         }
     }
 
@@ -100,8 +135,19 @@ public abstract class IInstanceOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("iget-object");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "iget-object";
+        }
+
+        @Override
+        public IGetObject clone() {
+            return new IGetObject(value_register_or_pair,
+                    object_register, instance_field);
         }
     }
 
@@ -120,8 +166,19 @@ public abstract class IInstanceOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("iget-boolean");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "iget-boolean";
+        }
+
+        @Override
+        public IGetBoolean clone() {
+            return new IGetBoolean(value_register_or_pair,
+                    object_register, instance_field);
         }
     }
 
@@ -140,8 +197,19 @@ public abstract class IInstanceOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("iget-byte");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "iget-byte";
+        }
+
+        @Override
+        public IGetByte clone() {
+            return new IGetByte(value_register_or_pair,
+                    object_register, instance_field);
         }
     }
 
@@ -160,8 +228,19 @@ public abstract class IInstanceOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("iget-char");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "iget-char";
+        }
+
+        @Override
+        public IGetChar clone() {
+            return new IGetChar(value_register_or_pair,
+                    object_register, instance_field);
         }
     }
 
@@ -180,8 +259,19 @@ public abstract class IInstanceOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("iget-short");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "iget-short";
+        }
+
+        @Override
+        public IGetShort clone() {
+            return new IGetShort(value_register_or_pair,
+                    object_register, instance_field);
         }
     }
 
@@ -200,8 +290,19 @@ public abstract class IInstanceOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("iput");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "iput";
+        }
+
+        @Override
+        public IPut clone() {
+            return new IPut(value_register_or_pair,
+                    object_register, instance_field);
         }
     }
 
@@ -220,8 +321,19 @@ public abstract class IInstanceOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("iput-wide");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "iput-wide";
+        }
+
+        @Override
+        public IPutWide clone() {
+            return new IPutWide(value_register_or_pair,
+                    object_register, instance_field);
         }
     }
 
@@ -240,8 +352,19 @@ public abstract class IInstanceOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("iput-object");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "iput-object";
+        }
+
+        @Override
+        public IPutObject clone() {
+            return new IPutObject(value_register_or_pair,
+                    object_register, instance_field);
         }
     }
 
@@ -260,8 +383,19 @@ public abstract class IInstanceOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("iput-boolean");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "iput-boolean";
+        }
+
+        @Override
+        public IPutBoolean clone() {
+            return new IPutBoolean(value_register_or_pair,
+                    object_register, instance_field);
         }
     }
 
@@ -280,8 +414,19 @@ public abstract class IInstanceOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("iput-byte");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "iput-byte";
+        }
+
+        @Override
+        public IPutByte clone() {
+            return new IPutByte(value_register_or_pair,
+                    object_register, instance_field);
         }
     }
 
@@ -300,8 +445,19 @@ public abstract class IInstanceOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("iput-char");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "iput-char";
+        }
+
+        @Override
+        public IPutChar clone() {
+            return new IPutChar(value_register_or_pair,
+                    object_register, instance_field);
         }
     }
 
@@ -320,8 +476,19 @@ public abstract class IInstanceOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("iput-short");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "iput-short";
+        }
+
+        @Override
+        public IPutShort clone() {
+            return new IPutShort(value_register_or_pair,
+                    object_register, instance_field);
         }
     }
 }

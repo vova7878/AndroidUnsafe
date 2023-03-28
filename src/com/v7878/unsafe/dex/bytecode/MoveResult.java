@@ -1,13 +1,15 @@
 package com.v7878.unsafe.dex.bytecode;
 
-import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_11x;
+import com.v7878.unsafe.io.RandomOutput;
 
 public class MoveResult extends Instruction {
 
     public static final int OPCODE = 0x0a;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_11x_10t((A) -> {
+        InstructionReader.register(OPCODE, new Reader_11x((A) -> {
             return new MoveResult(A);
         }));
     }
@@ -19,7 +21,27 @@ public class MoveResult extends Instruction {
     }
 
     @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_11x(out, OPCODE, destination_register);
+    }
+
+    @Override
+    public int opcode() {
+        return OPCODE;
+    }
+
+    @Override
+    public String name() {
+        return "move-result";
+    }
+
+    @Override
     public String toString() {
-        return "move-result " + destination_register;
+        return name() + " " + destination_register;
+    }
+
+    @Override
+    public MoveResult clone() {
+        return new MoveResult(destination_register);
     }
 }

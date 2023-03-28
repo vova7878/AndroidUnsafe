@@ -1,14 +1,16 @@
 package com.v7878.unsafe.dex.bytecode;
 
-import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_21s64;
+import com.v7878.unsafe.io.RandomOutput;
 
 public class ConstWide16 extends Instruction {
 
     public static final int OPCODE = 0x16;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_22x_21t_21s_21h((A, B) -> {
-            return new ConstWide16(A, ((long) B << 48) >> 48);
+        InstructionReader.register(OPCODE, new Reader_21s64((A, B) -> {
+            return new ConstWide16(A, B);
         }));
     }
 
@@ -21,7 +23,28 @@ public class ConstWide16 extends Instruction {
     }
 
     @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_21s64(out, OPCODE,
+                destination_register, value);
+    }
+
+    @Override
+    public int opcode() {
+        return OPCODE;
+    }
+
+    @Override
+    public String name() {
+        return "const-wide/16";
+    }
+
+    @Override
     public String toString() {
-        return "const-wide/16 " + destination_register + " " + value;
+        return name() + " " + destination_register + " " + value;
+    }
+
+    @Override
+    public ConstWide16 clone() {
+        return new ConstWide16(destination_register, value);
     }
 }

@@ -1,6 +1,8 @@
 package com.v7878.unsafe.dex.bytecode;
 
-import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_21t_21s32;
+import com.v7878.unsafe.io.RandomOutput;
 
 public abstract class IfTestZ extends Instruction {
 
@@ -21,17 +23,27 @@ public abstract class IfTestZ extends Instruction {
         signed_branch_offset = B;
     }
 
-    private String toString(String name) {
-        return name + " " + register_to_test
+    @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_21t_21s32(out, opcode(),
+                register_to_test, signed_branch_offset);
+    }
+
+    @Override
+    public String toString() {
+        return name() + " " + register_to_test
                 + " " + signed_branch_offset;
     }
+
+    @Override
+    public abstract IfTestZ clone();
 
     public static class IfEqZ extends IfTestZ {
 
         public static final int OPCODE = 0x38;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22x_21t_21s_21h((A, B) -> {
+            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> {
                 return new IfEqZ(A, (B << 16) >> 16);
             }));
         }
@@ -41,8 +53,18 @@ public abstract class IfTestZ extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("if-eqz");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "if-eqz";
+        }
+
+        @Override
+        public IfEqZ clone() {
+            return new IfEqZ(register_to_test, signed_branch_offset);
         }
     }
 
@@ -51,7 +73,7 @@ public abstract class IfTestZ extends Instruction {
         public static final int OPCODE = 0x39;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22x_21t_21s_21h((A, B) -> {
+            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> {
                 return new IfNeZ(A, (B << 16) >> 16);
             }));
         }
@@ -61,8 +83,18 @@ public abstract class IfTestZ extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("if-nez");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "if-nez";
+        }
+
+        @Override
+        public IfNeZ clone() {
+            return new IfNeZ(register_to_test, signed_branch_offset);
         }
     }
 
@@ -71,7 +103,7 @@ public abstract class IfTestZ extends Instruction {
         public static final int OPCODE = 0x3a;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22x_21t_21s_21h((A, B) -> {
+            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> {
                 return new IfLtZ(A, (B << 16) >> 16);
             }));
         }
@@ -81,8 +113,18 @@ public abstract class IfTestZ extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("if-ltz");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "if-ltz";
+        }
+
+        @Override
+        public IfLtZ clone() {
+            return new IfLtZ(register_to_test, signed_branch_offset);
         }
     }
 
@@ -91,7 +133,7 @@ public abstract class IfTestZ extends Instruction {
         public static final int OPCODE = 0x3b;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22x_21t_21s_21h((A, B) -> {
+            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> {
                 return new IfGeZ(A, (B << 16) >> 16);
             }));
         }
@@ -101,8 +143,18 @@ public abstract class IfTestZ extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("if-gez");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "if-gez";
+        }
+
+        @Override
+        public IfGeZ clone() {
+            return new IfGeZ(register_to_test, signed_branch_offset);
         }
     }
 
@@ -111,7 +163,7 @@ public abstract class IfTestZ extends Instruction {
         public static final int OPCODE = 0x3c;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22x_21t_21s_21h((A, B) -> {
+            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> {
                 return new IfGtZ(A, (B << 16) >> 16);
             }));
         }
@@ -121,8 +173,18 @@ public abstract class IfTestZ extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("if-gtz");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "if-gtz";
+        }
+
+        @Override
+        public IfGtZ clone() {
+            return new IfGtZ(register_to_test, signed_branch_offset);
         }
     }
 
@@ -131,7 +193,7 @@ public abstract class IfTestZ extends Instruction {
         public static final int OPCODE = 0x3d;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22x_21t_21s_21h((A, B) -> {
+            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> {
                 return new IfLeZ(A, (B << 16) >> 16);
             }));
         }
@@ -141,8 +203,18 @@ public abstract class IfTestZ extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("if-lez");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "if-lez";
+        }
+
+        @Override
+        public IfLeZ clone() {
+            return new IfLeZ(register_to_test, signed_branch_offset);
         }
     }
 }

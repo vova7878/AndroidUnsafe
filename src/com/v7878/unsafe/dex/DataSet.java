@@ -25,6 +25,7 @@ public class DataSet extends DataFilter {
     private final Set<AnnotationSet> annotation_sets;
     private final Set<AnnotationSetList> annotation_set_lists;
     private final Set<ArrayValue> array_values;
+    private final Set<CodeItem> code_items;
 
     public DataSet() {
         strings = new HashSet<>();
@@ -45,6 +46,7 @@ public class DataSet extends DataFilter {
         annotation_sets = new HashSet<>();
         annotation_set_lists = new HashSet<>();
         array_values = new HashSet<>();
+        code_items = new HashSet<>();
     }
 
     @Override
@@ -146,8 +148,8 @@ public class DataSet extends DataFilter {
 
     @Override
     public void add(CodeItem value) {
-        //TODO
         super.add(value);
+        code_items.add(value);
     }
 
     public String[] getStrings() {
@@ -208,5 +210,9 @@ public class DataSet extends DataFilter {
 
     public ArrayValue[] getArrayValues() {
         return array_values.stream().toArray(ArrayValue[]::new);
+    }
+
+    public CodeItem[] getCodeItems() {
+        return code_items.stream().toArray(CodeItem[]::new);
     }
 }

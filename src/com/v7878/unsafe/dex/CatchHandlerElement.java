@@ -43,6 +43,11 @@ public class CatchHandlerElement implements PublicCloneable {
         data.add(type);
     }
 
+    public void write(WriteContext context, RandomOutput out, int[] offsets) {
+        out.writeULeb128(context.getTypeIndex(type));
+        out.writeULeb128(offsets[address]);
+    }
+
     @Override
     public String toString() {
         return type + " " + address;

@@ -5,7 +5,7 @@ import com.v7878.unsafe.dex.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class Instruction implements PublicCloneable {
+public abstract class Instruction implements PublicCloneable {
 
     public static int[] readArray(RandomInput in,
             ReadContext context, PCList<Instruction> insns) {
@@ -36,9 +36,12 @@ public class Instruction implements PublicCloneable {
     public void collectData(DataCollector data) {
     }
 
+    public abstract void write(WriteContext context, RandomOutput out);
+
+    public abstract int opcode();
+
+    public abstract String name();
+
     @Override
-    public Instruction clone() {
-        //TODO
-        return this;
-    }
+    public abstract Instruction clone();
 }

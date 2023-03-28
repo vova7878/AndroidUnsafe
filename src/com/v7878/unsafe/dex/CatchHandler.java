@@ -2,6 +2,7 @@ package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.io.RandomInput;
+import com.v7878.unsafe.io.RandomOutput;
 import java.util.stream.*;
 
 public class CatchHandler implements PublicCloneable {
@@ -56,6 +57,18 @@ public class CatchHandler implements PublicCloneable {
         }
     }
 
+    public void write(WriteContext context, RandomOutput out, int[] offsets) {
+        assert_(!(handlers.isEmpty() && catch_all_addr == null),
+                IllegalStateException::new, "unable to write empty catch handler");
+        out.writeSLeb128(catch_all_addr == null ? handlers.size() : -handlers.size());
+        for (CatchHandlerElement tmp : handlers) {
+            tmp.write(context, out, offsets);
+        }
+        if (catch_all_addr != null) {
+            out.writeULeb128(offsets[catch_all_addr]);
+        }
+    }
+
     @Override
     public String toString() {
         return "catch handler " + catch_all_addr + " " + handlers.stream()
@@ -67,4 +80,6 @@ public class CatchHandler implements PublicCloneable {
     public CatchHandler clone() {
         return new CatchHandler(handlers, catch_all_addr);
     }
+
+    //TODO: equals
 }

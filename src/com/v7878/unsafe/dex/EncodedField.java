@@ -119,9 +119,9 @@ public class EncodedField implements PublicCloneable {
         } else {
             assert_((encoded_field.access_flags & Modifier.STATIC) == 0,
                     IllegalStateException::new, "field must not be static");
-            assert_(!encoded_field.getValue().isDefault(),
-                    IllegalStateException::new,
-                    "instance field can`t have value");
+            EncodedValue tmp = encoded_field.getValue();
+            assert_(tmp.isDefault(), IllegalStateException::new,
+                    "instance field can`t have value: " + tmp);
         }
     }
 

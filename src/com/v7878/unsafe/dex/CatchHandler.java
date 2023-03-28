@@ -1,8 +1,7 @@
 package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.*;
-import com.v7878.unsafe.io.RandomInput;
-import com.v7878.unsafe.io.RandomOutput;
+import com.v7878.unsafe.io.*;
 import java.util.stream.*;
 
 public class CatchHandler implements PublicCloneable {

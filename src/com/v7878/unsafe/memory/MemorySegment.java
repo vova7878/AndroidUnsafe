@@ -81,6 +81,24 @@ public class MemorySegment {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(pointer, layout);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof MemorySegment)) {
+            return false;
+        }
+        MemorySegment other_ms = (MemorySegment) other;
+        return Objects.equals(pointer, other_ms.pointer)
+                && Objects.equals(layout, other_ms.layout);
+    }
+
+    @Override
     public String toString() {
         return "MemorySegment{" + pointer + "; layout " + layout + "}";
     }

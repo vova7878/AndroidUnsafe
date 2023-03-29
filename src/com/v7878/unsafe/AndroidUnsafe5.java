@@ -252,12 +252,15 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         return currentArtMethodLayout;
     }
 
-    public static MemorySegment getDexFileSegment(Class<?> clazz) {
+    public static long getDexFile(Class<?> clazz) {
         Object dexCache = getDexCache(clazz);
         long address = nothrows_run(() -> dexFile.getLong(dexCache));
         assert_(address != 0, IllegalStateException::new, "dexFile == 0");
-        Pointer tmp = new Pointer(address);
-        return getDexFileLayout().bind(tmp);
+        return address;
+    }
+
+    public static MemorySegment getDexFileSegment(Class<?> clazz) {
+        return getDexFileLayout().bind(new Pointer(getDexFile(clazz)));
     }
 
     public static MemorySegment getArtMethodSegment(Executable ex) {

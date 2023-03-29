@@ -69,9 +69,9 @@ public class MethodId extends FieldOrMethodId {
     }
 
     @Override
-    public void fillContext(DataSet data) {
-        data.addProto(proto);
-        super.fillContext(data);
+    public void collectData(DataCollector data) {
+        data.add(proto);
+        super.collectData(data);
     }
 
     public void write(WriteContext context, RandomOutput out) {

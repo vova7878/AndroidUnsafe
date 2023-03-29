@@ -1,8 +1,10 @@
 package com.v7878.unsafe.dex.bytecode;
 
+import com.v7878.unsafe.dex.DataCollector;
 import com.v7878.unsafe.dex.MethodId;
-import com.v7878.unsafe.dex.DataSet;
-import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_35c_35ms_35mi;
+import com.v7878.unsafe.io.RandomOutput;
 
 public abstract class InvokeKind extends Instruction {
 
@@ -33,12 +35,22 @@ public abstract class InvokeKind extends Instruction {
     }
 
     @Override
-    public void fillContext(DataSet data) {
-        data.addMethod(method_reference);
+    public void collectData(DataCollector data) {
+        data.add(method_reference);
     }
 
-    private String toString(String name) {
-        return name + " " + method_reference
+    @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_35c_35ms_35mi(out, opcode(),
+                argument_word_count, context.getMethodIndex(method_reference),
+                argument_register_1, argument_register_2, argument_register_3,
+                argument_register_4, argument_register_5);
+    }
+
+    @Override
+    public String toString() {
+        return name() + " " + argument_word_count
+                + " " + method_reference
                 + " " + argument_word_count
                 + " " + argument_register_1
                 + " " + argument_register_2
@@ -46,6 +58,9 @@ public abstract class InvokeKind extends Instruction {
                 + " " + argument_register_4
                 + " " + argument_register_5;
     }
+
+    @Override
+    public abstract InvokeKind clone();
 
     public static class InvokeVirtual extends InvokeKind {
 
@@ -63,8 +78,21 @@ public abstract class InvokeKind extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("invoke-virtual");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "invoke-virtual";
+        }
+
+        @Override
+        public InvokeVirtual clone() {
+            return new InvokeVirtual(argument_word_count,
+                    method_reference, argument_register_1,
+                    argument_register_2, argument_register_3,
+                    argument_register_4, argument_register_5);
         }
     }
 
@@ -84,8 +112,21 @@ public abstract class InvokeKind extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("invoke-super");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "invoke-super";
+        }
+
+        @Override
+        public InvokeSuper clone() {
+            return new InvokeSuper(argument_word_count,
+                    method_reference, argument_register_1,
+                    argument_register_2, argument_register_3,
+                    argument_register_4, argument_register_5);
         }
     }
 
@@ -105,8 +146,21 @@ public abstract class InvokeKind extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("invoke-direct");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "invoke-direct";
+        }
+
+        @Override
+        public InvokeDirect clone() {
+            return new InvokeDirect(argument_word_count,
+                    method_reference, argument_register_1,
+                    argument_register_2, argument_register_3,
+                    argument_register_4, argument_register_5);
         }
     }
 
@@ -126,8 +180,21 @@ public abstract class InvokeKind extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("invoke-static");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "invoke-static";
+        }
+
+        @Override
+        public InvokeStatic clone() {
+            return new InvokeStatic(argument_word_count,
+                    method_reference, argument_register_1,
+                    argument_register_2, argument_register_3,
+                    argument_register_4, argument_register_5);
         }
     }
 
@@ -147,8 +214,21 @@ public abstract class InvokeKind extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("invoke-interface");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "invoke-interface";
+        }
+
+        @Override
+        public InvokeInterface clone() {
+            return new InvokeInterface(argument_word_count,
+                    method_reference, argument_register_1,
+                    argument_register_2, argument_register_3,
+                    argument_register_4, argument_register_5);
         }
     }
 }

@@ -14,7 +14,7 @@ public class PCList<T extends PublicCloneable>
         }
         this.elements = new ArrayList<>(length);
         if (length != 0) {
-            addAll(Arrays.asList(elements));
+            addAll(elements);
         }
     }
 
@@ -45,6 +45,22 @@ public class PCList<T extends PublicCloneable>
     @Override
     public final T remove(int index) {
         return elements.remove(index);
+    }
+
+    public final boolean addAll(int index, T[] data, int from, int to) {
+        return super.addAll(index, Arrays.asList(Arrays.copyOfRange(data, from, to)));
+    }
+
+    public final boolean addAll(T[] data, int from, int to) {
+        return super.addAll(Arrays.asList(Arrays.copyOfRange(data, from, to)));
+    }
+
+    public final boolean addAll(int index, T[] data) {
+        return super.addAll(index, Arrays.asList(data));
+    }
+
+    public final boolean addAll(T[] data) {
+        return super.addAll(Arrays.asList(data));
     }
 
     @Override

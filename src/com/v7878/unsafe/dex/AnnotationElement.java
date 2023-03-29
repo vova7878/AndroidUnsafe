@@ -44,9 +44,9 @@ public class AnnotationElement implements PublicCloneable {
         return new AnnotationElement(name, value);
     }
 
-    public void fillContext(DataSet data) {
-        data.addString(name);
-        value.fillContext(data);
+    public void collectData(DataCollector data) {
+        data.add(name);
+        data.fill(value);
     }
 
     public void write(WriteContext context, RandomOutput out) {

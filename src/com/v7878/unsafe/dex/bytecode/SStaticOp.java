@@ -1,8 +1,10 @@
 package com.v7878.unsafe.dex.bytecode;
 
-import com.v7878.unsafe.dex.DataSet;
+import com.v7878.unsafe.dex.DataCollector;
 import com.v7878.unsafe.dex.FieldId;
-import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_20bc_21c;
+import com.v7878.unsafe.io.RandomOutput;
 
 public abstract class SStaticOp extends Instruction {
 
@@ -33,14 +35,24 @@ public abstract class SStaticOp extends Instruction {
     }
 
     @Override
-    public void fillContext(DataSet data) {
-        data.addField(static_field);
+    public void collectData(DataCollector data) {
+        data.add(static_field);
     }
 
-    private String toString(String name) {
-        return name + " " + value_register_or_pair
+    @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_22x_20bc_21c(out, opcode(), value_register_or_pair,
+                context.getFieldIndex(static_field));
+    }
+
+    @Override
+    public String toString() {
+        return name() + " " + value_register_or_pair
                 + " " + static_field;
     }
+
+    @Override
+    public abstract SStaticOp clone();
 
     public static class SGet extends SStaticOp {
 
@@ -57,8 +69,18 @@ public abstract class SStaticOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("sget");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "sget";
+        }
+
+        @Override
+        public SGet clone() {
+            return new SGet(value_register_or_pair, static_field);
         }
     }
 
@@ -77,8 +99,18 @@ public abstract class SStaticOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("sget-wide");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "sget-wide";
+        }
+
+        @Override
+        public SGetWide clone() {
+            return new SGetWide(value_register_or_pair, static_field);
         }
     }
 
@@ -97,8 +129,18 @@ public abstract class SStaticOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("sget-object");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "sget-object";
+        }
+
+        @Override
+        public SGetObject clone() {
+            return new SGetObject(value_register_or_pair, static_field);
         }
     }
 
@@ -117,8 +159,18 @@ public abstract class SStaticOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("sget-boolean");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "sget-boolean";
+        }
+
+        @Override
+        public SGetBoolean clone() {
+            return new SGetBoolean(value_register_or_pair, static_field);
         }
     }
 
@@ -137,8 +189,18 @@ public abstract class SStaticOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("sget-byte");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "sget-byte";
+        }
+
+        @Override
+        public SGetByte clone() {
+            return new SGetByte(value_register_or_pair, static_field);
         }
     }
 
@@ -157,8 +219,18 @@ public abstract class SStaticOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("sget-char");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "sget-char";
+        }
+
+        @Override
+        public SGetChar clone() {
+            return new SGetChar(value_register_or_pair, static_field);
         }
     }
 
@@ -177,8 +249,18 @@ public abstract class SStaticOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("sget-short");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "sget-short";
+        }
+
+        @Override
+        public SGetShort clone() {
+            return new SGetShort(value_register_or_pair, static_field);
         }
     }
 
@@ -197,8 +279,18 @@ public abstract class SStaticOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("sput");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "sput";
+        }
+
+        @Override
+        public SPut clone() {
+            return new SPut(value_register_or_pair, static_field);
         }
     }
 
@@ -217,8 +309,18 @@ public abstract class SStaticOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("sput-wide");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "sput-wide";
+        }
+
+        @Override
+        public SPutWide clone() {
+            return new SPutWide(value_register_or_pair, static_field);
         }
     }
 
@@ -237,8 +339,18 @@ public abstract class SStaticOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("sput-object");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "sput-object";
+        }
+
+        @Override
+        public SPutObject clone() {
+            return new SPutObject(value_register_or_pair, static_field);
         }
     }
 
@@ -257,8 +369,18 @@ public abstract class SStaticOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("sput-boolean");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "sput-boolean";
+        }
+
+        @Override
+        public SPutBoolean clone() {
+            return new SPutBoolean(value_register_or_pair, static_field);
         }
     }
 
@@ -277,8 +399,18 @@ public abstract class SStaticOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("sput-byte");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "sput-byte";
+        }
+
+        @Override
+        public SPutByte clone() {
+            return new SPutByte(value_register_or_pair, static_field);
         }
     }
 
@@ -297,8 +429,18 @@ public abstract class SStaticOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("sput-char");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "sput-char";
+        }
+
+        @Override
+        public SPutChar clone() {
+            return new SPutChar(value_register_or_pair, static_field);
         }
     }
 
@@ -317,8 +459,18 @@ public abstract class SStaticOp extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("sput-short");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "sput-short";
+        }
+
+        @Override
+        public SPutShort clone() {
+            return new SPutShort(value_register_or_pair, static_field);
         }
     }
 }

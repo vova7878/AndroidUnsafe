@@ -1,7 +1,9 @@
 package com.v7878.unsafe.dex.bytecode;
 
-import com.v7878.unsafe.dex.DataSet;
-import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.DataCollector;
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_31c;
+import com.v7878.unsafe.io.RandomOutput;
 
 public class ConstStringJumbo extends Instruction {
 
@@ -22,12 +24,33 @@ public class ConstStringJumbo extends Instruction {
     }
 
     @Override
-    public void fillContext(DataSet data) {
-        data.addString(value);
+    public void collectData(DataCollector data) {
+        data.add(value);
+    }
+
+    @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_31i32_31t_31c(out, OPCODE,
+                destination_register, context.getStringIndex(value));
+    }
+
+    @Override
+    public int opcode() {
+        return OPCODE;
+    }
+
+    @Override
+    public String name() {
+        return "const-string/jumbo";
     }
 
     @Override
     public String toString() {
-        return "const-string/jumbo " + destination_register + " \"" + value + "\"";
+        return name() + " " + destination_register + " \"" + value + "\"";
+    }
+
+    @Override
+    public ConstStringJumbo clone() {
+        return new ConstStringJumbo(destination_register, value);
     }
 }

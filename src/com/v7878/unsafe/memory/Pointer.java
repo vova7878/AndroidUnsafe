@@ -30,7 +30,8 @@ public final class Pointer {
     public Pointer(Object base, long offset) {
         this.base = base;
         if (base == null) {
-            assert_(checkNativeAddress(offset), IllegalArgumentException::new);
+            assert_(checkNativeAddress(offset),
+                    IllegalArgumentException::new);
             this.alignShift = Long.numberOfTrailingZeros(offset);
             this.base_address = offset;
             this.offset = 0;
@@ -47,10 +48,12 @@ public final class Pointer {
                 long raw_address = address + offset;
                 assert_(Long.compareUnsigned(raw_address, address) >= 0,
                         IllegalArgumentException::new);
-                assert_(checkNativeAddress(raw_address), IllegalArgumentException::new);
+                assert_(checkNativeAddress(raw_address),
+                        IllegalArgumentException::new);
                 align_shift = Long.numberOfTrailingZeros(raw_address);
             } else {
-                align_shift = OBJECT_ALIGNMENT_SHIFT;
+                align_shift = Math.min(OBJECT_ALIGNMENT_SHIFT,
+                        Long.numberOfTrailingZeros(offset));
             }
             this.base_address = address;
             this.alignShift = align_shift;
@@ -223,6 +226,25 @@ public final class Pointer {
 
     public void put(ValueLayout.OfWord layout, Word value) {
         putWordUnaligned(base, getOffset(), value.longValue(), layout.order());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(base, base_address, offset);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Pointer)) {
+            return false;
+        }
+        Pointer other_ptr = (Pointer) other;
+        return base == other_ptr.base
+                && base_address == other_ptr.base_address
+                && offset == other_ptr.offset;
     }
 
     @Override

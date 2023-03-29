@@ -1,8 +1,10 @@
 package com.v7878.unsafe.dex.bytecode;
 
+import com.v7878.unsafe.dex.DataCollector;
 import com.v7878.unsafe.dex.TypeId;
-import com.v7878.unsafe.dex.DataSet;
+import com.v7878.unsafe.dex.WriteContext;
 import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_20bc_21c;
+import com.v7878.unsafe.io.RandomOutput;
 
 public class ConstClass extends Instruction {
 
@@ -23,12 +25,33 @@ public class ConstClass extends Instruction {
     }
 
     @Override
-    public void fillContext(DataSet data) {
-        data.addType(value);
+    public void collectData(DataCollector data) {
+        data.add(value);
+    }
+
+    @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_22x_20bc_21c(out, OPCODE,
+                destination_register, context.getTypeIndex(value));
+    }
+
+    @Override
+    public int opcode() {
+        return OPCODE;
+    }
+
+    @Override
+    public String name() {
+        return "const-class";
     }
 
     @Override
     public String toString() {
-        return "const-class " + destination_register + " \"" + value + "\"";
+        return name() + " " + destination_register + " " + value;
+    }
+
+    @Override
+    public ConstClass clone() {
+        return new ConstClass(destination_register, value);
     }
 }

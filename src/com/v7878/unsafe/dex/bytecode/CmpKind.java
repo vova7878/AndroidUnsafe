@@ -1,6 +1,8 @@
 package com.v7878.unsafe.dex.bytecode;
 
+import com.v7878.unsafe.dex.WriteContext;
 import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.io.RandomOutput;
 
 public abstract class CmpKind extends Instruction {
 
@@ -22,18 +24,29 @@ public abstract class CmpKind extends Instruction {
         second_source_register_or_pair = C;
     }
 
-    private String toString(String name) {
-        return name + " " + destination_register
+    @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_23x(out, opcode(),
+                destination_register, first_source_register_or_pair,
+                second_source_register_or_pair);
+    }
+
+    @Override
+    public String toString() {
+        return name() + " " + destination_register
                 + " " + first_source_register_or_pair
                 + " " + second_source_register_or_pair;
     }
+
+    @Override
+    public abstract CmpKind clone();
 
     public static class CmpLFloat extends CmpKind {
 
         public static final int OPCODE = 0x2d;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_23x_22b((A, B, C) -> {
+            InstructionReader.register(OPCODE, new Reader_23x((A, B, C) -> {
                 return new CmpLFloat(A, B, C);
             }));
         }
@@ -43,8 +56,20 @@ public abstract class CmpKind extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("cmpl-float");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "cmpl-float";
+        }
+
+        @Override
+        public CmpLFloat clone() {
+            return new CmpLFloat(destination_register,
+                    first_source_register_or_pair,
+                    second_source_register_or_pair);
         }
     }
 
@@ -53,7 +78,7 @@ public abstract class CmpKind extends Instruction {
         public static final int OPCODE = 0x2e;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_23x_22b((A, B, C) -> {
+            InstructionReader.register(OPCODE, new Reader_23x((A, B, C) -> {
                 return new CmpGFloat(A, B, C);
             }));
         }
@@ -63,8 +88,20 @@ public abstract class CmpKind extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("cmpg-float");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "cmpg-float";
+        }
+
+        @Override
+        public CmpGFloat clone() {
+            return new CmpGFloat(destination_register,
+                    first_source_register_or_pair,
+                    second_source_register_or_pair);
         }
     }
 
@@ -73,7 +110,7 @@ public abstract class CmpKind extends Instruction {
         public static final int OPCODE = 0x2f;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_23x_22b((A, B, C) -> {
+            InstructionReader.register(OPCODE, new Reader_23x((A, B, C) -> {
                 return new CmpLDouble(A, B, C);
             }));
         }
@@ -83,8 +120,20 @@ public abstract class CmpKind extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("cmpl-double");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "cmpl-double";
+        }
+
+        @Override
+        public CmpLDouble clone() {
+            return new CmpLDouble(destination_register,
+                    first_source_register_or_pair,
+                    second_source_register_or_pair);
         }
     }
 
@@ -93,7 +142,7 @@ public abstract class CmpKind extends Instruction {
         public static final int OPCODE = 0x30;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_23x_22b((A, B, C) -> {
+            InstructionReader.register(OPCODE, new Reader_23x((A, B, C) -> {
                 return new CmpGDouble(A, B, C);
             }));
         }
@@ -103,8 +152,20 @@ public abstract class CmpKind extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("cmpg-double");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "cmpg-double";
+        }
+
+        @Override
+        public CmpGDouble clone() {
+            return new CmpGDouble(destination_register,
+                    first_source_register_or_pair,
+                    second_source_register_or_pair);
         }
     }
 
@@ -113,7 +174,7 @@ public abstract class CmpKind extends Instruction {
         public static final int OPCODE = 0x31;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_23x_22b((A, B, C) -> {
+            InstructionReader.register(OPCODE, new Reader_23x((A, B, C) -> {
                 return new CmpLong(A, B, C);
             }));
         }
@@ -123,8 +184,20 @@ public abstract class CmpKind extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("cmp-long");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "cmp-long";
+        }
+
+        @Override
+        public CmpLong clone() {
+            return new CmpLong(destination_register,
+                    first_source_register_or_pair,
+                    second_source_register_or_pair);
         }
     }
 }

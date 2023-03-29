@@ -31,9 +31,9 @@ public class AnnotationSet extends AbstractSet<AnnotationItem>
         return new AnnotationSet();
     }
 
-    public void fillContext(DataSet data) {
+    public void collectData(DataCollector data) {
         for (AnnotationItem tmp : annotations) {
-            data.addAnnotation(tmp);
+            data.add(tmp);
         }
     }
 

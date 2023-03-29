@@ -27,10 +27,10 @@ public class AnnotationSetList extends PCList<AnnotationSet> {
         return new AnnotationSetList();
     }
 
-    public void fillContext(DataSet data) {
+    public void collectData(DataCollector data) {
         for (AnnotationSet tmp : this) {
             if (!tmp.isEmpty()) {
-                data.addAnnotationSet(tmp);
+                data.add(tmp);
             }
         }
     }

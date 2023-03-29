@@ -1,18 +1,77 @@
 package com.v7878.unsafe.dex;
 
-import com.v7878.unsafe.dex.bytecode.Instruction;
-import android.util.Pair;
 import static com.v7878.unsafe.Utils.*;
-import com.v7878.unsafe.io.RandomInput;
+import com.v7878.unsafe.dex.bytecode.Instruction;
+import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class CodeItem {
+public class CodeItem implements PublicCloneable {
 
-    public int registers_size;
-    public int ins_size;
-    public int outs_size;
-    public Instruction[] insns;
-    public TryItem[] tries;
+    public static final int ALIGNMENT = 4;
+
+    private int registers_size;
+    private int ins_size;
+    private int outs_size;
+    private PCList<Instruction> insns;
+    private PCList<TryItem> tries;
+
+    public CodeItem(int registers_size, int ins_size, int outs_size,
+            PCList<Instruction> insns, PCList<TryItem> tries) {
+        setRegistersSize(registers_size);
+        //TODO: checks
+        setInputsSize(ins_size);
+        setOutputsSize(outs_size);
+        setInstructions(insns);
+        setTries(tries);
+    }
+
+    public final void setRegistersSize(int registers_size) {
+        assert_(registers_size >= 0, IllegalArgumentException::new,
+                "registers_size can`t be negative");
+        this.registers_size = registers_size;
+    }
+
+    public final int getRegistersSize() {
+        return registers_size;
+    }
+
+    public final void setInputsSize(int ins_size) {
+        assert_(ins_size >= 0, IllegalArgumentException::new,
+                "ins_size can`t be negative");
+        this.ins_size = ins_size;
+    }
+
+    public final int getInputsSize() {
+        return ins_size;
+    }
+
+    public final void setOutputsSize(int outs_size) {
+        assert_(outs_size >= 0, IllegalArgumentException::new,
+                "outs_size can`t be negative");
+        this.outs_size = outs_size;
+    }
+
+    public final int getOutputsSize() {
+        return outs_size;
+    }
+
+    public final void setInstructions(PCList<Instruction> insns) {
+        this.insns = insns == null
+                ? PCList.empty() : insns.clone();
+    }
+
+    public final PCList<Instruction> getInstructions() {
+        return insns;
+    }
+
+    public final void setTries(PCList<TryItem> tries) {
+        this.tries = tries == null
+                ? PCList.empty() : tries.clone();
+    }
+
+    public final PCList<TryItem> getTries() {
+        return tries;
+    }
 
     static int getInstructionIndex(int[] offsets, int addr) {
         addr = Arrays.binarySearch(offsets, addr);
@@ -22,27 +81,24 @@ public class CodeItem {
     }
 
     public static CodeItem read(RandomInput in, ReadContext context) {
-        CodeItem out = new CodeItem();
-        out.registers_size = in.readUnsignedShort();
-        out.ins_size = in.readUnsignedShort();
-        out.outs_size = in.readUnsignedShort();
+        int registers_size = in.readUnsignedShort();
+        int ins_size = in.readUnsignedShort();
+        int outs_size = in.readUnsignedShort();
+        CodeItem out = new CodeItem(registers_size, ins_size, outs_size, null, null);
         int tries_size = in.readUnsignedShort();
 
         //TODO
         in.readInt(); //out.debug_info_off = in.readInt();
 
-        Pair<int[], Instruction[]> insns_data = Instruction.readArray(in, context);
-        out.insns = insns_data.second;
+        int[] offsets = Instruction.readArray(in, context, out.insns);
+        int insns_units_size = offsets[out.insns.size()]; // in code units
 
-        int[] offsets = insns_data.first;
-        int insns_size = offsets[out.insns.length]; // in code units
-
-        for (int i = 0; i < out.insns.length; i++) {
-            System.out.println(offsets[i] + " " + out.insns[i]);
+        for (int i = 0; i < out.insns.size(); i++) {
+            System.out.println(offsets[i] + " " + out.insns.get(i));
         }
 
         if (tries_size > 0) {
-            if ((insns_size & 1) != 0) {
+            if ((insns_units_size & 1) != 0) {
                 in.readShort(); // padding
             }
 
@@ -63,23 +119,73 @@ public class CodeItem {
             }
 
             in.position(tries_pos);
-            out.tries = new TryItem[tries_size];
             for (int i = 0; i < tries_size; i++) {
-                out.tries[i] = TryItem.read(in, handlers, offsets);
-                System.out.println(out.tries[i]);
+                out.tries.add(TryItem.read(in, handlers, offsets));
             }
-        } else {
-            out.tries = new TryItem[0];
         }
         return out;
     }
 
-    public void fillContext(DataSet data) {
+    public void collectData(DataCollector data) {
         for (Instruction tmp : insns) {
-            tmp.fillContext(data);
+            data.fill(tmp);
         }
         for (TryItem tmp : tries) {
-            tmp.fillContext(data);
+            data.fill(tmp);
         }
     }
+
+    //TODO: refactor
+    public void write(WriteContext context, RandomOutput out) {
+        out.writeShort(registers_size);
+        out.writeShort(ins_size);
+        out.writeShort(outs_size);
+
+        int tries_size = tries.size();
+        out.writeShort(tries_size);
+
+        out.writeInt(0); // TODO: debug_info_off
+
+        long insns_size_pos = out.position();
+        int insns_size = insns.size();
+        out.skipBytes(4);
+
+        long insns_start = (int) out.position();
+        int[] offsets = new int[insns_size + 1];
+        int offset = 0;
+        for (int i = 0; i <= insns_size; i++) {
+            offset = (int) (out.position() - insns_start);
+            assert_((offset & 1) == 0, IllegalStateException::new,
+                    "Unaligned code unit");
+            offsets[i] = offset / 2;
+            if (i != insns_size) {
+                insns.get(i).write(context, out);
+            }
+        }
+
+        out.position(insns_size_pos);
+        out.writeInt(offsets[insns_size]);
+        out.position(insns_start + offset);
+
+        //TODO: delete duplicates in catch_handlers
+        if (tries_size != 0) {
+            if ((offsets[insns_size] & 1) != 0) {
+                out.writeShort(0); // padding
+            }
+            RandomOutput tries_out = out.duplicate(out.position());
+            out.skipBytes(TryItem.SIZE * tries_size);
+            long handlers_start = out.position();
+            out.writeULeb128(tries_size); // handlers_size
+            for (TryItem tmp : tries) {
+                tmp.write(context, tries_out, out, handlers_start, offsets);
+            }
+        }
+    }
+
+    @Override
+    public CodeItem clone() {
+        return new CodeItem(registers_size, ins_size, outs_size, insns, tries);
+    }
+
+    //TODO: equals
 }

@@ -1,14 +1,16 @@
 package com.v7878.unsafe.dex.bytecode;
 
-import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_11n;
+import com.v7878.unsafe.io.RandomOutput;
 
 public class Const4 extends Instruction {
 
     public static final int OPCODE = 0x12;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_12x_11n((A, B) -> {
-            return new Const4(A, (B << 28) >> 28);
+        InstructionReader.register(OPCODE, new Reader_11n((A, B) -> {
+            return new Const4(A, B);
         }));
     }
 
@@ -20,7 +22,28 @@ public class Const4 extends Instruction {
     }
 
     @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_11n(out, OPCODE,
+                destination_register, value);
+    }
+
+    @Override
+    public int opcode() {
+        return OPCODE;
+    }
+
+    @Override
+    public String name() {
+        return "const/4";
+    }
+
+    @Override
     public String toString() {
-        return "const/4 " + destination_register + " " + value;
+        return name() + " " + destination_register + " " + value;
+    }
+
+    @Override
+    public Const4 clone() {
+        return new Const4(destination_register, value);
     }
 }

@@ -1,8 +1,10 @@
 package com.v7878.unsafe.dex.bytecode;
 
+import com.v7878.unsafe.dex.DataCollector;
 import com.v7878.unsafe.dex.TypeId;
-import com.v7878.unsafe.dex.DataSet;
-import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_22c_22cs;
+import com.v7878.unsafe.io.RandomOutput;
 
 public class InstanceOf extends Instruction {
 
@@ -25,12 +27,35 @@ public class InstanceOf extends Instruction {
     }
 
     @Override
-    public void fillContext(DataSet data) {
-        data.addType(type);
+    public void collectData(DataCollector data) {
+        data.add(type);
+    }
+
+    @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_22c_22cs(out, OPCODE, destination_register,
+                reference_bearing_register, context.getTypeIndex(type));
+    }
+
+    @Override
+    public int opcode() {
+        return OPCODE;
+    }
+
+    @Override
+    public String name() {
+        return "instance-of";
     }
 
     @Override
     public String toString() {
-        return "instance-of " + destination_register + " " + reference_bearing_register + " " + type;
+        return name() + " " + destination_register
+                + " " + reference_bearing_register + " " + type;
+    }
+
+    @Override
+    public InstanceOf clone() {
+        return new InstanceOf(destination_register,
+                reference_bearing_register, type);
     }
 }

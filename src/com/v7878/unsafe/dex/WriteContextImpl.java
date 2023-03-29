@@ -87,6 +87,7 @@ public final class WriteContextImpl implements WriteContext {
     private final Map<ArrayValue, Integer> array_values;
     private final Map<ClassData, Integer> class_data_items;
     private final Map<ClassDef, Integer> annotations_directories;
+    private final Map<CodeItem, Integer> code_items;
 
     public WriteContextImpl(DataSet data) {
         strings = data.getStrings();
@@ -112,6 +113,7 @@ public final class WriteContextImpl implements WriteContext {
         class_data_items = new HashMap<>();
         annotations_directories = new HashMap<>();
         array_values = new HashMap<>();
+        code_items = new HashMap<>();
 
         //TODO: sort
         call_sites = data.getCallSites();
@@ -143,6 +145,10 @@ public final class WriteContextImpl implements WriteContext {
 
     public void addArrayValue(ArrayValue value, int offset) {
         array_values.put(value, offset);
+    }
+
+    public void addCodeItem(CodeItem value, int offset) {
+        code_items.put(value, offset);
     }
 
     public Stream<String> stringsStream() {
@@ -306,6 +312,14 @@ public final class WriteContextImpl implements WriteContext {
         Integer out = array_values.get(value);
         assert_(out != null, IllegalArgumentException::new,
                 "unable to find array value \"" + value + "\"");
+        return out;
+    }
+
+    @Override
+    public int getCodeItemOffset(CodeItem value) {
+        Integer out = code_items.get(value);
+        assert_(out != null, IllegalArgumentException::new,
+                "unable to find code item \"" + value + "\"");
         return out;
     }
 }

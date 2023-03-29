@@ -1,6 +1,8 @@
 package com.v7878.unsafe.dex.bytecode;
 
-import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_22t_22s;
+import com.v7878.unsafe.io.RandomOutput;
 
 public abstract class IfTest extends Instruction {
 
@@ -23,11 +25,22 @@ public abstract class IfTest extends Instruction {
         signed_branch_offset = C;
     }
 
-    private String toString(String name) {
-        return name + " " + first_register_to_test
+    @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_22t_22s(out, opcode(),
+                first_register_to_test, second_register_to_test,
+                signed_branch_offset);
+    }
+
+    @Override
+    public String toString() {
+        return name() + " " + first_register_to_test
                 + " " + second_register_to_test
                 + " " + signed_branch_offset;
     }
+
+    @Override
+    public abstract IfTest clone();
 
     public static class IfEq extends IfTest {
 
@@ -35,7 +48,7 @@ public abstract class IfTest extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_22t_22s((A, B, C) -> {
-                return new IfEq(A, B, (C << 16) >> 16);
+                return new IfEq(A, B, C);
             }));
         }
 
@@ -44,8 +57,19 @@ public abstract class IfTest extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("if-eq");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "if-eq";
+        }
+
+        @Override
+        public IfEq clone() {
+            return new IfEq(first_register_to_test,
+                    second_register_to_test, signed_branch_offset);
         }
     }
 
@@ -55,7 +79,7 @@ public abstract class IfTest extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_22t_22s((A, B, C) -> {
-                return new IfNe(A, B, (C << 16) >> 16);
+                return new IfNe(A, B, C);
             }));
         }
 
@@ -64,8 +88,19 @@ public abstract class IfTest extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("if-ne");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "if-ne";
+        }
+
+        @Override
+        public IfNe clone() {
+            return new IfNe(first_register_to_test,
+                    second_register_to_test, signed_branch_offset);
         }
     }
 
@@ -75,7 +110,7 @@ public abstract class IfTest extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_22t_22s((A, B, C) -> {
-                return new IfLt(A, B, (C << 16) >> 16);
+                return new IfLt(A, B, C);
             }));
         }
 
@@ -84,8 +119,19 @@ public abstract class IfTest extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("if-lt");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "if-lt";
+        }
+
+        @Override
+        public IfLt clone() {
+            return new IfLt(first_register_to_test,
+                    second_register_to_test, signed_branch_offset);
         }
     }
 
@@ -95,7 +141,7 @@ public abstract class IfTest extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_22t_22s((A, B, C) -> {
-                return new IfGe(A, B, (C << 16) >> 16);
+                return new IfGe(A, B, C);
             }));
         }
 
@@ -104,8 +150,19 @@ public abstract class IfTest extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("if-ge");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "if-ge";
+        }
+
+        @Override
+        public IfGe clone() {
+            return new IfGe(first_register_to_test,
+                    second_register_to_test, signed_branch_offset);
         }
     }
 
@@ -115,7 +172,7 @@ public abstract class IfTest extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_22t_22s((A, B, C) -> {
-                return new IfGt(A, B, (C << 16) >> 16);
+                return new IfGt(A, B, C);
             }));
         }
 
@@ -124,8 +181,19 @@ public abstract class IfTest extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("if-gt");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "if-gt";
+        }
+
+        @Override
+        public IfGt clone() {
+            return new IfGt(first_register_to_test,
+                    second_register_to_test, signed_branch_offset);
         }
     }
 
@@ -135,7 +203,7 @@ public abstract class IfTest extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_22t_22s((A, B, C) -> {
-                return new IfLe(A, B, (C << 16) >> 16);
+                return new IfLe(A, B, C);
             }));
         }
 
@@ -144,8 +212,19 @@ public abstract class IfTest extends Instruction {
         }
 
         @Override
-        public String toString() {
-            return super.toString("if-le");
+        public int opcode() {
+            return OPCODE;
+        }
+
+        @Override
+        public String name() {
+            return "if-le";
+        }
+
+        @Override
+        public IfLe clone() {
+            return new IfLe(first_register_to_test,
+                    second_register_to_test, signed_branch_offset);
         }
     }
 }

@@ -76,8 +76,7 @@ public class EncodedMethod implements PublicCloneable {
     }
 
     public final void setCode(CodeItem code) {
-        //TODO: clone
-        this.code = code;
+        this.code = code == null ? null : code.clone();
     }
 
     public final CodeItem getCode() {
@@ -85,8 +84,7 @@ public class EncodedMethod implements PublicCloneable {
     }
 
     public static EncodedMethod read(RandomInput in, ReadContext context,
-            MethodId method,
-            Map<MethodId, AnnotationSet> annotated_methods,
+            MethodId method, Map<MethodId, AnnotationSet> annotated_methods,
             Map<MethodId, AnnotationSetList> annotated_parameters) {
         int access_flags = in.readULeb128();
         AnnotationSet annotations = annotated_methods.get(method);
@@ -115,22 +113,22 @@ public class EncodedMethod implements PublicCloneable {
         return out;
     }
 
-    public void fillContext(DataSet data) {
-        data.addMethod(method);
+    public void collectData(DataCollector data) {
+        data.add(method);
         if (!annotations.isEmpty()) {
-            data.addAnnotationSet(annotations);
+            data.add(annotations);
         }
         if (!parameter_annotations.isEmpty()) {
-            data.addAnnotationSetList(parameter_annotations);
+            data.add(parameter_annotations);
         }
         if (code != null) {
-            code.fillContext(data);
+            data.add(code);
         }
     }
 
     public void write(WriteContext context, RandomOutput out) {
         out.writeULeb128(access_flags);
-        out.writeULeb128(0); // TODO: code
+        out.writeULeb128(code == null ? 0 : context.getCodeItemOffset(code));
     }
 
     public static void writeArray(WriteContext context, RandomOutput out,

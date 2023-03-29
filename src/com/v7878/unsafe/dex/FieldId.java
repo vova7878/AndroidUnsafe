@@ -68,9 +68,9 @@ public class FieldId extends FieldOrMethodId {
     }
 
     @Override
-    public void fillContext(DataSet data) {
-        data.addType(type);
-        super.fillContext(data);
+    public void collectData(DataCollector data) {
+        data.add(type);
+        super.collectData(data);
     }
 
     public void write(WriteContext context, RandomOutput out) {

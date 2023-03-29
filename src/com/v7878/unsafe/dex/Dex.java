@@ -5,50 +5,40 @@ import com.v7878.unsafe.dex.EncodedValue.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
 
-public class Dex extends AbstractList<ClassDef> implements PublicCloneable {
-
-    private final List<ClassDef> class_defs;
+public class Dex extends PCList<ClassDef> {
 
     public Dex(ClassDef... class_defs) {
-        if (class_defs == null) {
-            class_defs = new ClassDef[0];
-        }
-        this.class_defs = new ArrayList<>(class_defs.length);
-        addAll(Arrays.asList(class_defs));
+        super(class_defs);
     }
 
-    private ClassDef check(ClassDef class_def) {
+    @Override
+    protected ClassDef check(ClassDef class_def) {
         return Objects.requireNonNull(class_def,
                 "Dex can`t contain null class def");
     }
 
-    @Override
-    public final void add(int index, ClassDef class_def) {
-        class_defs.add(check(class_def).clone());
-    }
-
-    @Override
-    public final ClassDef set(int index, ClassDef class_def) {
-        return class_defs.set(index, check(class_def).clone());
-    }
-
-    @Override
-    public final ClassDef get(int index) {
-        return class_defs.get(index);
-    }
-
-    @Override
-    public final ClassDef remove(int index) {
-        return class_defs.remove(index);
-    }
-
-    @Override
-    public final int size() {
-        return class_defs.size();
-    }
-
     public static Dex read(RandomInput in) {
+        return read(in, null);
+    }
+
+    public static Dex read(RandomInput in, int[] class_def_ids) {
         FileMap map = FileMap.read(in);
+
+        if (class_def_ids == null) {
+            class_def_ids = new int[map.class_defs_size];
+            for (int i = 0; i < map.class_defs_size; i++) {
+                class_def_ids[i] = i;
+            }
+        } else {
+            for (int id : class_def_ids) {
+                Objects.checkIndex(id, map.class_defs_size);
+            }
+        }
+
+        if (class_def_ids.length == 0) {
+            return new Dex();
+        }
+
         ReadContextImpl context = new ReadContextImpl();
         String[] strings = new String[map.string_ids_size];
         if (map.string_ids_size != 0) {
@@ -106,19 +96,18 @@ public class Dex extends AbstractList<ClassDef> implements PublicCloneable {
             }
         }
         context.setCallSites(call_sites);
-        ClassDef[] class_defs = new ClassDef[map.class_defs_size];
-        if (map.class_defs_size != 0) {
-            RandomInput in2 = in.duplicate(map.class_defs_off);
-            for (int i = 0; i < map.class_defs_size; i++) {
-                class_defs[i] = ClassDef.read(in2, context);
-            }
+        ClassDef[] class_defs = new ClassDef[class_def_ids.length];
+        for (int i = 0; i < class_def_ids.length; i++) {
+            int offset = map.class_defs_off + ClassDef.SIZE * class_def_ids[i];
+            RandomInput in2 = in.duplicate(offset);
+            class_defs[i] = ClassDef.read(in2, context);
         }
         return new Dex(class_defs);
     }
 
-    public void fillContext(DataSet data) {
-        for (ClassDef tmp : class_defs) {
-            data.addClassDef(tmp);
+    public void collectData(DataCollector data) {
+        for (ClassDef tmp : this) {
+            data.add(tmp);
         }
     }
 
@@ -126,7 +115,7 @@ public class Dex extends AbstractList<ClassDef> implements PublicCloneable {
         assert_(out.position() == 0, IllegalArgumentException::new);
 
         DataSet data = new DataSet();
-        fillContext(data);
+        collectData(data);
 
         WriteContextImpl context = new WriteContextImpl(data);
 
@@ -235,6 +224,20 @@ public class Dex extends AbstractList<ClassDef> implements PublicCloneable {
             }
         }
 
+        CodeItem[] code_items = data.getCodeItems();
+        if (code_items.length != 0) {
+            offset = roundUp(offset, CodeItem.ALIGNMENT);
+            map.code_items_off = offset;
+            map.code_items_size = code_items.length;
+            for (CodeItem tmp : code_items) {
+                offset = roundUp(offset, CodeItem.ALIGNMENT);
+                data_out.position(offset);
+                tmp.write(context, data_out);
+                context.addCodeItem(tmp, offset);
+                offset = (int) data_out.position();
+            }
+        }
+
         ClassData[] class_data_items = data.getClassDataItems();
         if (class_data_items.length != 0) {
             map.class_data_items_off = offset;
@@ -247,6 +250,7 @@ public class Dex extends AbstractList<ClassDef> implements PublicCloneable {
             }
         }
 
+        //TODO: delete duplicates
         Map<ClassDef, AnnotationsDirectory> annotations_directories
                 = data.getAnnotationsDirectories();
         if (!annotations_directories.isEmpty()) {
@@ -323,6 +327,15 @@ public class Dex extends AbstractList<ClassDef> implements PublicCloneable {
         map.writeHeader(out, file_size);
     }
 
+    public ClassDef findClassDef(TypeId type) {
+        for (ClassDef tmp : this) {
+            if (tmp.getType().equals(type)) {
+                return tmp;
+            }
+        }
+        return null;
+    }
+
     public byte[] compile() {
         ByteArrayIO out = new ByteArrayIO();
         write(out);
@@ -332,7 +345,7 @@ public class Dex extends AbstractList<ClassDef> implements PublicCloneable {
     @Override
     public Dex clone() {
         Dex out = new Dex();
-        out.addAll(class_defs);
+        out.addAll(this);
         return out;
     }
 }

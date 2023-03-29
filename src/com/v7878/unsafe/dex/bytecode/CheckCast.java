@@ -1,8 +1,10 @@
 package com.v7878.unsafe.dex.bytecode;
 
+import com.v7878.unsafe.dex.DataCollector;
 import com.v7878.unsafe.dex.TypeId;
-import com.v7878.unsafe.dex.DataSet;
-import com.v7878.unsafe.dex.bytecode.InstructionReader.*;
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.bytecode.InstructionReader.Reader_20bc_21c;
+import com.v7878.unsafe.io.RandomOutput;
 
 public class CheckCast extends Instruction {
 
@@ -23,12 +25,33 @@ public class CheckCast extends Instruction {
     }
 
     @Override
-    public void fillContext(DataSet data) {
-        data.addType(type);
+    public void collectData(DataCollector data) {
+        data.add(type);
+    }
+
+    @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_22x_20bc_21c(out, OPCODE,
+                reference_bearing_register, context.getTypeIndex(type));
+    }
+
+    @Override
+    public int opcode() {
+        return OPCODE;
+    }
+
+    @Override
+    public String name() {
+        return "check-cast";
     }
 
     @Override
     public String toString() {
-        return "check-cast " + reference_bearing_register + " " + type;
+        return name() + " " + reference_bearing_register + " " + type;
+    }
+
+    @Override
+    public CheckCast clone() {
+        return new CheckCast(reference_bearing_register, type);
     }
 }

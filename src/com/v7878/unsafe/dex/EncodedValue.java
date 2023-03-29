@@ -14,7 +14,7 @@ public interface EncodedValue extends PublicCloneable {
 
     public Object value();
 
-    public default void fillContext(DataSet data) {
+    public default void collectData(DataCollector data) {
     }
 
     public void write(WriteContext context, RandomOutput out);
@@ -572,8 +572,8 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public void fillContext(DataSet data) {
-            data.addProto(value);
+        public void collectData(DataCollector data) {
+            data.add(value);
         }
 
         @Override
@@ -609,8 +609,8 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public void fillContext(DataSet data) {
-            data.addMethodHandle(value);
+        public void collectData(DataCollector data) {
+            data.add(value);
         }
 
         @Override
@@ -645,8 +645,8 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public void fillContext(DataSet data) {
-            data.addString(value);
+        public void collectData(DataCollector data) {
+            data.add(value);
         }
 
         @Override
@@ -681,8 +681,8 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public void fillContext(DataSet data) {
-            data.addType(value);
+        public void collectData(DataCollector data) {
+            data.add(value);
         }
 
         @Override
@@ -717,8 +717,8 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public void fillContext(DataSet data) {
-            data.addField(value);
+        public void collectData(DataCollector data) {
+            data.add(value);
         }
 
         @Override
@@ -753,8 +753,8 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public void fillContext(DataSet data) {
-            data.addMethod(value);
+        public void collectData(DataCollector data) {
+            data.add(value);
         }
 
         @Override
@@ -789,8 +789,8 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public void fillContext(DataSet data) {
-            data.addField(value);
+        public void collectData(DataCollector data) {
+            data.add(value);
         }
 
         @Override
@@ -833,9 +833,9 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public void fillContext(DataSet data) {
+        public void collectData(DataCollector data) {
             for (EncodedValue tmp : this) {
-                tmp.fillContext(data);
+                tmp.collectData(data);
             }
         }
 
@@ -897,8 +897,8 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public void fillContext(DataSet data) {
-            value.fillContext(data);
+        public void collectData(DataCollector data) {
+            value.collectData(data);
         }
 
         @Override

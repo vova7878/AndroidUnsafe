@@ -2,15 +2,16 @@ package com.v7878.unsafe.dex;
 
 import com.v7878.unsafe.dex.EncodedValue.*;
 import com.v7878.unsafe.io.*;
+import java.util.function.Consumer;
 
 public class ClassData implements PublicCloneable {
 
-    private PCList<PCPair<EncodedField, EncodedValue>> static_fields;
+    private PCList<EncodedField> static_fields;
     private PCList<EncodedField> instance_fields;
     private PCList<EncodedMethod> direct_methods;
     private PCList<EncodedMethod> virtual_methods;
 
-    public ClassData(PCList<PCPair<EncodedField, EncodedValue>> static_fields,
+    public ClassData(PCList<EncodedField> static_fields,
             PCList<EncodedField> instance_fields,
             PCList<EncodedMethod> direct_methods,
             PCList<EncodedMethod> virtual_methods) {
@@ -20,13 +21,12 @@ public class ClassData implements PublicCloneable {
         setVirtualMethods(virtual_methods);
     }
 
-    public final void setStaticFields(
-            PCList<PCPair<EncodedField, EncodedValue>> static_fields) {
+    public final void setStaticFields(PCList<EncodedField> static_fields) {
         this.static_fields = static_fields == null
                 ? PCList.empty() : static_fields.clone();
     }
 
-    public final PCList<PCPair<EncodedField, EncodedValue>> getStaticFields() {
+    public final PCList<EncodedField> getStaticFields() {
         return static_fields;
     }
 
@@ -73,20 +73,10 @@ public class ClassData implements PublicCloneable {
         int instance_fields_size = in.readULeb128();
         int direct_methods_size = in.readULeb128();
         int virtual_methods_size = in.readULeb128();
-        PCList<EncodedField> static_fields_list = EncodedField.readArray(in, context,
+        out.static_fields = EncodedField.readArray(in, context,
                 static_fields_size, annotations.annotated_fields);
-        PCList<PCPair<EncodedField, EncodedValue>> static_fields
-                = out.getStaticFields();
-        for (int i = 0; i < static_fields_size; i++) {
-            EncodedField field = static_fields_list.get(i);
-            if (i < static_values.size()) {
-                static_fields.add(new PCPair<>(field,
-                        static_values.get(i)));
-            } else {
-                static_fields.add(new PCPair<>(field,
-                        EncodedValue.defaultValue(
-                                field.getField().getType())));
-            }
+        for (int i = 0; i < static_values.size(); i++) {
+            out.static_fields.get(i).setValue(static_values.get(i));
         }
         out.instance_fields = EncodedField.readArray(in, context,
                 instance_fields_size, annotations.annotated_fields);
@@ -99,19 +89,18 @@ public class ClassData implements PublicCloneable {
         return out;
     }
 
-    public void fillContext(DataSet data) {
-        for (PCPair<EncodedField, EncodedValue> tmp : static_fields) {
-            tmp.first.fillContext(data);
-            tmp.second.fillContext(data);
+    public void collectData(DataCollector data) {
+        for (EncodedField tmp : static_fields) {
+            data.fill(tmp);
         }
         for (EncodedField tmp : instance_fields) {
-            tmp.fillContext(data);
+            data.fill(tmp);
         }
         for (EncodedMethod tmp : direct_methods) {
-            tmp.fillContext(data);
+            data.fill(tmp);
         }
         for (EncodedMethod tmp : virtual_methods) {
-            tmp.fillContext(data);
+            data.fill(tmp);
         }
     }
 
@@ -121,9 +110,10 @@ public class ClassData implements PublicCloneable {
         out.writeULeb128(direct_methods.size());
         out.writeULeb128(virtual_methods.size());
 
-        EncodedField.writeArray(context, out, static_fields.stream()
-                .map(PCPair::first).toArray(EncodedField[]::new));
-        EncodedField.writeArray(context, out, instance_fields);
+        EncodedField.writeArray(true, context, out, static_fields);
+        EncodedField.writeArray(false, context, out, instance_fields);
+
+        //TODO: check direct
         EncodedMethod.writeArray(context, out, direct_methods);
         EncodedMethod.writeArray(context, out, virtual_methods);
     }
@@ -135,20 +125,16 @@ public class ClassData implements PublicCloneable {
     }
 
     public void fillAnnotations(AnnotationsDirectory all_annotations) {
-        static_fields.stream().forEach((pair) -> {
-            EncodedField field = pair.first;
+        Consumer<EncodedField> fill_field = (field) -> {
             AnnotationSet fannotations = field.getAnnotations();
             if (!fannotations.isEmpty()) {
                 all_annotations.addFieldAnnotations(field.getField(), fannotations);
             }
-        });
-        instance_fields.stream().forEach((field) -> {
-            AnnotationSet fannotations = field.getAnnotations();
-            if (!fannotations.isEmpty()) {
-                all_annotations.addFieldAnnotations(field.getField(), fannotations);
-            }
-        });
-        direct_methods.stream().forEach((method) -> {
+        };
+        static_fields.stream().forEach(fill_field);
+        instance_fields.stream().forEach(fill_field);
+
+        Consumer<EncodedMethod> fill_method = (method) -> {
             AnnotationSet mannotations = method.getAnnotations();
             if (!mannotations.isEmpty()) {
                 all_annotations.addMethodAnnotations(method.getMethod(), mannotations);
@@ -157,16 +143,8 @@ public class ClassData implements PublicCloneable {
             if (!pannotations.isEmpty()) {
                 all_annotations.addMethodParameterAnnotations(method.getMethod(), pannotations);
             }
-        });
-        virtual_methods.stream().forEach((method) -> {
-            AnnotationSet mannotations = method.getAnnotations();
-            if (!mannotations.isEmpty()) {
-                all_annotations.addMethodAnnotations(method.getMethod(), mannotations);
-            }
-            AnnotationSetList pannotations = method.getParameterAnnotations();
-            if (!pannotations.isEmpty()) {
-                all_annotations.addMethodParameterAnnotations(method.getMethod(), pannotations);
-            }
-        });
+        };
+        direct_methods.stream().forEach(fill_method);
+        virtual_methods.stream().forEach(fill_method);
     }
 }

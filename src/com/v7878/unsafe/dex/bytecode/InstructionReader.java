@@ -1,5 +1,6 @@
 package com.v7878.unsafe.dex.bytecode;
 
+import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.dex.ReadContext;
 import com.v7878.unsafe.io.RandomInput;
 
@@ -111,6 +112,16 @@ public abstract class InstructionReader {
         FillArrayDataPayload.init();                // extra 0x03
     }
 
+    private static int extend_sign(int value, int width) {
+        int shift = 32 - width;
+        return (value << shift) >> shift;
+    }
+
+    private static long extend_sign64(long value, int width) {
+        int shift = 64 - width;
+        return (value << shift) >> shift;
+    }
+
     public static Instruction read(RandomInput in, ReadContext context) {
         int code = in.readUnsignedShort();
 
@@ -131,7 +142,11 @@ public abstract class InstructionReader {
         if (reader == null) {
             throw new IllegalArgumentException("unknown " + (is_extra ? "extra " : "") + "opcode " + opcode);
         }
-        return reader.read(in, context, arg);
+
+        Instruction out = reader.read(in, context, arg);
+        assert_(out.opcode() == opcode, IllegalStateException::new,
+                "opcode != readed.opcode()");
+        return out;
     }
 
     abstract Instruction read(RandomInput in, ReadContext context, int arg);
@@ -156,7 +171,7 @@ public abstract class InstructionReader {
         }
     }
 
-    static class Reader_12x_11n extends InstructionReader {
+    static class Reader_12x extends InstructionReader {
 
         @FunctionalInterface
         public interface Factory {
@@ -166,7 +181,7 @@ public abstract class InstructionReader {
 
         public final Factory factory;
 
-        public Reader_12x_11n(Factory factory) {
+        public Reader_12x(Factory factory) {
             this.factory = factory;
         }
 
@@ -176,7 +191,27 @@ public abstract class InstructionReader {
         }
     }
 
-    static class Reader_11x_10t extends InstructionReader {
+    static class Reader_11n extends InstructionReader {
+
+        @FunctionalInterface
+        public interface Factory {
+
+            public Instruction make(int A, int sB);
+        }
+
+        public final Factory factory;
+
+        public Reader_11n(Factory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        Instruction read(RandomInput in, ReadContext context, int BA) {
+            return factory.make(BA & 0xf, extend_sign(BA >> 4, 4));
+        }
+    }
+
+    static class Reader_11x extends InstructionReader {
 
         @FunctionalInterface
         public interface Factory {
@@ -186,7 +221,7 @@ public abstract class InstructionReader {
 
         public final Factory factory;
 
-        public Reader_11x_10t(Factory factory) {
+        public Reader_11x(Factory factory) {
             this.factory = factory;
         }
 
@@ -196,12 +231,32 @@ public abstract class InstructionReader {
         }
     }
 
+    static class Reader_10t extends InstructionReader {
+
+        @FunctionalInterface
+        public interface Factory {
+
+            public Instruction make(int sAA);
+        }
+
+        public final Factory factory;
+
+        public Reader_10t(Factory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        Instruction read(RandomInput in, ReadContext context, int AA) {
+            return factory.make(extend_sign(AA, 8));
+        }
+    }
+
     static class Reader_20t extends InstructionReader {
 
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int AAAA);
+            public Instruction make(int sAAAA);
         }
 
         public final Factory factory;
@@ -213,7 +268,7 @@ public abstract class InstructionReader {
         @Override
         Instruction read(RandomInput in, ReadContext context, int _00) {
             int AAAA = in.readUnsignedShort();
-            return factory.make(AAAA);
+            return factory.make(extend_sign(AAAA, 16));
         }
     }
 
@@ -238,7 +293,7 @@ public abstract class InstructionReader {
         }
     }
 
-    static class Reader_22x_21t_21s_21h extends InstructionReader {
+    static class Reader_22x extends InstructionReader {
 
         @FunctionalInterface
         public interface Factory {
@@ -248,7 +303,7 @@ public abstract class InstructionReader {
 
         public final Factory factory;
 
-        public Reader_22x_21t_21s_21h(Factory factory) {
+        public Reader_22x(Factory factory) {
             this.factory = factory;
         }
 
@@ -259,7 +314,91 @@ public abstract class InstructionReader {
         }
     }
 
-    static class Reader_23x_22b extends InstructionReader {
+    static class Reader_21t_21s32 extends InstructionReader {
+
+        @FunctionalInterface
+        public interface Factory {
+
+            public Instruction make(int AA, int sBBBB);
+        }
+
+        public final Factory factory;
+
+        public Reader_21t_21s32(Factory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        Instruction read(RandomInput in, ReadContext context, int AA) {
+            int BBBB = in.readUnsignedShort();
+            return factory.make(AA, extend_sign(BBBB, 16));
+        }
+    }
+
+    static class Reader_21s64 extends InstructionReader {
+
+        @FunctionalInterface
+        public interface Factory {
+
+            public Instruction make(int AA, long sBBBB);
+        }
+
+        public final Factory factory;
+
+        public Reader_21s64(Factory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        Instruction read(RandomInput in, ReadContext context, int AA) {
+            int BBBB = in.readUnsignedShort();
+            return factory.make(AA, extend_sign64(BBBB, 16));
+        }
+    }
+
+    static class Reader_21h32 extends InstructionReader {
+
+        @FunctionalInterface
+        public interface Factory {
+
+            public Instruction make(int AA, int BBBB0000);
+        }
+
+        public final Factory factory;
+
+        public Reader_21h32(Factory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        Instruction read(RandomInput in, ReadContext context, int AA) {
+            int BBBB = in.readUnsignedShort();
+            return factory.make(AA, BBBB << 16);
+        }
+    }
+
+    static class Reader_21h64 extends InstructionReader {
+
+        @FunctionalInterface
+        public interface Factory {
+
+            public Instruction make(int AA, long BBBB000000000000);
+        }
+
+        public final Factory factory;
+
+        public Reader_21h64(Factory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        Instruction read(RandomInput in, ReadContext context, int AA) {
+            long BBBB = in.readUnsignedShort();
+            return factory.make(AA, BBBB << 48);
+        }
+    }
+
+    static class Reader_23x extends InstructionReader {
 
         @FunctionalInterface
         public interface Factory {
@@ -269,7 +408,7 @@ public abstract class InstructionReader {
 
         public final Factory factory;
 
-        public Reader_23x_22b(Factory factory) {
+        public Reader_23x(Factory factory) {
             this.factory = factory;
         }
 
@@ -280,12 +419,33 @@ public abstract class InstructionReader {
         }
     }
 
+    static class Reader_22b extends InstructionReader {
+
+        @FunctionalInterface
+        public interface Factory {
+
+            public Instruction make(int AA, int BB, int sCC);
+        }
+
+        public final Factory factory;
+
+        public Reader_22b(Factory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        Instruction read(RandomInput in, ReadContext context, int AA) {
+            int CCBB = in.readUnsignedShort();
+            return factory.make(AA, CCBB & 0xff, extend_sign(CCBB >> 8, 8));
+        }
+    }
+
     static class Reader_22t_22s extends InstructionReader {
 
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int A, int B, int CCCC);
+            public Instruction make(int A, int B, int sCCCC);
         }
 
         public final Factory factory;
@@ -297,7 +457,7 @@ public abstract class InstructionReader {
         @Override
         Instruction read(RandomInput in, ReadContext context, int BA) {
             int CCCC = in.readUnsignedShort();
-            return factory.make(BA & 0xf, BA >> 4, CCCC);
+            return factory.make(BA & 0xf, BA >> 4, extend_sign(CCCC, 16));
         }
     }
 
@@ -366,7 +526,7 @@ public abstract class InstructionReader {
         }
     }
 
-    static class Reader_31i_31t extends InstructionReader {
+    static class Reader_31i32_31t extends InstructionReader {
 
         @FunctionalInterface
         public interface Factory {
@@ -376,7 +536,7 @@ public abstract class InstructionReader {
 
         public final Factory factory;
 
-        public Reader_31i_31t(Factory factory) {
+        public Reader_31i32_31t(Factory factory) {
             this.factory = factory;
         }
 
@@ -385,6 +545,28 @@ public abstract class InstructionReader {
             int BBBBlo = in.readUnsignedShort();
             int BBBBhi = in.readUnsignedShort();
             return factory.make(AA, BBBBlo | (BBBBhi << 16));
+        }
+    }
+
+    static class Reader_31i64 extends InstructionReader {
+
+        @FunctionalInterface
+        public interface Factory {
+
+            public Instruction make(int AA, long sBBBBBBBB);
+        }
+
+        public final Factory factory;
+
+        public Reader_31i64(Factory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        Instruction read(RandomInput in, ReadContext context, int AA) {
+            int BBBBlo = in.readUnsignedShort();
+            int BBBBhi = in.readUnsignedShort();
+            return factory.make(AA, extend_sign64(BBBBlo | (BBBBhi << 16), 32));
         }
     }
 
@@ -462,12 +644,34 @@ public abstract class InstructionReader {
         }
     }
 
+    static class Reader_3rc_3rms_3rmi extends InstructionReader {
+
+        @FunctionalInterface
+        public interface Factory {
+
+            public Instruction make(ReadContext context, int AA, int BBBB, int CCCC);
+        }
+
+        public final Factory factory;
+
+        public Reader_3rc_3rms_3rmi(Factory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        Instruction read(RandomInput in, ReadContext context, int AA) {
+            int BBBB = in.readUnsignedShort();
+            int CCCC = in.readUnsignedShort();
+            return factory.make(context, AA, BBBB, CCCC);
+        }
+    }
+
     static class Reader_fill_array_data_payload extends InstructionReader {
 
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int element_width, int size, byte[] data);
+            public Instruction make(int element_width, byte[] data);
         }
 
         public final Factory factory;
@@ -484,7 +688,7 @@ public abstract class InstructionReader {
             if ((size & 1) != 0) {
                 in.readByte(); // padding
             }
-            return factory.make(element_width, size, data);
+            return factory.make(element_width, data);
         }
     }
 }

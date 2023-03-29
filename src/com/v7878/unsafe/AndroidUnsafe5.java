@@ -281,6 +281,24 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
             } else {
                 throw new IllegalStateException("unsupported sdk: " + getSdkInt());
             }
+            setAccessible(dex_constructor, true);
+        }
+    }
+
+    private static Method set_dex_trusted;
+
+    private synchronized static void initSetTrusted() {
+        if (getSdkInt() >= 26 && getSdkInt() <= 27) {
+            return;
+        }
+        if (set_dex_trusted == null) {
+            if (getSdkInt() >= 28 && getSdkInt() <= 34) {
+                set_dex_trusted = nothrows_run(() -> getDeclaredMethod(
+                        DexFile.class, "setTrusted"));
+            } else {
+                throw new IllegalStateException("unsupported sdk: " + getSdkInt());
+            }
+            setAccessible(set_dex_trusted, true);
         }
     }
 
@@ -298,6 +316,14 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
 
     public static DexFile openDexFile(byte[] data) {
         return openDexFile(ByteBuffer.wrap(data));
+    }
+
+    public static void setTrusted(DexFile dex) {
+        if (getSdkInt() >= 26 && getSdkInt() <= 27) {
+            return;
+        }
+        initSetTrusted();
+        nothrows_run(() -> set_dex_trusted.invoke(dex), true);
     }
 
     public static Dex readClassDex(Class<?> clazz) {

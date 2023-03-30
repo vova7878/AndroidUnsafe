@@ -1,6 +1,5 @@
 package com.v7878.unsafe.io;
 
-import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.memory.*;
 import java.util.Objects;
 
@@ -16,10 +15,9 @@ public class MemoryInput implements RandomInput {
     }
 
     private long grow(long n) {
-        long new_offset = Math.addExact(offset, n);
-        assert_(n >= 0 && new_offset <= data.size(), IllegalArgumentException::new);
-        offset = new_offset;
-        return new_offset - n;
+        long tmp = Objects.checkFromIndexSize(offset, n, data.size());
+        offset += n;
+        return tmp;
     }
 
     @Override
@@ -59,8 +57,7 @@ public class MemoryInput implements RandomInput {
 
     @Override
     public void position(long new_position) {
-        assert_(new_position >= 0 && new_position < data.size(), IllegalArgumentException::new);
-        offset = new_position;
+        offset = Objects.checkIndex(new_position, data.size());
     }
 
     @Override

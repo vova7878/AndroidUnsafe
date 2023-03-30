@@ -1,10 +1,7 @@
 package com.v7878.unsafe;
 
 import static com.v7878.unsafe.Utils.*;
-import com.v7878.unsafe.dex.Dex;
-import com.v7878.unsafe.io.MemoryInput;
 import com.v7878.unsafe.memory.*;
-import static com.v7878.unsafe.memory.LayoutPath.PathElement.*;
 import static com.v7878.unsafe.memory.ValueLayout.*;
 import dalvik.system.DexFile;
 import java.lang.reflect.*;
@@ -327,21 +324,5 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         }
         initSetTrusted();
         nothrows_run(() -> set_dex_trusted.invoke(dex), true);
-    }
-
-    public static Dex readClassDex(Class<?> clazz) {
-        ClassMirror[] cm = arrayCast(ClassMirror.class, clazz);
-        int dex_id = cm[0].dexClassDefIndex;
-        if (dex_id >= 0xffff) {
-            throw new IllegalArgumentException("illegal dexClassDefIndex: " + dex_id);
-        }
-        Pointer data = (Pointer) getDexFileSegment(clazz)
-                .select(groupElement("begin_")).getValue();
-        long size = ((Word) getDexFileSegment(clazz)
-                .select(groupElement("size_")).getValue()).longValue();
-
-        return Dex.read(new MemoryInput(
-                Layout.rawLayout(size).bind(data)),
-                new int[]{dex_id});
     }
 }

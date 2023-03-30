@@ -103,11 +103,9 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         public static int sa, sb;
 
         public static void a() {
-            System.out.println("inside a");
         }
 
         public static void b() {
-            System.out.println("inside b");
         }
     }
 

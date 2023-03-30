@@ -30,6 +30,7 @@ public class Dex extends PCList<ClassDef> {
                 class_def_ids[i] = i;
             }
         } else {
+            //TODO: check unique
             for (int id : class_def_ids) {
                 Objects.checkIndex(id, map.class_defs_size);
             }

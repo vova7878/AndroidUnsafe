@@ -93,10 +93,10 @@ public class CodeItem implements PublicCloneable {
         int[] offsets = Instruction.readArray(in, context, out.insns);
         int insns_units_size = offsets[out.insns.size()]; // in code units
 
-        for (int i = 0; i < out.insns.size(); i++) {
+        //TODO: remove after tests
+        /*for (int i = 0; i < out.insns.size(); i++) {
             System.out.println(offsets[i] + " " + out.insns.get(i));
-        }
-
+        }*/
         if (tries_size > 0) {
             if ((insns_units_size & 1) != 0) {
                 in.readShort(); // padding

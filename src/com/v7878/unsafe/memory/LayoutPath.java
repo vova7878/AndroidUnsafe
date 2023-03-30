@@ -195,7 +195,7 @@ public class LayoutPath {
 
         private final LayoutPath parent;
         private final List<Layout> members;
-        private boolean collect_offset;
+        private final boolean collect_offset;
         long currentOffset;
         int currentIndex;
 

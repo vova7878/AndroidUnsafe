@@ -13,26 +13,28 @@ import java.util.stream.*;
 public abstract class Layout {
 
     static void requireValidAlignment(long alignment) {
-        assert_(isPowerOfTwoL(alignment)
-                && (IS64BIT || is32BitOnly(alignment)),
-                IllegalArgumentException::new,
-                "Invalid alignment: " + alignment);
+        if (!isPowerOfTwoL(alignment)
+                || !(IS64BIT || is32BitOnly(alignment))) {
+            throw new IllegalArgumentException(
+                    "illegal alignment: " + alignment);
+        }
     }
 
     static void requireValidAlignmentShift(int align_shift) {
-        assert_((align_shift >= 0) && (align_shift < (ADDRESS_SIZE * 8)),
-                IllegalArgumentException::new,
-                "Invalid alignment shift: " + align_shift);
+        if ((align_shift < 0) || (align_shift >= (ADDRESS_SIZE * 8))) {
+            throw new IllegalArgumentException(
+                    "Invalid alignment shift: " + align_shift);
+        }
     }
 
     static void requireValidSize(long size, boolean includeZero) {
-        assert_(checkSize(size) || (includeZero && size == 0),
-                IllegalArgumentException::new,
-                "Invalid size: " + size);
+        if (!checkSize(size) || (!includeZero && size == 0)) {
+            throw new IllegalArgumentException("Invalid size: " + size);
+        }
     }
 
     static void requireValidSize(long size) {
-        Layout.requireValidSize(size, false);
+        requireValidSize(size, false);
     }
 
     private final long size;
@@ -131,7 +133,8 @@ public abstract class Layout {
     @Override
     public abstract String toString();
 
-    private static <T> T computePathOp(LayoutPath path, Function<LayoutPath, T> finalizer, PathElement... elements) {
+    private static <T> T computePathOp(LayoutPath path,
+            Function<LayoutPath, T> finalizer, PathElement... elements) {
         Objects.requireNonNull(elements);
         for (PathElement e : elements) {
             path = e.apply(path);

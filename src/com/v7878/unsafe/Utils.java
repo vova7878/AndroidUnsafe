@@ -76,8 +76,8 @@ public class Utils {
         }
     }
 
-    public static <T extends Throwable, E> void assert_(
-            boolean value, Function<E, T> th, E msg) {
+    public static <T extends Throwable> void assert_(
+            boolean value, Function<String, T> th, String msg) {
         if (!value) {
             Thrower.throwException(th.apply(msg));
         }

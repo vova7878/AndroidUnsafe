@@ -6,10 +6,19 @@ import java.util.Arrays;
 
 class ModifiableArray {
 
+    static final int DEFAULT_GROW_FACTOR = 4096; // 4 KiB
+    static final int MAX_GROW_FACTOR = 1024 * 1024; // 1 MiB
+
     private byte[] data;
     private int data_size;
+    private int grow_factor;
 
-    ModifiableArray(int size) {
+    ModifiableArray(int size, int grow_factor) {
+        if (grow_factor <= 0) {
+            grow_factor = DEFAULT_GROW_FACTOR;
+        }
+        grow_factor = Math.min(grow_factor, MAX_GROW_FACTOR);
+        this.grow_factor = grow_factor;
         this.data = new byte[size];
         this.data_size = 0;
     }
@@ -26,13 +35,12 @@ class ModifiableArray {
         return Arrays.copyOf(data, data_size);
     }
 
-    static final int GROW_FACTOR = 4096;
-
     void ensureSize(int new_size) {
-        assert_(new_size >= 0, IllegalArgumentException::new, "negative size");
+        if (new_size < 0) {
+            throw new IllegalArgumentException("negative size");
+        }
         if (new_size > data.length) {
-            data = Arrays.copyOf(data,
-                    roundUp(new_size, GROW_FACTOR) + GROW_FACTOR);
+            data = Arrays.copyOf(data, new_size + grow_factor);
         }
         if (new_size > data_size) {
             data_size = new_size;
@@ -50,8 +58,12 @@ public class ByteArrayIO implements RandomIO {
         this.offset = 0;
     }
 
+    public ByteArrayIO(int size, int grow_factor) {
+        this(new ModifiableArray(size, grow_factor));
+    }
+
     public ByteArrayIO(int size) {
-        this(new ModifiableArray(size));
+        this(new ModifiableArray(size, 0));
     }
 
     public ByteArrayIO() {
@@ -60,8 +72,6 @@ public class ByteArrayIO implements RandomIO {
 
     private long grow(long n) {
         long new_offset = offset + n;
-        assert_(new_offset >= offset && new_offset <= Integer.MAX_VALUE,
-                IllegalArgumentException::new);
         arr.ensureSize((int) new_offset);
         offset = (int) new_offset;
         return new_offset - n;

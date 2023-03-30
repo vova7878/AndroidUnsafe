@@ -1,6 +1,5 @@
 package com.v7878.unsafe.dex;
 
-import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.dex.EncodedValue.*;
 import java.util.*;
 import java.util.stream.*;
@@ -214,112 +213,141 @@ public final class WriteContextImpl implements WriteContext {
     @Override
     public int getStringIndex(String value) {
         int out = Arrays.binarySearch(strings, value, StringId.COMPARATOR);
-        assert_(out >= 0, IllegalArgumentException::new,
-                "unable to find string \"" + value + "\"");
+        if (out < 0) {
+            throw new IllegalArgumentException(
+                    "unable to find string \"" + value + "\"");
+        }
         return out;
     }
 
     @Override
     public int getTypeIndex(TypeId value) {
         int out = Arrays.binarySearch(types, value, type_comparator);
-        assert_(out >= 0, IllegalArgumentException::new,
-                "unable to find type \"" + value + "\"");
+        if (out < 0) {
+            throw new IllegalArgumentException(
+                    "unable to find type \"" + value + "\"");
+        }
         return out;
     }
 
     @Override
     public int getProtoIndex(ProtoId value) {
         int out = Arrays.binarySearch(protos, value, proto_comparator);
-        assert_(out >= 0, IllegalArgumentException::new,
-                "unable to find proto \"" + value + "\"");
+        if (out < 0) {
+            throw new IllegalArgumentException(
+                    "unable to find proto \"" + value + "\"");
+        }
         return out;
     }
 
     @Override
     public int getFieldIndex(FieldId value) {
         int out = Arrays.binarySearch(fields, value, field_comparator);
-        assert_(out >= 0, IllegalArgumentException::new,
-                "unable to find field \"" + value + "\"");
+        if (out < 0) {
+            throw new IllegalArgumentException(
+                    "unable to find field \"" + value + "\"");
+        }
         return out;
     }
 
     @Override
     public int getMethodIndex(MethodId value) {
         int out = Arrays.binarySearch(methods, value, method_comparator);
-        assert_(out >= 0, IllegalArgumentException::new,
-                "unable to find method \"" + value + "\"");
+        if (out < 0) {
+            throw new IllegalArgumentException(
+                    "unable to find method \"" + value + "\"");
+        }
         return out;
     }
 
     @Override
     public int getMethodHandleIndex(MethodHandleItem value) {
         int out = Arrays.binarySearch(method_handles, value, method_handle_comparator);
-        assert_(out >= 0, IllegalArgumentException::new,
-                "unable to find method handle \"" + value + "\"");
+        if (out < 0) {
+            throw new IllegalArgumentException(
+                    "unable to find method handle \"" + value + "\"");
+        }
         return out;
     }
 
     @Override
     public int getTypeListOffset(TypeList value) {
         Integer out = type_lists.get(value);
-        assert_(out != null, IllegalArgumentException::new,
-                "unable to find type list \"" + value + "\"");
+        if (out == null) {
+            throw new IllegalArgumentException(
+                    "unable to type list \"" + value + "\"");
+        }
         return out;
     }
 
     @Override
     public int getAnnotationOffset(AnnotationItem value) {
         Integer out = annotations.get(value);
-        assert_(out != null, IllegalArgumentException::new,
-                "unable to find annotation \"" + value + "\"");
+        if (out == null) {
+            throw new IllegalArgumentException(
+                    "unable to find annotation \"" + value + "\"");
+        }
         return out;
     }
 
     @Override
     public int getAnnotationSetOffset(AnnotationSet value) {
         Integer out = annotation_sets.get(value);
-        assert_(out != null, IllegalArgumentException::new,
-                "unable to find annotation set \"" + value + "\"");
+        if (out == null) {
+            throw new IllegalArgumentException(
+                    "unable to find annotation set \"" + value + "\"");
+        }
         return out;
     }
 
     @Override
     public int getAnnotationSetListOffset(AnnotationSetList value) {
         Integer out = annotation_set_lists.get(value);
-        assert_(out != null, IllegalArgumentException::new,
-                "unable to find annotation set list \"" + value + "\"");
+        if (out == null) {
+            throw new IllegalArgumentException(
+                    "unable to find annotation set list \"" + value + "\"");
+        }
         return out;
     }
 
     @Override
     public int getClassDataOffset(ClassData value) {
         Integer out = class_data_items.get(value);
-        assert_(out != null, IllegalArgumentException::new,
-                "unable to find class data \"" + value + "\"");
+        if (out == null) {
+            throw new IllegalArgumentException(
+                    "unable to find class data \"" + value + "\"");
+        }
         return out;
     }
 
     @Override
     public int getAnnotationsDirectoryOffset(ClassDef value) {
         Integer out = annotations_directories.get(value);
-        assert_(out != null, IllegalArgumentException::new,
-                "unable to find annotations directory for class def \"" + value + "\"");
+        if (out == null) {
+            throw new IllegalArgumentException(
+                    "unable to find annotations directory for class def \""
+                    + value + "\"");
+        }
         return out;
     }
 
     @Override
     public int getArrayValueOffset(ArrayValue value) {
         Integer out = array_values.get(value);
-        assert_(out != null, IllegalArgumentException::new,
-                "unable to find array value \"" + value + "\"");
+        if (out == null) {
+            throw new IllegalArgumentException(
+                    "unable to find array value \"" + value + "\"");
+        }
         return out;
     }
 
     @Override
     public int getCodeItemOffset(CodeItem value) {
         Integer out = code_items.get(value);
-        assert_(out != null, IllegalArgumentException::new,
-                "unable to find code item \"" + value + "\"");
+        if (out == null) {
+            throw new IllegalArgumentException(
+                    "unable to find code item \"" + value + "\"");
+        }
         return out;
     }
 }

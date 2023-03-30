@@ -26,10 +26,13 @@ class ModifiableArray {
         return Arrays.copyOf(data, data_size);
     }
 
+    static final int GROW_FACTOR = 4096;
+
     void ensureSize(int new_size) {
         assert_(new_size >= 0, IllegalArgumentException::new);
         if (new_size > data.length) {
-            data = Arrays.copyOf(data, new_size);
+            data = Arrays.copyOf(data,
+                    roundUp(new_size, GROW_FACTOR) + GROW_FACTOR);
         }
         if (new_size > data_size) {
             data_size = new_size;

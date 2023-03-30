@@ -39,9 +39,11 @@ public class Utils {
         return null;
     }
 
-    public static Method searchMethod(Method[] methods, String name, boolean thw, Class<?>... parameterTypes) {
+    public static Method searchMethod(Method[] methods, String name,
+            boolean thw, Class<?>... parameterTypes) {
         for (Method m : methods) {
-            if (m.getName().equals(name) && arrayContentsEq(parameterTypes, m.getParameterTypes())) {
+            if (m.getName().equals(name) && arrayContentsEq(
+                    parameterTypes, m.getParameterTypes())) {
                 return m;
             }
         }
@@ -49,7 +51,8 @@ public class Utils {
         return null;
     }
 
-    public static <T> Constructor<T> searchConstructor(Constructor<T>[] constructors, boolean thw, Class<?>... parameterTypes) {
+    public static <T> Constructor<T> searchConstructor(
+            Constructor<T>[] constructors, boolean thw, Class<?>... parameterTypes) {
         for (Constructor<T> c : constructors) {
             if (arrayContentsEq(parameterTypes, c.getParameterTypes())) {
                 return c;
@@ -59,19 +62,22 @@ public class Utils {
         return null;
     }
 
-    public static <T extends Throwable> void assert_(boolean value, Supplier<T> th) {
+    public static <T extends Throwable> void assert_(
+            boolean value, Supplier<T> th) {
         if (!value) {
             Thrower.throwException(th.get());
         }
     }
 
-    public static <T extends Throwable, E> void assert_(boolean value, Function<E, T> th, Supplier<E> msg) {
+    public static <T extends Throwable, E> void assert_(
+            boolean value, Function<E, T> th, Supplier<E> msg) {
         if (!value) {
             Thrower.throwException(th.apply(msg.get()));
         }
     }
 
-    public static <T extends Throwable, E> void assert_(boolean value, Function<E, T> th, E msg) {
+    public static <T extends Throwable, E> void assert_(
+            boolean value, Function<E, T> th, E msg) {
         if (!value) {
             Thrower.throwException(th.apply(msg));
         }

@@ -51,9 +51,9 @@ public class Modifications {
         Dex dex = readDex(clazz);
         dex.collectData(data);
         byte[] bytes = dex.compile();
-        DexFile d = openDexFile(bytes);
-        setTrusted(d);
-        return nothrows_run(() -> d.loadClass(clazz.getName(), loader));
+        DexFile df = openDexFile(bytes);
+        setTrusted(df);
+        return loadClass(df, clazz.getName(), loader);
     }
 
     public static Class<?> reload(Class<?> clazz, DataCollector data) {

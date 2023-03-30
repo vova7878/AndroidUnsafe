@@ -221,11 +221,12 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
             return classSizeField((Class<?>) obj);
         }
         @SuppressWarnings("null")
-        Class<?> ocl = obj.getClass();
-        if (ocl.isArray()) {
-            return arrayBaseOffset(ocl) + arrayIndexScale(ocl) * getArrayLength(obj);
+        Class<?> clazz = obj.getClass();
+        if (clazz.isArray()) {
+            return arrayBaseOffset(clazz)
+                    + arrayIndexScale(clazz) * getArrayLength(obj);
         }
-        return objectSizeField(ocl);
+        return objectSizeField(clazz);
     }
 
     public static int alignedSizeOf(Object obj) {

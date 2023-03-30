@@ -1,5 +1,6 @@
 package com.v7878.unsafe.dex;
 
+import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.dex.DexConstants.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
@@ -18,7 +19,6 @@ public final class AnnotationItem implements PublicCloneable {
                 return out;
             }
 
-            // TODO: repeatable?
             // a != b, but a.type == b.type
             throw new IllegalStateException("can`t compare annotations " + a + " " + b);
         };
@@ -97,8 +97,10 @@ public final class AnnotationItem implements PublicCloneable {
         setAnnotation(new EncodedAnnotation(type, elements));
     }
 
-    //TODO: check
     public void setVisibility(int visibility) {
+        assert_(visibility >= VISIBILITY_MIN && visibility <= VISIBILITY_MAX,
+                IllegalArgumentException::new,
+                "illegal annotation visibility: " + visibility);
         this.visibility = visibility;
     }
 

@@ -6,6 +6,7 @@ import static com.v7878.unsafe.memory.ValueLayout.*;
 import dalvik.system.DexFile;
 import java.lang.reflect.*;
 import java.nio.ByteBuffer;
+import java.util.*;
 
 @DangerLevel(5)
 public class AndroidUnsafe5 extends AndroidUnsafe4 {
@@ -285,6 +286,22 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         }
     }
 
+    public static DexFile openDexFile(ByteBuffer data) {
+        initDex();
+        if (getSdkInt() >= 26 && getSdkInt() <= 28) {
+            return nothrows_run(() -> dex_constructor.newInstance(data), true);
+        } else if (getSdkInt() >= 29 && getSdkInt() <= 34) {
+            return nothrows_run(() -> dex_constructor.newInstance(
+                    new ByteBuffer[]{data}, null, null), true);
+        } else {
+            throw new IllegalStateException("unsupported sdk: " + getSdkInt());
+        }
+    }
+
+    public static DexFile openDexFile(byte[] data) {
+        return openDexFile(ByteBuffer.wrap(data));
+    }
+
     private static Method set_dex_trusted;
 
     private synchronized static void initSetTrusted() {
@@ -302,27 +319,37 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         }
     }
 
-    public static DexFile openDexFile(ByteBuffer data) {
-        initDex();
-        if (getSdkInt() >= 26 && getSdkInt() <= 28) {
-            return nothrows_run(() -> dex_constructor.newInstance(data), true);
-        } else if (getSdkInt() >= 29 && getSdkInt() <= 34) {
-            return nothrows_run(() -> dex_constructor.newInstance(
-                    new ByteBuffer[]{data}, null, null), true);
-        } else {
-            throw new IllegalStateException("unsupported sdk: " + getSdkInt());
-        }
-    }
-
-    public static DexFile openDexFile(byte[] data) {
-        return openDexFile(ByteBuffer.wrap(data));
-    }
-
     public static void setTrusted(DexFile dex) {
         if (getSdkInt() >= 26 && getSdkInt() <= 27) {
             return;
         }
         initSetTrusted();
         nothrows_run(() -> set_dex_trusted.invoke(dex), true);
+    }
+
+    private static Method loadClassBinaryName;
+
+    private synchronized static void initLoad() {
+        if (loadClassBinaryName == null) {
+            loadClassBinaryName = getDeclaredMethod(DexFile.class,
+                    "loadClassBinaryName", String.class,
+                    ClassLoader.class, List.class);
+            setAccessible(loadClassBinaryName, true);
+        }
+    }
+
+    public static Class<?> loadClass(DexFile dex, String name, ClassLoader loader) {
+        List<Throwable> suppressed = new ArrayList<>();
+        Class<?> out = (Class<?>) nothrows_run(() -> loadClassBinaryName
+                .invoke(dex, name.replace('.', '/'),
+                        loader, suppressed), true);
+        if (!suppressed.isEmpty()) {
+            RuntimeException err = new RuntimeException();
+            for (Throwable tmp : suppressed) {
+                err.addSuppressed(tmp);
+            }
+            throw err;
+        }
+        return out;
     }
 }

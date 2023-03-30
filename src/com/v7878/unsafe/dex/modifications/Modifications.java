@@ -39,7 +39,7 @@ public class Modifications {
                 Layout.rawLayout(size).bind(data)), dex_ids);
     }
 
-    private static class EmptyClassLoader extends ClassLoader {
+    public static class EmptyClassLoader extends ClassLoader {
 
         public EmptyClassLoader(ClassLoader parent) {
             super(parent);

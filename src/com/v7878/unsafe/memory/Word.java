@@ -12,7 +12,7 @@ public final class Word extends Number {
     }
 
     public Word(long value) {
-        if (!IS64BIT && Utils.is32BitOnly(value)) {
+        if (!(IS64BIT || Utils.is32BitOnly(value))) {
             throw new IllegalArgumentException(
                     "value is too big to represent as a word: " + value);
         }

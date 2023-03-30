@@ -339,6 +339,7 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
     }
 
     public static Class<?> loadClass(DexFile dex, String name, ClassLoader loader) {
+        initLoad();
         List<Throwable> suppressed = new ArrayList<>();
         Class<?> out = (Class<?>) nothrows_run(() -> loadClassBinaryName
                 .invoke(dex, name.replace('.', '/'),

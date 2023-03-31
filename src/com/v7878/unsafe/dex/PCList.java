@@ -71,8 +71,8 @@ public class PCList<T extends PublicCloneable>
         if (to <= from) {
             return false;
         }
-        for (int i = from; i < to; i++) {
-            add(index, data[i]);
+        for (int i = 0; i < to - from; i++) {
+            add(index + i, data[from + i]);
         }
         return true;
     }

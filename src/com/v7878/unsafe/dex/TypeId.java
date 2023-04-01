@@ -5,6 +5,16 @@ import java.util.*;
 
 public class TypeId implements PublicCloneable {
 
+    public static final TypeId V = new TypeId("V");
+    public static final TypeId Z = new TypeId("Z");
+    public static final TypeId B = new TypeId("B");
+    public static final TypeId S = new TypeId("S");
+    public static final TypeId C = new TypeId("C");
+    public static final TypeId I = new TypeId("I");
+    public static final TypeId F = new TypeId("F");
+    public static final TypeId J = new TypeId("J");
+    public static final TypeId D = new TypeId("D");
+
     public static final int SIZE = 0x04;
 
     public static final Comparator<TypeId> getComparator(WriteContext context) {

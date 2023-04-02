@@ -17,8 +17,7 @@ public class Transformers {
     private static final Constructor<MethodHandle> transformer_constructor;
 
     static {
-        String esf_name = "dalvik.system.EmulatedStackFrame";
-        TypeId esf = TypeId.of(esf_name);
+        TypeId esf = TypeId.of("dalvik.system.EmulatedStackFrame");
         TypeId mesf = TypeId.of(EmulatedStackFrame.class);
 
         String transformer_name = Transformers.class.getName() + "$Transformer";
@@ -108,7 +107,32 @@ public class Transformers {
         public void transform(EmulatedStackFrame stackFrame) throws Throwable;
     }
 
-    // TODO:
-    // invokeFromTransform
-    // invokeExactFromTransform
+    private static final Method invokeExactWithFrame = nothrows_run(() -> {
+        return getDeclaredMethod(MethodHandle.class,
+                "invokeExactWithFrame", EmulatedStackFrame.esf_class);
+    });
+
+    private static final Method transform = nothrows_run(() -> {
+        return getDeclaredMethod(MethodHandle.class,
+                "transform", EmulatedStackFrame.esf_class);
+    });
+
+    public static void invokeFromTransform(MethodHandle target,
+            EmulatedStackFrame stackFrame) throws Throwable {
+        if (invoke_transformer.isInstance(target)) {
+            nothrows_run(() -> transform.invoke(target, stackFrame.esf));
+        } else {
+            final MethodHandle adaptedTarget = target.asType(stackFrame.getMethodType());
+            nothrows_run(() -> invokeExactWithFrame.invoke(adaptedTarget, stackFrame.esf));
+        }
+    }
+
+    public static void invokeExactFromTransform(MethodHandle target,
+            EmulatedStackFrame stackFrame) throws Throwable {
+        if (invoke_transformer.isInstance(target)) {
+            nothrows_run(() -> transform.invoke(target, stackFrame.esf));
+        } else {
+            nothrows_run(() -> invokeExactWithFrame.invoke(target, stackFrame.esf));
+        }
+    }
 }

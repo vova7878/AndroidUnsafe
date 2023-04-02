@@ -29,7 +29,7 @@ public final class EmulatedStackFrame {
         }
     }
 
-    private static final Class<?> esf_class = nothrows_run(() -> {
+    static final Class<?> esf_class = nothrows_run(() -> {
         return Class.forName("dalvik.system.EmulatedStackFrame");
     });
 
@@ -49,7 +49,7 @@ public final class EmulatedStackFrame {
                 () -> esf_create.invoke(null, frameType)));
     }
 
-    private final Object esf;
+    final Object esf;
 
     private EmulatedStackFrame(Object esf) {
         this.esf = esf;

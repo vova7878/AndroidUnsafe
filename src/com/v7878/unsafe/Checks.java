@@ -30,4 +30,13 @@ public class Checks {
         }
         return checkOffset(offset);
     }
+
+    public static long checkFromIndexSize(long fromIndex, long size, long length) {
+        if ((length | fromIndex | size) < 0 || size > length - fromIndex) {
+            throw new IndexOutOfBoundsException(
+                    String.format("Range [%s, %<s + %s) out of bounds for length %s",
+                            fromIndex, size, length));
+        }
+        return fromIndex;
+    }
 }

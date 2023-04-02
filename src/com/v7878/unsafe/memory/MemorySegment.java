@@ -4,7 +4,7 @@ import static com.v7878.unsafe.AndroidUnsafe2.*;
 import static com.v7878.unsafe.Utils.*;
 import java.util.Objects;
 
-public class MemorySegment {
+public class MemorySegment implements Addressable {
 
     private final Pointer pointer;
     private final Layout layout;
@@ -24,6 +24,7 @@ public class MemorySegment {
         return layout;
     }
 
+    @Override
     public Pointer pointer() {
         return pointer;
     }

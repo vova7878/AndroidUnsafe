@@ -5,7 +5,7 @@ import static com.v7878.unsafe.Checks.*;
 import static com.v7878.unsafe.Utils.*;
 import java.util.Objects;
 
-public final class Pointer {
+public final class Pointer implements Addressable {
 
     private final Object base;
     private final long base_address;
@@ -58,6 +58,11 @@ public final class Pointer {
             }
             this.base_address = address;
         }
+    }
+
+    @Override
+    public Pointer pointer() {
+        return this;
     }
 
     public Object getBase() {

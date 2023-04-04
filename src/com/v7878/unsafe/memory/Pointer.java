@@ -7,6 +7,8 @@ import java.util.Objects;
 
 public final class Pointer implements Addressable {
 
+    public static final Pointer NULL = new Pointer(0);
+
     private final Object base;
     private final long base_address;
     private final long offset;

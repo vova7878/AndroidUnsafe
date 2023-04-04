@@ -2,6 +2,7 @@ package com.v7878.unsafe;
 
 import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.memory.*;
+import static com.v7878.unsafe.memory.LayoutPath.PathElement.groupElement;
 import static com.v7878.unsafe.memory.ValueLayout.*;
 import dalvik.system.DexFile;
 import java.lang.reflect.*;
@@ -352,5 +353,19 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
             throw err;
         }
         return out;
+    }
+
+    private static final long art_method_data_offset = getArtMethodLayout()
+            .selectPath(groupElement("ptr_sized_fields_"),
+                    groupElement("data_")).offset();
+
+    public static Pointer getExecutableData(Executable ex) {
+        long art_method = getArtMethod(ex);
+        return new Pointer(getWordN(art_method + art_method_data_offset));
+    }
+
+    public static void setExecutableData(Executable ex, Addressable data) {
+        long art_method = getArtMethod(ex);
+        putWordN(art_method + art_method_data_offset, data.pointer().getRawAddress());
     }
 }

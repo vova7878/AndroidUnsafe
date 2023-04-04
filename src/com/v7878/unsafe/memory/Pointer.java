@@ -65,6 +65,10 @@ public final class Pointer implements Addressable {
         return this;
     }
 
+    public boolean isNull() {
+        return base == null && base_address == 0 && offset == 0;
+    }
+
     public Object getBase() {
         return base;
     }

@@ -515,6 +515,7 @@ public abstract class ValueLayout extends Layout {
         }
     }
 
+    //TODO pointer to X?
     public static final class OfAddress extends ValueLayout {
 
         OfAddress(ByteOrder order) {

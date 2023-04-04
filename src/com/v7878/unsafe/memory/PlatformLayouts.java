@@ -8,6 +8,8 @@ public class PlatformLayouts {
 
     public static final ValueLayout C_BOOL = JAVA_BOOLEAN;
 
+    public static final ValueLayout BOOL32 = JAVA_INT;
+
     public static final ValueLayout C_CHAR = JAVA_BYTE;
 
     public static final ValueLayout C_SHORT = JAVA_SHORT;
@@ -17,6 +19,8 @@ public class PlatformLayouts {
     public static final ValueLayout C_LONG = IS64BIT ? JAVA_LONG : JAVA_INT;
 
     public static final ValueLayout C_LONG_LONG = JAVA_LONG;
+
+    public static final ValueLayout C_INT_PTR = WORD;
 
     public static final ValueLayout C_FLOAT = JAVA_FLOAT;
 

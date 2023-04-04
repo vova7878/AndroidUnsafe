@@ -37,9 +37,6 @@ public class FunctionDescriptor {
     }
 
     private static FunctionDescriptor ofAny(Layout retLayout, Layout... argLayouts) {
-        if (retLayout != null) {
-            checkLayout(retLayout);
-        }
         Objects.requireNonNull(argLayouts);
         Arrays.stream(argLayouts).forEach((tmp) -> {
             Objects.requireNonNull(tmp);
@@ -50,6 +47,7 @@ public class FunctionDescriptor {
 
     public static FunctionDescriptor of(Layout retLayout, Layout... argLayouts) {
         Objects.requireNonNull(retLayout);
+        checkLayout(retLayout);
         return ofAny(retLayout, argLayouts);
     }
 

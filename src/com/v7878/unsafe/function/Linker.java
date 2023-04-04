@@ -5,6 +5,12 @@ import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.dex.*;
 import com.v7878.unsafe.dex.modifications.Modifications.EmptyClassLoader;
 import com.v7878.unsafe.memory.*;
+import com.v7878.unsafe.methodhandle.*;
+import static com.v7878.unsafe.methodhandle.EmulatedStackFrame.RETURN_VALUE_IDX;
+import com.v7878.unsafe.methodhandle.EmulatedStackFrame.StackFrameReader;
+import com.v7878.unsafe.methodhandle.EmulatedStackFrame.StackFrameWriter;
+import static com.v7878.unsafe.methodhandle.Transformers.*;
+import com.v7878.unsafe.methodhandle.Transformers.TransformerI;
 import dalvik.system.DexFile;
 import java.lang.invoke.*;
 import java.lang.reflect.*;
@@ -18,6 +24,52 @@ public class Linker {
     private static final SoftReferenceCache<String, Class<?>> DOWNCALL_CACHE
             = new SoftReferenceCache<>();
     private static final int HANDLER_OFFSET = classSizeField(Test.class);
+
+    public static void copyNext(StackFrameReader reader,
+            StackFrameWriter writer, Class<?> type) {
+        if (type == Addressable.class) {
+            long tmp = reader.nextReference(Addressable.class)
+                    .pointer().getRawAddress();
+            if (IS64BIT) {
+                writer.putNextLong(tmp);
+            } else {
+                writer.putNextInt((int) tmp);
+            }
+            return;
+        } else if (type == Word.class) {
+            long tmp = reader.nextReference(Word.class).longValue();
+            if (IS64BIT) {
+                writer.putNextLong(tmp);
+            } else {
+                writer.putNextInt((int) tmp);
+            }
+            return;
+        }
+        EmulatedStackFrame.copyNext(reader, writer, type);
+
+    }
+
+    private static TransformerI getTransformerI(MethodHandle stub) {
+        return (stackFrame) -> {
+            MethodType current_type = stackFrame.type();
+            int params_count = current_type.parameterCount();
+            EmulatedStackFrame stub_frame = EmulatedStackFrame.create(stub.type());
+            StackFrameReader reader = stackFrame.createReader();
+            StackFrameWriter writer = stub_frame.createWriter();
+            Class<?> type;
+            for (int i = 0; i < params_count; i++) {
+                type = current_type.parameterType(i);
+                copyNext(reader, writer, type);
+            }
+            invokeExactFromTransform(stub, stub_frame);
+            type = current_type.returnType();
+            if (type != void.class) {
+                reader.moveTo(RETURN_VALUE_IDX);
+                writer.moveTo(RETURN_VALUE_IDX);
+                copyNext(reader, writer, type);
+            }
+        };
+    }
 
     public static MethodHandle downcallHandle(Addressable symbol,
             FunctionDescriptor function) {
@@ -36,8 +88,7 @@ public class Linker {
         if (stub_call_type.equals(handle_call_type)) {
             return handle;
         }
-        //TODO
-        throw new IllegalArgumentException("Unsupported yet");
+        return makeTransformer(handle_call_type, getTransformerI(handle));
     }
 
     private static String getStubName(long address, ProtoId proto) {

@@ -108,13 +108,17 @@ public class Transformers {
     }
 
     private static final Method invokeExactWithFrame = nothrows_run(() -> {
-        return getDeclaredMethod(MethodHandle.class,
+        Method tmp = getDeclaredMethod(MethodHandle.class,
                 "invokeExactWithFrame", EmulatedStackFrame.esf_class);
+        setAccessible(tmp, true);
+        return tmp;
     });
 
     private static final Method transform = nothrows_run(() -> {
-        return getDeclaredMethod(MethodHandle.class,
+        Method tmp = getDeclaredMethod(MethodHandle.class,
                 "transform", EmulatedStackFrame.esf_class);
+        setAccessible(tmp, true);
+        return tmp;
     });
 
     public static void invokeFromTransform(MethodHandle target,

@@ -1,6 +1,7 @@
 package com.v7878.unsafe.dex;
 
 import com.v7878.unsafe.io.*;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -31,6 +32,13 @@ public class ProtoId implements PublicCloneable {
                 ? ((Method) ex).getReturnType() : void.class;
         return new ProtoId(TypeId.of(return_type),
                 Arrays.stream(ex.getParameterTypes())
+                        .map(TypeId::of).toArray(TypeId[]::new));
+    }
+
+    public static ProtoId of(MethodType proto) {
+        Objects.requireNonNull(proto, "trying to get ProtoId of null");
+        return new ProtoId(TypeId.of(proto.returnType()),
+                proto.parameterList().stream()
                         .map(TypeId::of).toArray(TypeId[]::new));
     }
 

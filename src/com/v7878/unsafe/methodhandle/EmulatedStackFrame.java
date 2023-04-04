@@ -61,7 +61,7 @@ public final class EmulatedStackFrame {
         return out;
     });
 
-    public Object[] getReferences() {
+    public Object[] references() {
         return (Object[]) nothrows_run(() -> references.get(esf));
     }
 
@@ -71,7 +71,7 @@ public final class EmulatedStackFrame {
         return out;
     });
 
-    public byte[] getStackFrame() {
+    public byte[] stackFrame() {
         return (byte[]) nothrows_run(() -> stackFrame.get(esf));
     }
 
@@ -81,7 +81,7 @@ public final class EmulatedStackFrame {
         return out;
     });
 
-    public MethodType getMethodType() {
+    public MethodType type() {
         return (MethodType) nothrows_run(() -> type.get(esf));
     }
 
@@ -105,17 +105,17 @@ public final class EmulatedStackFrame {
                 other.getMethodType().parameterCount());
     }*/
     public void copyReturnValueTo(EmulatedStackFrame other) {
-        final Class<?> returnType = getMethodType().returnType();
-        checkAssignable(other.getMethodType().returnType(), returnType);
+        final Class<?> returnType = type().returnType();
+        checkAssignable(other.type().returnType(), returnType);
         if (returnType.isPrimitive()) {
-            byte[] this_stack = getStackFrame();
-            byte[] other_stack = other.getStackFrame();
+            byte[] this_stack = stackFrame();
+            byte[] other_stack = other.stackFrame();
             int size = getSize(returnType);
             System.arraycopy(this_stack, this_stack.length - size,
                     other_stack, other_stack.length - size, size);
         } else {
-            Object[] this_references = getReferences();
-            Object[] other_references = other.getReferences();
+            Object[] this_references = references();
+            Object[] other_references = other.references();
             other_references[other_references.length - 1]
                     = this_references[this_references.length - 1];
         }
@@ -175,9 +175,9 @@ public final class EmulatedStackFrame {
             if (frame != stackFrame) {
                 // Re-initialize storage if not re-attaching to the same stackFrame.
                 frame = stackFrame;
-                frameBuf = ByteBuffer.wrap(frame.getStackFrame())
+                frameBuf = ByteBuffer.wrap(frame.stackFrame())
                         .order(ByteOrder.LITTLE_ENDIAN);
-                buildTables(stackFrame.getMethodType());
+                buildTables(stackFrame.type());
             }
             referencesOffset = 0;
             argumentIdx = 0;
@@ -202,11 +202,11 @@ public final class EmulatedStackFrame {
         }
 
         public Class<?> getCurrentArgumentType() {
-            if (argumentIdx >= frame.getMethodType().parameterCount()
+            if (argumentIdx >= frame.type().parameterCount()
                     || argumentIdx == (RETURN_VALUE_IDX + 1)) {
                 throw new IllegalArgumentException("Invalid argument index: " + argumentIdx);
             }
-            MethodType type = frame.getMethodType();
+            MethodType type = frame.type();
             return (argumentIdx == RETURN_VALUE_IDX)
                     ? type.returnType() : type.parameterType(argumentIdx);
         }
@@ -231,14 +231,14 @@ public final class EmulatedStackFrame {
         }
 
         private void makeReturnValueAccessor() {
-            Class<?> rtype = frame.getMethodType().returnType();
+            Class<?> rtype = frame.type().returnType();
             argumentIdx = RETURN_VALUE_IDX;
             // Position the cursor appropriately. The return value is either the last element
             // of the references array, or the last 4 or 8 bytes of the stack frame.
             if (rtype.isPrimitive()) {
                 frameBuf.position(frameBuf.capacity() - getSize(rtype));
             } else {
-                referencesOffset = frame.getReferences().length - 1;
+                referencesOffset = frame.references().length - 1;
             }
         }
     }
@@ -296,7 +296,7 @@ public final class EmulatedStackFrame {
         public void putNextReference(Object value, Class<?> expectedType) {
             checkWriteType(expectedType);
             argumentIdx++;
-            frame.getReferences()[referencesOffset++] = value;
+            frame.references()[referencesOffset++] = value;
         }
 
         @Override
@@ -358,7 +358,7 @@ public final class EmulatedStackFrame {
         public <T> T nextReference(Class<T> expectedType) {
             checkReadType(expectedType);
             argumentIdx++;
-            return (T) frame.getReferences()[referencesOffset++];
+            return (T) frame.references()[referencesOffset++];
         }
 
         @Override

@@ -122,7 +122,7 @@ public class Transformers {
         if (invoke_transformer.isInstance(target)) {
             transform.invoke(target, stackFrame.esf);
         } else {
-            final MethodHandle adaptedTarget = target.asType(stackFrame.getMethodType());
+            final MethodHandle adaptedTarget = target.asType(stackFrame.type());
             invokeExactWithFrame.invoke(adaptedTarget, stackFrame.esf);
         }
     }

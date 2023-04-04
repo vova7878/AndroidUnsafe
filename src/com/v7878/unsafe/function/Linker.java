@@ -25,7 +25,7 @@ public class Linker {
             = new SoftReferenceCache<>();
     private static final int HANDLER_OFFSET = classSizeField(Test.class);
 
-    public static void copyNext(StackFrameReader reader,
+    private static void copyNext(StackFrameReader reader,
             StackFrameWriter writer, Class<?> type) {
         if (type == Addressable.class) {
             long tmp = reader.nextReference(Addressable.class)

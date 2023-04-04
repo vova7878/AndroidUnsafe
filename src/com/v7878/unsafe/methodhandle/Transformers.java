@@ -120,19 +120,19 @@ public class Transformers {
     public static void invokeFromTransform(MethodHandle target,
             EmulatedStackFrame stackFrame) throws Throwable {
         if (invoke_transformer.isInstance(target)) {
-            nothrows_run(() -> transform.invoke(target, stackFrame.esf));
+            transform.invoke(target, stackFrame.esf);
         } else {
             final MethodHandle adaptedTarget = target.asType(stackFrame.getMethodType());
-            nothrows_run(() -> invokeExactWithFrame.invoke(adaptedTarget, stackFrame.esf));
+            invokeExactWithFrame.invoke(adaptedTarget, stackFrame.esf);
         }
     }
 
     public static void invokeExactFromTransform(MethodHandle target,
             EmulatedStackFrame stackFrame) throws Throwable {
         if (invoke_transformer.isInstance(target)) {
-            nothrows_run(() -> transform.invoke(target, stackFrame.esf));
+            transform.invoke(target, stackFrame.esf);
         } else {
-            nothrows_run(() -> invokeExactWithFrame.invoke(target, stackFrame.esf));
+            invokeExactWithFrame.invoke(target, stackFrame.esf);
         }
     }
 }

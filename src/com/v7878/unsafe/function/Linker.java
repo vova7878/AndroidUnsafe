@@ -55,7 +55,7 @@ public class Linker {
             if (IS64BIT) {
                 value = reader.nextLong();
             } else {
-                value = reader.nextInt() & 0xffffffff;
+                value = reader.nextInt() & 0xffffffffL;
             }
             writer.putNextReference(new Pointer(value), type);
             return;
@@ -64,7 +64,7 @@ public class Linker {
             if (IS64BIT) {
                 value = reader.nextLong();
             } else {
-                value = reader.nextInt() & 0xffffffff;
+                value = reader.nextInt() & 0xffffffffL;
             }
             writer.putNextReference(new Word(value), type);
         }

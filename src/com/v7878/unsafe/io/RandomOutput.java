@@ -1,5 +1,6 @@
 package com.v7878.unsafe.io;
 
+import com.v7878.unsafe.Checks;
 import java.util.Objects;
 
 public interface RandomOutput extends AutoCloseable {
@@ -10,7 +11,7 @@ public interface RandomOutput extends AutoCloseable {
 
     public default void writeByteArray(byte[] arr, int off, int len) {
         Objects.requireNonNull(arr);
-        Objects.checkFromIndexSize(off, len, arr.length);
+        Checks.checkFromIndexSize(off, len, arr.length);
         if (len == 0) {
             return;
         }

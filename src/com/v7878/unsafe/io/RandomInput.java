@@ -1,5 +1,6 @@
 package com.v7878.unsafe.io;
 
+import com.v7878.unsafe.Checks;
 import java.util.Objects;
 
 public interface RandomInput extends AutoCloseable {
@@ -10,7 +11,7 @@ public interface RandomInput extends AutoCloseable {
 
     public default void readFully(byte[] arr, int off, int len) {
         Objects.requireNonNull(arr);
-        Objects.checkFromIndexSize(off, len, arr.length);
+        Checks.checkFromIndexSize(off, len, arr.length);
         if (len == 0) {
             return;
         }

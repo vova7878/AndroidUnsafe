@@ -185,7 +185,8 @@ public class InstructionWriter {
         out.writeShort((int) (BBBBBBBBBBBBBBBB >>> 48));
     }
 
-    public static void write_35c_35ms_35mi(RandomOutput out, int opcode, int A, int BBBB, int C, int D, int E, int F, int G) {
+    public static void write_35c_35ms_35mi(RandomOutput out, int opcode, int A,
+            int BBBB, int C, int D, int E, int F, int G) {
         A = check_unsigned(A, 4);
         BBBB = check_unsigned(BBBB, 16);
         C = check_unsigned(C, 4);
@@ -196,6 +197,22 @@ public class InstructionWriter {
         write_base(out, opcode, (A << 4) | G);
         out.writeShort(BBBB);
         out.writeShort((F << 12) | (E << 8) | (D << 4) | C);
+    }
+
+    public static void write_45cc(RandomOutput out, int opcode, int A,
+            int BBBB, int C, int D, int E, int F, int G, int HHHH) {
+        A = check_unsigned(A, 4);
+        BBBB = check_unsigned(BBBB, 16);
+        C = check_unsigned(C, 4);
+        D = check_unsigned(D, 4);
+        E = check_unsigned(E, 4);
+        F = check_unsigned(F, 4);
+        G = check_unsigned(G, 4);
+        HHHH = check_unsigned(HHHH, 16);
+        write_base(out, opcode, (A << 4) | G);
+        out.writeShort(BBBB);
+        out.writeShort((F << 12) | (E << 8) | (D << 4) | C);
+        out.writeShort(HHHH);
     }
 
     public static void write_fill_array_data_payload(RandomOutput out,

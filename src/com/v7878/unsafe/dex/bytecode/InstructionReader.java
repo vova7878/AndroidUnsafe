@@ -106,7 +106,8 @@ public abstract class InstructionReader {
         // TODO: d0-d7
         // TODO: d8-e2
         // <unused> e3-f9
-        // TODO: fa-fd
+        InvokePolymorphic.init();
+        // TODO: fd
         // TODO: fe-ff
         // TODO: extra 01-02
         FillArrayDataPayload.init();                // extra 0x03
@@ -621,7 +622,8 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(ReadContext context, int A, int BBBB, int C, int D, int E, int F, int G);
+            public Instruction make(ReadContext context, int A, int BBBB,
+                    int C, int D, int E, int F, int G);
         }
 
         public final Factory factory;
@@ -641,6 +643,36 @@ public abstract class InstructionReader {
             int D = (FEDC >> 4) & 0xf;
             int C = FEDC & 0xf;
             return factory.make(context, A, BBBB, C, D, E, F, G);
+        }
+    }
+
+    static class Reader_45cc extends InstructionReader {
+
+        @FunctionalInterface
+        public interface Factory {
+
+            public Instruction make(ReadContext context, int A, int BBBB, int C,
+                    int D, int E, int F, int G, int HHHH);
+        }
+
+        public final Factory factory;
+
+        public Reader_45cc(Factory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        Instruction read(RandomInput in, ReadContext context, int AG) {
+            int A = AG >> 4;
+            int G = AG & 0xf;
+            int BBBB = in.readUnsignedShort();
+            int FEDC = in.readUnsignedShort();
+            int F = FEDC >> 12;
+            int E = (FEDC >> 8) & 0xf;
+            int D = (FEDC >> 4) & 0xf;
+            int C = FEDC & 0xf;
+            int HHHH = in.readUnsignedShort();
+            return factory.make(context, A, BBBB, C, D, E, F, G, HHHH);
         }
     }
 

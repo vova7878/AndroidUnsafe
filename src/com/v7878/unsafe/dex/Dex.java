@@ -30,6 +30,7 @@ public class Dex extends PCList<ClassDef> {
                 class_def_ids[i] = i;
             }
         } else {
+            //TODO: check unique
             for (int id : class_def_ids) {
                 Objects.checkIndex(id, map.class_defs_size);
             }
@@ -336,10 +337,14 @@ public class Dex extends PCList<ClassDef> {
         return null;
     }
 
-    public byte[] compile() {
-        ByteArrayIO out = new ByteArrayIO();
+    public byte[] compile(int size) {
+        ByteArrayIO out = new ByteArrayIO(size);
         write(out);
         return out.toByteArray();
+    }
+
+    public byte[] compile() {
+        return compile(0);
     }
 
     @Override

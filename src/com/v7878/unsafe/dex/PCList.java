@@ -5,7 +5,7 @@ import java.util.*;
 public class PCList<T extends PublicCloneable>
         extends AbstractList<T> implements PublicCloneable {
 
-    private final List<T> elements;
+    private final ArrayList<T> elements;
 
     public PCList(T... elements) {
         int length = 0;
@@ -28,8 +28,13 @@ public class PCList<T extends PublicCloneable>
     }
 
     @Override
+    public final boolean add(T element) {
+        return elements.add((T) check(element).clone());
+    }
+
+    @Override
     public final void add(int index, T element) {
-        elements.add((T) check(element).clone());
+        elements.add(index, (T) check(element).clone());
     }
 
     @Override
@@ -47,20 +52,41 @@ public class PCList<T extends PublicCloneable>
         return elements.remove(index);
     }
 
+    @Override
+    public final void clear() {
+        elements.clear();
+    }
+
+    public void ensureCapacity(int minCapacity) {
+        elements.ensureCapacity(minCapacity);
+    }
+
+    public void trimToSize() {
+        elements.trimToSize();
+    }
+
     public final boolean addAll(int index, T[] data, int from, int to) {
-        return super.addAll(index, Arrays.asList(Arrays.copyOfRange(data, from, to)));
+        ensureCapacity(size() + to - from);
+        Objects.checkFromToIndex(from, to, data.length);
+        if (to <= from) {
+            return false;
+        }
+        for (int i = 0; i < to - from; i++) {
+            add(index + i, data[from + i]);
+        }
+        return true;
     }
 
     public final boolean addAll(T[] data, int from, int to) {
-        return super.addAll(Arrays.asList(Arrays.copyOfRange(data, from, to)));
+        return addAll(size(), data, from, to);
     }
 
     public final boolean addAll(int index, T[] data) {
-        return super.addAll(index, Arrays.asList(data));
+        return addAll(index, data, 0, data.length);
     }
 
     public final boolean addAll(T[] data) {
-        return super.addAll(Arrays.asList(data));
+        return addAll(size(), data, 0, data.length);
     }
 
     @Override

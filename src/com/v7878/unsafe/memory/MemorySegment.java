@@ -4,7 +4,7 @@ import static com.v7878.unsafe.AndroidUnsafe2.*;
 import static com.v7878.unsafe.Utils.*;
 import java.util.Objects;
 
-public class MemorySegment {
+public class MemorySegment implements Addressable {
 
     private final Pointer pointer;
     private final Layout layout;
@@ -12,7 +12,8 @@ public class MemorySegment {
     MemorySegment(Pointer pointer, Layout layout, boolean ignore_alignment) {
         Objects.requireNonNull(pointer);
         Objects.requireNonNull(layout);
-        assert_(ignore_alignment || pointer.checkAlignmentShift(layout.alignmentShift()),
+        assert_(ignore_alignment || pointer
+                .checkAlignmentShift(layout.alignmentShift()),
                 IllegalArgumentException::new);
         pointer.addOffset(layout.size()); //check pointer + size
         this.pointer = pointer;
@@ -23,6 +24,7 @@ public class MemorySegment {
         return layout;
     }
 
+    @Override
     public Pointer pointer() {
         return pointer;
     }
@@ -32,21 +34,21 @@ public class MemorySegment {
     }
 
     public int alignmentShift() {
-        return pointer.getAlignmentShift();
+        return pointer.alignmentShift();
     }
 
     public long alignment() {
         return 1L << alignmentShift();
     }
 
-    private static final String indent = "    ";
+    private static final String INDENT = "    ";
 
     private String readToString(String spaces) {
         if (layout instanceof ValueLayout) {
             return spaces + layout + " = " + getValue();
         }
         if (layout instanceof GroupLayout || layout instanceof SequenceLayout) {
-            String spaces2 = spaces + indent;
+            String spaces2 = spaces + INDENT;
             String name = layout.name().isEmpty() ? "" : "(" + layout.name().get() + ")";
             String type;
             if (layout instanceof GroupLayout) {
@@ -76,7 +78,7 @@ public class MemorySegment {
     }
 
     public String readToString() {
-        String data = readToString(indent);
+        String data = readToString(INDENT);
         return "MemorySegment{" + pointer + "\n" + data + "\n}";
     }
 

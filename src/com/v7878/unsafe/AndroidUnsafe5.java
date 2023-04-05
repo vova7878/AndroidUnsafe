@@ -1,14 +1,13 @@
 package com.v7878.unsafe;
 
 import static com.v7878.unsafe.Utils.*;
-import com.v7878.unsafe.dex.Dex;
-import com.v7878.unsafe.io.MemoryInput;
 import com.v7878.unsafe.memory.*;
-import static com.v7878.unsafe.memory.LayoutPath.PathElement.*;
+import static com.v7878.unsafe.memory.LayoutPath.PathElement.groupElement;
 import static com.v7878.unsafe.memory.ValueLayout.*;
 import dalvik.system.DexFile;
 import java.lang.reflect.*;
 import java.nio.ByteBuffer;
+import java.util.*;
 
 @DangerLevel(5)
 public class AndroidUnsafe5 extends AndroidUnsafe4 {
@@ -288,6 +287,22 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         }
     }
 
+    public static DexFile openDexFile(ByteBuffer data) {
+        initDex();
+        if (getSdkInt() >= 26 && getSdkInt() <= 28) {
+            return nothrows_run(() -> dex_constructor.newInstance(data), true);
+        } else if (getSdkInt() >= 29 && getSdkInt() <= 34) {
+            return nothrows_run(() -> dex_constructor.newInstance(
+                    new ByteBuffer[]{data}, null, null), true);
+        } else {
+            throw new IllegalStateException("unsupported sdk: " + getSdkInt());
+        }
+    }
+
+    public static DexFile openDexFile(byte[] data) {
+        return openDexFile(ByteBuffer.wrap(data));
+    }
+
     private static Method set_dex_trusted;
 
     private synchronized static void initSetTrusted() {
@@ -305,22 +320,6 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         }
     }
 
-    public static DexFile openDexFile(ByteBuffer data) {
-        initDex();
-        if (getSdkInt() >= 26 && getSdkInt() <= 28) {
-            return nothrows_run(() -> dex_constructor.newInstance(data), true);
-        } else if (getSdkInt() >= 29 && getSdkInt() <= 34) {
-            return nothrows_run(() -> dex_constructor.newInstance(
-                    new ByteBuffer[]{data}, null, null), true);
-        } else {
-            throw new IllegalStateException("unsupported sdk: " + getSdkInt());
-        }
-    }
-
-    public static DexFile openDexFile(byte[] data) {
-        return openDexFile(ByteBuffer.wrap(data));
-    }
-
     public static void setTrusted(DexFile dex) {
         if (getSdkInt() >= 26 && getSdkInt() <= 27) {
             return;
@@ -329,19 +328,66 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         nothrows_run(() -> set_dex_trusted.invoke(dex), true);
     }
 
-    public static Dex readClassDex(Class<?> clazz) {
-        ClassMirror[] cm = arrayCast(ClassMirror.class, clazz);
-        int dex_id = cm[0].dexClassDefIndex;
-        if (dex_id >= 0xffff) {
-            throw new IllegalArgumentException("illegal dexClassDefIndex: " + dex_id);
-        }
-        Pointer data = (Pointer) getDexFileSegment(clazz)
-                .select(groupElement("begin_")).getValue();
-        long size = ((Word) getDexFileSegment(clazz)
-                .select(groupElement("size_")).getValue()).longValue();
+    private static Method loadClassBinaryName;
 
-        return Dex.read(new MemoryInput(
-                Layout.rawLayout(size).bind(data)),
-                new int[]{dex_id});
+    private synchronized static void initLoad() {
+        if (loadClassBinaryName == null) {
+            loadClassBinaryName = getDeclaredMethod(DexFile.class,
+                    "loadClassBinaryName", String.class,
+                    ClassLoader.class, List.class);
+            setAccessible(loadClassBinaryName, true);
+        }
+    }
+
+    public static Class<?> loadClass(DexFile dex, String name, ClassLoader loader) {
+        initLoad();
+        List<Throwable> suppressed = new ArrayList<>();
+        Class<?> out = (Class<?>) nothrows_run(() -> loadClassBinaryName
+                .invoke(dex, name.replace('.', '/'),
+                        loader, suppressed), true);
+        if (!suppressed.isEmpty()) {
+            RuntimeException err = new RuntimeException();
+            for (Throwable tmp : suppressed) {
+                err.addSuppressed(tmp);
+            }
+            throw err;
+        }
+        return out;
+    }
+
+    private static final long DATA_OFFSET = getArtMethodLayout()
+            .selectPath(groupElement("ptr_sized_fields_"),
+                    groupElement("data_")).offset();
+
+    public static Pointer getExecutableData(Executable ex) {
+        long art_method = getArtMethod(ex);
+        return new Pointer(getWordN(art_method + DATA_OFFSET));
+    }
+
+    public static void setExecutableData(Executable ex, Addressable data) {
+        long art_method = getArtMethod(ex);
+        putWordN(art_method + DATA_OFFSET, data.pointer().getRawAddress());
+    }
+
+    private static final long ACCESS_FLAGS_OFFSET = getArtMethodLayout()
+            .selectPath(groupElement("access_flags_")).offset();
+
+    public static int getExecutableAccessFlags(Executable ex) {
+        long art_method = getArtMethod(ex);
+        return getIntN(art_method + ACCESS_FLAGS_OFFSET);
+    }
+
+    public static void setExecutableAccessFlags(Executable ex, int flags) {
+        long art_method = getArtMethod(ex);
+        putIntN(art_method + ACCESS_FLAGS_OFFSET, flags);
+    }
+
+    private static final long ENTRY_POINT_OFFSET = getArtMethodLayout()
+            .selectPath(groupElement("ptr_sized_fields_"),
+                    groupElement("entry_point_from_quick_compiled_code_")).offset();
+
+    public static Pointer getExecutableEntryPoint(Executable ex) {
+        long art_method = getArtMethod(ex);
+        return new Pointer(getWordN(art_method + ENTRY_POINT_OFFSET));
     }
 }

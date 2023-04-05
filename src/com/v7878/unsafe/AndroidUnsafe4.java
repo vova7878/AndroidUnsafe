@@ -221,11 +221,12 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
             return classSizeField((Class<?>) obj);
         }
         @SuppressWarnings("null")
-        Class<?> ocl = obj.getClass();
-        if (ocl.isArray()) {
-            return arrayBaseOffset(ocl) + arrayIndexScale(ocl) * getArrayLength(obj);
+        Class<?> clazz = obj.getClass();
+        if (clazz.isArray()) {
+            return arrayBaseOffset(clazz)
+                    + arrayIndexScale(clazz) * getArrayLength(obj);
         }
-        return objectSizeField(ocl);
+        return objectSizeField(clazz);
     }
 
     public static int alignedSizeOf(Object obj) {
@@ -290,19 +291,19 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
 
     @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static void putObjectRaw(long address, Object value) {
-        Unsafe.putInt(address, rawObjectToInt(value));
+        putIntN(address, rawObjectToInt(value));
     }
 
-    @DangerLevel(DangerLevel.MAX)
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static Object rawIntToObject(int obj) {
         int[] arr = new int[1];
         arr[0] = obj;
         return getObject(arr, ARRAY_INT_BASE_OFFSET);
     }
 
-    @DangerLevel(DangerLevel.MAX)
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static Object getObjectRaw(long address) {
-        return rawIntToObject(Unsafe.getInt(address));
+        return rawIntToObject(getIntN(address));
     }
 
     private static Boolean kPoisonReferences;

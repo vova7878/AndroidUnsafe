@@ -36,6 +36,9 @@ public class DexConstants {
     public static final int METHOD_HANDLE_TYPE_INVOKE_DIRECT = 0x07;
     public static final int METHOD_HANDLE_TYPE_INVOKE_INTERFACE = 0x08;
 
+    public static final int METHOD_HANDLE_TYPE_MIN = 0x00;
+    public static final int METHOD_HANDLE_TYPE_MAX = 0x08;
+
     //map_list
     public static final int TYPE_HEADER_ITEM = 0x0000;
     public static final int TYPE_STRING_ID_ITEM = 0x0001;
@@ -66,4 +69,7 @@ public class DexConstants {
     public static final int VISIBILITY_BUILD = 0x00;
     public static final int VISIBILITY_RUNTIME = 0x01;
     public static final int VISIBILITY_SYSTEM = 0x02;
+
+    public static final int VISIBILITY_MIN = 0x00;
+    public static final int VISIBILITY_MAX = 0x02;
 }

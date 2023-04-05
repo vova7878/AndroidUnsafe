@@ -10,9 +10,8 @@ public interface RandomInput extends AutoCloseable {
 
     public default void readFully(byte[] arr, int off, int len) {
         Objects.requireNonNull(arr);
-        if (off < 0 || len < 0 || len > arr.length - off) {
-            throw new IllegalArgumentException();
-        } else if (len == 0) {
+        Objects.checkFromIndexSize(off, len, arr.length);
+        if (len == 0) {
             return;
         }
         for (int i = 0; i < len; i++) {

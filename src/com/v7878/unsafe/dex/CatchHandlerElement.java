@@ -54,6 +54,21 @@ public class CatchHandlerElement implements PublicCloneable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof CatchHandlerElement) {
+            CatchHandlerElement eobj = (CatchHandlerElement) obj;
+            return address == eobj.address
+                    && Objects.equals(type, eobj.type);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(address, type);
+    }
+
+    @Override
     public CatchHandlerElement clone() {
         return new CatchHandlerElement(type, address);
     }

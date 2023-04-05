@@ -93,10 +93,10 @@ public class CodeItem implements PublicCloneable {
         int[] offsets = Instruction.readArray(in, context, out.insns);
         int insns_units_size = offsets[out.insns.size()]; // in code units
 
-        for (int i = 0; i < out.insns.size(); i++) {
+        //TODO: remove after tests
+        /*for (int i = 0; i < out.insns.size(); i++) {
             System.out.println(offsets[i] + " " + out.insns.get(i));
-        }
-
+        }*/
         if (tries_size > 0) {
             if ((insns_units_size & 1) != 0) {
                 in.readShort(); // padding
@@ -135,7 +135,6 @@ public class CodeItem implements PublicCloneable {
         }
     }
 
-    //TODO: refactor
     public void write(WriteContext context, RandomOutput out) {
         out.writeShort(registers_size);
         out.writeShort(ins_size);
@@ -150,11 +149,10 @@ public class CodeItem implements PublicCloneable {
         int insns_size = insns.size();
         out.skipBytes(4);
 
-        long insns_start = (int) out.position();
+        long insns_start = out.position();
         int[] offsets = new int[insns_size + 1];
-        int offset = 0;
         for (int i = 0; i <= insns_size; i++) {
-            offset = (int) (out.position() - insns_start);
+            int offset = (int) (out.position() - insns_start);
             assert_((offset & 1) == 0, IllegalStateException::new,
                     "Unaligned code unit");
             offsets[i] = offset / 2;
@@ -164,28 +162,63 @@ public class CodeItem implements PublicCloneable {
         }
 
         out.position(insns_size_pos);
-        out.writeInt(offsets[insns_size]);
-        out.position(insns_start + offset);
+        out.writeInt(offsets[insns_size]); // size in code units
+        out.position(insns_start + offsets[insns_size] * 2);
 
-        //TODO: delete duplicates in catch_handlers
+        //TODO: remove after tests
+        /*System.out.println(registers_size + " " + ins_size + " " + outs_size);
+        for (int i = 0; i < insns.size(); i++) {
+            System.out.println(offsets[i] + " " + insns.get(i));
+        }*/
         if (tries_size != 0) {
             if ((offsets[insns_size] & 1) != 0) {
                 out.writeShort(0); // padding
             }
+
             RandomOutput tries_out = out.duplicate(out.position());
             out.skipBytes(TryItem.SIZE * tries_size);
-            long handlers_start = out.position();
-            out.writeULeb128(tries_size); // handlers_size
+
+            HashMap<CatchHandler, Integer> handlers
+                    = new HashMap<>(tries_size);
             for (TryItem tmp : tries) {
-                tmp.write(context, tries_out, out, handlers_start, offsets);
+                handlers.put(tmp.getHandler(), null);
+            }
+
+            long handlers_start = out.position();
+            out.writeULeb128(handlers.size());
+
+            for (CatchHandler tmp : handlers.keySet()) {
+                int handler_offset = (int) (out.position() - handlers_start);
+                tmp.write(context, out, offsets);
+                handlers.replace(tmp, handler_offset);
+            }
+            for (TryItem tmp : tries) {
+                tmp.write(context, tries_out, handlers, offsets);
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof CodeItem) {
+            CodeItem ciobj = (CodeItem) obj;
+            return registers_size == ciobj.registers_size
+                    && ins_size == ciobj.ins_size
+                    && outs_size == ciobj.outs_size
+                    && Objects.equals(insns, ciobj.insns)
+                    && Objects.equals(tries, ciobj.tries);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(registers_size, ins_size,
+                outs_size, insns, tries);
     }
 
     @Override
     public CodeItem clone() {
         return new CodeItem(registers_size, ins_size, outs_size, insns, tries);
     }
-
-    //TODO: equals
 }

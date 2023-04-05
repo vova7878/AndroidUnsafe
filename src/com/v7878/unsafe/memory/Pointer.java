@@ -5,18 +5,18 @@ import static com.v7878.unsafe.Checks.*;
 import static com.v7878.unsafe.Utils.*;
 import java.util.Objects;
 
-public final class Pointer {
+public final class Pointer implements Addressable {
+
+    public static final Pointer NULL = new Pointer(0);
 
     private final Object base;
     private final long base_address;
     private final long offset;
-    private final int alignShift;
 
-    private Pointer(Object base, long base_address, long offset, int alignShift) {
+    private Pointer(Object base, long base_address, long offset) {
         this.base = base;
         this.base_address = base_address;
         this.offset = offset;
-        this.alignShift = alignShift;
     }
 
     public Pointer(long address) {
@@ -30,34 +30,45 @@ public final class Pointer {
     public Pointer(Object base, long offset) {
         this.base = base;
         if (base == null) {
-            assert_(checkNativeAddress(offset),
-                    IllegalArgumentException::new);
-            this.alignShift = Long.numberOfTrailingZeros(offset);
+            if (!checkNativeAddress(offset)) {
+                throw new IllegalArgumentException(
+                        "illegal native address: " + offset);
+            }
             this.base_address = offset;
             this.offset = 0;
         } else {
-            assert_(checkOffset(offset), IllegalArgumentException::new);
+            if (!checkOffset(offset)) {
+                throw new IllegalArgumentException("illegal offset: " + offset);
+            }
             this.offset = offset;
             long address = 0;
             try {
                 address = addressOfNonMovableArray(base);
             } catch (Throwable th) {
             }
-            int align_shift;
             if (address != 0) {
                 long raw_address = address + offset;
-                assert_(Long.compareUnsigned(raw_address, address) >= 0,
-                        IllegalArgumentException::new);
-                assert_(checkNativeAddress(raw_address),
-                        IllegalArgumentException::new);
-                align_shift = Long.numberOfTrailingZeros(raw_address);
-            } else {
-                align_shift = Math.min(OBJECT_ALIGNMENT_SHIFT,
-                        Long.numberOfTrailingZeros(offset));
+                if (Long.compareUnsigned(raw_address, address) < 0) {
+                    throw new IllegalArgumentException(String.format(
+                            "base address(%s) + offset(%s) overflows",
+                            address, offset));
+                }
+                if (!checkNativeAddress(raw_address)) {
+                    throw new IllegalArgumentException(
+                            "illegal raw address: " + raw_address);
+                }
             }
             this.base_address = address;
-            this.alignShift = align_shift;
         }
+    }
+
+    @Override
+    public Pointer pointer() {
+        return this;
+    }
+
+    public boolean isNull() {
+        return base == null && base_address == 0 && offset == 0;
     }
 
     public Object getBase() {
@@ -88,20 +99,27 @@ public final class Pointer {
             assert_(checkNativeAddress(address), IllegalArgumentException::new);
             long new_offset = address - base_address;
             assert_(checkOffset(new_offset), IllegalArgumentException::new);
-            return new Pointer(base, base_address, new_offset,
-                    Long.numberOfTrailingZeros(address));
+            return new Pointer(base, base_address, new_offset);
         }
         long new_offset = Math.addExact(offset, add_offset);
         assert_(checkOffset(new_offset), IllegalArgumentException::new);
-        return new Pointer(base, 0, new_offset, OBJECT_ALIGNMENT_SHIFT);
+        return new Pointer(base, 0, new_offset);
     }
 
-    public int getAlignmentShift() {
-        return alignShift;
+    public int alignmentShift() {
+        if (hasRawAddress()) {
+            return Long.numberOfTrailingZeros(base_address + offset);
+        }
+        return Math.min(OBJECT_ALIGNMENT_SHIFT,
+                Long.numberOfTrailingZeros(offset));
+    }
+
+    public int alignment() {
+        return 1 << alignmentShift();
     }
 
     public boolean checkAlignmentShift(int shift) {
-        return shift <= alignShift;
+        return shift <= alignmentShift();
     }
 
     public boolean get(ValueLayout.OfBoolean layout) {
@@ -266,7 +284,7 @@ public final class Pointer {
         out.append("+");
         out.append(offset);
         out.append("%");
-        out.append(alignShift);
+        out.append(alignmentShift());
         return out.toString();
     }
 

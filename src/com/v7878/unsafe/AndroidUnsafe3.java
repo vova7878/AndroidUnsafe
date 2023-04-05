@@ -64,6 +64,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     public static class ExecutableMirror extends AccessibleObjectMirror {
 
         public volatile boolean hasRealParameterData;
+        @SuppressWarnings("VolatileArrayField")
         public volatile Parameter[] parameters;
         public int accessFlags;
         public long artMethod;
@@ -94,31 +95,35 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
 
     private static class Test {
 
-        public static final Method am = nothrows_run(() -> Test.class.getDeclaredMethod("a"));
-        public static final Method bm = nothrows_run(() -> Test.class.getDeclaredMethod("b"));
+        public static final Method am = nothrows_run(()
+                -> Test.class.getDeclaredMethod("a"));
+        public static final Method bm = nothrows_run(()
+                -> Test.class.getDeclaredMethod("b"));
 
-        public static final Field af = nothrows_run(() -> Test.class.getDeclaredField("sa"));
-        public static final Field bf = nothrows_run(() -> Test.class.getDeclaredField("sb"));
+        public static final Field af = nothrows_run(()
+                -> Test.class.getDeclaredField("sa"));
+        public static final Field bf = nothrows_run(()
+                -> Test.class.getDeclaredField("sb"));
 
         public static int sa, sb;
 
         public static void a() {
-            System.out.println("inside a");
         }
 
         public static void b() {
-            System.out.println("inside b");
         }
     }
 
-    private static final Class<MethodHandle> MethodHandleImplClass = nothrows_run(() -> {
-        return (Class<MethodHandle>) Class.forName("java.lang.invoke.MethodHandleImpl");
-    });
+    private static final Class<MethodHandle> MethodHandleImplClass
+            = nothrows_run(() -> {
+                return (Class<MethodHandle>) Class.forName(
+                        "java.lang.invoke.MethodHandleImpl");
+            });
 
-    public static final int artMethodSize;
-    public static final int artMethodPadding;
-    public static final int artFieldSize;
-    public static final int artFieldPadding;
+    public static final int ART_METHOD_SIZE;
+    public static final int ART_METHOD_PADDING;
+    public static final int ART_FIELD_SIZE;
+    public static final int ART_FIELD_PADDING;
 
     private static final Method mGetArtField;
 
@@ -129,17 +134,17 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
 
         long am = getArtMethod(Test.am);
         long bm = getArtMethod(Test.bm);
-        artMethodSize = (int) (bm - am);
-        artMethodPadding = (int) (am - tm[0].methods - length_field_size)
-                % artMethodSize + length_field_size;
+        ART_METHOD_SIZE = (int) Math.abs(bm - am);
+        ART_METHOD_PADDING = (int) (am - tm[0].methods - length_field_size)
+                % ART_METHOD_SIZE + length_field_size;
 
         mGetArtField = getDeclaredMethod(Field.class, "getArtField");
 
         long af = getArtField(Test.af);
         long bf = getArtField(Test.bf);
-        artFieldSize = (int) (bf - af);
-        artFieldPadding = (int) (af - tm[0].sFields - length_field_size)
-                % artFieldSize + length_field_size;
+        ART_FIELD_SIZE = (int) Math.abs(bf - af);
+        ART_FIELD_PADDING = (int) (af - tm[0].sFields - length_field_size)
+                % ART_FIELD_SIZE + length_field_size;
 
         try {
             Class<?> bits = Class.forName("java.nio.Bits");
@@ -209,7 +214,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         MethodHandle mh = allocateInstance(MethodHandleImplClass);
         MethodHandleImplMirror[] mhh = arrayCast(MethodHandleImplMirror.class, mh);
         for (int i = 0; i < col; i++) {
-            mhh[0].artFieldOrMethod = methods + artMethodPadding + artMethodSize * i;
+            mhh[0].artFieldOrMethod = methods + ART_METHOD_PADDING + ART_METHOD_SIZE * i;
             mhh[0].info = null;
             out[i] = MethodHandles.reflectAs(Executable.class, mh);
         }
@@ -231,7 +236,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         MethodHandle mh = allocateInstance(MethodHandleImplClass);
         MethodHandleImplMirror[] mhh = arrayCast(MethodHandleImplMirror.class, mh);
         for (int i = 0; i < col; i++) {
-            mhh[0].artFieldOrMethod = fields + artFieldPadding + artFieldSize * i;
+            mhh[0].artFieldOrMethod = fields + ART_FIELD_PADDING + ART_FIELD_SIZE * i;
             mhh[0].info = null;
             mhh[0].handleKind = Integer.MAX_VALUE;
             out[i] = MethodHandles.reflectAs(Field.class, mh);

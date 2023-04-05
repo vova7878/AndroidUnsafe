@@ -44,6 +44,11 @@ public class MethodId extends FieldOrMethodId {
                 ProtoId.of(ex), getName(ex));
     }
 
+    public static MethodId constructor(TypeId declaring_class, TypeId... parameters) {
+        return new MethodId(declaring_class,
+                new ProtoId(TypeId.V, parameters), "<init>");
+    }
+
     private ProtoId proto;
 
     public MethodId(TypeId declaring_class, ProtoId proto, String name) {

@@ -18,7 +18,7 @@ public class EncodedMethod implements PublicCloneable {
                 return out;
             }
 
-            // a != b, but a.field == b.field
+            // a != b, but a.method == b.method
             throw new IllegalStateException("can`t compare encoded methods " + a + " " + b);
         };
     }

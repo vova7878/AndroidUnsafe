@@ -1,5 +1,6 @@
 package com.v7878.unsafe.dex;
 
+import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.dex.DexConstants.*;
 import com.v7878.unsafe.io.*;
 import java.util.*;
@@ -40,8 +41,9 @@ public class MethodHandleItem implements PublicCloneable {
         setFieldOrMethod(field_or_method);
     }
 
-    //TODO: check
     public final void setType(int type) {
+        assert_(type >= METHOD_HANDLE_TYPE_MIN && type <= METHOD_HANDLE_TYPE_MAX,
+                IllegalArgumentException::new, "illegal method handle type: " + type);
         this.type = type;
     }
 

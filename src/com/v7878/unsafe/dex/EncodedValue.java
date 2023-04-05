@@ -103,6 +103,9 @@ public interface EncodedValue extends PublicCloneable {
         if (obj instanceof ProtoId) {
             return new MethodTypeValue((ProtoId) obj);
         }
+        if (obj instanceof MethodType) {
+            return new MethodTypeValue(ProtoId.of((MethodType) obj));
+        }
 
         if (obj instanceof MethodId) {
             return new MethodValue((MethodId) obj);

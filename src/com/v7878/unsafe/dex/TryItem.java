@@ -67,20 +67,37 @@ public class TryItem implements PublicCloneable {
         data.fill(handler);
     }
 
-    public void write(WriteContext context, RandomOutput tries_out,
-            RandomOutput handlers_out, long handlers_start, int[] offsets) {
-        int handler_offset = (int) (handlers_out.position() - handlers_start);
+    public void write(WriteContext context, RandomOutput out,
+            Map<CatchHandler, Integer> handlers, int[] offsets) {
         int tmp = offsets[start_addr];
-        tries_out.writeInt(tmp);
+        out.writeInt(tmp);
         tmp = offsets[start_addr + insn_count] - tmp;
-        tries_out.writeShort(tmp);
-        tries_out.writeShort(handler_offset);
-        handler.write(context, handlers_out, offsets);
+        out.writeShort(tmp);
+        Integer offset = handlers.get(handler);
+        assert_(offset != null, IllegalStateException::new,
+                "unable to find offset for catch handler: " + handler);
+        out.writeShort(offset);
     }
 
     @Override
     public String toString() {
         return "try item " + start_addr + " " + insn_count + " " + handler;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof TryItem) {
+            TryItem tobj = (TryItem) obj;
+            return start_addr == tobj.start_addr
+                    && insn_count == tobj.insn_count
+                    && Objects.equals(handler, tobj.handler);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(start_addr, insn_count, handler);
     }
 
     @Override

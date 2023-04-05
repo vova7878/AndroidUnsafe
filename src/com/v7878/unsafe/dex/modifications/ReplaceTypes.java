@@ -26,4 +26,8 @@ public class ReplaceTypes extends DataFilter {
         }
         super.add(value);
     }
+
+    public void clear() {
+        rules.clear();
+    }
 }

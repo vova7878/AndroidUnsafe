@@ -51,7 +51,6 @@ public abstract class InvokeKind extends Instruction {
     public String toString() {
         return name() + " " + argument_word_count
                 + " " + method_reference
-                + " " + argument_word_count
                 + " " + argument_register_1
                 + " " + argument_register_2
                 + " " + argument_register_3

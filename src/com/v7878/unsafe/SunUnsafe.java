@@ -8,7 +8,7 @@ import java.lang.reflect.*;
 
 //sun.misc.Unsafe "as is", but static
 @DangerLevel(1)
-public class Unsafe {
+public class SunUnsafe {
 
     public static void throwException(Throwable th) {
         Thrower.throwException(th);

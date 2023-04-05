@@ -59,70 +59,70 @@ public class AndroidUnsafe {
     }
 
     public static sun.misc.Unsafe getUnsafe() {
-        return Unsafe.getUnsafe();
+        return SunUnsafe.getUnsafe();
     }
 
     public static void throwException(Throwable th) {
-        Unsafe.throwException(th);
+        SunUnsafe.throwException(th);
     }
 
     public static void park(boolean absolute, long time) {
-        Unsafe.park(absolute, time);
+        SunUnsafe.park(absolute, time);
     }
 
     public static void unpark(Object obj) {
-        Unsafe.unpark(obj);
+        SunUnsafe.unpark(obj);
     }
 
     public static void loadFence() {
-        Unsafe.loadFence();
+        SunUnsafe.loadFence();
     }
 
     public static void storeFence() {
-        Unsafe.storeFence();
+        SunUnsafe.storeFence();
     }
 
     public static void fullFence() {
-        Unsafe.fullFence();
+        SunUnsafe.fullFence();
     }
 
     public static int addressSize() {
-        return Unsafe.addressSize();
+        return SunUnsafe.addressSize();
     }
 
     public static int pageSize() {
-        return Unsafe.pageSize();
+        return SunUnsafe.pageSize();
     }
 
     public static long allocateMemory(long bytes) {
-        return Unsafe.allocateMemory(bytes);
+        return SunUnsafe.allocateMemory(bytes);
     }
 
     public static void freeMemory(long address) {
-        Unsafe.freeMemory(address);
+        SunUnsafe.freeMemory(address);
     }
 
     public static void setMemory(long address, long bytes, byte value) {
-        Unsafe.setMemory(address, bytes, value);
+        SunUnsafe.setMemory(address, bytes, value);
     }
 
     public static void copyMemory(long srcAddr, long dstAddr, long bytes) {
-        Unsafe.copyMemory(srcAddr, dstAddr, bytes);
+        SunUnsafe.copyMemory(srcAddr, dstAddr, bytes);
     }
 
     public static <T> T allocateInstance(Class<T> clazz) {
-        return (T) nothrows_run(() -> Unsafe.allocateInstance(clazz));
+        return (T) nothrows_run(() -> SunUnsafe.allocateInstance(clazz));
     }
 
     public static long objectFieldOffset(Field field) {
-        return Unsafe.objectFieldOffset(field);
+        return SunUnsafe.objectFieldOffset(field);
     }
 
     public static int arrayBaseOffset(Class<?> clazz) {
         if (clazz.getComponentType() == void.class) {
             clazz = byte[].class;
         }
-        int out = Unsafe.arrayBaseOffset(clazz);
+        int out = SunUnsafe.arrayBaseOffset(clazz);
         if (out == 0) {
             throw new IllegalArgumentException();
         }
@@ -133,7 +133,7 @@ public class AndroidUnsafe {
         if (clazz.getComponentType() == void.class) {
             clazz = byte[].class;
         }
-        int out = Unsafe.arrayIndexScale(clazz);
+        int out = SunUnsafe.arrayIndexScale(clazz);
         if (out == 0) {
             throw new IllegalArgumentException();
         }
@@ -141,258 +141,258 @@ public class AndroidUnsafe {
     }
 
     public static boolean getBooleanO(Object obj, long offset) {
-        return Unsafe.getBoolean(obj, offset);
+        return SunUnsafe.getBoolean(obj, offset);
     }
 
     public static void putBooleanO(Object obj, long offset, boolean value) {
-        Unsafe.putBoolean(obj, offset, value);
+        SunUnsafe.putBoolean(obj, offset, value);
     }
 
     public static byte getByteO(Object obj, long offset) {
-        return Unsafe.getByte(obj, offset);
+        return SunUnsafe.getByte(obj, offset);
     }
 
     public static void putByteO(Object obj, long offset, byte value) {
-        Unsafe.putByte(obj, offset, value);
+        SunUnsafe.putByte(obj, offset, value);
     }
 
     public static char getCharO(Object obj, long offset) {
-        return Unsafe.getChar(obj, offset);
+        return SunUnsafe.getChar(obj, offset);
     }
 
     public static void putCharO(Object obj, long offset, char value) {
-        Unsafe.putChar(obj, offset, value);
+        SunUnsafe.putChar(obj, offset, value);
     }
 
     public static short getShortO(Object obj, long offset) {
-        return Unsafe.getShort(obj, offset);
+        return SunUnsafe.getShort(obj, offset);
     }
 
     public static void putShortO(Object obj, long offset, short value) {
-        Unsafe.putShort(obj, offset, value);
+        SunUnsafe.putShort(obj, offset, value);
     }
 
     public static int getIntO(Object obj, long offset) {
-        return Unsafe.getInt(obj, offset);
+        return SunUnsafe.getInt(obj, offset);
     }
 
     public static void putIntO(Object obj, long offset, int value) {
-        Unsafe.putInt(obj, offset, value);
+        SunUnsafe.putInt(obj, offset, value);
     }
 
     public static float getFloatO(Object obj, long offset) {
-        return Unsafe.getFloat(obj, offset);
+        return SunUnsafe.getFloat(obj, offset);
     }
 
     public static void putFloatO(Object obj, long offset, float value) {
-        Unsafe.putFloat(obj, offset, value);
+        SunUnsafe.putFloat(obj, offset, value);
     }
 
     public static long getLongO(Object obj, long offset) {
-        return Unsafe.getLong(obj, offset);
+        return SunUnsafe.getLong(obj, offset);
     }
 
     public static void putLongO(Object obj, long offset, long value) {
-        Unsafe.putLong(obj, offset, value);
+        SunUnsafe.putLong(obj, offset, value);
     }
 
     public static double getDoubleO(Object obj, long offset) {
-        return Unsafe.getDouble(obj, offset);
+        return SunUnsafe.getDouble(obj, offset);
     }
 
     public static void putDoubleO(Object obj, long offset, double value) {
-        Unsafe.putDouble(obj, offset, value);
+        SunUnsafe.putDouble(obj, offset, value);
     }
 
     public static boolean getBooleanN(long address) {
-        return Unsafe.getBoolean(address);
+        return SunUnsafe.getBoolean(address);
     }
 
     public static void putBooleanN(long address, boolean value) {
-        Unsafe.putBoolean(address, value);
+        SunUnsafe.putBoolean(address, value);
     }
 
     public static byte getByteN(long address) {
-        return Unsafe.getByte(address);
+        return SunUnsafe.getByte(address);
     }
 
     public static void putByteN(long address, byte value) {
-        Unsafe.putByte(address, value);
+        SunUnsafe.putByte(address, value);
     }
 
     public static char getCharN(long address) {
-        return Unsafe.getChar(address);
+        return SunUnsafe.getChar(address);
     }
 
     public static void putCharN(long address, char value) {
-        Unsafe.putChar(address, value);
+        SunUnsafe.putChar(address, value);
     }
 
     public static short getShortN(long address) {
-        return Unsafe.getShort(address);
+        return SunUnsafe.getShort(address);
     }
 
     public static void putShortN(long address, short value) {
-        Unsafe.putShort(address, value);
+        SunUnsafe.putShort(address, value);
     }
 
     public static int getIntN(long address) {
-        return Unsafe.getInt(address);
+        return SunUnsafe.getInt(address);
     }
 
     public static void putIntN(long address, int value) {
-        Unsafe.putInt(address, value);
+        SunUnsafe.putInt(address, value);
     }
 
     public static float getFloatN(long address) {
-        return Unsafe.getFloat(address);
+        return SunUnsafe.getFloat(address);
     }
 
     public static void putFloatN(long address, float value) {
-        Unsafe.putFloat(address, value);
+        SunUnsafe.putFloat(address, value);
     }
 
     public static long getLongN(long address) {
-        return Unsafe.getLong(address);
+        return SunUnsafe.getLong(address);
     }
 
     public static void putLongN(long address, long value) {
-        Unsafe.putLong(address, value);
+        SunUnsafe.putLong(address, value);
     }
 
     public static double getDoubleN(long address) {
-        return Unsafe.getDouble(address);
+        return SunUnsafe.getDouble(address);
     }
 
     public static void putDoubleN(long address, double value) {
-        Unsafe.putDouble(address, value);
+        SunUnsafe.putDouble(address, value);
     }
 
     public static boolean getBoolean(Object obj, long offset) {
         if (obj == null) {
-            return Unsafe.getBoolean(offset);
+            return SunUnsafe.getBoolean(offset);
         } else {
-            return Unsafe.getBoolean(obj, offset);
+            return SunUnsafe.getBoolean(obj, offset);
         }
     }
 
     public static void putBoolean(Object obj, long offset, boolean value) {
         if (obj == null) {
-            Unsafe.putBoolean(offset, value);
+            SunUnsafe.putBoolean(offset, value);
         } else {
-            Unsafe.putBoolean(obj, offset, value);
+            SunUnsafe.putBoolean(obj, offset, value);
         }
     }
 
     public static byte getByte(Object obj, long offset) {
         if (obj == null) {
-            return Unsafe.getByte(offset);
+            return SunUnsafe.getByte(offset);
         } else {
-            return Unsafe.getByte(obj, offset);
+            return SunUnsafe.getByte(obj, offset);
         }
     }
 
     public static void putByte(Object obj, long offset, byte value) {
         if (obj == null) {
-            Unsafe.putByte(offset, value);
+            SunUnsafe.putByte(offset, value);
         } else {
-            Unsafe.putByte(obj, offset, value);
+            SunUnsafe.putByte(obj, offset, value);
         }
     }
 
     public static char getChar(Object obj, long offset) {
         if (obj == null) {
-            return Unsafe.getChar(offset);
+            return SunUnsafe.getChar(offset);
         } else {
-            return Unsafe.getChar(obj, offset);
+            return SunUnsafe.getChar(obj, offset);
         }
     }
 
     public static void putChar(Object obj, long offset, char value) {
         if (obj == null) {
-            Unsafe.putChar(offset, value);
+            SunUnsafe.putChar(offset, value);
         } else {
-            Unsafe.putChar(obj, offset, value);
+            SunUnsafe.putChar(obj, offset, value);
         }
     }
 
     public static short getShort(Object obj, long offset) {
         if (obj == null) {
-            return Unsafe.getShort(offset);
+            return SunUnsafe.getShort(offset);
         } else {
-            return Unsafe.getShort(obj, offset);
+            return SunUnsafe.getShort(obj, offset);
         }
     }
 
     public static void putShort(Object obj, long offset, short value) {
         if (obj == null) {
-            Unsafe.putShort(offset, value);
+            SunUnsafe.putShort(offset, value);
         } else {
-            Unsafe.putShort(obj, offset, value);
+            SunUnsafe.putShort(obj, offset, value);
         }
     }
 
     public static int getInt(Object obj, long offset) {
         if (obj == null) {
-            return Unsafe.getInt(offset);
+            return SunUnsafe.getInt(offset);
         } else {
-            return Unsafe.getInt(obj, offset);
+            return SunUnsafe.getInt(obj, offset);
         }
     }
 
     public static void putInt(Object obj, long offset, int value) {
         if (obj == null) {
-            Unsafe.putInt(offset, value);
+            SunUnsafe.putInt(offset, value);
         } else {
-            Unsafe.putInt(obj, offset, value);
+            SunUnsafe.putInt(obj, offset, value);
         }
     }
 
     public static float getFloat(Object obj, long offset) {
         if (obj == null) {
-            return Unsafe.getFloat(offset);
+            return SunUnsafe.getFloat(offset);
         } else {
-            return Unsafe.getFloat(obj, offset);
+            return SunUnsafe.getFloat(obj, offset);
         }
     }
 
     public static void putFloat(Object obj, long offset, float value) {
         if (obj == null) {
-            Unsafe.putFloat(offset, value);
+            SunUnsafe.putFloat(offset, value);
         } else {
-            Unsafe.putFloat(obj, offset, value);
+            SunUnsafe.putFloat(obj, offset, value);
         }
     }
 
     public static long getLong(Object obj, long offset) {
         if (obj == null) {
-            return Unsafe.getLong(offset);
+            return SunUnsafe.getLong(offset);
         } else {
-            return Unsafe.getLong(obj, offset);
+            return SunUnsafe.getLong(obj, offset);
         }
     }
 
     public static void putLong(Object obj, long offset, long value) {
         if (obj == null) {
-            Unsafe.putLong(offset, value);
+            SunUnsafe.putLong(offset, value);
         } else {
-            Unsafe.putLong(obj, offset, value);
+            SunUnsafe.putLong(obj, offset, value);
         }
     }
 
     public static double getDouble(Object obj, long offset) {
         if (obj == null) {
-            return Unsafe.getDouble(offset);
+            return SunUnsafe.getDouble(offset);
         } else {
-            return Unsafe.getDouble(obj, offset);
+            return SunUnsafe.getDouble(obj, offset);
         }
     }
 
     public static void putDouble(Object obj, long offset, double value) {
         if (obj == null) {
-            Unsafe.putDouble(offset, value);
+            SunUnsafe.putDouble(offset, value);
         } else {
-            Unsafe.putDouble(obj, offset, value);
+            SunUnsafe.putDouble(obj, offset, value);
         }
     }
 
@@ -458,12 +458,12 @@ public class AndroidUnsafe {
 
     public static Object getObject(Object obj, long offset) {
         Objects.requireNonNull(obj);
-        return Unsafe.getObject(obj, offset);
+        return SunUnsafe.getObject(obj, offset);
     }
 
     public static void putObject(Object obj, long offset, Object value) {
         Objects.requireNonNull(obj);
-        Unsafe.putObject(obj, offset, value);
+        SunUnsafe.putObject(obj, offset, value);
     }
 
     /*public static boolean compareAndSwapInt(Object obj, long offset,

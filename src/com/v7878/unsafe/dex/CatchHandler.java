@@ -2,6 +2,7 @@ package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.io.*;
+import java.util.Objects;
 import java.util.stream.*;
 
 public class CatchHandler implements PublicCloneable {
@@ -76,9 +77,22 @@ public class CatchHandler implements PublicCloneable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof CatchHandler) {
+            CatchHandler chobj = (CatchHandler) obj;
+            return Objects.equals(catch_all_addr, chobj.catch_all_addr)
+                    && Objects.equals(handlers, chobj.handlers);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(handlers, catch_all_addr);
+    }
+
+    @Override
     public CatchHandler clone() {
         return new CatchHandler(handlers, catch_all_addr);
     }
-
-    //TODO: equals
 }

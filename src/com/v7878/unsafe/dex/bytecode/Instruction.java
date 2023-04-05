@@ -44,4 +44,6 @@ public abstract class Instruction implements PublicCloneable {
 
     @Override
     public abstract Instruction clone();
+
+    //TODO: equals
 }

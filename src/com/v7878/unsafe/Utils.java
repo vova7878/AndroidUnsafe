@@ -3,7 +3,9 @@ package com.v7878.unsafe;
 import android.os.Build;
 import com.v7878.Thrower;
 import java.lang.reflect.*;
+import java.util.Arrays;
 import java.util.function.*;
+import java.util.stream.Collectors;
 
 public class Utils {
 
@@ -35,43 +37,58 @@ public class Utils {
                 return field;
             }
         }
-        assert_(!thw, NoSuchFieldException::new);
+        assert_(!thw, NoSuchFieldException::new, name);
         return null;
     }
 
-    public static Method searchMethod(Method[] methods, String name, boolean thw, Class<?>... parameterTypes) {
+    private static String methodToString(String name, Class<?>[] argTypes) {
+        return name + ((argTypes == null || argTypes.length == 0)
+                ? "()" : Arrays.stream(argTypes)
+                        .map(c -> c == null ? "null" : c.getName())
+                        .collect(Collectors.joining(",", "(", ")")));
+    }
+
+    public static Method searchMethod(Method[] methods, String name,
+            boolean thw, Class<?>... parameterTypes) {
         for (Method m : methods) {
-            if (m.getName().equals(name) && arrayContentsEq(parameterTypes, m.getParameterTypes())) {
+            if (m.getName().equals(name) && arrayContentsEq(
+                    parameterTypes, m.getParameterTypes())) {
                 return m;
             }
         }
-        assert_(!thw, NoSuchMethodException::new);
+        assert_(!thw, NoSuchMethodException::new,
+                methodToString(name, parameterTypes));
         return null;
     }
 
-    public static <T> Constructor<T> searchConstructor(Constructor<T>[] constructors, boolean thw, Class<?>... parameterTypes) {
+    public static <T> Constructor<T> searchConstructor(
+            Constructor<T>[] constructors, boolean thw, Class<?>... parameterTypes) {
         for (Constructor<T> c : constructors) {
             if (arrayContentsEq(parameterTypes, c.getParameterTypes())) {
                 return c;
             }
         }
-        assert_(!thw, NoSuchMethodException::new);
+        assert_(!thw, NoSuchMethodException::new,
+                methodToString("<init>", parameterTypes));
         return null;
     }
 
-    public static <T extends Throwable> void assert_(boolean value, Supplier<T> th) {
+    public static <T extends Throwable> void assert_(
+            boolean value, Supplier<T> th) {
         if (!value) {
             Thrower.throwException(th.get());
         }
     }
 
-    public static <T extends Throwable, E> void assert_(boolean value, Function<E, T> th, Supplier<E> msg) {
+    public static <T extends Throwable, E> void assert_(
+            boolean value, Function<E, T> th, Supplier<E> msg) {
         if (!value) {
             Thrower.throwException(th.apply(msg.get()));
         }
     }
 
-    public static <T extends Throwable, E> void assert_(boolean value, Function<E, T> th, E msg) {
+    public static <T extends Throwable> void assert_(
+            boolean value, Function<String, T> th, String msg) {
         if (!value) {
             Thrower.throwException(th.apply(msg));
         }

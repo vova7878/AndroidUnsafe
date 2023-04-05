@@ -98,9 +98,9 @@ public class FileMap {
     public static FileMap read(RandomInput in) {
         FileMap out = new FileMap();
         String magic = new String(in.readByteArray(8));
+        //TODO: version check
         assert_(magic.startsWith("dex\n"),
                 IllegalArgumentException::new, "invalid magic: " + magic);
-        System.out.println(magic);
         in.skipBytes(4); //checksum
         in.skipBytes(20); //signature
         in.skipBytes(4); //file_size
@@ -132,8 +132,6 @@ public class FileMap {
         int map_size = in2.readInt();
         for (int i = 0; i < map_size; i++) {
             MapItem item = MapItem.read(in2);
-            System.out.println("type: " + Integer.toHexString(item.type)
-                    + " off: " + item.offset + " size: " + item.size);
             switch (item.type) {
                 case TYPE_HEADER_ITEM:
                     assert_(item.size == 1, IllegalStateException::new);

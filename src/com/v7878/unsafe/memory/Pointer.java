@@ -3,11 +3,15 @@ package com.v7878.unsafe.memory;
 import static com.v7878.unsafe.AndroidUnsafe4.*;
 import static com.v7878.unsafe.Checks.*;
 import static com.v7878.unsafe.Utils.*;
+import static com.v7878.unsafe.memory.ValueLayout.JAVA_BYTE;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public final class Pointer implements Addressable {
 
     public static final Pointer NULL = new Pointer(0);
+
+    public static final long MAX_ADDRESS = IS64BIT ? Long.MAX_VALUE : 0xffffffff;
 
     private final Object base;
     private final long base_address;
@@ -196,6 +200,24 @@ public final class Pointer implements Addressable {
             return get((ValueLayout.OfWord) layout);
         }
         throw new IllegalStateException();
+    }
+
+    private static int strlen(Pointer data) {
+        for (int offset = 0; offset >= 0; offset++) {
+            byte curr = data.addOffset(offset).get(JAVA_BYTE);
+            if (curr == 0) {
+                return offset;
+            }
+        }
+        throw new IllegalArgumentException("String too large");
+    }
+
+    public String getUtf8String() {
+        int len = strlen(this);
+        byte[] bytes = new byte[len];
+        copyMemory(getBase(), getOffset(),
+                bytes, ARRAY_BYTE_BASE_OFFSET, len);
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     public void put(ValueLayout.OfBoolean layout, boolean value) {

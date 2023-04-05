@@ -85,14 +85,8 @@ public final class EmulatedStackFrame {
         return (MethodType) nothrows_run(() -> type.get(esf));
     }
 
-    public StackFrameWriter createWriter() {
-        StackFrameWriter out = new StackFrameWriter();
-        out.attach(this);
-        return out;
-    }
-
-    public StackFrameReader createReader() {
-        StackFrameReader out = new StackFrameReader();
+    public StackFrameAccessor createAccessor() {
+        StackFrameAccessor out = new StackFrameAccessor();
         out.attach(this);
         return out;
     }
@@ -121,8 +115,8 @@ public final class EmulatedStackFrame {
         }
     }
 
-    public static void copyNext(StackFrameReader reader,
-            StackFrameWriter writer, Class<?> type) {
+    public static void copyNext(StackFrameAccessor reader,
+            StackFrameAccessor writer, Class<?> type) {
         switch (TypeId.of(type).getShorty()) {
             case 'L':
                 writer.putNextReference(reader.nextReference(type), type);
@@ -154,7 +148,7 @@ public final class EmulatedStackFrame {
         }
     }
 
-    private static class StackFrameAccessor {
+    public static class StackFrameAccessor {
 
         protected int referencesOffset;
         protected int argumentIdx;
@@ -241,9 +235,6 @@ public final class EmulatedStackFrame {
                 referencesOffset = frame.references().length - 1;
             }
         }
-    }
-
-    public static final class StackFrameWriter extends StackFrameAccessor {
 
         public void putNextByte(byte value) {
             checkWriteType(byte.class);
@@ -299,14 +290,6 @@ public final class EmulatedStackFrame {
             frame.references()[referencesOffset++] = value;
         }
 
-        @Override
-        public StackFrameWriter moveTo(int argumentIndex) {
-            return (StackFrameWriter) super.moveTo(argumentIndex);
-        }
-    }
-
-    public static final class StackFrameReader extends StackFrameAccessor {
-
         public byte nextByte() {
             checkReadType(byte.class);
             argumentIdx++;
@@ -359,11 +342,6 @@ public final class EmulatedStackFrame {
             checkReadType(expectedType);
             argumentIdx++;
             return (T) frame.references()[referencesOffset++];
-        }
-
-        @Override
-        public StackFrameReader moveTo(int argumentIndex) {
-            return (StackFrameReader) super.moveTo(argumentIndex);
         }
     }
 }

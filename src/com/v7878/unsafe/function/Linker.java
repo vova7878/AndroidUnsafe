@@ -7,8 +7,7 @@ import com.v7878.unsafe.dex.modifications.Modifications.EmptyClassLoader;
 import com.v7878.unsafe.memory.*;
 import com.v7878.unsafe.methodhandle.*;
 import static com.v7878.unsafe.methodhandle.EmulatedStackFrame.RETURN_VALUE_IDX;
-import com.v7878.unsafe.methodhandle.EmulatedStackFrame.StackFrameReader;
-import com.v7878.unsafe.methodhandle.EmulatedStackFrame.StackFrameWriter;
+import com.v7878.unsafe.methodhandle.EmulatedStackFrame.StackFrameAccessor;
 import static com.v7878.unsafe.methodhandle.Transformers.*;
 import com.v7878.unsafe.methodhandle.Transformers.TransformerI;
 import dalvik.system.DexFile;
@@ -25,8 +24,8 @@ public class Linker {
             = new SoftReferenceCache<>();
     private static final int HANDLER_OFFSET = classSizeField(Test.class);
 
-    private static void copyNext(StackFrameReader reader,
-            StackFrameWriter writer, Class<?> type) {
+    private static void copyArg(StackFrameAccessor reader,
+            StackFrameAccessor writer, Class<?> type) {
         if (type == Addressable.class) {
             long tmp = reader.nextReference(Addressable.class)
                     .pointer().getRawAddress();
@@ -49,24 +48,48 @@ public class Linker {
 
     }
 
+    private static void copyRet(StackFrameAccessor reader,
+            StackFrameAccessor writer, Class<?> type) {
+        if (type == Addressable.class) {
+            long value;
+            if (IS64BIT) {
+                value = reader.nextLong();
+            } else {
+                value = reader.nextInt() & 0xffffffff;
+            }
+            writer.putNextReference(new Pointer(value), type);
+            return;
+        } else if (type == Word.class) {
+            long value;
+            if (IS64BIT) {
+                value = reader.nextLong();
+            } else {
+                value = reader.nextInt() & 0xffffffff;
+            }
+            writer.putNextReference(new Word(value), type);
+        }
+        EmulatedStackFrame.copyNext(reader, writer, type);
+
+    }
+
     private static TransformerI getTransformerI(MethodHandle stub) {
         return (stackFrame) -> {
             MethodType current_type = stackFrame.type();
             int params_count = current_type.parameterCount();
             EmulatedStackFrame stub_frame = EmulatedStackFrame.create(stub.type());
-            StackFrameReader reader = stackFrame.createReader();
-            StackFrameWriter writer = stub_frame.createWriter();
+            StackFrameAccessor thiz_acc = stackFrame.createAccessor();
+            StackFrameAccessor stub_acc = stub_frame.createAccessor();
             Class<?> type;
             for (int i = 0; i < params_count; i++) {
                 type = current_type.parameterType(i);
-                copyNext(reader, writer, type);
+                copyArg(thiz_acc, stub_acc, type);
             }
             invokeExactFromTransform(stub, stub_frame);
             type = current_type.returnType();
             if (type != void.class) {
-                reader.moveTo(RETURN_VALUE_IDX);
-                writer.moveTo(RETURN_VALUE_IDX);
-                copyNext(reader, writer, type);
+                thiz_acc.moveTo(RETURN_VALUE_IDX);
+                stub_acc.moveTo(RETURN_VALUE_IDX);
+                copyRet(stub_acc, thiz_acc, type);
             }
         };
     }

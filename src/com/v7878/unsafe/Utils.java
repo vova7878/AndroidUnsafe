@@ -3,7 +3,9 @@ package com.v7878.unsafe;
 import android.os.Build;
 import com.v7878.Thrower;
 import java.lang.reflect.*;
+import java.util.Arrays;
 import java.util.function.*;
+import java.util.stream.Collectors;
 
 public class Utils {
 
@@ -35,8 +37,15 @@ public class Utils {
                 return field;
             }
         }
-        assert_(!thw, NoSuchFieldException::new);
+        assert_(!thw, NoSuchFieldException::new, name);
         return null;
+    }
+
+    private static String methodToString(String name, Class<?>[] argTypes) {
+        return name + ((argTypes == null || argTypes.length == 0)
+                ? "()" : Arrays.stream(argTypes)
+                        .map(c -> c == null ? "null" : c.getName())
+                        .collect(Collectors.joining(",", "(", ")")));
     }
 
     public static Method searchMethod(Method[] methods, String name,
@@ -47,7 +56,8 @@ public class Utils {
                 return m;
             }
         }
-        assert_(!thw, NoSuchMethodException::new);
+        assert_(!thw, NoSuchMethodException::new,
+                methodToString(name, parameterTypes));
         return null;
     }
 
@@ -58,7 +68,8 @@ public class Utils {
                 return c;
             }
         }
-        assert_(!thw, NoSuchMethodException::new);
+        assert_(!thw, NoSuchMethodException::new,
+                methodToString("<init>", parameterTypes));
         return null;
     }
 

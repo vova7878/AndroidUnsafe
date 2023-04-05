@@ -1,7 +1,7 @@
 package com.v7878.unsafe.methodhandle;
 
 import static com.v7878.unsafe.AndroidUnsafe5.*;
-import static com.v7878.unsafe.Utils.nothrows_run;
+import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.dex.*;
 import com.v7878.unsafe.dex.bytecode.*;
 import dalvik.system.DexFile;
@@ -15,6 +15,7 @@ public class Transformers {
     });
     private static final Class<MethodHandle> transformer;
     private static final Constructor<MethodHandle> transformer_constructor;
+    private static final InvokerI invoker;
 
     static {
         TypeId esf = TypeId.of("dalvik.system.EmulatedStackFrame");
@@ -25,7 +26,7 @@ public class Transformers {
 
         ClassDef transformer_def = new ClassDef(transformer_id);
         transformer_def.setSuperClass(TypeId.of(invoke_transformer));
-        transformer_def.setAccessFlags(Modifier.PUBLIC);
+        transformer_def.setAccessFlags(Modifier.PUBLIC | Modifier.FINAL);
 
         FieldId callback_field = new FieldId(transformer_id,
                 TypeId.of(TransformerI.class), "callback");
@@ -85,11 +86,97 @@ public class Transformers {
                 )
         );
 
-        DexFile dex = openDexFile(new Dex(transformer_def).compile());
+        String invoker_name = Transformers.class.getName() + "$Invoker";
+        TypeId invoker_id = TypeId.of(invoker_name);
+
+        ClassDef invoker_def = new ClassDef(invoker_id);
+        invoker_def.setSuperClass(TypeId.of(Object.class));
+        invoker_def.getInterfaces().add(TypeId.of(InvokerI.class));
+        invoker_def.setAccessFlags(Modifier.PUBLIC | Modifier.FINAL);
+
+        if (getSdkInt() < 33) {
+            code.clear();
+            code.add(new CheckCast(2, esf));
+            code.add(new InvokePolymorphic(2,
+                    new MethodId(TypeId.of(MethodHandle.class),
+                            new ProtoId(TypeId.of(Object.class),
+                                    TypeId.of(Object[].class)),
+                            "invoke"),
+                    1, 2, 0, 0, 0,
+                    new ProtoId(TypeId.V, esf)));
+            code.add(new ReturnVoid());
+        } else {
+            Method tmp = getDeclaredMethod(MethodHandle.class,
+                    "invokeExactWithFrame", EmulatedStackFrame.esf_class);
+            int flags = getExecutableAccessFlags(tmp);
+            setExecutableAccessFlags(tmp, flags | Modifier.PUBLIC);
+            fullFence();
+
+            code.clear();
+            code.add(new CheckCast(2, esf));
+            code.add(new InvokeKind.InvokeVirtual(2,
+                    new MethodId(TypeId.of(MethodHandle.class),
+                            new ProtoId(TypeId.V, esf),
+                            "invokeExactWithFrame"),
+                    1, 2, 0, 0, 0));
+            code.add(new ReturnVoid());
+        }
+
+        invoker_def.getClassData().getVirtualMethods().add(
+                new EncodedMethod(
+                        new MethodId(invoker_id,
+                                new ProtoId(TypeId.V,
+                                        TypeId.of(MethodHandle.class),
+                                        TypeId.of(Object.class)),
+                                "invokeExactWithFrame"),
+                        Modifier.PUBLIC,
+                        null, null,
+                        new CodeItem(
+                                3, 3, 2,
+                                code, null
+                        )
+                )
+        );
+
+        Method tmp = getDeclaredMethod(MethodHandle.class,
+                "transform", EmulatedStackFrame.esf_class);
+        int flags = getExecutableAccessFlags(tmp);
+        setExecutableAccessFlags(tmp, flags | Modifier.PUBLIC);
+        fullFence();
+
+        code.clear();
+        code.add(new CheckCast(2, esf));
+        code.add(new InvokeKind.InvokeVirtual(2,
+                new MethodId(TypeId.of(MethodHandle.class),
+                        new ProtoId(TypeId.V, esf),
+                        "transform"),
+                1, 2, 0, 0, 0));
+        code.add(new ReturnVoid());
+
+        invoker_def.getClassData().getVirtualMethods().add(
+                new EncodedMethod(
+                        new MethodId(invoker_id,
+                                new ProtoId(TypeId.V,
+                                        TypeId.of(MethodHandle.class),
+                                        TypeId.of(Object.class)),
+                                "transform"),
+                        Modifier.PUBLIC,
+                        null, null,
+                        new CodeItem(
+                                3, 3, 2,
+                                code, null
+                        )
+                )
+        );
+
+        DexFile dex = openDexFile(new Dex(transformer_def,
+                invoker_def).compile());
         setTrusted(dex);
 
         ClassLoader loader = Transformers.class.getClassLoader();
         transformer = (Class<MethodHandle>) loadClass(dex, transformer_name, loader);
+        Class<?> invoker_class = loadClass(dex, invoker_name, loader);
+        invoker = (InvokerI) allocateInstance(invoker_class);
 
         transformer_constructor = nothrows_run(() -> {
             return transformer.getDeclaredConstructor(
@@ -101,42 +188,37 @@ public class Transformers {
         return nothrows_run(() -> transformer_constructor.newInstance(type, impl));
     }
 
+    private interface InvokerI {
+
+        public void transform(MethodHandle handle,
+                Object stackFrame) throws Throwable;
+
+        public void invokeExactWithFrame(MethodHandle handle,
+                Object stackFrame) throws Throwable;
+    }
+
     @FunctionalInterface
     public interface TransformerI {
 
         public void transform(EmulatedStackFrame stackFrame) throws Throwable;
     }
 
-    private static final Method invokeExactWithFrame = nothrows_run(() -> {
-        Method tmp = getDeclaredMethod(MethodHandle.class,
-                "invokeExactWithFrame", EmulatedStackFrame.esf_class);
-        setAccessible(tmp, true);
-        return tmp;
-    });
-
-    private static final Method transform = nothrows_run(() -> {
-        Method tmp = getDeclaredMethod(MethodHandle.class,
-                "transform", EmulatedStackFrame.esf_class);
-        setAccessible(tmp, true);
-        return tmp;
-    });
-
     public static void invokeFromTransform(MethodHandle target,
             EmulatedStackFrame stackFrame) throws Throwable {
         if (invoke_transformer.isInstance(target)) {
-            transform.invoke(target, stackFrame.esf);
+            invoker.transform(target, stackFrame.esf);
         } else {
             final MethodHandle adaptedTarget = target.asType(stackFrame.type());
-            invokeExactWithFrame.invoke(adaptedTarget, stackFrame.esf);
+            invoker.invokeExactWithFrame(adaptedTarget, stackFrame.esf);
         }
     }
 
     public static void invokeExactFromTransform(MethodHandle target,
             EmulatedStackFrame stackFrame) throws Throwable {
         if (invoke_transformer.isInstance(target)) {
-            transform.invoke(target, stackFrame.esf);
+            invoker.transform(target, stackFrame.esf);
         } else {
-            invokeExactWithFrame.invoke(target, stackFrame.esf);
+            invoker.invokeExactWithFrame(target, stackFrame.esf);
         }
     }
 }

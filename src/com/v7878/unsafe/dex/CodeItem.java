@@ -166,7 +166,8 @@ public class CodeItem implements PublicCloneable {
         out.position(insns_start + offsets[insns_size] * 2);
 
         //TODO: remove after tests
-        /*for (int i = 0; i < insns.size(); i++) {
+        /*System.out.println(registers_size + " " + ins_size + " " + outs_size);
+        for (int i = 0; i < insns.size(); i++) {
             System.out.println(offsets[i] + " " + insns.get(i));
         }*/
         if (tries_size != 0) {

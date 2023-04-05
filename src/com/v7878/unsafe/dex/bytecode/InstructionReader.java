@@ -106,8 +106,8 @@ public abstract class InstructionReader {
         // TODO: d0-d7
         // TODO: d8-e2
         // <unused> e3-f9
-        InvokePolymorphic.init();
-        // TODO: fd
+        InvokePolymorphic.init();                   // 0xfa
+        // TODO: fb-fd
         // TODO: fe-ff
         // TODO: extra 01-02
         FillArrayDataPayload.init();                // extra 0x03

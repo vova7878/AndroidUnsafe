@@ -355,17 +355,39 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         return out;
     }
 
-    private static final long art_method_data_offset = getArtMethodLayout()
+    private static final long DATA_OFFSET = getArtMethodLayout()
             .selectPath(groupElement("ptr_sized_fields_"),
                     groupElement("data_")).offset();
 
     public static Pointer getExecutableData(Executable ex) {
         long art_method = getArtMethod(ex);
-        return new Pointer(getWordN(art_method + art_method_data_offset));
+        return new Pointer(getWordN(art_method + DATA_OFFSET));
     }
 
     public static void setExecutableData(Executable ex, Addressable data) {
         long art_method = getArtMethod(ex);
-        putWordN(art_method + art_method_data_offset, data.pointer().getRawAddress());
+        putWordN(art_method + DATA_OFFSET, data.pointer().getRawAddress());
+    }
+
+    private static final long ACCESS_FLAGS_OFFSET = getArtMethodLayout()
+            .selectPath(groupElement("access_flags_")).offset();
+
+    public static int getExecutableAccessFlags(Executable ex) {
+        long art_method = getArtMethod(ex);
+        return getIntN(art_method + ACCESS_FLAGS_OFFSET);
+    }
+
+    public static void setExecutableAccessFlags(Executable ex, int flags) {
+        long art_method = getArtMethod(ex);
+        putIntN(art_method + ACCESS_FLAGS_OFFSET, flags);
+    }
+
+    private static final long ENTRY_POINT_OFFSET = getArtMethodLayout()
+            .selectPath(groupElement("ptr_sized_fields_"),
+                    groupElement("entry_point_from_quick_compiled_code_")).offset();
+
+    public static Pointer getExecutableEntryPoint(Executable ex) {
+        long art_method = getArtMethod(ex);
+        return new Pointer(getWordN(art_method + ENTRY_POINT_OFFSET));
     }
 }

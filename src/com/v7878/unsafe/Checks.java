@@ -6,16 +6,13 @@ import static com.v7878.unsafe.Utils.*;
 public class Checks {
 
     public static boolean checkNativeAddress(long address) {
-        if (ADDRESS_SIZE == 4) {
-            return is32BitOnly(address);
-        }
-        return true;
+        return IS64BIT || isSigned32Bit(address);
     }
 
     public static boolean checkOffset(long offset) {
         if (ADDRESS_SIZE == 4) {
             // Note: this will also check for negative sizes
-            return is32BitOnly(offset);
+            return is32Bit(offset);
         }
         return offset >= 0;
     }

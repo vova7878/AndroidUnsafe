@@ -3,7 +3,7 @@ package com.v7878.unsafe.memory;
 import static com.v7878.unsafe.AndroidUnsafe4.*;
 import static com.v7878.unsafe.Utils.*;
 import static com.v7878.unsafe.memory.ValueLayout.JAVA_BYTE;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.*;
 import java.util.Objects;
 
 public class MemorySegment implements Addressable {
@@ -16,9 +16,10 @@ public class MemorySegment implements Addressable {
         Objects.requireNonNull(pointer);
         this.pointer = pointer;
         if (pointer.hasRawAddress()) {
-            layout = Layout.rawLayout(Pointer.MAX_ADDRESS - pointer.getRawAddress());
+            long value = Pointer.MAX_ADDRESS - pointer.getRawAddress();
+            layout = Layout.rawLayout(minUL(Pointer.MAX_SIZE, value));
         } else {
-            layout = Layout.rawLayout(Pointer.MAX_ADDRESS);
+            layout = Layout.rawLayout(Pointer.MAX_SIZE);
         }
     }
 
@@ -219,13 +220,17 @@ public class MemorySegment implements Addressable {
         return Layout.getInstanceLayout(obj).bind(new Pointer(obj));
     }
 
-    public static MemorySegment allocateUtf8String(String value) {
+    public static MemorySegment allocateCString(String value, Charset charset) {
         Objects.requireNonNull(value);
-        byte[] data = value.getBytes(StandardCharsets.UTF_8);
+        byte[] data = value.getBytes(charset);
         byte[] out = (byte[]) newNonMovableArrayVM(byte.class, data.length + 1);
         System.arraycopy(data, 0, out, 0, data.length);
         out[data.length] = 0;
         return Layout.sequenceLayout(data.length + 1, JAVA_BYTE)
-                .bind(new Pointer(addressOfNonMovableArrayData(out)));
+                .bind(new Pointer(out, ARRAY_BYTE_BASE_OFFSET));
+    }
+
+    public static MemorySegment allocateCString(String value) {
+        return allocateCString(value, StandardCharsets.UTF_8);
     }
 }

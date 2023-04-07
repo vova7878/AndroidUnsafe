@@ -4,14 +4,15 @@ import static com.v7878.unsafe.AndroidUnsafe4.*;
 import static com.v7878.unsafe.Checks.*;
 import static com.v7878.unsafe.Utils.*;
 import static com.v7878.unsafe.memory.ValueLayout.JAVA_BYTE;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.*;
 import java.util.Objects;
 
 public final class Pointer implements Addressable {
 
     public static final Pointer NULL = new Pointer(0);
 
-    public static final long MAX_ADDRESS = IS64BIT ? Long.MAX_VALUE : 0xffffffff;
+    public static final long MAX_ADDRESS = IS64BIT ? ~0L : 0xffffffffL;
+    public static final long MAX_SIZE = IS64BIT ? Long.MAX_VALUE : 0xffffffffL;
 
     private final Object base;
     private final long base_address;
@@ -38,7 +39,7 @@ public final class Pointer implements Addressable {
                 throw new IllegalArgumentException(
                         "illegal native address: " + offset);
             }
-            this.base_address = offset;
+            this.base_address = offset & MAX_ADDRESS;
             this.offset = 0;
         } else {
             if (!checkOffset(offset)) {
@@ -51,6 +52,7 @@ public final class Pointer implements Addressable {
             } catch (Throwable th) {
             }
             if (address != 0) {
+                //checks
                 long raw_address = address + offset;
                 if (Long.compareUnsigned(raw_address, address) < 0) {
                     throw new IllegalArgumentException(String.format(
@@ -62,7 +64,7 @@ public final class Pointer implements Addressable {
                             "illegal raw address: " + raw_address);
                 }
             }
-            this.base_address = address;
+            this.base_address = address & MAX_ADDRESS;
         }
     }
 
@@ -87,25 +89,29 @@ public final class Pointer implements Addressable {
         return (base == null) || (base_address != 0);
     }
 
+    private long getRawAddressNoCheck() {
+        return base_address + offset;
+    }
+
     public long getRawAddress() {
         assert_(hasRawAddress(), UnsupportedOperationException::new);
-        return base_address + offset;
+        return getRawAddressNoCheck();
     }
 
     public long getOffset() {
         return base == null ? base_address + offset : offset;
     }
 
-    public Pointer addOffset(long add_offset) {
+    public Pointer addOffset(long off) {
         if (hasRawAddress()) {
-            long address = getRawAddress();
-            address = Math.addExact(address, add_offset);
+            long address = getRawAddressNoCheck();
+            address = Math.addExact(address, off);
             assert_(checkNativeAddress(address), IllegalArgumentException::new);
             long new_offset = address - base_address;
             assert_(checkOffset(new_offset), IllegalArgumentException::new);
             return new Pointer(base, base_address, new_offset);
         }
-        long new_offset = Math.addExact(offset, add_offset);
+        long new_offset = Math.addExact(offset, off);
         assert_(checkOffset(new_offset), IllegalArgumentException::new);
         return new Pointer(base, 0, new_offset);
     }
@@ -212,12 +218,16 @@ public final class Pointer implements Addressable {
         throw new IllegalArgumentException("String too large");
     }
 
-    public String getUtf8String() {
+    public String getCString(Charset charset) {
         int len = strlen(this);
         byte[] bytes = new byte[len];
         copyMemory(getBase(), getOffset(),
                 bytes, ARRAY_BYTE_BASE_OFFSET, len);
-        return new String(bytes, StandardCharsets.UTF_8);
+        return new String(bytes, charset);
+    }
+
+    public String getCString() {
+        return getCString(StandardCharsets.UTF_8);
     }
 
     public void put(ValueLayout.OfBoolean layout, boolean value) {
@@ -316,7 +326,7 @@ public final class Pointer implements Addressable {
         size = Math.addExact(size, alignment - 1);
         Object data = newNonMovableArrayVM(byte.class, size);
         long address = addressOfNonMovableArrayData(data);
-        long aligned_address = roundUpL(address, alignment);
+        long aligned_address = roundUpUL(address, alignment);
         return new Pointer(data, ARRAY_BYTE_BASE_OFFSET + aligned_address - address);
     }
 
@@ -325,7 +335,7 @@ public final class Pointer implements Addressable {
         Layout.requireValidAlignment(alignment);
         size = Math.addExact(size, alignment - 1);
         long address = allocateMemory(size);
-        long aligned_address = roundUpL(address, alignment);
+        long aligned_address = roundUpUL(address, alignment);
         return new Pointer(null, address).addOffset(aligned_address - address);
     }
 }

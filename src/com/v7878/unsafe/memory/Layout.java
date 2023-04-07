@@ -118,7 +118,7 @@ public abstract class Layout {
     String decorateLayoutString(String s) {
         s = String.format("%s%d", s, size());
         if (!hasAlignedSize()) {
-            //TODO: check big check big alignments
+            //TODO: check big alignments
             s = String.format("%s+%d", s,
                     roundUpL(size(), alignment()) - size());
         }

@@ -6,6 +6,7 @@ import com.v7878.unsafe.dex.TypeId;
 import java.lang.invoke.*;
 import java.lang.reflect.*;
 import java.nio.*;
+import java.util.*;
 
 public final class EmulatedStackFrame {
 
@@ -343,5 +344,11 @@ public final class EmulatedStackFrame {
             argumentIdx++;
             return (T) frame.references()[referencesOffset++];
         }
+    }
+
+    @Override
+    public String toString() {
+        return "EmulatedStackFrame{stackFrame=[" + toHexString(stackFrame())
+                + "], references=" + Arrays.deepToString(references()) + "}";
     }
 }

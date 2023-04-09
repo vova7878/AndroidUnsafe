@@ -223,6 +223,11 @@ public class MemorySegment implements Addressable {
     public static MemorySegment allocateCString(String value, Charset charset) {
         Objects.requireNonNull(value);
         byte[] data = value.getBytes(charset);
+        for (byte tmp : data) {
+            if (tmp == 0) {
+                throw new IllegalArgumentException("C string can`t contain \\0 char");
+            }
+        }
         byte[] out = (byte[]) newNonMovableArrayVM(byte.class, data.length + 1);
         System.arraycopy(data, 0, out, 0, data.length);
         out[data.length] = 0;

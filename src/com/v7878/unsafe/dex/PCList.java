@@ -1,5 +1,6 @@
 package com.v7878.unsafe.dex;
 
+import com.v7878.unsafe.Checks;
 import java.util.*;
 
 public class PCList<T extends PublicCloneable>
@@ -67,7 +68,7 @@ public class PCList<T extends PublicCloneable>
 
     public final boolean addAll(int index, T[] data, int from, int to) {
         ensureCapacity(size() + to - from);
-        Objects.checkFromToIndex(from, to, data.length);
+        Checks.checkFromToIndex(from, to, data.length);
         if (to <= from) {
             return false;
         }

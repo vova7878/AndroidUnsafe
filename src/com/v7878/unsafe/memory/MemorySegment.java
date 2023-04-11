@@ -63,7 +63,7 @@ public class MemorySegment implements Addressable {
         }
         if (layout instanceof GroupLayout || layout instanceof SequenceLayout) {
             String spaces2 = spaces + INDENT;
-            String name = layout.name().isEmpty() ? "" : "(" + layout.name().get() + ")";
+            String name = layout.name().isPresent() ? "(" + layout.name().get() + ")" : "";
             String type;
             if (layout instanceof GroupLayout) {
                 type = ((GroupLayout) layout).isStruct() ? "struct" : "union";

@@ -3,7 +3,7 @@ package com.v7878.unsafe;
 import android.os.Build;
 import com.v7878.Thrower;
 import java.lang.reflect.*;
-import java.util.Arrays;
+import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
@@ -152,6 +152,13 @@ public class Utils {
             sb.append(Integer.toHexString(arr[i] & 0xff));
         }
         return sb.toString().toUpperCase();
+    }
+
+    public static <T> List<T> asList(T... array) {
+        for (T tmp : array) {
+            Objects.requireNonNull(tmp);
+        }
+        return Arrays.asList(array);
     }
 
     public static long maxUL(long a, long b) {

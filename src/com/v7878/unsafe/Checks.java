@@ -45,4 +45,40 @@ public class Checks {
         }
         return fromIndex;
     }
+
+    public static long checkFromToIndex(long fromIndex, long toIndex, long length) {
+        if (fromIndex < 0 || fromIndex > toIndex || toIndex > length) {
+            throw new IndexOutOfBoundsException(
+                    String.format("Range [%s, %<s + %s) out of bounds for length %s",
+                            fromIndex, toIndex, length));
+        }
+        return fromIndex;
+    }
+
+    public static int checkFromToIndex(int fromIndex, int toIndex, int length) {
+        if (fromIndex < 0 || fromIndex > toIndex || toIndex > length) {
+            throw new IndexOutOfBoundsException(
+                    String.format("Range [%s, %<s + %s) out of bounds for length %s",
+                            fromIndex, toIndex, length));
+        }
+        return fromIndex;
+    }
+
+    public static long checkIndex(long index, long length) {
+        if (index < 0 || index >= length) {
+            throw new IndexOutOfBoundsException(
+                    String.format("Index %s out of bounds for length %s",
+                            index, length));
+        }
+        return index;
+    }
+
+    public static int checkIndex(int index, int length) {
+        if (index < 0 || index >= length) {
+            throw new IndexOutOfBoundsException(
+                    String.format("Index %s out of bounds for length %s",
+                            index, length));
+        }
+        return index;
+    }
 }

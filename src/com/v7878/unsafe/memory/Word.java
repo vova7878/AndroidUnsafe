@@ -38,6 +38,10 @@ public final class Word extends Number {
         return IS64BIT ? value : ((value << 32) >> 32);
     }
 
+    public long ulongValue() {
+        return IS64BIT ? value : (value & 0xffffffffL);
+    }
+
     @Override
     public float floatValue() {
         return longValue();

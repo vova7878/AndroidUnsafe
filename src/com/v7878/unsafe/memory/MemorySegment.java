@@ -172,6 +172,14 @@ public class MemorySegment implements Addressable {
         return pointer.getValue((ValueLayout) layout);
     }
 
+    public String getCString(long offset, Charset charset) {
+        return pointer.addOffset(offset).getCString(charset);
+    }
+
+    public String getCString(long offset) {
+        return pointer.addOffset(offset).getCString();
+    }
+
     public void put(ValueLayout.OfBoolean layout, long offset, boolean value) {
         pointer.addOffset(offset).put(layout, value);
     }

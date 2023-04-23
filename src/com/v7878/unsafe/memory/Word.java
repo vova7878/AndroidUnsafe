@@ -1,6 +1,7 @@
 package com.v7878.unsafe.memory;
 
 import static com.v7878.unsafe.AndroidUnsafe.*;
+import static com.v7878.unsafe.Checks.*;
 import com.v7878.unsafe.Utils;
 
 public final class Word extends Number {
@@ -12,7 +13,7 @@ public final class Word extends Number {
     }
 
     public Word(long value) {
-        if (!(IS64BIT || Utils.is32BitOnly(value))) {
+        if (!checkNativeAddress(value)) {
             throw new IllegalArgumentException(
                     "value is too big to represent as a word: " + value);
         }
@@ -20,11 +21,11 @@ public final class Word extends Number {
     }
 
     public Word(int value) {
-        this.value = value & 0xffffffffL;
+        this.value = value;
     }
 
     public boolean is32BitOnly() {
-        return Utils.is32BitOnly(value);
+        return Utils.isSigned32Bit(value);
     }
 
     @Override
@@ -34,21 +35,25 @@ public final class Word extends Number {
 
     @Override
     public long longValue() {
-        return value;
+        return IS64BIT ? value : ((value << 32) >> 32);
+    }
+
+    public long ulongValue() {
+        return IS64BIT ? value : (value & 0xffffffffL);
     }
 
     @Override
     public float floatValue() {
-        return value;
+        return longValue();
     }
 
     @Override
     public double doubleValue() {
-        return value;
+        return longValue();
     }
 
     @Override
     public String toString() {
-        return Long.toString(value);
+        return Long.toString(longValue());
     }
 }

@@ -1,5 +1,8 @@
 package com.v7878.unsafe.io;
 
+import static com.v7878.unsafe.AndroidUnsafe.IS64BIT;
+import com.v7878.unsafe.Checks;
+import com.v7878.unsafe.memory.Word;
 import java.util.Objects;
 
 public interface RandomInput extends AutoCloseable {
@@ -10,7 +13,7 @@ public interface RandomInput extends AutoCloseable {
 
     public default void readFully(byte[] arr, int off, int len) {
         Objects.requireNonNull(arr);
-        Objects.checkFromIndexSize(off, len, arr.length);
+        Checks.checkFromIndexSize(off, len, arr.length);
         if (len == 0) {
             return;
         }
@@ -65,6 +68,10 @@ public interface RandomInput extends AutoCloseable {
 
     public default double readDouble() {
         return Double.longBitsToDouble(readLong());
+    }
+
+    public default Word readWord() {
+        return new Word(IS64BIT ? readLong() : readInt());
     }
 
     public default int readULeb128() {

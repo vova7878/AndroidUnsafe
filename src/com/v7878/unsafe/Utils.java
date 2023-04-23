@@ -3,7 +3,7 @@ package com.v7878.unsafe;
 import android.os.Build;
 import com.v7878.Thrower;
 import java.lang.reflect.*;
-import java.util.Arrays;
+import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
@@ -154,30 +154,57 @@ public class Utils {
         return sb.toString().toUpperCase();
     }
 
-    public static boolean is32BitOnly(long value) {
+    public static <T> List<T> asList(T... array) {
+        for (T tmp : array) {
+            Objects.requireNonNull(tmp);
+        }
+        return Arrays.asList(array);
+    }
+
+    public static long maxUL(long a, long b) {
+        return Long.compareUnsigned(a, b) > 0 ? a : b;
+    }
+
+    public static long minUL(long a, long b) {
+        return Long.compareUnsigned(a, b) < 0 ? a : b;
+    }
+
+    public static int maxU(int a, int b) {
+        return Integer.compareUnsigned(a, b) > 0 ? a : b;
+    }
+
+    public static int minU(int a, int b) {
+        return Integer.compareUnsigned(a, b) < 0 ? a : b;
+    }
+
+    public static boolean is32Bit(long value) {
         return value >>> 32 == 0;
     }
 
-    public static boolean isPowerOfTwoUnsignedL(long x) {
-        return (x & (x - 1)) == 0;
+    public static boolean isSigned32Bit(long value) {
+        return (((value >> 32) + 1) & ~1) == 0;
+    }
+
+    public static boolean isPowerOfTwoUL(long x) {
+        return (x != 0) && (x & (x - 1)) == 0;
     }
 
     public static boolean isPowerOfTwoL(long x) {
-        return (x >= 0) && isPowerOfTwoUnsignedL(x);
+        return (x > 0) && isPowerOfTwoUL(x);
     }
 
-    public static long roundDownUnsignedL(long x, long n) {
-        assert_(isPowerOfTwoUnsignedL(n), IllegalArgumentException::new);
+    public static long roundDownUL(long x, long n) {
+        assert_(isPowerOfTwoUL(n), IllegalArgumentException::new);
         return x & -n;
     }
 
     public static long roundDownL(long x, long n) {
         assert_(x >= 0 && n >= 0, IllegalArgumentException::new);
-        return roundDownUnsignedL(x, n);
+        return roundDownUL(x, n);
     }
 
-    public static long roundUpUnsignedL(long x, long n) {
-        long out = roundDownUnsignedL(x + n - 1, n);
+    public static long roundUpUL(long x, long n) {
+        long out = roundDownUL(x + n - 1, n);
         assert_(Long.compareUnsigned(out, x) >= 0, IllegalArgumentException::new);
         return out;
     }
@@ -188,26 +215,26 @@ public class Utils {
         return out;
     }
 
-    public static boolean isPowerOfTwoUnsigned(int x) {
-        return (x & (x - 1)) == 0;
+    public static boolean isPowerOfTwoU(int x) {
+        return (x != 0) && (x & (x - 1)) == 0;
     }
 
     public static boolean isPowerOfTwo(int x) {
-        return (x >= 0) && isPowerOfTwoUnsigned(x);
+        return (x > 0) && isPowerOfTwoU(x);
     }
 
-    public static int roundDownUnsigned(int x, int n) {
-        assert_(isPowerOfTwoUnsigned(n), IllegalArgumentException::new);
+    public static int roundDownU(int x, int n) {
+        assert_(isPowerOfTwoU(n), IllegalArgumentException::new);
         return x & -n;
     }
 
     public static int roundDown(int x, int n) {
         assert_(x >= 0 && n >= 0, IllegalArgumentException::new);
-        return roundDownUnsigned(x, n);
+        return roundDownU(x, n);
     }
 
-    public static int roundUpUnsigned(int x, int n) {
-        int out = roundDownUnsigned(x + n - 1, n);
+    public static int roundUpU(int x, int n) {
+        int out = roundDownU(x + n - 1, n);
         assert_(Integer.compareUnsigned(out, x) >= 0, IllegalArgumentException::new);
         return out;
     }
@@ -219,12 +246,12 @@ public class Utils {
     }
 
     public static boolean isAligned(int x, int n) {
-        assert_(isPowerOfTwoUnsigned(n), IllegalArgumentException::new);
+        assert_(isPowerOfTwoU(n), IllegalArgumentException::new);
         return (x & (n - 1)) == 0;
     }
 
     public static boolean isAlignedL(long x, long n) {
-        assert_(isPowerOfTwoUnsignedL(n), IllegalArgumentException::new);
+        assert_(isPowerOfTwoUL(n), IllegalArgumentException::new);
         return (x & (n - 1)) == 0;
     }
 

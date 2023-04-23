@@ -42,7 +42,7 @@ public class FunctionDescriptor {
             Objects.requireNonNull(tmp);
             checkLayout(tmp);
         });
-        return new FunctionDescriptor(retLayout, List.of(argLayouts));
+        return new FunctionDescriptor(retLayout, Arrays.asList(argLayouts));
     }
 
     public static FunctionDescriptor of(Layout retLayout, Layout... argLayouts) {
@@ -63,7 +63,7 @@ public class FunctionDescriptor {
         if (index < 0 || index > argLayouts.size()) {
             throw new IllegalArgumentException("Index out of bounds: " + index);
         }
-        List<Layout> added = List.of(addedLayouts); // null check on array and its elements
+        List<Layout> added = asList(addedLayouts); // null check on array and its elements
         List<Layout> newLayouts = new ArrayList<>(argLayouts.size() + addedLayouts.length);
         newLayouts.addAll(argLayouts.subList(0, index));
         newLayouts.addAll(added);

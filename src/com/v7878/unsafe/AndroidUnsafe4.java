@@ -313,7 +313,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         if (kPoisonReferences == null) {
             Object test = allocateNonMovableObject(0);
             long address = addressOfNonMovableArray(test);
-            assert_(is32BitOnly(address), IllegalStateException::new);
+            assert_(isSigned32Bit(address), IllegalStateException::new);
             int real = (int) address;
             int raw = rawObjectToInt(test);
             if (real == raw) {

@@ -13,8 +13,8 @@ import java.util.stream.*;
 public abstract class Layout {
 
     static void requireValidAlignment(long alignment) {
-        if (!isPowerOfTwoL(alignment)
-                || !(IS64BIT || is32BitOnly(alignment))) {
+        if (!isPowerOfTwoUL(alignment)
+                || !(IS64BIT || is32Bit(alignment))) {
             throw new IllegalArgumentException(
                     "illegal alignment: " + alignment);
         }
@@ -118,6 +118,7 @@ public abstract class Layout {
     String decorateLayoutString(String s) {
         s = String.format("%s%d", s, size());
         if (!hasAlignedSize()) {
+            //TODO: check big alignments
             s = String.format("%s+%d", s,
                     roundUpL(size(), alignment()) - size());
         }
@@ -370,6 +371,7 @@ public abstract class Layout {
                     out.stream().toArray(Layout[]::new))
                     .withName(String.class.getName());
         }
+        @SuppressWarnings("null")
         Class<?> clazz = obj.getClass();
         if (clazz.isArray()) {
             ArrayList<Layout> out = new ArrayList();
@@ -395,7 +397,7 @@ public abstract class Layout {
     public final MemorySegment allocateHeap() {
         long alignment = alignment();
         if (size > Integer.MAX_VALUE || alignment > Integer.MAX_VALUE) {
-            throw new IllegalStateException();
+            throw new IllegalArgumentException();
         }
         Pointer p = Pointer.allocateHeap((int) size, (int) alignment);
         return new MemorySegment(p, this, false);

@@ -1,13 +1,27 @@
 package com.v7878.unsafe.memory;
 
-import static com.v7878.unsafe.AndroidUnsafe2.*;
+import static com.v7878.unsafe.AndroidUnsafe4.*;
 import static com.v7878.unsafe.Utils.*;
+import static com.v7878.unsafe.memory.ValueLayout.JAVA_BYTE;
+import java.nio.charset.*;
 import java.util.Objects;
 
 public class MemorySegment implements Addressable {
 
     private final Pointer pointer;
     private final Layout layout;
+
+    //infinity segment
+    public MemorySegment(Pointer pointer) {
+        Objects.requireNonNull(pointer);
+        this.pointer = pointer;
+        if (pointer.hasRawAddress()) {
+            long value = Pointer.MAX_ADDRESS - pointer.getRawAddress();
+            layout = Layout.rawLayout(minUL(Pointer.MAX_SIZE, value));
+        } else {
+            layout = Layout.rawLayout(Pointer.MAX_SIZE);
+        }
+    }
 
     MemorySegment(Pointer pointer, Layout layout, boolean ignore_alignment) {
         Objects.requireNonNull(pointer);
@@ -49,7 +63,7 @@ public class MemorySegment implements Addressable {
         }
         if (layout instanceof GroupLayout || layout instanceof SequenceLayout) {
             String spaces2 = spaces + INDENT;
-            String name = layout.name().isEmpty() ? "" : "(" + layout.name().get() + ")";
+            String name = layout.name().isPresent() ? "(" + layout.name().get() + ")" : "";
             String type;
             if (layout instanceof GroupLayout) {
                 type = ((GroupLayout) layout).isStruct() ? "struct" : "union";
@@ -158,6 +172,14 @@ public class MemorySegment implements Addressable {
         return pointer.getValue((ValueLayout) layout);
     }
 
+    public String getCString(long offset, Charset charset) {
+        return pointer.addOffset(offset).getCString(charset);
+    }
+
+    public String getCString(long offset) {
+        return pointer.addOffset(offset).getCString();
+    }
+
     public void put(ValueLayout.OfBoolean layout, long offset, boolean value) {
         pointer.addOffset(offset).put(layout, value);
     }
@@ -204,5 +226,24 @@ public class MemorySegment implements Addressable {
 
     public static MemorySegment getInstanceSegment(Object obj) {
         return Layout.getInstanceLayout(obj).bind(new Pointer(obj));
+    }
+
+    public static MemorySegment allocateCString(String value, Charset charset) {
+        Objects.requireNonNull(value);
+        byte[] data = value.getBytes(charset);
+        for (byte tmp : data) {
+            if (tmp == 0) {
+                throw new IllegalArgumentException("C string can`t contain \\0 char");
+            }
+        }
+        byte[] out = (byte[]) newNonMovableArrayVM(byte.class, data.length + 1);
+        System.arraycopy(data, 0, out, 0, data.length);
+        out[data.length] = 0;
+        return Layout.sequenceLayout(data.length + 1, JAVA_BYTE)
+                .bind(new Pointer(out, ARRAY_BYTE_BASE_OFFSET));
+    }
+
+    public static MemorySegment allocateCString(String value) {
+        return allocateCString(value, StandardCharsets.UTF_8);
     }
 }

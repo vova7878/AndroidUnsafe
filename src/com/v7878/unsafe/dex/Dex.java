@@ -1,5 +1,6 @@
 package com.v7878.unsafe.dex;
 
+import com.v7878.unsafe.Checks;
 import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.dex.EncodedValue.*;
 import com.v7878.unsafe.io.*;
@@ -32,7 +33,7 @@ public class Dex extends PCList<ClassDef> {
         } else {
             //TODO: check unique
             for (int id : class_def_ids) {
-                Objects.checkIndex(id, map.class_defs_size);
+                Checks.checkIndex(id, map.class_defs_size);
             }
         }
 

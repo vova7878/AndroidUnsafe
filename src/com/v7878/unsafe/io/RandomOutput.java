@@ -1,5 +1,8 @@
 package com.v7878.unsafe.io;
 
+import static com.v7878.unsafe.AndroidUnsafe.IS64BIT;
+import com.v7878.unsafe.Checks;
+import com.v7878.unsafe.memory.Word;
 import java.util.Objects;
 
 public interface RandomOutput extends AutoCloseable {
@@ -10,7 +13,7 @@ public interface RandomOutput extends AutoCloseable {
 
     public default void writeByteArray(byte[] arr, int off, int len) {
         Objects.requireNonNull(arr);
-        Objects.checkFromIndexSize(off, len, arr.length);
+        Checks.checkFromIndexSize(off, len, arr.length);
         if (len == 0) {
             return;
         }
@@ -49,6 +52,14 @@ public interface RandomOutput extends AutoCloseable {
 
     public default void writeDouble(double value) {
         writeLong(Double.doubleToRawLongBits(value));
+    }
+
+    public default void writeWord(Word value) {
+        if (IS64BIT) {
+            writeLong(value.longValue());
+        } else {
+            writeInt(value.intValue());
+        }
     }
 
     public default void writeULeb128(int value) {

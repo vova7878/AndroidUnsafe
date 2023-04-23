@@ -2,7 +2,6 @@ package com.v7878.unsafe;
 
 import android.annotation.TargetApi;
 import android.os.Build;
-import static com.v7878.unsafe.Checks.*;
 import static com.v7878.unsafe.Utils.*;
 import java.nio.ByteOrder;
 
@@ -352,6 +351,7 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
             return;
         }
         for (long i = 0; i < bytes; i++) {
+            //TODO: use builtin functions for primitive arrays
             putByteO(destBase, destOffset + i, getByteO(srcBase, srcOffset + i));
         }
     }

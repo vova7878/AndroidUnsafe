@@ -1,6 +1,6 @@
 package com.v7878.unsafe.io;
 
-import static com.v7878.unsafe.Checks.checkFromIndexSize;
+import com.v7878.unsafe.Checks;
 import com.v7878.unsafe.memory.*;
 import java.util.Objects;
 
@@ -16,7 +16,7 @@ public class MemoryInput implements RandomInput {
     }
 
     private long grow(long n) {
-        long tmp = checkFromIndexSize(offset, n, data.size());
+        long tmp = Checks.checkFromIndexSize(offset, n, data.size());
         offset += n;
         return tmp;
     }
@@ -58,7 +58,7 @@ public class MemoryInput implements RandomInput {
 
     @Override
     public void position(long new_position) {
-        offset = Objects.checkIndex(new_position, data.size());
+        offset = Checks.checkIndex(new_position, data.size());
     }
 
     @Override

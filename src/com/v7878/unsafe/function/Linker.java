@@ -67,6 +67,7 @@ public class Linker {
                 value = reader.nextInt() & 0xffffffffL;
             }
             writer.putNextReference(new Word(value), type);
+            return;
         }
         EmulatedStackFrame.copyNext(reader, writer, type);
 

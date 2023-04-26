@@ -45,7 +45,6 @@ public class Linker {
             return;
         }
         EmulatedStackFrame.copyNext(reader, writer, type);
-
     }
 
     private static void copyRet(StackFrameAccessor reader,
@@ -70,7 +69,6 @@ public class Linker {
             return;
         }
         EmulatedStackFrame.copyNext(reader, writer, type);
-
     }
 
     private static TransformerI getTransformerI(MethodHandle stub) {

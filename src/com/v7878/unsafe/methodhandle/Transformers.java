@@ -115,9 +115,7 @@ public class Transformers {
             code.clear();
             code.add(new CheckCast(2, esf));
             code.add(new InvokeKind.InvokeVirtual(2,
-                    new MethodId(TypeId.of(MethodHandle.class),
-                            new ProtoId(TypeId.V, esf),
-                            "invokeExactWithFrame"),
+                    MethodId.of(tmp),
                     1, 2, 0, 0, 0));
             code.add(new ReturnVoid());
         }
@@ -147,9 +145,7 @@ public class Transformers {
         code.clear();
         code.add(new CheckCast(2, esf));
         code.add(new InvokeKind.InvokeVirtual(2,
-                new MethodId(TypeId.of(MethodHandle.class),
-                        new ProtoId(TypeId.V, esf),
-                        "transform"),
+                MethodId.of(tmp),
                 1, 2, 0, 0, 0));
         code.add(new ReturnVoid());
 

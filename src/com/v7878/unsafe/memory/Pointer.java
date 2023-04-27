@@ -171,8 +171,9 @@ public final class Pointer implements Addressable {
         return getObject(base, getOffset());
     }
 
-    public Pointer get(ValueLayout.OfAddress layout) {
-        return new Pointer(getWordUnaligned(base, getOffset(), layout.order()));
+    public <T> T get(ValueLayout.OfAddress<T> layout) {
+        return layout.content().bind(new Pointer(getWordUnaligned(base,
+                getOffset(), layout.order())));
     }
 
     public Word get(ValueLayout.OfWord layout) {

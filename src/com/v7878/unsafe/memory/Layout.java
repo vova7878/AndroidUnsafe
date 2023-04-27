@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.*;
 
-public abstract class Layout {
+public abstract class Layout implements Bindable<MemorySegment> {
 
     static void requireValidAlignment(long alignment) {
         if (!isPowerOfTwoUL(alignment)
@@ -193,7 +193,7 @@ public abstract class Layout {
         } else if (carrier == double.class) {
             return new ValueLayout.OfDouble(order);
         } else if (carrier == Pointer.class) {
-            return new ValueLayout.OfAddress(order);
+            return ValueLayout.ADDRESS.withOrder(order);
         } else if (carrier == Word.class) {
             return new ValueLayout.OfWord(order);
         } else if (carrier == Object.class) {
@@ -403,11 +403,12 @@ public abstract class Layout {
         return new MemorySegment(p, this, false);
     }
 
-    public final MemorySegment bind(Pointer p, boolean ignore_alignment) {
-        return new MemorySegment(p, this, ignore_alignment);
+    public final MemorySegment bind(Addressable a, boolean ignore_alignment) {
+        return new MemorySegment(a.pointer(), this, ignore_alignment);
     }
 
-    public final MemorySegment bind(Pointer p) {
-        return bind(p, false);
+    @Override
+    public final MemorySegment bind(Addressable a) {
+        return bind(a, false);
     }
 }

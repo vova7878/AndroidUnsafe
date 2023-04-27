@@ -160,7 +160,7 @@ public class MemorySegment implements Addressable {
         return pointer.addOffset(offset).get(layout);
     }
 
-    public Pointer get(ValueLayout.OfAddress layout, long offset) {
+    public <T> T get(ValueLayout.OfAddress<T> layout, long offset) {
         return pointer.addOffset(offset).get(layout);
     }
 

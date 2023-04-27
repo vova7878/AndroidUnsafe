@@ -17,7 +17,7 @@ public abstract class ValueLayout extends Layout {
     public static final OfFloat JAVA_FLOAT = new OfFloat(ByteOrder.nativeOrder());
     public static final OfDouble JAVA_DOUBLE = new OfDouble(ByteOrder.nativeOrder());
     public static final OfObject JAVA_OBJECT = new OfObject(ByteOrder.nativeOrder());
-    public static final OfAddress ADDRESS = new OfAddress(ByteOrder.nativeOrder());
+    public static final OfAddress<Pointer> ADDRESS = new OfAddress<>(ByteOrder.nativeOrder(), a -> a.pointer());
     public static final OfWord WORD = new OfWord(ByteOrder.nativeOrder());
 
     private final ByteOrder order;
@@ -515,15 +515,19 @@ public abstract class ValueLayout extends Layout {
         }
     }
 
-    //TODO pointer to X?
-    public static final class OfAddress extends ValueLayout {
+    public static final class OfAddress<T> extends ValueLayout {
 
-        OfAddress(ByteOrder order) {
+        private final Bindable<T> content;
+
+        OfAddress(ByteOrder order, Bindable<T> content) {
             super(ADDRESS_SIZE, log2(ADDRESS_SIZE), order);
+            this.content = content;
         }
 
-        OfAddress(int align_shift, ByteOrder order, Optional<String> name) {
+        OfAddress(int align_shift, ByteOrder order,
+                Bindable<T> content, Optional<String> name) {
             super(ADDRESS_SIZE, align_shift, order, name);
+            this.content = content;
         }
 
         @Override
@@ -531,33 +535,65 @@ public abstract class ValueLayout extends Layout {
             return Pointer.class;
         }
 
-        @Override
-        OfAddress dup(int align_shift, ByteOrder order, Optional<String> name) {
-            return new OfAddress(align_shift, order, name);
+        public Bindable<T> content() {
+            return content;
+        }
+
+        <E> OfAddress<E> dup(int align_shift, ByteOrder order,
+                Bindable<E> content, Optional<String> name) {
+            return new OfAddress<>(align_shift, order,
+                    Objects.requireNonNull(content), name);
         }
 
         @Override
-        public OfAddress withName(String name) {
-            return (OfAddress) super.withName(name);
+        OfAddress<T> dup(int align_shift, ByteOrder order, Optional<String> name) {
+            return dup(align_shift, order, content, name);
         }
 
         @Override
-        public OfAddress withAlignmentShift(int align_shift) {
-            return (OfAddress) super.withAlignmentShift(align_shift);
+        public OfAddress<T> withName(String name) {
+            return (OfAddress<T>) super.withName(name);
         }
 
         @Override
-        public OfAddress withAlignment(long alignment) {
-            return (OfAddress) super.withAlignment(alignment);
+        public OfAddress<T> withAlignmentShift(int align_shift) {
+            return (OfAddress<T>) super.withAlignmentShift(align_shift);
         }
 
         @Override
-        public OfAddress withOrder(ByteOrder order) {
-            return (OfAddress) super.withOrder(order);
+        public OfAddress<T> withAlignment(long alignment) {
+            return (OfAddress<T>) super.withAlignment(alignment);
+        }
+
+        @Override
+        public OfAddress<T> withOrder(ByteOrder order) {
+            return (OfAddress<T>) super.withOrder(order);
+        }
+
+        public <E> OfAddress<E> withContent(Bindable<E> content) {
+            return dup(alignmentShift(), order(), content, name());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), content());
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (!super.equals(other)) {
+                return false;
+            }
+            OfAddress otherLayout = (OfAddress) other;
+            return content.equals(otherLayout.content);
         }
 
         @Override
         public String toString() {
+            //TODO: add content
             return super.toString('A');
         }
     }

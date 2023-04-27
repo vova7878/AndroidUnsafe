@@ -2,12 +2,13 @@ package com.v7878.unsafe.function;
 
 import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.memory.*;
+import java.lang.invoke.MethodHandle;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.stream.*;
 
 //TODO: variadic
-public class FunctionDescriptor {
+public class FunctionDescriptor implements Bindable<MethodHandle> {
 
     private final Layout retLayout;
     private final List<Layout> argLayouts;
@@ -78,6 +79,11 @@ public class FunctionDescriptor {
 
     public FunctionDescriptor dropReturnLayout() {
         return new FunctionDescriptor(null, argLayouts);
+    }
+
+    @Override
+    public MethodHandle bind(Addressable symbol) {
+        return Linker.downcallHandle(symbol, this);
     }
 
     @Override

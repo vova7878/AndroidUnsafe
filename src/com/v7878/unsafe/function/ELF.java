@@ -1,8 +1,7 @@
 package com.v7878.unsafe.function;
 
 import static com.v7878.unsafe.AndroidUnsafe.IS64BIT;
-import com.v7878.unsafe.function.MMap.MMapEntry;
-import com.v7878.unsafe.function.MMap.MMapFile;
+import com.v7878.unsafe.function.MMap.*;
 import com.v7878.unsafe.memory.*;
 import static com.v7878.unsafe.memory.Layout.*;
 import static com.v7878.unsafe.memory.LayoutPath.PathElement.*;
@@ -10,7 +9,6 @@ import static com.v7878.unsafe.memory.ValueLayout.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import static com.v7878.unsafe.function.MMap.PERMISSION_GENERATED;
 
 // see elf.h
 public class ELF {
@@ -234,7 +232,7 @@ public class ELF {
                 throw new IllegalArgumentException("unknown symbol type: " + type);
             }
             Pointer bias = new Pointer(in.entries.stream()
-                    .filter(e -> (e.perms() != PERMISSION_GENERATED))
+                    .filter(e -> (e.perms() != MMap.PERMISSION_GENERATED))
                     .mapToLong(MMapEntry::start).min().getAsLong());
             long value = symbol.get(WORD, st_value).ulongValue();
             long size = symbol.get(WORD, st_size).ulongValue();

@@ -17,7 +17,7 @@ public abstract class ValueLayout extends Layout {
     public static final OfFloat JAVA_FLOAT = new OfFloat(ByteOrder.nativeOrder());
     public static final OfDouble JAVA_DOUBLE = new OfDouble(ByteOrder.nativeOrder());
     public static final OfObject JAVA_OBJECT = new OfObject(ByteOrder.nativeOrder());
-    public static final OfAddress<Pointer> ADDRESS = new OfAddress<>(ByteOrder.nativeOrder(), a -> a.pointer());
+    public static final OfAddress<Pointer> ADDRESS = new OfAddress<>(ByteOrder.nativeOrder(), POINTER);
     public static final OfWord WORD = new OfWord(ByteOrder.nativeOrder());
 
     private final ByteOrder order;

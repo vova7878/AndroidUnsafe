@@ -2,9 +2,7 @@ package com.v7878.unsafe.function;
 
 import static com.v7878.unsafe.AndroidUnsafe2.*;
 import static com.v7878.unsafe.Utils.*;
-import com.v7878.unsafe.function.MMap.MMapEntry;
-import com.v7878.unsafe.function.MMap.MMapFile;
-import static com.v7878.unsafe.function.MMap.PERMISIION_GENERATED;
+import com.v7878.unsafe.function.MMap.*;
 import com.v7878.unsafe.memory.*;
 import static com.v7878.unsafe.memory.LayoutPath.PathElement.groupElement;
 import static com.v7878.unsafe.memory.PlatformLayouts.C_INT;
@@ -62,7 +60,7 @@ public class NativeLibrary implements SymbolLookup {
             copyMemory(tmp, ARRAY_BYTE_BASE_OFFSET,
                     data.getBase(), data.getOffset(), tmp.length);
             libdl.add(new MMapEntry(0, tmp.length,
-                    PERMISIION_GENERATED, data));
+                    MMap.PERMISSION_GENERATED, data));
         } catch (IOException ex) {
             throwException(ex);
         }

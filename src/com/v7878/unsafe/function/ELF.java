@@ -3,12 +3,14 @@ package com.v7878.unsafe.function;
 import static com.v7878.unsafe.AndroidUnsafe.IS64BIT;
 import com.v7878.unsafe.function.MMap.MMapEntry;
 import com.v7878.unsafe.function.MMap.MMapFile;
-import static com.v7878.unsafe.function.MMap.PERMISIION_GENERATED;
 import com.v7878.unsafe.memory.*;
 import static com.v7878.unsafe.memory.Layout.*;
 import static com.v7878.unsafe.memory.LayoutPath.PathElement.*;
 import static com.v7878.unsafe.memory.ValueLayout.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import static com.v7878.unsafe.function.MMap.PERMISSION_GENERATED;
 
 // see elf.h
 public class ELF {
@@ -210,31 +212,19 @@ public class ELF {
 
     public static class SymTab {
 
-        public final Element[] sym;
-        public final Element[] dyn;
-
-        public SymTab(Element[] sym, Element[] dyn) {
-            this.sym = sym;
-            this.dyn = dyn;
-        }
+        public final Map<String, Element> sym = new HashMap<>();
+        public final Map<String, Element> dyn = new HashMap<>();
 
         public Element find(String name) {
             Objects.requireNonNull(name);
-            if (dyn != null) {
-                for (Element tmp : dyn) {
-                    if (name.equals(tmp.name)) {
-                        return tmp;
-                    }
-                }
+            Element out = dyn.get(name);
+            if (out == null) {
+                out = sym.get(name);
             }
-            if (sym != null) {
-                for (Element tmp : sym) {
-                    if (name.equals(tmp.name)) {
-                        return tmp;
-                    }
-                }
+            if (out == null) {
+                throw new IllegalArgumentException("symbol \'" + name + "\' not found");
             }
-            throw new IllegalArgumentException("symbol \'" + name + "\' not found");
+            return out;
         }
 
         public MemorySegment findFunction(String name, MMapFile in) {
@@ -244,7 +234,7 @@ public class ELF {
                 throw new IllegalArgumentException("unknown symbol type: " + type);
             }
             Pointer bias = new Pointer(in.entries.stream()
-                    .filter(e -> (e.perms() != PERMISIION_GENERATED))
+                    .filter(e -> (e.perms() != PERMISSION_GENERATED))
                     .mapToLong(MMapEntry::start).min().getAsLong());
             long value = symbol.get(WORD, st_value).ulongValue();
             long size = symbol.get(WORD, st_size).ulongValue();
@@ -252,8 +242,9 @@ public class ELF {
         }
     }
 
-    public static Element[] readSymbols(MMapFile in,
-            MemorySegment symtab, MemorySegment strtab) {
+    public static void readSymbols(MMapFile in,
+            MemorySegment symtab, MemorySegment strtab,
+            Map<String, Element> out) {
 
         symtab = getRawSegmentData(in, symtab);
         strtab = getRawSegmentData(in, strtab);
@@ -264,16 +255,12 @@ public class ELF {
         int num = (int) (symtab.size() / Elf_Sym.size());
         symtab = Layout.sequenceLayout(num,
                 Elf_Sym).bind(symtab.pointer());
-
-        Element[] symbols = new Element[num];
         for (int i = 0; i < num; i++) {
             MemorySegment symbol = symtab.select(sequenceElement(i));
             long name_off = symbol.get(JAVA_INT, st_name) & 0xffffffffL;
             String name = strtab.getCString(name_off);
-            symbols[i] = new Element(name, symbol);
+            out.put(name, new Element(name, symbol));
         }
-
-        return symbols;
     }
 
     public static SymTab readSymTab(MMapFile in, boolean only_dyn) {
@@ -321,16 +308,15 @@ public class ELF {
             }
         }
 
-        Element[] sym = null;
+        SymTab out = new SymTab();
+
         if ((symtab != null) && (strtab != null)) {
-            sym = readSymbols(in, symtab.data, strtab.data);
+            readSymbols(in, symtab.data, strtab.data, out.sym);
         }
-
-        Element[] dyn = null;
         if ((dynsym != null) && (dynstr != null)) {
-            dyn = readSymbols(in, dynsym.data, dynstr.data);
+            readSymbols(in, dynsym.data, dynstr.data, out.dyn);
         }
 
-        return new SymTab(sym, dyn);
+        return out;
     }
 }

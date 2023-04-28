@@ -9,12 +9,12 @@ import java.util.regex.*;
 //TODO make non-public
 public class MMap {
 
-    public static final int PERMISIION_READ = 0b1;
-    public static final int PERMISIION_WRITE = 0b10;
-    public static final int PERMISIION_EXECUTE = 0b100;
-    public static final int PERMISIION_SHARED = 0b1000;
-    public static final int PERMISIION_PRIVATE = 0b10000;
-    public static final int PERMISIION_GENERATED = 1 << 31;
+    public static final int PERMISSION_READ = 0b1;
+    public static final int PERMISSION_WRITE = 0b10;
+    public static final int PERMISSION_EXECUTE = 0b100;
+    public static final int PERMISSION_SHARED = 0b1000;
+    public static final int PERMISSION_PRIVATE = 0b10000;
+    public static final int PERMISSION_GENERATED = 1 << 31;
 
     public static class MMapEntry implements Comparable<MMapEntry>, Addressable {
 
@@ -79,7 +79,7 @@ public class MMap {
         public static interface Filter {
 
             public static final Filter DEFAULT = unused -> true;
-            public static final Filter GENERATED = perm(PERMISIION_GENERATED);
+            public static final Filter GENERATED = perm(PERMISSION_GENERATED);
 
             public static Filter perm(int perms) {
                 return entry -> (entry.perms == perms);
@@ -175,11 +175,11 @@ public class MMap {
             long end = Long.parseLong(match.group("end"), 16);
             long size = end - start;
             long offset = Long.parseLong(match.group("offset"), 16);
-            int i_perms = (perms.indexOf('r') < 0 ? 0 : PERMISIION_READ)
-                    | (perms.indexOf('w') < 0 ? 0 : PERMISIION_WRITE)
-                    | (perms.indexOf('x') < 0 ? 0 : PERMISIION_EXECUTE)
-                    | (perms.indexOf('s') < 0 ? 0 : PERMISIION_SHARED)
-                    | (perms.indexOf('p') < 0 ? 0 : PERMISIION_PRIVATE);
+            int i_perms = (perms.indexOf('r') < 0 ? 0 : PERMISSION_READ)
+                    | (perms.indexOf('w') < 0 ? 0 : PERMISSION_WRITE)
+                    | (perms.indexOf('x') < 0 ? 0 : PERMISSION_EXECUTE)
+                    | (perms.indexOf('s') < 0 ? 0 : PERMISSION_SHARED)
+                    | (perms.indexOf('p') < 0 ? 0 : PERMISSION_PRIVATE);
 
             MMapEntry tmp = new MMapEntry(offset, size, i_perms, start);
             int index = Collections.binarySearch(out, path);

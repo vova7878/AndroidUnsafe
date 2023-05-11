@@ -48,15 +48,18 @@ public class Linker {
     }
 
     private static void copyRet(StackFrameAccessor reader,
-            StackFrameAccessor writer, Class<?> type) {
+            StackFrameAccessor writer, ValueLayout layout) {
+        Class<?> type = layout.carrier();
         if (type == Addressable.class) {
+            Bindable<?> content = ((ValueLayout.OfAddress) layout).content();
             long value;
             if (IS64BIT) {
                 value = reader.nextLong();
             } else {
                 value = reader.nextInt() & 0xffffffffL;
             }
-            writer.putNextReference(new Pointer(value), type);
+            writer.putNextReference(content.bind(new Pointer(
+                    value)), Object.class);
             return;
         } else if (type == Word.class) {
             long value;
@@ -71,24 +74,26 @@ public class Linker {
         EmulatedStackFrame.copyNext(reader, writer, type);
     }
 
-    private static TransformerI getTransformerI(MethodHandle stub) {
+    private static TransformerI getTransformerI(
+            MethodHandle stub, FunctionDescriptor function) {
+
+        Class<?>[] args = function.argumentLayouts().stream()
+                .map(l -> ((ValueLayout) l).carrier()).toArray(Class[]::new);
+        int arg_count = args.length;
+        ValueLayout ret = (ValueLayout) function.returnLayout().orElse(null);
+
         return (stackFrame) -> {
-            MethodType current_type = stackFrame.type();
-            int params_count = current_type.parameterCount();
-            EmulatedStackFrame stub_frame = EmulatedStackFrame.create(stub.type());
             StackFrameAccessor thiz_acc = stackFrame.createAccessor();
+            EmulatedStackFrame stub_frame = EmulatedStackFrame.create(stub.type());
             StackFrameAccessor stub_acc = stub_frame.createAccessor();
-            Class<?> type;
-            for (int i = 0; i < params_count; i++) {
-                type = current_type.parameterType(i);
-                copyArg(thiz_acc, stub_acc, type);
+            for (int i = 0; i < arg_count; i++) {
+                copyArg(thiz_acc, stub_acc, args[i]);
             }
             invokeExactFromTransform(stub, stub_frame);
-            type = current_type.returnType();
-            if (type != void.class) {
+            if (ret != null) {
                 thiz_acc.moveTo(RETURN_VALUE_IDX);
                 stub_acc.moveTo(RETURN_VALUE_IDX);
-                copyRet(stub_acc, thiz_acc, type);
+                copyRet(stub_acc, thiz_acc, ret);
             }
         };
     }
@@ -110,7 +115,8 @@ public class Linker {
         if (stub_call_type.equals(handle_call_type)) {
             return handle;
         }
-        return makeTransformer(handle_call_type, getTransformerI(handle));
+        return makeTransformer(handle_call_type,
+                getTransformerI(handle, function));
     }
 
     private static String getStubName(long address, ProtoId proto) {
@@ -177,7 +183,10 @@ public class Linker {
         if (layout instanceof ValueLayout.OfObject) {
             //Unsupported
         } else if (layout instanceof ValueLayout.OfAddress) {
-            return forStub ? (IS64BIT ? long.class : int.class) : Addressable.class;
+            if (forStub) {
+                return IS64BIT ? long.class : int.class;
+            }
+            return forArg ? Addressable.class : Object.class;
         } else if (layout instanceof ValueLayout.OfWord) {
             return forStub ? (IS64BIT ? long.class : int.class) : Word.class;
         } else if (layout instanceof ValueLayout) {

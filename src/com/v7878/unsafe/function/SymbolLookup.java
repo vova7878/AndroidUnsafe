@@ -48,6 +48,12 @@ public interface SymbolLookup extends Closeable {
         return NativeLibrary.load(path);
     }
 
-    /*public static SymbolLookup loaderLookup(ClassLoader loader) {
+    public static NativeLibrary loaderLookup(
+            ClassLoader loader, String libname) {
+        return NativeLibrary.loadLibrary(loader, libname);
+    }
+
+    //TODO: get caller class
+    /*public static NativeLibrary loaderLookup(String libname) {
     }*/
 }

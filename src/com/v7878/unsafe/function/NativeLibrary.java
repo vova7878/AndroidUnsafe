@@ -1,6 +1,6 @@
 package com.v7878.unsafe.function;
 
-import static com.v7878.unsafe.AndroidUnsafe2.*;
+import static com.v7878.unsafe.AndroidUnsafe3.*;
 import static com.v7878.unsafe.Utils.*;
 import com.v7878.unsafe.function.MMap.*;
 import com.v7878.unsafe.memory.*;
@@ -10,6 +10,7 @@ import static com.v7878.unsafe.memory.ValueLayout.ADDRESS;
 import java.io.File;
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.*;
 
@@ -201,6 +202,15 @@ public class NativeLibrary implements SymbolLookup {
         return new DLInfo(fname, fbase, sname, saddr);
     }
 
+    private static Method findLibrary;
+
+    private synchronized static void init_findLibrary() {
+        if (findLibrary == null) {
+            findLibrary = getDeclaredMethod(ClassLoader.class,
+                    "findLibrary", String.class);
+        }
+    }
+
     private final Object LOCK = new Object();
     private final String name;
     private Pointer handle;
@@ -218,6 +228,24 @@ public class NativeLibrary implements SymbolLookup {
                     dlerror("Can`t find library " + path));
         }
         return new NativeLibrary(tmp, path);
+    }
+
+    public static NativeLibrary loadLibrary(ClassLoader loader, String name) {
+        if (findLibrary == null) {
+            init_findLibrary();
+        }
+        if (name.indexOf((int) File.separatorChar) != -1) {
+            throw new IllegalArgumentException(
+                    "Directory separator should not appear in library name: " + name);
+        }
+        if (loader != null) {
+            String filename = (String) nothrows_run(
+                    () -> findLibrary.invoke(loader, name));
+            if (filename != null) {
+                return load(filename);
+            }
+        }
+        return load(System.mapLibraryName(name));
     }
 
     public String name() {

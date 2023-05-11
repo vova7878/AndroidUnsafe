@@ -192,7 +192,7 @@ public abstract class Layout implements Bindable<MemorySegment> {
             return new ValueLayout.OfLong(order);
         } else if (carrier == double.class) {
             return new ValueLayout.OfDouble(order);
-        } else if (carrier == Pointer.class) {
+        } else if (carrier == Addressable.class) {
             return ValueLayout.ADDRESS.withOrder(order);
         } else if (carrier == Word.class) {
             return new ValueLayout.OfWord(order);

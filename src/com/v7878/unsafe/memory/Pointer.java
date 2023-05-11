@@ -201,7 +201,7 @@ public final class Pointer implements Addressable {
             return get((ValueLayout.OfDouble) layout);
         } else if (carrier == Object.class) {
             return get((ValueLayout.OfObject) layout);
-        } else if (carrier == Pointer.class) {
+        } else if (carrier == Addressable.class) {
             return get((ValueLayout.OfAddress) layout);
         } else if (carrier == Word.class) {
             return get((ValueLayout.OfWord) layout);

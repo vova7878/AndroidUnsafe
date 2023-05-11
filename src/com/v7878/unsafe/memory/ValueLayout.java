@@ -532,7 +532,7 @@ public abstract class ValueLayout extends Layout {
 
         @Override
         public Class<?> carrier() {
-            return Pointer.class;
+            return Addressable.class;
         }
 
         public Bindable<T> content() {

@@ -160,7 +160,7 @@ public final class EmulatedStackFrame {
         protected ByteBuffer frameBuf;
         protected EmulatedStackFrame frame;
 
-        protected StackFrameAccessor() {
+        public StackFrameAccessor() {
             referencesOffset = 0;
             argumentIdx = 0;
             frameBuf = null;

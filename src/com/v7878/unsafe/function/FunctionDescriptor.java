@@ -26,6 +26,14 @@ public class FunctionDescriptor implements Bindable<MethodHandle> {
         return Collections.unmodifiableList(argLayouts);
     }
 
+    public Layout argumentLayout(int num) {
+        return argLayouts.get(num);
+    }
+
+    public int argumentCount() {
+        return argLayouts.size();
+    }
+
     private static void checkLayout(Layout value) {
         //TODO
         assert_(value instanceof ValueLayout, IllegalArgumentException::new,

@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.*;
 
+//TODO: toString
 public class NativeLibrary implements SymbolLookup {
 
     public static class DLInfo {
@@ -113,9 +114,9 @@ public class NativeLibrary implements SymbolLookup {
         out.append(msg);
         String err = dlerror();
         if (err == null) {
-            out.append(", no error message");
+            out.append(", no dlerror message");
         } else {
-            out.append(" error: ");
+            out.append(" dlerror: ");
             out.append(err);
         }
         return out.toString();
@@ -179,7 +180,6 @@ public class NativeLibrary implements SymbolLookup {
         MemorySegment info = Dl_info.allocateHeap();
         int status = (int) nothrows_run(() -> dladdr.invoke(symbol, info));
         if (status == 0) {
-            System.out.println(info.readToString());
             throw new IllegalArgumentException(dlerror("can`t get symbol info"));
         }
 
@@ -211,6 +211,56 @@ public class NativeLibrary implements SymbolLookup {
         }
     }
 
+    private static String[] systemLibPaths;
+
+    private static void init_lib_paths() {
+        if (systemLibPaths == null) {
+            String javaLibraryPath = System.getProperty("java.library.path");
+            if (javaLibraryPath == null) {
+                systemLibPaths = new String[0];
+                return;
+            }
+            String[] paths = javaLibraryPath.split(":");
+            // Add a '/' to the end of each directory so we don't have to do it every time.
+            for (int i = 0; i < paths.length; ++i) {
+                if (!paths[i].endsWith("/")) {
+                    paths[i] += "/";
+                }
+            }
+            systemLibPaths = paths;
+        }
+    }
+
+    private static String[] getSystemLibPaths() {
+        if (systemLibPaths == null) {
+            init_lib_paths();
+        }
+        return systemLibPaths;
+    }
+
+    public static String findLibraryPath(ClassLoader loader, String name) {
+        String out = null;
+        if (loader != null) {
+            if (findLibrary == null) {
+                init_findLibrary();
+            }
+            out = (String) nothrows_run(
+                    () -> findLibrary.invoke(loader, name));
+        }
+        if (out != null) {
+            return out;
+        }
+        String map_name = System.mapLibraryName(name);
+        for (String path : getSystemLibPaths()) {
+            path += map_name;
+            if (new File(path).isFile()) {
+                out = path;
+                break;
+            }
+        }
+        return out;
+    }
+
     private final Object LOCK = new Object();
     private final String name;
     private Pointer handle;
@@ -231,35 +281,33 @@ public class NativeLibrary implements SymbolLookup {
     }
 
     public static NativeLibrary loadLibrary(ClassLoader loader, String name) {
-        if (findLibrary == null) {
-            init_findLibrary();
-        }
         if (name.indexOf((int) File.separatorChar) != -1) {
             throw new IllegalArgumentException(
                     "Directory separator should not appear in library name: " + name);
         }
-        if (loader != null) {
-            String filename = (String) nothrows_run(
-                    () -> findLibrary.invoke(loader, name));
-            if (filename != null) {
-                return load(filename);
-            }
+        String filename = findLibraryPath(loader, name);
+        if (filename == null) {
+            filename = System.mapLibraryName(name);
         }
-        return load(System.mapLibraryName(name));
+        return load(filename);
     }
 
     public String name() {
         return name;
     }
 
+    public Pointer handle() {
+        if (handle == null) {
+            throw new IllegalStateException("library is closed");
+        }
+        return handle;
+    }
+
     @Override
     public Optional<Pointer> find(String name) {
         Objects.requireNonNull(name);
         synchronized (LOCK) {
-            if (handle == null) {
-                throw new IllegalStateException("library is closed");
-            }
-            Pointer tmp = dlsym(handle, name);
+            Pointer tmp = dlsym(handle(), name);
             return Optional.ofNullable(tmp);
         }
     }

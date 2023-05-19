@@ -6,7 +6,6 @@ import static com.v7878.unsafe.Utils.searchConstructor;
 import static com.v7878.unsafe.Utils.searchField;
 import static com.v7878.unsafe.Utils.searchMethod;
 
-import android.annotation.TargetApi;
 import android.os.Build;
 
 import java.lang.invoke.MethodHandle;
@@ -26,7 +25,6 @@ import java.util.Arrays;
 import java.util.Objects;
 
 @DangerLevel(3)
-@TargetApi(Build.VERSION_CODES.O)
 public class AndroidUnsafe3 extends AndroidUnsafe2 {
 
     static {
@@ -134,6 +132,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
 
     private static final Class<MethodHandle> MethodHandleImplClass
             = nothrows_run(() -> {
+        //noinspection unchecked
         return (Class<MethodHandle>) Class.forName(
                 "java.lang.invoke.MethodHandleImpl");
     });
@@ -168,17 +167,19 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
             Class<?> bits = Class.forName("java.nio.Bits");
             Method unaligned = getDeclaredMethod(bits, "unaligned");
             setAccessible(unaligned, true);
+            //noinspection ConstantConditions
             UNALIGNED_ACCESS = (boolean) unaligned.invoke(null);
-        } catch (@SuppressWarnings("UseSpecificCatch") Throwable th) {
+        } catch (@SuppressWarnings("UseSpecificCatch") Throwable ignored) {
         }
     }
 
     @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static <T> T[] arrayCast(Class<T> clazz, Object... data) {
         assert_(!clazz.isPrimitive(), IllegalArgumentException::new);
+        //noinspection unchecked
         T[] out = (T[]) Array.newInstance(clazz, data.length);
         for (int i = 0; i < data.length; i++) {
-            putObject(out, ARRAY_OBJECT_BASE_OFFSET + i * ARRAY_OBJECT_INDEX_SCALE, data[i]);
+            putObject(out, ARRAY_OBJECT_BASE_OFFSET + (long) i * ARRAY_OBJECT_INDEX_SCALE, data[i]);
         }
         return out;
     }
@@ -232,7 +233,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         MethodHandle mh = allocateInstance(MethodHandleImplClass);
         MethodHandleImplMirror[] mhh = arrayCast(MethodHandleImplMirror.class, mh);
         for (int i = 0; i < col; i++) {
-            mhh[0].artFieldOrMethod = methods + ART_METHOD_PADDING + ART_METHOD_SIZE * i;
+            mhh[0].artFieldOrMethod = methods + ART_METHOD_PADDING + (long) ART_METHOD_SIZE * i;
             mhh[0].info = null;
             out[i] = MethodHandles.reflectAs(Executable.class, mh);
         }
@@ -254,7 +255,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         MethodHandle mh = allocateInstance(MethodHandleImplClass);
         MethodHandleImplMirror[] mhh = arrayCast(MethodHandleImplMirror.class, mh);
         for (int i = 0; i < col; i++) {
-            mhh[0].artFieldOrMethod = fields + ART_FIELD_PADDING + ART_FIELD_SIZE * i;
+            mhh[0].artFieldOrMethod = fields + ART_FIELD_PADDING + (long) ART_FIELD_SIZE * i;
             mhh[0].info = null;
             mhh[0].handleKind = Integer.MAX_VALUE;
             out[i] = MethodHandles.reflectAs(Field.class, mh);
@@ -278,6 +279,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     }
 
     public static Constructor[] getDeclaredConstructors(Class<?> clazz) {
+        //noinspection SuspiciousToArrayCall
         return Arrays.stream(getDeclaredExecutables0(clazz))
                 .filter((exec) -> exec instanceof Constructor
                         && !Modifier.isStatic(exec.getModifiers()))
@@ -301,6 +303,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     }
 
     public static Method getDeclaredStaticConstructor(Class<?> clazz) {
+        //noinspection SuspiciousToArrayCall
         Constructor[] out = Arrays.stream(getDeclaredExecutables0(clazz))
                 .filter((exec) -> exec instanceof Constructor
                         && Modifier.isStatic(exec.getModifiers()))

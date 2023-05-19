@@ -3,9 +3,6 @@ package com.v7878.unsafe;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.nothrows_run;
 
-import android.annotation.TargetApi;
-import android.os.Build;
-
 import com.v7878.Thrower;
 
 import java.lang.reflect.Field;
@@ -13,7 +10,6 @@ import java.nio.ByteOrder;
 import java.util.Objects;
 
 @DangerLevel(1)
-@TargetApi(Build.VERSION_CODES.O)
 public class AndroidUnsafe {
 
     public static final int ADDRESS_SIZE = addressSize();
@@ -59,7 +55,7 @@ public class AndroidUnsafe {
         return UNALIGNED_ACCESS;
     }
 
-    public static final boolean isBigEndian() {
+    public static boolean isBigEndian() {
         return ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN);
     }
 
@@ -112,6 +108,7 @@ public class AndroidUnsafe {
     }
 
     public static <T> T allocateInstance(Class<T> clazz) {
+        //noinspection unchecked
         return (T) nothrows_run(() -> SunUnsafe.allocateInstance(clazz));
     }
 

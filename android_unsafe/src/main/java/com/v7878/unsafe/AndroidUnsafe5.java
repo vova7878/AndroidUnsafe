@@ -29,6 +29,7 @@ import java.util.List;
 
 import dalvik.system.DexFile;
 
+@SuppressWarnings("deprecation")
 @DangerLevel(5)
 public class AndroidUnsafe5 extends AndroidUnsafe4 {
 

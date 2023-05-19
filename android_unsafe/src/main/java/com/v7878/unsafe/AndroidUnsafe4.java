@@ -7,16 +7,12 @@ import static com.v7878.unsafe.Utils.roundUp;
 import static com.v7878.unsafe.Utils.searchField;
 import static com.v7878.unsafe.Utils.searchMethod;
 
-import android.annotation.TargetApi;
-import android.os.Build;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
 
 @DangerLevel(4)
-@TargetApi(Build.VERSION_CODES.O)
 public class AndroidUnsafe4 extends AndroidUnsafe3 {
 
     public static class ArrayMirror {
@@ -82,6 +78,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
                     Class.class, int.class);
             addressOf = searchMethod(mtds, "addressOf", true, Object.class);
             Method gr = searchMethod(mtds, "getRuntime", true);
+            //noinspection ConstantConditions
             vmruntime = nothrows_run(() -> gr.invoke(null), true);
         }
     }
@@ -103,12 +100,14 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return shadow$_monitor_;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T internalClone(T obj) {
         initInternalClone();
         return (T) nothrows_run(() -> internalClone.invoke(obj), true);
     }
 
     @DangerLevel(DangerLevel.VERY_CAREFUL)
+    @SuppressWarnings("unchecked")
     public static <T> T setObjectClass(Object obj, Class<T> clazz) {
         Field sk = getShadowKlassField();
         nothrows_run(() -> sk.set(obj, clazz));
@@ -243,6 +242,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     }
 
     @DangerLevel(5)
+    @SuppressWarnings("unchecked")
     public static <T> T cloneBySize(T obj, boolean nonmovable) {
         int size = sizeOf(obj);
         Object out = allocateObject(size, nonmovable);

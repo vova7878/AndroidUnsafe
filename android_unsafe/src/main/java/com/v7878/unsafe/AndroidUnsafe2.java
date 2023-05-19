@@ -3,13 +3,9 @@ package com.v7878.unsafe;
 import static com.v7878.unsafe.Utils.toUnsignedInt;
 import static com.v7878.unsafe.Utils.toUnsignedLong;
 
-import android.annotation.TargetApi;
-import android.os.Build;
-
 import java.nio.ByteOrder;
 
 @DangerLevel(2)
-@TargetApi(Build.VERSION_CODES.O)
 public class AndroidUnsafe2 extends AndroidUnsafe {
 
     private static short convEndian(short value, ByteOrder order) {
@@ -181,7 +177,7 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
     }
 
     private static void putLongParts(Object o, long offset, byte i0, byte i1, byte i2, byte i3, byte i4, byte i5, byte i6, byte i7) {
-        putByte(o, offset + 0, pick(i0, i7));
+        putByte(o, offset, pick(i0, i7));
         putByte(o, offset + 1, pick(i1, i6));
         putByte(o, offset + 2, pick(i2, i5));
         putByte(o, offset + 3, pick(i3, i4));
@@ -192,31 +188,31 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
     }
 
     private static void putLongParts(Object o, long offset, short i0, short i1, short i2, short i3) {
-        putShort(o, offset + 0, pick(i0, i3));
+        putShort(o, offset, pick(i0, i3));
         putShort(o, offset + 2, pick(i1, i2));
         putShort(o, offset + 4, pick(i2, i1));
         putShort(o, offset + 6, pick(i3, i0));
     }
 
     private static void putLongParts(Object o, long offset, int i0, int i1) {
-        putInt(o, offset + 0, pick(i0, i1));
+        putInt(o, offset, pick(i0, i1));
         putInt(o, offset + 4, pick(i1, i0));
     }
 
     private static void putIntParts(Object o, long offset, short i0, short i1) {
-        putShort(o, offset + 0, pick(i0, i1));
+        putShort(o, offset, pick(i0, i1));
         putShort(o, offset + 2, pick(i1, i0));
     }
 
     private static void putIntParts(Object o, long offset, byte i0, byte i1, byte i2, byte i3) {
-        putByte(o, offset + 0, pick(i0, i3));
+        putByte(o, offset, pick(i0, i3));
         putByte(o, offset + 1, pick(i1, i2));
         putByte(o, offset + 2, pick(i2, i1));
         putByte(o, offset + 3, pick(i3, i0));
     }
 
     private static void putShortParts(Object o, long offset, byte i0, byte i1) {
-        putByte(o, offset + 0, pick(i0, i1));
+        putByte(o, offset, pick(i0, i1));
         putByte(o, offset + 1, pick(i1, i0));
     }
 
@@ -225,17 +221,17 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
             putLong(o, offset, value);
         } else if ((offset & 3) == 0) {
             putLongParts(o, offset,
-                    (int) (value >>> 0),
+                    (int) (value),
                     (int) (value >>> 32));
         } else if ((offset & 1) == 0) {
             putLongParts(o, offset,
-                    (short) (value >>> 0),
+                    (short) (value),
                     (short) (value >>> 16),
                     (short) (value >>> 32),
                     (short) (value >>> 48));
         } else {
             putLongParts(o, offset,
-                    (byte) (value >>> 0),
+                    (byte) (value),
                     (byte) (value >>> 8),
                     (byte) (value >>> 16),
                     (byte) (value >>> 24),
@@ -263,11 +259,11 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
             putInt(o, offset, value);
         } else if ((offset & 1) == 0) {
             putIntParts(o, offset,
-                    (short) (value >> 0),
+                    (short) (value),
                     (short) (value >>> 16));
         } else {
             putIntParts(o, offset,
-                    (byte) (value >>> 0),
+                    (byte) (value),
                     (byte) (value >>> 8),
                     (byte) (value >>> 16),
                     (byte) (value >>> 24));
@@ -291,7 +287,7 @@ public class AndroidUnsafe2 extends AndroidUnsafe {
             putShort(o, offset, value);
         } else {
             putShortParts(o, offset,
-                    (byte) (value >>> 0),
+                    (byte) (value),
                     (byte) (value >>> 8));
         }
     }

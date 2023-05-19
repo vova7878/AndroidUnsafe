@@ -105,24 +105,25 @@ public class Utils {
     @FunctionalInterface
     public interface TRun<T> {
 
-        public T run() throws Throwable;
+        T run() throws Throwable;
     }
 
     @FunctionalInterface
     public interface VTRun {
 
-        public void run() throws Throwable;
+        void run() throws Throwable;
     }
 
     public static <T> T nothrows_run(TRun<T> r, boolean tie) {
         try {
             return r.run();
         } catch (Throwable th) {
-            if (tie && (th instanceof InvocationTargetException)) {
-                th = th.getCause();
+            Throwable err = th;
+            if (tie && (err instanceof InvocationTargetException)) {
+                err = err.getCause();
             }
-            Thrower.throwException(th);
-            throw new RuntimeException(th);
+            Thrower.throwException(err);
+            throw new RuntimeException(err);
         }
     }
 
@@ -134,11 +135,12 @@ public class Utils {
         try {
             r.run();
         } catch (Throwable th) {
-            if (tie && (th instanceof InvocationTargetException)) {
-                th = th.getCause();
+            Throwable err = th;
+            if (tie && (err instanceof InvocationTargetException)) {
+                err = err.getCause();
             }
-            Thrower.throwException(th);
-            throw new RuntimeException(th);
+            Thrower.throwException(err);
+            throw new RuntimeException(err);
         }
     }
 
@@ -162,6 +164,7 @@ public class Utils {
         return sb.toString().toUpperCase();
     }
 
+    @SafeVarargs
     public static <T> List<T> asList(T... array) {
         for (T tmp : array) {
             Objects.requireNonNull(tmp);

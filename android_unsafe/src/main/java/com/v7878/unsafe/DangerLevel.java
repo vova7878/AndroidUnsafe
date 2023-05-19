@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 @Target(value = {ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR})
 public @interface DangerLevel {
 
-    public static final int VERY_CAREFUL = Integer.MAX_VALUE / 2;
-    public static final int MAX = Integer.MAX_VALUE;
+    int VERY_CAREFUL = Integer.MAX_VALUE / 2;
+    int MAX = Integer.MAX_VALUE;
 
-    public int value();
+    int value();
 }

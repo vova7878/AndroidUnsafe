@@ -83,7 +83,7 @@ public class Linker {
                                 StackFrameAccessor writer, ValueLayout layout) {
         Class<?> type = layout.carrier();
         if (type == Addressable.class) {
-            Bindable<?> content = ((ValueLayout.OfAddress) layout).content();
+            Bindable<?> content = ((ValueLayout.OfAddress<?>) layout).content();
             long value;
             if (IS64BIT) {
                 value = reader.nextLong();
@@ -111,15 +111,14 @@ public class Linker {
 
         Class<?>[] args = function.argumentLayouts().stream()
                 .map(l -> ((ValueLayout) l).carrier()).toArray(Class[]::new);
-        int arg_count = args.length;
         ValueLayout ret = (ValueLayout) function.returnLayout().orElse(null);
 
         return (stackFrame) -> {
             StackFrameAccessor thiz_acc = stackFrame.createAccessor();
             EmulatedStackFrame stub_frame = EmulatedStackFrame.create(stub.type());
             StackFrameAccessor stub_acc = stub_frame.createAccessor();
-            for (int i = 0; i < arg_count; i++) {
-                copyArg(thiz_acc, stub_acc, args[i]);
+            for (Class<?> arg : args) {
+                copyArg(thiz_acc, stub_acc, arg);
             }
             invokeExactFromTransform(stub, stub_frame);
             if (ret != null) {
@@ -139,9 +138,8 @@ public class Linker {
         MethodType stub_call_type = inferMethodType(function, true);
         ProtoId proto = ProtoId.of(stub_call_type);
         String stub_name = getStubName(raw_address, proto);
-        Class<?> stub = DOWNCALL_CACHE.get(stub_name, unused -> {
-            return newStub(symbol, stub_name, stub_call_type, proto);
-        });
+        Class<?> stub = DOWNCALL_CACHE.get(stub_name,
+                unused -> newStub(symbol, stub_name, stub_call_type, proto));
         MethodHandle handle = (MethodHandle) getObject(stub, HANDLER_OFFSET);
         MethodType handle_call_type = inferMethodType(function, false);
         if (stub_call_type.equals(handle_call_type)) {
@@ -183,6 +181,7 @@ public class Linker {
                         Modifier.PUBLIC | Modifier.STATIC, null
                 )
         );
+        //noinspection deprecation
         DexFile dex = openDexFile(new Dex(clazz).compile());
         Class<?> stub = loadClass(dex, stub_name, getStubClassLoader());
         Method function = getDeclaredMethod(stub, "function",

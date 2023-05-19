@@ -9,11 +9,11 @@ import java.util.Objects;
 
 public interface RandomInput extends AutoCloseable {
 
-    public default void readFully(byte[] arr) {
+    default void readFully(byte[] arr) {
         readFully(arr, 0, arr.length);
     }
 
-    public default void readFully(byte[] arr, int off, int len) {
+    default void readFully(byte[] arr, int off, int len) {
         Objects.requireNonNull(arr);
         Checks.checkFromIndexSize(off, len, arr.length);
         if (len == 0) {
@@ -24,13 +24,13 @@ public interface RandomInput extends AutoCloseable {
         }
     }
 
-    public default byte[] readByteArray(int length) {
+    default byte[] readByteArray(int length) {
         byte[] result = new byte[length];
         readFully(result);
         return result;
     }
 
-    public default short[] readShortArray(int length) {
+    default short[] readShortArray(int length) {
         short[] result = new short[length];
         for (int i = 0; i < length; i++) {
             result[i] = readShort();
@@ -38,71 +38,71 @@ public interface RandomInput extends AutoCloseable {
         return result;
     }
 
-    public void skipBytes(long n);
+    void skipBytes(long n);
 
-    public default boolean readBoolean() {
+    default boolean readBoolean() {
         return readByte() != 0;
     }
 
-    public byte readByte();
+    byte readByte();
 
-    public default int readUnsignedByte() {
+    default int readUnsignedByte() {
         return readByte() & 0xff;
     }
 
-    public short readShort();
+    short readShort();
 
-    public default int readUnsignedShort() {
+    default int readUnsignedShort() {
         return readShort() & 0xffff;
     }
 
-    public default char readChar() {
+    default char readChar() {
         return (char) readShort();
     }
 
-    public int readInt();
+    int readInt();
 
-    public long readLong();
+    long readLong();
 
-    public default float readFloat() {
+    default float readFloat() {
         return Float.intBitsToFloat(readInt());
     }
 
-    public default double readDouble() {
+    default double readDouble() {
         return Double.longBitsToDouble(readLong());
     }
 
-    public default Word readWord() {
+    default Word readWord() {
         return new Word(IS64BIT ? readLong() : readInt());
     }
 
-    public default int readULeb128() {
+    default int readULeb128() {
         return Leb128.readUnsignedLeb128(this);
     }
 
-    public default int readSLeb128() {
+    default int readSLeb128() {
         return Leb128.readSignedLeb128(this);
     }
 
-    public default String readMUTF8() {
+    default String readMUTF8() {
         return MUTF8.readMUTF8(this);
     }
 
-    public long size();
+    long size();
 
-    public long position();
+    long position();
 
-    public void position(long new_position);
+    void position(long new_position);
 
-    public RandomInput duplicate();
+    RandomInput duplicate();
 
-    public default RandomInput duplicate(long offset) {
+    default RandomInput duplicate(long offset) {
         RandomInput out = duplicate();
         out.skipBytes(offset);
         return out;
     }
 
     @Override
-    public default void close() {
+    default void close() {
     }
 }

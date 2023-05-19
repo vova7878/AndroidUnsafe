@@ -156,7 +156,7 @@ public class ELF {
 
         @Override
         public String toString() {
-            return "\'" + name + "\' " + data.readToString();
+            return "'" + name + "' " + data.readToString();
         }
     }
 
@@ -235,7 +235,7 @@ public class ELF {
                 out = sym.get(name);
             }
             if (out == null) {
-                throw new IllegalArgumentException("symbol \'" + name + "\' not found");
+                throw new IllegalArgumentException("symbol '" + name + "' not found");
             }
             return out;
         }

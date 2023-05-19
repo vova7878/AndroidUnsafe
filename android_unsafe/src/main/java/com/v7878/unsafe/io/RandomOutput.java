@@ -9,11 +9,11 @@ import java.util.Objects;
 
 public interface RandomOutput extends AutoCloseable {
 
-    public default void writeByteArray(byte[] arr) {
+    default void writeByteArray(byte[] arr) {
         writeByteArray(arr, 0, arr.length);
     }
 
-    public default void writeByteArray(byte[] arr, int off, int len) {
+    default void writeByteArray(byte[] arr, int off, int len) {
         Objects.requireNonNull(arr);
         Checks.checkFromIndexSize(off, len, arr.length);
         if (len == 0) {
@@ -24,39 +24,39 @@ public interface RandomOutput extends AutoCloseable {
         }
     }
 
-    public default void writeShortArray(short[] shorts) {
+    default void writeShortArray(short[] shorts) {
         for (short value : shorts) {
             writeShort(value);
         }
     }
 
-    public void skipBytes(long n);
+    void skipBytes(long n);
 
-    public default void writeBoolean(boolean value) {
+    default void writeBoolean(boolean value) {
         writeByte(value ? 1 : 0);
     }
 
-    public void writeByte(int value);
+    void writeByte(int value);
 
-    public void writeShort(int value);
+    void writeShort(int value);
 
-    public default void writeChar(int value) {
+    default void writeChar(int value) {
         writeShort(value);
     }
 
-    public void writeInt(int value);
+    void writeInt(int value);
 
-    public void writeLong(long value);
+    void writeLong(long value);
 
-    public default void writeFloat(float value) {
+    default void writeFloat(float value) {
         writeInt(Float.floatToRawIntBits(value));
     }
 
-    public default void writeDouble(double value) {
+    default void writeDouble(double value) {
         writeLong(Double.doubleToRawLongBits(value));
     }
 
-    public default void writeWord(Word value) {
+    default void writeWord(Word value) {
         if (IS64BIT) {
             writeLong(value.longValue());
         } else {
@@ -64,33 +64,33 @@ public interface RandomOutput extends AutoCloseable {
         }
     }
 
-    public default void writeULeb128(int value) {
+    default void writeULeb128(int value) {
         Leb128.writeUnsignedLeb128(this, value);
     }
 
-    public default void writeSLeb128(int value) {
+    default void writeSLeb128(int value) {
         Leb128.writeSignedLeb128(this, value);
     }
 
-    public default void writeMUtf8(String value) {
+    default void writeMUtf8(String value) {
         MUTF8.writeMUTF8(this, value);
     }
 
-    public long size();
+    long size();
 
-    public long position();
+    long position();
 
-    public void position(long new_position);
+    void position(long new_position);
 
-    public RandomOutput duplicate();
+    RandomOutput duplicate();
 
-    public default RandomOutput duplicate(long offset) {
+    default RandomOutput duplicate(long offset) {
         RandomOutput out = duplicate();
         out.skipBytes(offset);
         return out;
     }
 
     @Override
-    public default void close() {
+    default void close() {
     }
 }

@@ -82,16 +82,16 @@ public class MMap {
 
     public static class MMapFile implements Comparable<String> {
 
-        public static interface Filter {
+        public interface Filter {
 
-            public static final Filter DEFAULT = unused -> true;
-            public static final Filter GENERATED = perm(PERMISSION_GENERATED);
+            Filter DEFAULT = unused -> true;
+            Filter GENERATED = perm(PERMISSION_GENERATED);
 
-            public static Filter perm(int perms) {
+            static Filter perm(int perms) {
                 return entry -> (entry.perms == perms);
             }
 
-            public boolean filter(MMapEntry entry);
+            boolean filter(MMapEntry entry);
         }
 
         public final String path;

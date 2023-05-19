@@ -222,7 +222,7 @@ public class MemorySegment implements Addressable {
         pointer.addOffset(offset).put(layout, value);
     }
 
-    public void put(ValueLayout.OfAddress layout, long offset, Pointer value) {
+    public void put(ValueLayout.OfAddress<?> layout, long offset, Pointer value) {
         pointer.addOffset(offset).put(layout, value);
     }
 

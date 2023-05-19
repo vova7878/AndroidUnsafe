@@ -20,7 +20,7 @@ class ModifiableArray {
 
     private byte[] data;
     private int data_size;
-    private int grow_factor;
+    private final int grow_factor;
 
     ModifiableArray(int size, int grow_factor) {
         if (grow_factor <= 0) {

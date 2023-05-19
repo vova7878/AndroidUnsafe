@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 //TODO: variadic
 public class FunctionDescriptor implements Bindable<MethodHandle> {
@@ -109,8 +108,7 @@ public class FunctionDescriptor implements Bindable<MethodHandle> {
     @Override
     public String toString() {
         return String.format("(%s)%s",
-                IntStream.range(0, argLayouts.size())
-                        .mapToObj(argLayouts::get)
+                argLayouts.stream()
                         .map(Object::toString)
                         .collect(Collectors.joining()),
                 returnLayout().map(Object::toString).orElse("v"));

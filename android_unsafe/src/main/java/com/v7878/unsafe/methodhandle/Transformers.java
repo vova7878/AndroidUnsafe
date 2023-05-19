@@ -39,9 +39,9 @@ import dalvik.system.DexFile;
 
 public class Transformers {
 
-    private static final Class<MethodHandle> invoke_transformer = nothrows_run(() -> {
-        return (Class<MethodHandle>) Class.forName("java.lang.invoke.Transformers$Transformer");
-    });
+    @SuppressWarnings("unchecked")
+    private static final Class<MethodHandle> invoke_transformer = nothrows_run(
+            () -> (Class<MethodHandle>) Class.forName("java.lang.invoke.Transformers$Transformer"));
     private static final Class<MethodHandle> transformer;
     private static final Constructor<MethodHandle> transformer_constructor;
     private static final InvokerI invoker;
@@ -194,19 +194,20 @@ public class Transformers {
                 )
         );
 
+        //noinspection deprecation
         DexFile dex = openDexFile(new Dex(transformer_def,
                 invoker_def).compile());
         setTrusted(dex);
 
         ClassLoader loader = Transformers.class.getClassLoader();
+        //noinspection unchecked
         transformer = (Class<MethodHandle>) loadClass(dex, transformer_name, loader);
         Class<?> invoker_class = loadClass(dex, invoker_name, loader);
         invoker = (InvokerI) allocateInstance(invoker_class);
 
-        transformer_constructor = nothrows_run(() -> {
-            return transformer.getDeclaredConstructor(
-                    MethodType.class, TransformerI.class);
-        });
+        transformer_constructor = nothrows_run(
+                () -> transformer.getDeclaredConstructor(
+                        MethodType.class, TransformerI.class));
     }
 
     public static MethodHandle makeTransformer(MethodType type, TransformerI impl) {
@@ -215,17 +216,17 @@ public class Transformers {
 
     private interface InvokerI {
 
-        public void transform(MethodHandle handle,
-                              Object stackFrame) throws Throwable;
+        void transform(MethodHandle handle,
+                       Object stackFrame) throws Throwable;
 
-        public void invokeExactWithFrame(MethodHandle handle,
-                                         Object stackFrame) throws Throwable;
+        void invokeExactWithFrame(MethodHandle handle,
+                                  Object stackFrame) throws Throwable;
     }
 
     @FunctionalInterface
     public interface TransformerI {
 
-        public void transform(EmulatedStackFrame stackFrame) throws Throwable;
+        void transform(EmulatedStackFrame stackFrame) throws Throwable;
     }
 
     public static void invokeFromTransform(MethodHandle target,

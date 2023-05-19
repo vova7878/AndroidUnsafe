@@ -20,12 +20,14 @@ import static com.v7878.unsafe.Utils.isPowerOfTwoUL;
 import static com.v7878.unsafe.Utils.log2;
 import static com.v7878.unsafe.Utils.roundUpL;
 
+import com.v7878.unsafe.AndroidUnsafe3;
 import com.v7878.unsafe.memory.LayoutPath.PathElement;
 
 import java.lang.reflect.Field;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Spliterator;
@@ -238,7 +240,7 @@ public abstract class Layout implements Bindable<MemorySegment> {
             size = Math.max(size, element.size());
         }
         if (fill_to_alignment) {
-            size = roundUpL(size, 1 << align_shift);
+            size = roundUpL(size, 1L << align_shift);
         }
         requireValidSize(size);
         return new GroupLayout(GroupLayout.Kind.UNION,
@@ -263,7 +265,7 @@ public abstract class Layout implements Bindable<MemorySegment> {
             size = Math.addExact(size, element.size());
         }
         requireValidSize(size);
-        assert_(isAlignedL(size, 1 << align_shift),
+        assert_(isAlignedL(size, 1L << align_shift),
                 IllegalArgumentException::new,
                 "Incompatible alignment constraints");
         return new GroupLayout(GroupLayout.Kind.STRUCT,
@@ -292,7 +294,7 @@ public abstract class Layout implements Bindable<MemorySegment> {
             align_shift = Math.max(align_shift, min_align_shift);
         }
         if (fill_to_alignment) {
-            long new_size = roundUpL(size, 1 << align_shift);
+            long new_size = roundUpL(size, 1L << align_shift);
             if (new_size != size) {
                 out_list.add(paddingLayout(new_size - size));
             }
@@ -318,9 +320,7 @@ public abstract class Layout implements Bindable<MemorySegment> {
     }
 
     private static Layout[] fieldsToLayouts(Field[] fields) {
-        Arrays.sort(fields, (a, b) -> {
-            return Integer.compare(fieldOffset(a), fieldOffset(b));
-        });
+        Arrays.sort(fields, Comparator.comparingInt(AndroidUnsafe3::fieldOffset));
         ValueLayout[] out = new ValueLayout[fields.length];
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
@@ -365,7 +365,7 @@ public abstract class Layout implements Bindable<MemorySegment> {
     public static Layout getInstanceLayout(Object obj) {
         Objects.requireNonNull(obj);
         if (obj instanceof Class) {
-            ArrayList<Layout> out = new ArrayList();
+            ArrayList<Layout> out = new ArrayList<>();
             out.addAll(Arrays.asList(fieldsToLayouts(getInstanceFields(Class.class))));
             Class<?> clazz = (Class<?>) obj;
             if (shouldHaveEmbeddedVTableAndImt(clazz)) {

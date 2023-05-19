@@ -555,21 +555,25 @@ public abstract class ValueLayout extends Layout {
 
         @Override
         public OfAddress<T> withName(String name) {
+            //noinspection unchecked
             return (OfAddress<T>) super.withName(name);
         }
 
         @Override
         public OfAddress<T> withAlignmentShift(int align_shift) {
+            //noinspection unchecked
             return (OfAddress<T>) super.withAlignmentShift(align_shift);
         }
 
         @Override
         public OfAddress<T> withAlignment(long alignment) {
+            //noinspection unchecked
             return (OfAddress<T>) super.withAlignment(alignment);
         }
 
         @Override
         public OfAddress<T> withOrder(ByteOrder order) {
+            //noinspection unchecked
             return (OfAddress<T>) super.withOrder(order);
         }
 
@@ -590,7 +594,7 @@ public abstract class ValueLayout extends Layout {
             if (!super.equals(other)) {
                 return false;
             }
-            OfAddress otherLayout = (OfAddress) other;
+            OfAddress<?> otherLayout = (OfAddress<?>) other;
             return content.equals(otherLayout.content);
         }
 

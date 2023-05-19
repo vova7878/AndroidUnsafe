@@ -83,7 +83,7 @@ public final class Pointer implements Addressable {
             long address = 0;
             try {
                 address = addressOfNonMovableArray(base);
-            } catch (Throwable th) {
+            } catch (Throwable ignored) {
             }
             if (address != 0) {
                 //checks
@@ -236,7 +236,7 @@ public final class Pointer implements Addressable {
         } else if (carrier == Object.class) {
             return get((ValueLayout.OfObject) layout);
         } else if (carrier == Addressable.class) {
-            return get((ValueLayout.OfAddress) layout);
+            return get((ValueLayout.OfAddress<?>) layout);
         } else if (carrier == Word.class) {
             return get((ValueLayout.OfWord) layout);
         }
@@ -305,7 +305,7 @@ public final class Pointer implements Addressable {
         }
     }
 
-    public void put(ValueLayout.OfAddress layout, Pointer value) {
+    public void put(ValueLayout.OfAddress<?> layout, Pointer value) {
         putWordUnaligned(base, getOffset(), value.getRawAddress(), layout.order());
     }
 

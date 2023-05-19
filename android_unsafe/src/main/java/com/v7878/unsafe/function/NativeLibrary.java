@@ -293,7 +293,7 @@ public class NativeLibrary implements SymbolLookup {
     }
 
     public static NativeLibrary loadLibrary(ClassLoader loader, String name) {
-        if (name.indexOf((int) File.separatorChar) != -1) {
+        if (name.indexOf(File.separatorChar) != -1) {
             throw new IllegalArgumentException(
                     "Directory separator should not appear in library name: " + name);
         }

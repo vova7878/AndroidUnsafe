@@ -37,9 +37,8 @@ public final class EmulatedStackFrame {
         }
     }
 
-    static final Class<?> esf_class = nothrows_run(() -> {
-        return Class.forName("dalvik.system.EmulatedStackFrame");
-    });
+    static final Class<?> esf_class = nothrows_run(
+            () -> Class.forName("dalvik.system.EmulatedStackFrame"));
 
     public static EmulatedStackFrame wrap(Object esf) {
         esf.getClass().asSubclass(esf_class);
@@ -265,7 +264,7 @@ public final class EmulatedStackFrame {
         public void putNextChar(char value) {
             checkWriteType(char.class);
             argumentIdx++;
-            frameBuf.putInt((int) value);
+            frameBuf.putInt(value);
         }
 
         public void putNextBoolean(boolean value) {
@@ -277,7 +276,7 @@ public final class EmulatedStackFrame {
         public void putNextShort(short value) {
             checkWriteType(short.class);
             argumentIdx++;
-            frameBuf.putInt((int) value);
+            frameBuf.putInt(value);
         }
 
         public void putNextFloat(float value) {
@@ -349,6 +348,7 @@ public final class EmulatedStackFrame {
         public <T> T nextReference(Class<T> expectedType) {
             checkReadType(expectedType);
             argumentIdx++;
+            //noinspection unchecked
             return (T) frame.references()[referencesOffset++];
         }
     }

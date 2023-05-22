@@ -174,9 +174,7 @@ public class Dex extends PCList<ClassDef> {
         map.string_data_items_size = map.string_ids_size;
         out.position(map.string_ids_off);
         data_out.position(map.string_data_items_off);
-        context.stringsStream().forEach((value) -> {
-            StringId.write(value, context, out, data_out);
-        });
+        context.stringsStream().forEach((value) -> StringId.write(value, context, out, data_out));
         offset = (int) data_out.position();
 
         TypeList[] lists = data.getTypeLists();
@@ -304,34 +302,22 @@ public class Dex extends PCList<ClassDef> {
         int file_size = offset;
 
         out.position(map.type_ids_off);
-        context.typesStream().forEach((value) -> {
-            value.write(context, out);
-        });
+        context.typesStream().forEach((value) -> value.write(context, out));
 
         out.position(map.field_ids_off);
-        context.fieldsStream().forEach((value) -> {
-            value.write(context, out);
-        });
+        context.fieldsStream().forEach((value) -> value.write(context, out));
 
         out.position(map.proto_ids_off);
-        context.protosStream().forEach((value) -> {
-            value.write(context, out);
-        });
+        context.protosStream().forEach((value) -> value.write(context, out));
 
         out.position(map.method_ids_off);
-        context.methodsStream().forEach((value) -> {
-            value.write(context, out);
-        });
+        context.methodsStream().forEach((value) -> value.write(context, out));
 
         out.position(map.class_defs_off);
-        context.classDefsStream().forEach((value) -> {
-            value.write(context, out);
-        });
+        context.classDefsStream().forEach((value) -> value.write(context, out));
 
         out.position(map.method_handles_off);
-        context.methodHandlesStream().forEach((value) -> {
-            value.write(context, out);
-        });
+        context.methodHandlesStream().forEach((value) -> value.write(context, out));
 
         map.writeHeader(out, file_size);
     }

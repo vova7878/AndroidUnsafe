@@ -95,8 +95,7 @@ public class AnnotationsDirectory {
         out.writeInt(annotated_methods.size());
         out.writeInt(annotated_parameters.size());
 
-        FieldId[] fields = annotated_fields.keySet().stream()
-                .toArray(FieldId[]::new);
+        FieldId[] fields = annotated_fields.keySet().toArray(new FieldId[0]);
         Arrays.sort(fields, context.field_comparator());
         for (FieldId tmp : fields) {
             out.writeInt(context.getFieldIndex(tmp));
@@ -104,8 +103,7 @@ public class AnnotationsDirectory {
                     annotated_fields.get(tmp)));
         }
 
-        MethodId[] methods = annotated_methods.keySet().stream()
-                .toArray(MethodId[]::new);
+        MethodId[] methods = annotated_methods.keySet().toArray(new MethodId[0]);
         Arrays.sort(methods, context.method_comparator());
         for (MethodId tmp : methods) {
             out.writeInt(context.getMethodIndex(tmp));
@@ -113,8 +111,7 @@ public class AnnotationsDirectory {
                     annotated_methods.get(tmp)));
         }
 
-        methods = annotated_parameters.keySet().stream()
-                .toArray(MethodId[]::new);
+        methods = annotated_parameters.keySet().toArray(new MethodId[0]);
         Arrays.sort(methods, context.method_comparator());
         for (MethodId tmp : methods) {
             out.writeInt(context.getMethodIndex(tmp));

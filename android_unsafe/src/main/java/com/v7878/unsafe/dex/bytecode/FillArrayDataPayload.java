@@ -12,9 +12,7 @@ class FillArrayDataPayload extends Instruction {
 
     static void init() {
         InstructionReader.registerExtra(OPCODE,
-                new Reader_fill_array_data_payload((element_width, data) -> {
-                    return new FillArrayDataPayload(element_width, data);
-                }));
+                new Reader_fill_array_data_payload(FillArrayDataPayload::new));
     }
 
     public final int element_width;

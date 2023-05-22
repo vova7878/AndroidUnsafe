@@ -196,7 +196,7 @@ public class MMap {
             }
         }
 
-        return out.stream().toArray(MMapFile[]::new);
+        return out.toArray(new MMapFile[0]);
     }
 
     public static MMapFile[] readSelf() {

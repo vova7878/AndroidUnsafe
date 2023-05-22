@@ -14,7 +14,7 @@ public class ProtoId implements PublicCloneable {
 
     public static final int SIZE = 0x0c;
 
-    public static final Comparator<ProtoId> getComparator(WriteContext context) {
+    public static Comparator<ProtoId> getComparator(WriteContext context) {
         return (a, b) -> {
             if (a.equals(b)) {
                 return 0;

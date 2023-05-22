@@ -211,6 +211,7 @@ public class Linker {
     }
 
     private static Class<?> carrierFor(Layout layout, boolean forStub, boolean forArg) {
+        //noinspection StatementWithEmptyBody
         if (layout instanceof ValueLayout.OfObject) {
             //Unsupported
         } else if (layout instanceof ValueLayout.OfAddress) {

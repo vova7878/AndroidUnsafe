@@ -9,9 +9,7 @@ public class ReturnWide extends Instruction {
     public static final int OPCODE = 0x10;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_11x((A) -> {
-            return new ReturnWide(A);
-        }));
+        InstructionReader.register(OPCODE, new Reader_11x(ReturnWide::new));
     }
 
     public final int return_value_register_pair;

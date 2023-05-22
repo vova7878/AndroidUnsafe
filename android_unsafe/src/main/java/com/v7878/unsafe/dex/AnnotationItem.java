@@ -14,7 +14,7 @@ import java.util.Objects;
 
 public final class AnnotationItem implements PublicCloneable {
 
-    public static final Comparator<AnnotationItem> getComparator(WriteContext context) {
+    public static Comparator<AnnotationItem> getComparator(WriteContext context) {
         return (a, b) -> {
             if (a.equals(b)) {
                 return 0;

@@ -9,9 +9,7 @@ public class ConstHigh16 extends Instruction {
     public static final int OPCODE = 0x15;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_21h32((A, B) -> {
-            return new ConstHigh16(A, B);
-        }));
+        InstructionReader.register(OPCODE, new Reader_21h32(ConstHigh16::new));
     }
 
     public final int destination_register, value;

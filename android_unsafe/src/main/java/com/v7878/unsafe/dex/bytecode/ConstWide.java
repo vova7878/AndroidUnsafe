@@ -9,9 +9,7 @@ public class ConstWide extends Instruction {
     public static final int OPCODE = 0x18;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_51l((A, B) -> {
-            return new ConstWide(A, B);
-        }));
+        InstructionReader.register(OPCODE, new Reader_51l(ConstWide::new));
     }
 
     public final int destination_register;

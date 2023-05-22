@@ -63,9 +63,7 @@ public abstract class IInstanceOp extends Instruction {
         public static final int OPCODE = 0x52;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-                return new IGet(A, B, context.field(C));
-            }));
+            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new IGet(A, B, context.field(C))));
         }
 
         public IGet(int A, int B, FieldId C) {
@@ -94,9 +92,7 @@ public abstract class IInstanceOp extends Instruction {
         public static final int OPCODE = 0x53;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-                return new IGetWide(A, B, context.field(C));
-            }));
+            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new IGetWide(A, B, context.field(C))));
         }
 
         public IGetWide(int A, int B, FieldId C) {
@@ -125,9 +121,7 @@ public abstract class IInstanceOp extends Instruction {
         public static final int OPCODE = 0x54;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-                return new IGetObject(A, B, context.field(C));
-            }));
+            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new IGetObject(A, B, context.field(C))));
         }
 
         public IGetObject(int A, int B, FieldId C) {
@@ -156,9 +150,7 @@ public abstract class IInstanceOp extends Instruction {
         public static final int OPCODE = 0x55;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-                return new IGetBoolean(A, B, context.field(C));
-            }));
+            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new IGetBoolean(A, B, context.field(C))));
         }
 
         public IGetBoolean(int A, int B, FieldId C) {
@@ -187,9 +179,7 @@ public abstract class IInstanceOp extends Instruction {
         public static final int OPCODE = 0x56;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-                return new IGetByte(A, B, context.field(C));
-            }));
+            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new IGetByte(A, B, context.field(C))));
         }
 
         public IGetByte(int A, int B, FieldId C) {
@@ -218,9 +208,7 @@ public abstract class IInstanceOp extends Instruction {
         public static final int OPCODE = 0x57;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-                return new IGetChar(A, B, context.field(C));
-            }));
+            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new IGetChar(A, B, context.field(C))));
         }
 
         public IGetChar(int A, int B, FieldId C) {
@@ -249,9 +237,7 @@ public abstract class IInstanceOp extends Instruction {
         public static final int OPCODE = 0x58;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-                return new IGetShort(A, B, context.field(C));
-            }));
+            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new IGetShort(A, B, context.field(C))));
         }
 
         public IGetShort(int A, int B, FieldId C) {
@@ -280,9 +266,7 @@ public abstract class IInstanceOp extends Instruction {
         public static final int OPCODE = 0x59;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-                return new IPut(A, B, context.field(C));
-            }));
+            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new IPut(A, B, context.field(C))));
         }
 
         public IPut(int A, int B, FieldId C) {
@@ -311,9 +295,7 @@ public abstract class IInstanceOp extends Instruction {
         public static final int OPCODE = 0x5a;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-                return new IPutWide(A, B, context.field(C));
-            }));
+            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new IPutWide(A, B, context.field(C))));
         }
 
         public IPutWide(int A, int B, FieldId C) {
@@ -342,9 +324,7 @@ public abstract class IInstanceOp extends Instruction {
         public static final int OPCODE = 0x5b;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-                return new IPutObject(A, B, context.field(C));
-            }));
+            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new IPutObject(A, B, context.field(C))));
         }
 
         public IPutObject(int A, int B, FieldId C) {
@@ -373,9 +353,7 @@ public abstract class IInstanceOp extends Instruction {
         public static final int OPCODE = 0x5c;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-                return new IPutBoolean(A, B, context.field(C));
-            }));
+            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new IPutBoolean(A, B, context.field(C))));
         }
 
         public IPutBoolean(int A, int B, FieldId C) {
@@ -404,9 +382,7 @@ public abstract class IInstanceOp extends Instruction {
         public static final int OPCODE = 0x5d;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-                return new IPutByte(A, B, context.field(C));
-            }));
+            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new IPutByte(A, B, context.field(C))));
         }
 
         public IPutByte(int A, int B, FieldId C) {
@@ -435,9 +411,7 @@ public abstract class IInstanceOp extends Instruction {
         public static final int OPCODE = 0x5e;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-                return new IPutChar(A, B, context.field(C));
-            }));
+            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new IPutChar(A, B, context.field(C))));
         }
 
         public IPutChar(int A, int B, FieldId C) {
@@ -466,9 +440,7 @@ public abstract class IInstanceOp extends Instruction {
         public static final int OPCODE = 0x5f;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-                return new IPutShort(A, B, context.field(C));
-            }));
+            InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new IPutShort(A, B, context.field(C))));
         }
 
         public IPutShort(int A, int B, FieldId C) {

@@ -43,9 +43,7 @@ public abstract class IfTestZ extends Instruction {
         public static final int OPCODE = 0x38;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> {
-                return new IfEqZ(A, (B << 16) >> 16);
-            }));
+            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> new IfEqZ(A, (B << 16) >> 16)));
         }
 
         public IfEqZ(int A, int B) {
@@ -73,9 +71,7 @@ public abstract class IfTestZ extends Instruction {
         public static final int OPCODE = 0x39;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> {
-                return new IfNeZ(A, (B << 16) >> 16);
-            }));
+            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> new IfNeZ(A, (B << 16) >> 16)));
         }
 
         public IfNeZ(int A, int B) {
@@ -103,9 +99,7 @@ public abstract class IfTestZ extends Instruction {
         public static final int OPCODE = 0x3a;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> {
-                return new IfLtZ(A, (B << 16) >> 16);
-            }));
+            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> new IfLtZ(A, (B << 16) >> 16)));
         }
 
         public IfLtZ(int A, int B) {
@@ -133,9 +127,7 @@ public abstract class IfTestZ extends Instruction {
         public static final int OPCODE = 0x3b;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> {
-                return new IfGeZ(A, (B << 16) >> 16);
-            }));
+            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> new IfGeZ(A, (B << 16) >> 16)));
         }
 
         public IfGeZ(int A, int B) {
@@ -163,9 +155,7 @@ public abstract class IfTestZ extends Instruction {
         public static final int OPCODE = 0x3c;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> {
-                return new IfGtZ(A, (B << 16) >> 16);
-            }));
+            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> new IfGtZ(A, (B << 16) >> 16)));
         }
 
         public IfGtZ(int A, int B) {
@@ -193,9 +183,7 @@ public abstract class IfTestZ extends Instruction {
         public static final int OPCODE = 0x3d;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> {
-                return new IfLeZ(A, (B << 16) >> 16);
-            }));
+            InstructionReader.register(OPCODE, new Reader_21t_21s32((A, B) -> new IfLeZ(A, (B << 16) >> 16)));
         }
 
         public IfLeZ(int A, int B) {

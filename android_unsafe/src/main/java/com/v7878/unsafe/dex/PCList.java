@@ -11,6 +11,7 @@ public class PCList<T extends PublicCloneable>
 
     private final ArrayList<T> elements;
 
+    @SafeVarargs
     public PCList(T... elements) {
         int length = 0;
         if (elements != null) {

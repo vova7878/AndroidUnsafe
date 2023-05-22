@@ -9,9 +9,7 @@ public class Throw extends Instruction {
     public static final int OPCODE = 0x27;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_11x((A) -> {
-            return new Throw(A);
-        }));
+        InstructionReader.register(OPCODE, new Reader_11x(Throw::new));
     }
 
     public final int exception_bearing_register;

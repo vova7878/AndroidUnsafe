@@ -9,9 +9,7 @@ public class MoveObjectFrom16 extends Instruction {
     public static final int OPCODE = 0x08;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_22x((A, B) -> {
-            return new MoveObjectFrom16(A, B);
-        }));
+        InstructionReader.register(OPCODE, new Reader_22x(MoveObjectFrom16::new));
     }
 
     public final int destination_register, source_register;

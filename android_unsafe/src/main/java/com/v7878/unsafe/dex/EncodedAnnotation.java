@@ -60,8 +60,7 @@ public class EncodedAnnotation implements PublicCloneable {
     public void write(WriteContext context, RandomOutput out) {
         out.writeULeb128(context.getTypeIndex(type));
         out.writeULeb128(elements.size());
-        AnnotationElement[] sorted_elements = elements.stream()
-                .toArray(AnnotationElement[]::new);
+        AnnotationElement[] sorted_elements = elements.toArray(new AnnotationElement[0]);
         Arrays.sort(sorted_elements, AnnotationElement.COMPARATOR);
         for (AnnotationElement tmp : sorted_elements) {
             tmp.write(context, out);
@@ -71,7 +70,7 @@ public class EncodedAnnotation implements PublicCloneable {
     @Override
     public String toString() {
         String elems = elements.stream()
-                .map((p) -> p.toString())
+                .map(AnnotationElement::toString)
                 .collect(Collectors.joining(", "));
         return "EncodedAnnotation{" + type + " " + elems + "}";
     }

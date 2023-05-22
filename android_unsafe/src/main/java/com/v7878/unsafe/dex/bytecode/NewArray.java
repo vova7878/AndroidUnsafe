@@ -11,9 +11,7 @@ public class NewArray extends Instruction {
     public static final int OPCODE = 0x23;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> {
-            return new NewArray(A, B, context.type(C));
-        }));
+        InstructionReader.register(OPCODE, new Reader_22c_22cs((context, A, B, C) -> new NewArray(A, B, context.type(C))));
     }
 
     public final int destination_register;

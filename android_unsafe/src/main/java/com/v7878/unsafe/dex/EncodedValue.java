@@ -29,21 +29,21 @@ import java.util.Objects;
 
 public interface EncodedValue extends PublicCloneable {
 
-    public boolean isDefault();
+    boolean isDefault();
 
-    public int type();
+    int type();
 
-    public Object value();
+    Object value();
 
-    public default void collectData(DataCollector data) {
+    default void collectData(DataCollector data) {
     }
 
-    public void write(WriteContext context, RandomOutput out);
+    void write(WriteContext context, RandomOutput out);
 
     @Override
-    public EncodedValue clone();
+    EncodedValue clone();
 
-    public static EncodedValue defaultValue(TypeId type) {
+    static EncodedValue defaultValue(TypeId type) {
         String name = type.getDescriptor();
         switch (name) {
             case "V":
@@ -69,7 +69,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static EncodedValue of(Object obj) {
+    static EncodedValue of(Object obj) {
         if (obj == null) {
             return new NullValue();
         }
@@ -237,7 +237,7 @@ public interface EncodedValue extends PublicCloneable {
         throw new IllegalArgumentException("unable to convert " + obj + " to EncodedValue");
     }
 
-    abstract static class SimpleValue implements EncodedValue {
+    abstract class SimpleValue implements EncodedValue {
 
         private final int type;
 
@@ -279,7 +279,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class BooleanValue extends SimpleValue {
+    class BooleanValue extends SimpleValue {
 
         public boolean value;
 
@@ -313,7 +313,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class ByteValue extends SimpleValue {
+    class ByteValue extends SimpleValue {
 
         public byte value;
 
@@ -347,7 +347,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class ShortValue extends SimpleValue {
+    class ShortValue extends SimpleValue {
 
         public short value;
 
@@ -381,7 +381,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class CharValue extends SimpleValue {
+    class CharValue extends SimpleValue {
 
         public char value;
 
@@ -415,7 +415,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class IntValue extends SimpleValue {
+    class IntValue extends SimpleValue {
 
         public int value;
 
@@ -449,7 +449,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class LongValue extends SimpleValue {
+    class LongValue extends SimpleValue {
 
         public long value;
 
@@ -483,7 +483,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class FloatValue extends SimpleValue {
+    class FloatValue extends SimpleValue {
 
         public float value;
 
@@ -518,7 +518,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class DoubleValue extends SimpleValue {
+    class DoubleValue extends SimpleValue {
 
         public double value;
 
@@ -554,7 +554,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class NullValue extends SimpleValue {
+    class NullValue extends SimpleValue {
 
         public NullValue() {
             super(VALUE_NULL);
@@ -586,7 +586,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class MethodTypeValue extends SimpleValue {
+    class MethodTypeValue extends SimpleValue {
 
         private ProtoId value;
 
@@ -623,7 +623,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class MethodHandleValue extends SimpleValue {
+    class MethodHandleValue extends SimpleValue {
 
         private MethodHandleItem value;
 
@@ -659,7 +659,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class StringValue extends SimpleValue {
+    class StringValue extends SimpleValue {
 
         private String value;
 
@@ -695,7 +695,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class TypeValue extends SimpleValue {
+    class TypeValue extends SimpleValue {
 
         private TypeId value;
 
@@ -731,7 +731,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class FieldValue extends SimpleValue {
+    class FieldValue extends SimpleValue {
 
         private FieldId value;
 
@@ -767,7 +767,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class MethodValue extends SimpleValue {
+    class MethodValue extends SimpleValue {
 
         private MethodId value;
 
@@ -803,7 +803,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class EnumValue extends SimpleValue {
+    class EnumValue extends SimpleValue {
 
         private FieldId value;
 
@@ -839,7 +839,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class ArrayValue extends PCList<EncodedValue>
+    class ArrayValue extends PCList<EncodedValue>
             implements EncodedValue {
 
         public ArrayValue(EncodedValue... value) {
@@ -911,7 +911,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    public static class AnnotationValue extends SimpleValue {
+    class AnnotationValue extends SimpleValue {
 
         private EncodedAnnotation value;
 

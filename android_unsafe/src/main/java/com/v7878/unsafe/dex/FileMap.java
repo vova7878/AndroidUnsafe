@@ -31,7 +31,6 @@ import com.v7878.unsafe.io.RandomOutput;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.zip.Adler32;
 
@@ -40,13 +39,11 @@ public class FileMap {
 
     public static class MapItem {
 
-        public static final Comparator<MapItem> COMPARATOR = (a, b) -> {
-            return Integer.compare(a.offset, b.offset);
-        };
+        public static final Comparator<MapItem> COMPARATOR = Comparator.comparingInt(a -> a.offset);
 
-        public int type;
-        public int offset;
-        public int size;
+        public final int type;
+        public final int offset;
+        public final int size;
 
         public MapItem(int type, int offset, int size) {
             this.type = type;
@@ -304,7 +301,7 @@ public class FileMap {
 
         list.add(new MapItem(TYPE_MAP_LIST, map_list_off, 1));
 
-        Collections.sort(list, MapItem.COMPARATOR);
+        list.sort(MapItem.COMPARATOR);
 
         out.writeInt(list.size());
         for (MapItem tmp : list) {

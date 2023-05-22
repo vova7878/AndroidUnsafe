@@ -11,9 +11,7 @@ public class NewInstance extends Instruction {
     public static final int OPCODE = 0x22;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-            return new NewInstance(A, context.type(B));
-        }));
+        InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new NewInstance(A, context.type(B))));
     }
 
     public final int destination_register;

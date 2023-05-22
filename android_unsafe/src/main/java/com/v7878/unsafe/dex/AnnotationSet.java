@@ -45,8 +45,7 @@ public class AnnotationSet extends AbstractSet<AnnotationItem>
     }
 
     public void write(WriteContext context, RandomOutput out) {
-        AnnotationItem[] sorted_annotations = annotations.stream()
-                .toArray(AnnotationItem[]::new);
+        AnnotationItem[] sorted_annotations = annotations.toArray(new AnnotationItem[0]);
         out.writeInt(size());
         Arrays.sort(sorted_annotations, context.annotation_comparator());
         for (AnnotationItem tmp : sorted_annotations) {

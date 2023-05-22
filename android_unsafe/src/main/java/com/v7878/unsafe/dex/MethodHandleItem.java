@@ -15,7 +15,7 @@ public class MethodHandleItem implements PublicCloneable {
 
     public static final int SIZE = 0x08;
 
-    public static final Comparator<MethodHandleItem> getComparator(WriteContext context) {
+    public static Comparator<MethodHandleItem> getComparator(WriteContext context) {
         return (a, b) -> {
             if (a.equals(b)) {
                 return 0;

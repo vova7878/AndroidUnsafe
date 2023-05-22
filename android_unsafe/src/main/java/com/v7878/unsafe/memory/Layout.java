@@ -365,8 +365,7 @@ public abstract class Layout implements Bindable<MemorySegment> {
     public static Layout getInstanceLayout(Object obj) {
         Objects.requireNonNull(obj);
         if (obj instanceof Class) {
-            ArrayList<Layout> out = new ArrayList<>();
-            out.addAll(Arrays.asList(fieldsToLayouts(getInstanceFields(Class.class))));
+            ArrayList<Layout> out = new ArrayList<>(Arrays.asList(fieldsToLayouts(getInstanceFields(Class.class))));
             Class<?> clazz = (Class<?>) obj;
             if (shouldHaveEmbeddedVTableAndImt(clazz)) {
                 out.add(ValueLayout.JAVA_INT.withName("embedded_vtable_length_"));
@@ -378,35 +377,33 @@ public abstract class Layout implements Bindable<MemorySegment> {
             out.addAll(Arrays.asList(fieldsToLayouts(getDeclaredFields0(clazz, true))));
             Layout tmp = Layout.structLayout(false,
                     OBJECT_ALIGNMENT_SHIFT,
-                    out.stream().toArray(Layout[]::new));
+                    out.toArray(new Layout[0]));
             assert_(classSizeField(clazz) == tmp.size(), IllegalStateException::new);
             //TODO: more checks
             return tmp.withName(clazz.getName() + ".class");
         }
         if (obj instanceof String) {
-            ArrayList<Layout> out = new ArrayList();
-            out.addAll(Arrays.asList(fieldsToLayouts(getInstanceFields(String.class))));
+            ArrayList<Layout> out = new ArrayList<>(Arrays.asList(fieldsToLayouts(getInstanceFields(String.class))));
             String sobj = (String) obj;
             int length = sobj.length();
             Class<?> component = isCompressedString(sobj) ? byte.class : short.class;
             Layout chars = sequenceLayout(length, valueLayout(component));
             out.add(chars.withName("value")); // classical name
             return structLayout(true, OBJECT_ALIGNMENT_SHIFT,
-                    out.stream().toArray(Layout[]::new))
+                    out.toArray(new Layout[0]))
                     .withName(String.class.getName());
         }
         @SuppressWarnings("null")
         Class<?> clazz = obj.getClass();
         if (clazz.isArray()) {
-            ArrayList<Layout> out = new ArrayList();
-            out.addAll(Arrays.asList(fieldsToLayouts(getInstanceFields(Object.class))));
+            ArrayList<Layout> out = new ArrayList<>(Arrays.asList(fieldsToLayouts(getInstanceFields(Object.class))));
             out.add(ValueLayout.JAVA_INT.withName("length"));
             int length = getArrayLength(obj);
             Class<?> component = obj.getClass().getComponentType();
             Layout elements = sequenceLayout(length,
                     valueLayout(component.isPrimitive() ? component : Object.class));
             out.add(elements.withName("data"));
-            return structLayout(false, out.stream().toArray(Layout[]::new))
+            return structLayout(false, out.toArray(new Layout[0]))
                     .withAlignmentShift(OBJECT_ALIGNMENT_SHIFT)
                     .withName(clazz.getName());
         }

@@ -9,9 +9,7 @@ public class FillArrayData extends Instruction {
     public static final int OPCODE = 0x26;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_31i32_31t((A, B) -> {
-            return new FillArrayData(A, B);
-        }));
+        InstructionReader.register(OPCODE, new Reader_31i32_31t(FillArrayData::new));
     }
 
     public final int array_reference;

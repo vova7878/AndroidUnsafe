@@ -160,31 +160,31 @@ public class DataSet extends DataFilter {
     }
 
     public String[] getStrings() {
-        return strings.stream().toArray(String[]::new);
+        return strings.toArray(new String[0]);
     }
 
     public TypeId[] getTypes() {
-        return types.stream().toArray(TypeId[]::new);
+        return types.toArray(new TypeId[0]);
     }
 
     public ProtoId[] getProtos() {
-        return protos.stream().toArray(ProtoId[]::new);
+        return protos.toArray(new ProtoId[0]);
     }
 
     public FieldId[] getFields() {
-        return fields.stream().toArray(FieldId[]::new);
+        return fields.toArray(new FieldId[0]);
     }
 
     public MethodId[] getMethods() {
-        return methods.stream().toArray(MethodId[]::new);
+        return methods.toArray(new MethodId[0]);
     }
 
     public MethodHandleItem[] getMethodHandles() {
-        return method_handles.stream().toArray(MethodHandleItem[]::new);
+        return method_handles.toArray(new MethodHandleItem[0]);
     }
 
     public CallSiteId[] getCallSites() {
-        return call_sites.stream().toArray(CallSiteId[]::new);
+        return call_sites.toArray(new CallSiteId[0]);
     }
 
     public ClassDef[] getClassDefs() {
@@ -192,23 +192,23 @@ public class DataSet extends DataFilter {
     }
 
     public ClassData[] getClassDataItems() {
-        return class_data_items.stream().toArray(ClassData[]::new);
+        return class_data_items.toArray(new ClassData[0]);
     }
 
     public TypeList[] getTypeLists() {
-        return type_lists.stream().toArray(TypeList[]::new);
+        return type_lists.toArray(new TypeList[0]);
     }
 
     public AnnotationItem[] getAnnotations() {
-        return annotations.stream().toArray(AnnotationItem[]::new);
+        return annotations.toArray(new AnnotationItem[0]);
     }
 
     public AnnotationSet[] getAnnotationSets() {
-        return annotation_sets.stream().toArray(AnnotationSet[]::new);
+        return annotation_sets.toArray(new AnnotationSet[0]);
     }
 
     public AnnotationSetList[] getAnnotationSetLists() {
-        return annotation_set_lists.stream().toArray(AnnotationSetList[]::new);
+        return annotation_set_lists.toArray(new AnnotationSetList[0]);
     }
 
     public Map<ClassDef, AnnotationsDirectory> getAnnotationsDirectories() {
@@ -216,10 +216,10 @@ public class DataSet extends DataFilter {
     }
 
     public ArrayValue[] getArrayValues() {
-        return array_values.stream().toArray(ArrayValue[]::new);
+        return array_values.toArray(new ArrayValue[0]);
     }
 
     public CodeItem[] getCodeItems() {
-        return code_items.stream().toArray(CodeItem[]::new);
+        return code_items.toArray(new CodeItem[0]);
     }
 }

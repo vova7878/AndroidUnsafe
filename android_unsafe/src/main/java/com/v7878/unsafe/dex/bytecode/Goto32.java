@@ -9,9 +9,7 @@ public class Goto32 extends Instruction {
     public static final int OPCODE = 0x2a;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_30t((A) -> {
-            return new Goto32(A);
-        }));
+        InstructionReader.register(OPCODE, new Reader_30t(Goto32::new));
     }
 
     public final int signed_branch_offset;

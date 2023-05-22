@@ -13,7 +13,7 @@ public class MethodId extends FieldOrMethodId {
 
     public static final int SIZE = 0x08;
 
-    public static final Comparator<MethodId> getComparator(WriteContext context) {
+    public static Comparator<MethodId> getComparator(WriteContext context) {
         return (a, b) -> {
             if (a.equals(b)) {
                 return 0;

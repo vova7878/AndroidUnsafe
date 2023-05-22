@@ -11,9 +11,7 @@ public class CheckCast extends Instruction {
     public static final int OPCODE = 0x1f;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-            return new CheckCast(A, context.type(B));
-        }));
+        InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new CheckCast(A, context.type(B))));
     }
 
     public final int reference_bearing_register;

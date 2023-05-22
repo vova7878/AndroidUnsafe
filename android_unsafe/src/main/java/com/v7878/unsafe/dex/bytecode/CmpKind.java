@@ -46,9 +46,7 @@ public abstract class CmpKind extends Instruction {
         public static final int OPCODE = 0x2d;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_23x((A, B, C) -> {
-                return new CmpLFloat(A, B, C);
-            }));
+            InstructionReader.register(OPCODE, new Reader_23x(CmpLFloat::new));
         }
 
         public CmpLFloat(int A, int B, int C) {
@@ -78,9 +76,7 @@ public abstract class CmpKind extends Instruction {
         public static final int OPCODE = 0x2e;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_23x((A, B, C) -> {
-                return new CmpGFloat(A, B, C);
-            }));
+            InstructionReader.register(OPCODE, new Reader_23x(CmpGFloat::new));
         }
 
         public CmpGFloat(int A, int B, int C) {
@@ -110,9 +106,7 @@ public abstract class CmpKind extends Instruction {
         public static final int OPCODE = 0x2f;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_23x((A, B, C) -> {
-                return new CmpLDouble(A, B, C);
-            }));
+            InstructionReader.register(OPCODE, new Reader_23x(CmpLDouble::new));
         }
 
         public CmpLDouble(int A, int B, int C) {
@@ -142,9 +136,7 @@ public abstract class CmpKind extends Instruction {
         public static final int OPCODE = 0x30;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_23x((A, B, C) -> {
-                return new CmpGDouble(A, B, C);
-            }));
+            InstructionReader.register(OPCODE, new Reader_23x(CmpGDouble::new));
         }
 
         public CmpGDouble(int A, int B, int C) {
@@ -174,9 +166,7 @@ public abstract class CmpKind extends Instruction {
         public static final int OPCODE = 0x31;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_23x((A, B, C) -> {
-                return new CmpLong(A, B, C);
-            }));
+            InstructionReader.register(OPCODE, new Reader_23x(CmpLong::new));
         }
 
         public CmpLong(int A, int B, int C) {

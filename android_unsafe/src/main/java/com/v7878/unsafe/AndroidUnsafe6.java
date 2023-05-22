@@ -269,7 +269,7 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
             ADDRESS.withName("AttachCurrentThreadAsDaemon")
     );
 
-    public static long env_offset = nothrows_run(() -> {
+    public static final long env_offset = nothrows_run(() -> {
         long tmp;
         switch (getSdkInt()) {
             case 34: // android 14

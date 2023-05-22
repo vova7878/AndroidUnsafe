@@ -47,9 +47,7 @@ public abstract class IfTest extends Instruction {
         public static final int OPCODE = 0x32;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22t_22s((A, B, C) -> {
-                return new IfEq(A, B, C);
-            }));
+            InstructionReader.register(OPCODE, new Reader_22t_22s(IfEq::new));
         }
 
         public IfEq(int A, int B, int C) {
@@ -78,9 +76,7 @@ public abstract class IfTest extends Instruction {
         public static final int OPCODE = 0x33;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22t_22s((A, B, C) -> {
-                return new IfNe(A, B, C);
-            }));
+            InstructionReader.register(OPCODE, new Reader_22t_22s(IfNe::new));
         }
 
         public IfNe(int A, int B, int C) {
@@ -109,9 +105,7 @@ public abstract class IfTest extends Instruction {
         public static final int OPCODE = 0x34;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22t_22s((A, B, C) -> {
-                return new IfLt(A, B, C);
-            }));
+            InstructionReader.register(OPCODE, new Reader_22t_22s(IfLt::new));
         }
 
         public IfLt(int A, int B, int C) {
@@ -140,9 +134,7 @@ public abstract class IfTest extends Instruction {
         public static final int OPCODE = 0x35;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22t_22s((A, B, C) -> {
-                return new IfGe(A, B, C);
-            }));
+            InstructionReader.register(OPCODE, new Reader_22t_22s(IfGe::new));
         }
 
         public IfGe(int A, int B, int C) {
@@ -171,9 +163,7 @@ public abstract class IfTest extends Instruction {
         public static final int OPCODE = 0x36;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22t_22s((A, B, C) -> {
-                return new IfGt(A, B, C);
-            }));
+            InstructionReader.register(OPCODE, new Reader_22t_22s(IfGt::new));
         }
 
         public IfGt(int A, int B, int C) {
@@ -202,9 +192,7 @@ public abstract class IfTest extends Instruction {
         public static final int OPCODE = 0x37;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_22t_22s((A, B, C) -> {
-                return new IfLe(A, B, C);
-            }));
+            InstructionReader.register(OPCODE, new Reader_22t_22s(IfLe::new));
         }
 
         public IfLe(int A, int B, int C) {

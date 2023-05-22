@@ -59,9 +59,7 @@ public abstract class SStaticOp extends Instruction {
         public static final int OPCODE = 0x60;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-                return new SGet(A, context.field(B));
-            }));
+            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new SGet(A, context.field(B))));
         }
 
         public SGet(int A, FieldId B) {
@@ -89,9 +87,7 @@ public abstract class SStaticOp extends Instruction {
         public static final int OPCODE = 0x61;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-                return new SGetWide(A, context.field(B));
-            }));
+            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new SGetWide(A, context.field(B))));
         }
 
         public SGetWide(int A, FieldId B) {
@@ -119,9 +115,7 @@ public abstract class SStaticOp extends Instruction {
         public static final int OPCODE = 0x62;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-                return new SGetObject(A, context.field(B));
-            }));
+            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new SGetObject(A, context.field(B))));
         }
 
         public SGetObject(int A, FieldId B) {
@@ -149,9 +143,7 @@ public abstract class SStaticOp extends Instruction {
         public static final int OPCODE = 0x63;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-                return new SGetBoolean(A, context.field(B));
-            }));
+            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new SGetBoolean(A, context.field(B))));
         }
 
         public SGetBoolean(int A, FieldId B) {
@@ -179,9 +171,7 @@ public abstract class SStaticOp extends Instruction {
         public static final int OPCODE = 0x64;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-                return new SGetByte(A, context.field(B));
-            }));
+            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new SGetByte(A, context.field(B))));
         }
 
         public SGetByte(int A, FieldId B) {
@@ -209,9 +199,7 @@ public abstract class SStaticOp extends Instruction {
         public static final int OPCODE = 0x65;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-                return new SGetChar(A, context.field(B));
-            }));
+            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new SGetChar(A, context.field(B))));
         }
 
         public SGetChar(int A, FieldId B) {
@@ -239,9 +227,7 @@ public abstract class SStaticOp extends Instruction {
         public static final int OPCODE = 0x66;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-                return new SGetShort(A, context.field(B));
-            }));
+            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new SGetShort(A, context.field(B))));
         }
 
         public SGetShort(int A, FieldId B) {
@@ -269,9 +255,7 @@ public abstract class SStaticOp extends Instruction {
         public static final int OPCODE = 0x67;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-                return new SPut(A, context.field(B));
-            }));
+            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new SPut(A, context.field(B))));
         }
 
         public SPut(int A, FieldId B) {
@@ -299,9 +283,7 @@ public abstract class SStaticOp extends Instruction {
         public static final int OPCODE = 0x68;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-                return new SPutWide(A, context.field(B));
-            }));
+            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new SPutWide(A, context.field(B))));
         }
 
         public SPutWide(int A, FieldId B) {
@@ -329,9 +311,7 @@ public abstract class SStaticOp extends Instruction {
         public static final int OPCODE = 0x69;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-                return new SPutObject(A, context.field(B));
-            }));
+            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new SPutObject(A, context.field(B))));
         }
 
         public SPutObject(int A, FieldId B) {
@@ -359,9 +339,7 @@ public abstract class SStaticOp extends Instruction {
         public static final int OPCODE = 0x6a;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-                return new SPutBoolean(A, context.field(B));
-            }));
+            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new SPutBoolean(A, context.field(B))));
         }
 
         public SPutBoolean(int A, FieldId B) {
@@ -389,9 +367,7 @@ public abstract class SStaticOp extends Instruction {
         public static final int OPCODE = 0x6b;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-                return new SPutByte(A, context.field(B));
-            }));
+            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new SPutByte(A, context.field(B))));
         }
 
         public SPutByte(int A, FieldId B) {
@@ -419,9 +395,7 @@ public abstract class SStaticOp extends Instruction {
         public static final int OPCODE = 0x6c;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-                return new SPutChar(A, context.field(B));
-            }));
+            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new SPutChar(A, context.field(B))));
         }
 
         public SPutChar(int A, FieldId B) {
@@ -449,9 +423,7 @@ public abstract class SStaticOp extends Instruction {
         public static final int OPCODE = 0x6d;
 
         static void init() {
-            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-                return new SPutShort(A, context.field(B));
-            }));
+            InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new SPutShort(A, context.field(B))));
         }
 
         public SPutShort(int A, FieldId B) {

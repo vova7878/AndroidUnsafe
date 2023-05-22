@@ -11,7 +11,7 @@ import java.util.Objects;
 
 public class EncodedMethod implements PublicCloneable {
 
-    public static final Comparator<EncodedMethod> getComparator(WriteContext context) {
+    public static Comparator<EncodedMethod> getComparator(WriteContext context) {
         return (a, b) -> {
             if (a.equals(b)) {
                 return 0;
@@ -150,8 +150,7 @@ public class EncodedMethod implements PublicCloneable {
 
     public static void writeArray(WriteContext context, RandomOutput out,
                                   PCList<EncodedMethod> encoded_methods) {
-        writeArray(context, out, encoded_methods
-                .stream().toArray(EncodedMethod[]::new));
+        writeArray(context, out, encoded_methods.toArray(new EncodedMethod[0]));
     }
 
     @Override

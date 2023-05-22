@@ -133,8 +133,8 @@ public class ClassData implements PublicCloneable {
                 all_annotations.addFieldAnnotations(field.getField(), fannotations);
             }
         };
-        static_fields.stream().forEach(fill_field);
-        instance_fields.stream().forEach(fill_field);
+        static_fields.forEach(fill_field);
+        instance_fields.forEach(fill_field);
 
         Consumer<EncodedMethod> fill_method = (method) -> {
             AnnotationSet mannotations = method.getAnnotations();
@@ -146,7 +146,7 @@ public class ClassData implements PublicCloneable {
                 all_annotations.addMethodParameterAnnotations(method.getMethod(), pannotations);
             }
         };
-        direct_methods.stream().forEach(fill_method);
-        virtual_methods.stream().forEach(fill_method);
+        direct_methods.forEach(fill_method);
+        virtual_methods.forEach(fill_method);
     }
 }

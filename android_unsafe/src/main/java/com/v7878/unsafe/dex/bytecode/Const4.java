@@ -9,9 +9,7 @@ public class Const4 extends Instruction {
     public static final int OPCODE = 0x12;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_11n((A, B) -> {
-            return new Const4(A, B);
-        }));
+        InstructionReader.register(OPCODE, new Reader_11n(Const4::new));
     }
 
     public final int destination_register, value;

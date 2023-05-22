@@ -9,9 +9,7 @@ public class MonitorExit extends Instruction {
     public static final int OPCODE = 0x1e;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_11x((A) -> {
-            return new MonitorExit(A);
-        }));
+        InstructionReader.register(OPCODE, new Reader_11x(MonitorExit::new));
     }
 
     public final int reference_bearing_register;

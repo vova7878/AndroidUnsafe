@@ -11,7 +11,7 @@ public class TypeList extends PCList<TypeId> {
 
     public static final int ALIGNMENT = 4;
 
-    public static final Comparator<TypeList> getComparator(WriteContext context) {
+    public static Comparator<TypeList> getComparator(WriteContext context) {
         return (a, b) -> {
             if (a == b) {
                 return 0;
@@ -30,13 +30,7 @@ public class TypeList extends PCList<TypeId> {
                 }
             }
 
-            if (a.size() < b.size()) {
-                return -1;
-            } else if (a.size() > b.size()) {
-                return 1;
-            } else {
-                return 0;
-            }
+            return Integer.compare(a.size(), b.size());
         };
     }
 
@@ -78,7 +72,7 @@ public class TypeList extends PCList<TypeId> {
 
     @Override
     public String toString() {
-        return stream().map((p) -> p.toString())
+        return stream().map(TypeId::toString)
                 .collect(Collectors.joining("", "(", ")"));
     }
 

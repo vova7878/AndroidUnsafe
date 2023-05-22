@@ -123,9 +123,11 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
 
         public static int sa, sb;
 
+        @SuppressWarnings("EmptyMethod")
         public static void a() {
         }
 
+        @SuppressWarnings("EmptyMethod")
         public static void b() {
         }
     }
@@ -334,7 +336,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
             out.addAll(Arrays.asList(af));
             c = c.getSuperclass();
         }
-        return out.stream().toArray(Field[]::new);
+        return out.toArray(new Field[0]);
     }
 
     public static Field[] getInstanceFields(Class<?> c) {
@@ -344,7 +346,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
             out.addAll(Arrays.asList(af));
             c = c.getSuperclass();
         }
-        return out.stream().toArray(Field[]::new);
+        return out.toArray(new Field[0]);
     }
 
     public static Method[] getMethods(Class<?> c) {
@@ -354,6 +356,6 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
             out.addAll(Arrays.asList(af));
             c = c.getSuperclass();
         }
-        return out.stream().toArray(Method[]::new);
+        return out.toArray(new Method[0]);
     }
 }

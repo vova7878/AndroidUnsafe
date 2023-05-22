@@ -14,10 +14,8 @@ public class InvokePolymorphic extends Instruction {
 
     static void init() {
         InstructionReader.register(OPCODE, new Reader_45cc(
-                (context, A, B, C, D, E, F, G, H) -> {
-                    return new InvokePolymorphic(A, context.method(B),
-                            C, D, E, F, G, context.proto(H));
-                }));
+                (context, A, B, C, D, E, F, G, H) -> new InvokePolymorphic(A, context.method(B),
+                        C, D, E, F, G, context.proto(H))));
     }
 
     public final int argument_word_count;

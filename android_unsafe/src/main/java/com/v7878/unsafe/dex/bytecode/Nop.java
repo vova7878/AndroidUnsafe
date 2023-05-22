@@ -9,9 +9,7 @@ public class Nop extends Instruction {
     public static final int OPCODE = 0x00;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_10x(() -> {
-            return new Nop();
-        }));
+        InstructionReader.register(OPCODE, new Reader_10x(Nop::new));
     }
 
     @Override

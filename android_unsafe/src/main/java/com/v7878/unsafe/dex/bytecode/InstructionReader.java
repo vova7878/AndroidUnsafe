@@ -158,7 +158,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make();
+            Instruction make();
         }
 
         public final Factory factory;
@@ -178,7 +178,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int A, int B);
+            Instruction make(int A, int B);
         }
 
         public final Factory factory;
@@ -198,7 +198,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int A, int sB);
+            Instruction make(int A, int sB);
         }
 
         public final Factory factory;
@@ -218,7 +218,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int AA);
+            Instruction make(int AA);
         }
 
         public final Factory factory;
@@ -238,7 +238,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int sAA);
+            Instruction make(int sAA);
         }
 
         public final Factory factory;
@@ -258,7 +258,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int sAAAA);
+            Instruction make(int sAAAA);
         }
 
         public final Factory factory;
@@ -279,7 +279,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(ReadContext context, int AA, int BBBB);
+            Instruction make(ReadContext context, int AA, int BBBB);
         }
 
         public final Factory factory;
@@ -300,7 +300,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int AA, int BBBB);
+            Instruction make(int AA, int BBBB);
         }
 
         public final Factory factory;
@@ -321,7 +321,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int AA, int sBBBB);
+            Instruction make(int AA, int sBBBB);
         }
 
         public final Factory factory;
@@ -342,7 +342,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int AA, long sBBBB);
+            Instruction make(int AA, long sBBBB);
         }
 
         public final Factory factory;
@@ -363,7 +363,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int AA, int BBBB0000);
+            Instruction make(int AA, int BBBB0000);
         }
 
         public final Factory factory;
@@ -384,7 +384,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int AA, long BBBB000000000000);
+            Instruction make(int AA, long BBBB000000000000);
         }
 
         public final Factory factory;
@@ -405,7 +405,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int AA, int BB, int CC);
+            Instruction make(int AA, int BB, int CC);
         }
 
         public final Factory factory;
@@ -426,7 +426,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int AA, int BB, int sCC);
+            Instruction make(int AA, int BB, int sCC);
         }
 
         public final Factory factory;
@@ -447,7 +447,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int A, int B, int sCCCC);
+            Instruction make(int A, int B, int sCCCC);
         }
 
         public final Factory factory;
@@ -468,7 +468,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(ReadContext context, int A, int B, int CCCC);
+            Instruction make(ReadContext context, int A, int B, int CCCC);
         }
 
         public final Factory factory;
@@ -489,7 +489,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int AAAAAAAA);
+            Instruction make(int AAAAAAAA);
         }
 
         public final Factory factory;
@@ -511,7 +511,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int AAAA, int BBBB);
+            Instruction make(int AAAA, int BBBB);
         }
 
         public final Factory factory;
@@ -533,7 +533,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int AA, int BBBBBBBB);
+            Instruction make(int AA, int BBBBBBBB);
         }
 
         public final Factory factory;
@@ -555,7 +555,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int AA, long sBBBBBBBB);
+            Instruction make(int AA, long sBBBBBBBB);
         }
 
         public final Factory factory;
@@ -577,7 +577,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(ReadContext context, int AA, int BBBBBBBB);
+            Instruction make(ReadContext context, int AA, int BBBBBBBB);
         }
 
         public final Factory factory;
@@ -599,7 +599,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int AA, long BBBBBBBBBBBBBBBB);
+            Instruction make(int AA, long BBBBBBBBBBBBBBBB);
         }
 
         public final Factory factory;
@@ -623,8 +623,8 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(ReadContext context, int A, int BBBB,
-                                    int C, int D, int E, int F, int G);
+            Instruction make(ReadContext context, int A, int BBBB,
+                             int C, int D, int E, int F, int G);
         }
 
         public final Factory factory;
@@ -652,8 +652,8 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(ReadContext context, int A, int BBBB, int C,
-                                    int D, int E, int F, int G, int HHHH);
+            Instruction make(ReadContext context, int A, int BBBB, int C,
+                             int D, int E, int F, int G, int HHHH);
         }
 
         public final Factory factory;
@@ -682,7 +682,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(ReadContext context, int AA, int BBBB, int CCCC);
+            Instruction make(ReadContext context, int AA, int BBBB, int CCCC);
         }
 
         public final Factory factory;
@@ -704,7 +704,7 @@ public abstract class InstructionReader {
         @FunctionalInterface
         public interface Factory {
 
-            public Instruction make(int element_width, byte[] data);
+            Instruction make(int element_width, byte[] data);
         }
 
         public final Factory factory;

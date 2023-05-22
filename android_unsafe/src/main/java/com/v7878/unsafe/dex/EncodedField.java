@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public class EncodedField implements PublicCloneable {
 
-    public static final Comparator<EncodedField> getComparator(WriteContext context) {
+    public static Comparator<EncodedField> getComparator(WriteContext context) {
         return (a, b) -> {
             if (a.equals(b)) {
                 return 0;
@@ -148,8 +148,7 @@ public class EncodedField implements PublicCloneable {
     public static void writeArray(boolean static_fields,
                                   WriteContext context, RandomOutput out,
                                   PCList<EncodedField> encoded_fields) {
-        writeArray(static_fields, context, out, encoded_fields
-                .stream().toArray(EncodedField[]::new));
+        writeArray(static_fields, context, out, encoded_fields.toArray(new EncodedField[0]));
     }
 
     @Override

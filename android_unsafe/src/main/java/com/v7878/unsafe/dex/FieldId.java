@@ -11,7 +11,7 @@ public class FieldId extends FieldOrMethodId {
 
     public static final int SIZE = 0x08;
 
-    public static final Comparator<FieldId> getComparator(WriteContext context) {
+    public static Comparator<FieldId> getComparator(WriteContext context) {
         return (a, b) -> {
             if (a.equals(b)) {
                 return 0;

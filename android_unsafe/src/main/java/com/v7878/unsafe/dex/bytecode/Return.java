@@ -9,9 +9,7 @@ public class Return extends Instruction {
     public static final int OPCODE = 0x0f;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_11x((A) -> {
-            return new Return(A);
-        }));
+        InstructionReader.register(OPCODE, new Reader_11x(Return::new));
     }
 
     public final int return_value_register;

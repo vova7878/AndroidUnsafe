@@ -20,7 +20,7 @@ public class TypeId implements PublicCloneable {
 
     public static final int SIZE = 0x04;
 
-    public static final Comparator<TypeId> getComparator(WriteContext context) {
+    public static Comparator<TypeId> getComparator(WriteContext context) {
         return (a, b) -> {
             if (a.equals(b)) {
                 return 0;

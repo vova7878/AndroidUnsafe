@@ -11,9 +11,7 @@ public class ConstClass extends Instruction {
     public static final int OPCODE = 0x1c;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> {
-            return new ConstClass(A, context.type(B));
-        }));
+        InstructionReader.register(OPCODE, new Reader_20bc_21c((context, A, B) -> new ConstClass(A, context.type(B))));
     }
 
     public final int destination_register;

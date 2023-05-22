@@ -9,9 +9,7 @@ public class MoveWide16 extends Instruction {
     public static final int OPCODE = 0x06;
 
     static void init() {
-        InstructionReader.register(OPCODE, new Reader_32x((A, B) -> {
-            return new MoveWide16(A, B);
-        }));
+        InstructionReader.register(OPCODE, new Reader_32x(MoveWide16::new));
     }
 
     public final int destination_register_pair, source_register_pair;

@@ -67,9 +67,7 @@ public abstract class InvokeKind extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_35c_35ms_35mi(
-                    (context, A, B, C, D, E, F, G) -> {
-                        return new InvokeVirtual(A, context.method(B), C, D, E, F, G);
-                    }));
+                    (context, A, B, C, D, E, F, G) -> new InvokeVirtual(A, context.method(B), C, D, E, F, G)));
         }
 
         public InvokeVirtual(int A, MethodId B, int C, int D, int E, int F, int G) {
@@ -101,9 +99,7 @@ public abstract class InvokeKind extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_35c_35ms_35mi(
-                    (context, A, B, C, D, E, F, G) -> {
-                        return new InvokeSuper(A, context.method(B), C, D, E, F, G);
-                    }));
+                    (context, A, B, C, D, E, F, G) -> new InvokeSuper(A, context.method(B), C, D, E, F, G)));
         }
 
         public InvokeSuper(int A, MethodId B, int C, int D, int E, int F, int G) {
@@ -135,9 +131,7 @@ public abstract class InvokeKind extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_35c_35ms_35mi(
-                    (context, A, B, C, D, E, F, G) -> {
-                        return new InvokeDirect(A, context.method(B), C, D, E, F, G);
-                    }));
+                    (context, A, B, C, D, E, F, G) -> new InvokeDirect(A, context.method(B), C, D, E, F, G)));
         }
 
         public InvokeDirect(int A, MethodId B, int C, int D, int E, int F, int G) {
@@ -169,9 +163,7 @@ public abstract class InvokeKind extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_35c_35ms_35mi(
-                    (context, A, B, C, D, E, F, G) -> {
-                        return new InvokeStatic(A, context.method(B), C, D, E, F, G);
-                    }));
+                    (context, A, B, C, D, E, F, G) -> new InvokeStatic(A, context.method(B), C, D, E, F, G)));
         }
 
         public InvokeStatic(int A, MethodId B, int C, int D, int E, int F, int G) {
@@ -203,9 +195,7 @@ public abstract class InvokeKind extends Instruction {
 
         static void init() {
             InstructionReader.register(OPCODE, new Reader_35c_35ms_35mi(
-                    (context, A, B, C, D, E, F, G) -> {
-                        return new InvokeInterface(A, context.method(B), C, D, E, F, G);
-                    }));
+                    (context, A, B, C, D, E, F, G) -> new InvokeInterface(A, context.method(B), C, D, E, F, G)));
         }
 
         public InvokeInterface(int A, MethodId B, int C, int D, int E, int F, int G) {

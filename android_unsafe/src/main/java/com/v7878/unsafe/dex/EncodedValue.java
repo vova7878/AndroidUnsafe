@@ -143,7 +143,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         if (obj instanceof Enum) {
-            return new EnumValue(FieldId.of((Enum) obj));
+            return new EnumValue(FieldId.of((Enum<?>) obj));
         }
 
         if (obj instanceof MethodHandleItem) {
@@ -896,11 +896,6 @@ public interface EncodedValue extends PublicCloneable {
                 return super.equals(obj);
             }
             return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return super.hashCode();
         }
 
         @Override

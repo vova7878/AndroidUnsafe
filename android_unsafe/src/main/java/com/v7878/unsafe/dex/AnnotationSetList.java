@@ -57,11 +57,12 @@ public class AnnotationSetList extends PCList<AnnotationSet> {
         if (super.isEmpty()) {
             return true;
         }
-        boolean out = true;
-        for (int i = 0; i < size() && out; i++) {
-            out &= get(i).isEmpty();
+        for (int i = 0; i < size(); i++) {
+            if (!get(i).isEmpty()) {
+                return false;
+            }
         }
-        return out;
+        return true;
     }
 
     @Override
@@ -75,11 +76,6 @@ public class AnnotationSetList extends PCList<AnnotationSet> {
             return super.equals(obj);
         }
         return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
     }
 
     @Override

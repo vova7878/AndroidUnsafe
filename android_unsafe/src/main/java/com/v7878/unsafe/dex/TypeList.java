@@ -85,11 +85,6 @@ public class TypeList extends PCList<TypeId> {
     }
 
     @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
     public TypeList clone() {
         TypeList out = new TypeList();
         out.addAll(this);

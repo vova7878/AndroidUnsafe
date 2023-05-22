@@ -84,21 +84,27 @@ public class Utils {
     public static <T extends Throwable> void assert_(
             boolean value, Supplier<T> th) {
         if (!value) {
-            Thrower.throwException(th.get());
+            Throwable tmp = th.get();
+            Thrower.throwException(tmp);
+            throw new RuntimeException(tmp);
         }
     }
 
     public static <T extends Throwable, E> void assert_(
             boolean value, Function<E, T> th, Supplier<E> msg) {
         if (!value) {
-            Thrower.throwException(th.apply(msg.get()));
+            Throwable tmp = th.apply(msg.get());
+            Thrower.throwException(tmp);
+            throw new RuntimeException(tmp);
         }
     }
 
     public static <T extends Throwable> void assert_(
             boolean value, Function<String, T> th, String msg) {
         if (!value) {
-            Thrower.throwException(th.apply(msg));
+            Throwable tmp = th.apply(msg);
+            Thrower.throwException(tmp);
+            throw new RuntimeException(tmp);
         }
     }
 

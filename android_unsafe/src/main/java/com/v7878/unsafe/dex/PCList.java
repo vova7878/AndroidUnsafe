@@ -33,16 +33,19 @@ public class PCList<T extends PublicCloneable>
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public final boolean add(T element) {
         return elements.add((T) check(element).clone());
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public final void add(int index, T element) {
         elements.add(index, (T) check(element).clone());
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public final T set(int index, T element) {
         return elements.set(index, (T) check(element).clone());
     }

@@ -280,8 +280,8 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
                 .toArray(Method[]::new);
     }
 
-    public static Constructor[] getDeclaredConstructors(Class<?> clazz) {
-        //noinspection SuspiciousToArrayCall
+    public static <T> Constructor<T>[] getDeclaredConstructors(Class<T> clazz) {
+        //noinspection SuspiciousToArrayCall,unchecked
         return Arrays.stream(getDeclaredExecutables0(clazz))
                 .filter((exec) -> exec instanceof Constructor
                         && !Modifier.isStatic(exec.getModifiers()))
@@ -305,7 +305,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     }
 
     public static Method getDeclaredStaticConstructor(Class<?> clazz) {
-        //noinspection SuspiciousToArrayCall
+        //noinspection SuspiciousToArrayCall,rawtypes
         Constructor[] out = Arrays.stream(getDeclaredExecutables0(clazz))
                 .filter((exec) -> exec instanceof Constructor
                         && Modifier.isStatic(exec.getModifiers()))

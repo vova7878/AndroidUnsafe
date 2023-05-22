@@ -49,6 +49,7 @@ public class FunctionDescriptor implements Bindable<MethodHandle> {
         //TODO
         assert_(value instanceof ValueLayout, IllegalArgumentException::new,
                 "only ValueLayout supported");
+        //noinspection ConstantConditions
         assert_(((ValueLayout) value).order() == ByteOrder.nativeOrder(),
                 IllegalArgumentException::new,
                 "only native order supported");

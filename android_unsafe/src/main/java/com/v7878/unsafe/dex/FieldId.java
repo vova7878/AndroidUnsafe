@@ -40,7 +40,7 @@ public class FieldId extends FieldOrMethodId {
                 TypeId.of(field.getType()), field.getName());
     }
 
-    public static FieldId of(Enum e) {
+    public static FieldId of(Enum<?> e) {
         Objects.requireNonNull(e, "trying to get FieldId of null");
         TypeId declaring_class = TypeId.of(e.getDeclaringClass());
         return new FieldId(declaring_class, declaring_class, e.name());

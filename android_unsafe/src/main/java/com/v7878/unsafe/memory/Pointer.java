@@ -244,6 +244,7 @@ public final class Pointer implements Addressable {
     }
 
     private static int strlen(Pointer data) {
+        //noinspection OverflowingLoopIndex
         for (int offset = 0; offset >= 0; offset++) {
             byte curr = data.addOffset(offset).get(JAVA_BYTE);
             if (curr == 0) {

@@ -55,7 +55,8 @@ public class Transformers {
     private static final InvokerI invoker;
 
     //TODO: Cloneable?
-    //TODO: asVarargsCollector
+    //TODO: asVarargsCollector?
+    //TODO: bindTo?
     static {
         TypeId mh = TypeId.of(MethodHandle.class);
         TypeId mt = TypeId.of(MethodType.class);

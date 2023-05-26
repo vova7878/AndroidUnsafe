@@ -1,5 +1,7 @@
 package com.v7878.unsafe.methodhandle;
 
+import static com.v7878.unsafe.AndroidUnsafe.getObject;
+import static com.v7878.unsafe.AndroidUnsafe.objectFieldOffset;
 import static com.v7878.unsafe.AndroidUnsafe3.getDeclaredField;
 import static com.v7878.unsafe.AndroidUnsafe3.getDeclaredMethod;
 import static com.v7878.unsafe.AndroidUnsafe3.setAccessible;
@@ -62,34 +64,31 @@ public final class EmulatedStackFrame {
         this.esf = esf;
     }
 
-    private static final Field references = nothrows_run(() -> {
-        Field out = getDeclaredField(esf_class, "references");
-        setAccessible(out, true);
-        return out;
+    private static final long references_offset = nothrows_run(() -> {
+        Field tmp = getDeclaredField(esf_class, "references");
+        return objectFieldOffset(tmp);
     });
 
     public Object[] references() {
-        return (Object[]) nothrows_run(() -> references.get(esf));
+        return (Object[]) getObject(esf, references_offset);
     }
 
-    private static final Field stackFrame = nothrows_run(() -> {
-        Field out = getDeclaredField(esf_class, "stackFrame");
-        setAccessible(out, true);
-        return out;
+    private static final long stackFrame_offset = nothrows_run(() -> {
+        Field tmp = getDeclaredField(esf_class, "stackFrame");
+        return objectFieldOffset(tmp);
     });
 
     public byte[] stackFrame() {
-        return (byte[]) nothrows_run(() -> stackFrame.get(esf));
+        return (byte[]) getObject(esf, stackFrame_offset);
     }
 
-    private static final Field type = nothrows_run(() -> {
-        Field out = getDeclaredField(esf_class, "type");
-        setAccessible(out, true);
-        return out;
+    private static final long type_offset = nothrows_run(() -> {
+        Field tmp = getDeclaredField(esf_class, "type");
+        return objectFieldOffset(tmp);
     });
 
     public MethodType type() {
-        return (MethodType) nothrows_run(() -> type.get(esf));
+        return (MethodType) getObject(esf, type_offset);
     }
 
     public StackFrameAccessor createAccessor() {
@@ -98,13 +97,15 @@ public final class EmulatedStackFrame {
         return out;
     }
 
-    /*public void copyArgumentsTo(int startIdx, EmulatedStackFrame other,
-            int otherStartIdx, int size) {
-        checkFromIndexSize(startIdx, size,
-                getMethodType().parameterCount());
-        checkFromIndexSize(otherStartIdx, size,
-                other.getMethodType().parameterCount());
+    /*//TODO
+    public static void copyArguments(StackFrameAccessor reader, int reader_start_idx,
+                                     StackFrameAccessor writer, int writer_start_idx, int count) {
+        checkFromIndexSize(reader_start_idx, count,
+                reader.frame().type().parameterCount());
+        checkFromIndexSize(writer_start_idx, count,
+                writer.frame().type().parameterCount());
     }*/
+
     public void copyReturnValueTo(EmulatedStackFrame other) {
         final Class<?> returnType = type().returnType();
         checkAssignable(other.type().returnType(), returnType);
@@ -184,6 +185,10 @@ public final class EmulatedStackFrame {
             argumentIdx = 0;
         }
 
+        public EmulatedStackFrame frame() {
+            return frame;
+        }
+
         private void buildTables(MethodType methodType) {
             final Class<?>[] ptypes = methodType.parameterArray();
             frameOffsets = new int[ptypes.length];
@@ -197,7 +202,7 @@ public final class EmulatedStackFrame {
                 if (ptype.isPrimitive()) {
                     frameOffset += getSize(ptype);
                 } else {
-                    referenceOffset += 1;
+                    referenceOffset++;
                 }
             }
         }
@@ -212,8 +217,8 @@ public final class EmulatedStackFrame {
                     ? type.returnType() : type.parameterType(argumentIdx);
         }
 
-        public void checkWriteType(Class<?> type) {
-            checkAssignable(getCurrentArgumentType(), type);
+        public void checkWriteType(Class<?> expectedType) {
+            checkAssignable(getCurrentArgumentType(), expectedType);
         }
 
         public void checkReadType(Class<?> expectedType) {

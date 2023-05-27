@@ -390,6 +390,8 @@ public class Transformers {
     public static void invokeFromTransform(MethodHandle target,
                                            EmulatedStackFrame stackFrame) throws Throwable {
         if (invoke_transformer.isInstance(target)) {
+            //it's wrong, but that's how android does it
+            //why is asType not being called?
             invoker.transform(target, stackFrame.esf);
         } else {
             final MethodHandle adaptedTarget = target.asType(stackFrame.type());
@@ -399,6 +401,7 @@ public class Transformers {
 
     public static void invokeExactFromTransform(MethodHandle target,
                                                 EmulatedStackFrame stackFrame) throws Throwable {
+        //where are the checks?
         if (invoke_transformer.isInstance(target)) {
             invoker.transform(target, stackFrame.esf);
         } else {

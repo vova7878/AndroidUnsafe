@@ -12,6 +12,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+//TODO: size checks
+//TODO: copy method
 public class MemorySegment implements Addressable {
 
     private final Pointer pointer;

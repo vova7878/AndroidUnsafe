@@ -41,6 +41,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+//important: all get/put operations without security checks
 public final class Pointer implements Addressable {
 
     public static final Pointer NULL = new Pointer(0);
@@ -312,6 +313,10 @@ public final class Pointer implements Addressable {
 
     public void put(ValueLayout.OfWord layout, Word value) {
         putWordUnaligned(base, getOffset(), value.longValue(), layout.order());
+    }
+
+    public static void copy(Pointer from, Pointer to, long size) {
+        copyMemory(from.base, from.getOffset(), to.base, to.getOffset(), size);
     }
 
     @Override

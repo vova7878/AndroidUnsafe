@@ -7,15 +7,15 @@ import java.util.function.Function;
 
 class SoftReferenceCache<K, V> {
 
-    private final Map<K, Node> cache = new ConcurrentHashMap<>();
+    private final Map<K, Node<K, V>> cache = new ConcurrentHashMap<>();
 
     public V get(K key, Function<K, V> valueFactory) {
         return cache
-                .computeIfAbsent(key, k -> new Node()) // short lock (has to be according to ConcurrentHashMap)
+                .computeIfAbsent(key, k -> new Node<>()) // short lock (has to be according to ConcurrentHashMap)
                 .get(key, valueFactory); // long lock, but just for the particular key
     }
 
-    private class Node {
+    private static class Node<K, V> {
 
         private volatile SoftReference<V> ref;
 

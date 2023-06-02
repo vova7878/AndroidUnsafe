@@ -47,8 +47,8 @@ import dalvik.system.DexFile;
 public class Transformers {
 
     @SuppressWarnings("unchecked")
-    private static final Class<MethodHandle> invoke_transformer = nothrows_run(
-            () -> (Class<MethodHandle>) Class.forName("java.lang.invoke.Transformers$Transformer"));
+    private static final Class<MethodHandle> invoke_transformer = (Class<MethodHandle>) nothrows_run(
+            () -> Class.forName("java.lang.invoke.Transformers$Transformer"));
     private static final Class<MethodHandle> transformer;
     private static final Constructor<MethodHandle> transformer_constructor;
     private static final Method transformer_superAsType;
@@ -369,6 +369,7 @@ public class Transformers {
 
             @Override
             MethodHandle asType(MethodHandle thiz, MethodType newType) {
+                //TODO
                 if (newType.equals(thiz.type())) {
                     return thiz;
                 }

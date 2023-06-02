@@ -280,13 +280,20 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         return address;
     }
 
+    public static Pointer getDexFilePointer(Class<?> clazz) {
+        return new Pointer(getDexFile(clazz));
+    }
+
     public static MemorySegment getDexFileSegment(Class<?> clazz) {
-        return getDexFileLayout().bind(new Pointer(getDexFile(clazz)));
+        return getDexFileLayout().bind(getDexFilePointer(clazz));
+    }
+
+    public static Pointer getArtMethodPointer(Executable ex) {
+        return new Pointer(getArtMethod(ex));
     }
 
     public static MemorySegment getArtMethodSegment(Executable ex) {
-        return getArtMethodLayout()
-                .bind(new Pointer(getArtMethod(ex)));
+        return getArtMethodLayout().bind(getArtMethodPointer(ex));
     }
 
     private static Constructor<DexFile> dex_constructor;
@@ -297,8 +304,8 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
                 dex_constructor = nothrows_run(() -> getDeclaredConstructor(
                         DexFile.class, ByteBuffer.class));
             } else if (getSdkInt() >= 29 && getSdkInt() <= 34) {
-                Class<?> dex_path_list_elements = nothrows_run(()
-                        -> Class.forName("[Ldalvik.system.DexPathList$Element;"));
+                Class<?> dex_path_list_elements = nothrows_run(
+                        () -> Class.forName("[Ldalvik.system.DexPathList$Element;"));
                 dex_constructor = nothrows_run(() -> getDeclaredConstructor(
                         DexFile.class, ByteBuffer[].class,
                         ClassLoader.class, dex_path_list_elements));
@@ -386,9 +393,18 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         return new Pointer(getWordN(art_method + DATA_OFFSET));
     }
 
+    public static Pointer getExecutableData(Addressable art_method) {
+        return new Pointer(getWordN(art_method.pointer().getRawAddress() + DATA_OFFSET));
+    }
+
     public static void setExecutableData(Executable ex, Addressable data) {
         long art_method = getArtMethod(ex);
         putWordN(art_method + DATA_OFFSET, data.pointer().getRawAddress());
+    }
+
+    public static void setExecutableData(Addressable art_method, Addressable data) {
+        putWordN(art_method.pointer().getRawAddress() + DATA_OFFSET,
+                data.pointer().getRawAddress());
     }
 
     private static final long ACCESS_FLAGS_OFFSET = getArtMethodLayout()

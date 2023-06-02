@@ -16,6 +16,8 @@ import static com.v7878.unsafe.methodhandle.EmulatedStackFrame.RETURN_VALUE_IDX;
 import static com.v7878.unsafe.methodhandle.Transformers.invokeExactFromTransform;
 import static com.v7878.unsafe.methodhandle.Transformers.makeTransformer;
 
+import android.util.Pair;
+
 import com.v7878.unsafe.dex.AnnotationItem;
 import com.v7878.unsafe.dex.AnnotationSet;
 import com.v7878.unsafe.dex.ClassDef;
@@ -52,27 +54,28 @@ class Test {
 
 public class Linker {
 
-    private static final SoftReferenceCache<String, Class<?>> DOWNCALL_CACHE
-            = new SoftReferenceCache<>();
+    private static final SoftReferenceCache<Pair<Pointer, MethodType>, Class<?>>
+            DOWNCALL_CACHE = new SoftReferenceCache<>();
     private static final int HANDLER_OFFSET = classSizeField(Test.class);
 
     private static void copyArg(StackFrameAccessor reader,
                                 StackFrameAccessor writer, Class<?> type) {
         if (type == Addressable.class) {
-            long tmp = reader.nextReference(Addressable.class)
-                    .pointer().getRawAddress();
+            Addressable tmp = reader.nextReference(Addressable.class);
+            long value = tmp == null ? 0 : tmp.pointer().getRawAddress();
             if (IS64BIT) {
-                writer.putNextLong(tmp);
+                writer.putNextLong(value);
             } else {
-                writer.putNextInt((int) tmp);
+                writer.putNextInt((int) value);
             }
             return;
-        } else if (type == Word.class) {
-            long tmp = reader.nextReference(Word.class).longValue();
+        }
+        if (type == Word.class) {
+            long value = reader.nextReference(Word.class).longValue();
             if (IS64BIT) {
-                writer.putNextLong(tmp);
+                writer.putNextLong(value);
             } else {
-                writer.putNextInt((int) tmp);
+                writer.putNextInt((int) value);
             }
             return;
         }
@@ -84,22 +87,12 @@ public class Linker {
         Class<?> type = layout.carrier();
         if (type == Addressable.class) {
             Bindable<?> content = ((ValueLayout.OfAddress<?>) layout).content();
-            long value;
-            if (IS64BIT) {
-                value = reader.nextLong();
-            } else {
-                value = reader.nextInt() & 0xffffffffL;
-            }
-            writer.putNextReference(content.bind(new Pointer(
-                    value)), Object.class);
+            long value = IS64BIT ? reader.nextLong() : reader.nextInt();
+            writer.putNextReference(content.bind(new Pointer(value)), Object.class);
             return;
-        } else if (type == Word.class) {
-            long value;
-            if (IS64BIT) {
-                value = reader.nextLong();
-            } else {
-                value = reader.nextInt() & 0xffffffffL;
-            }
+        }
+        if (type == Word.class) {
+            long value = IS64BIT ? reader.nextLong() : reader.nextInt();
             writer.putNextReference(new Word(value), type);
             return;
         }
@@ -113,7 +106,7 @@ public class Linker {
                 .map(l -> ((ValueLayout) l).carrier()).toArray(Class[]::new);
         ValueLayout ret = (ValueLayout) function.returnLayout().orElse(null);
 
-        return (stackFrame) -> {
+        return stackFrame -> {
             StackFrameAccessor thiz_acc = stackFrame.createAccessor();
             EmulatedStackFrame stub_frame = EmulatedStackFrame.create(stub.type());
             StackFrameAccessor stub_acc = stub_frame.createAccessor();
@@ -129,24 +122,24 @@ public class Linker {
         };
     }
 
-    public static MethodHandle downcallHandle(Addressable symbol,
-                                              FunctionDescriptor function) {
+    public static MethodHandle downcallHandle(
+            Addressable symbol, FunctionDescriptor function) {
         assert_(!symbol.pointer().isNull(), IllegalArgumentException::new,
                 "symbol == nullptr");
         Objects.requireNonNull(function);
-        long raw_address = symbol.pointer().getRawAddress();
+
         MethodType stub_call_type = inferMethodType(function, true);
-        ProtoId proto = ProtoId.of(stub_call_type);
-        String stub_name = getStubName(raw_address, proto);
-        Class<?> stub = DOWNCALL_CACHE.get(stub_name,
-                unused -> newStub(symbol, stub_name, stub_call_type, proto));
+        Class<?> stub = DOWNCALL_CACHE.get(new Pair<>(symbol.pointer(), stub_call_type),
+                pair -> newStub(pair.first, pair.second));
+
         MethodHandle handle = (MethodHandle) getObject(stub, HANDLER_OFFSET);
+
+        //TODO: skip check
         MethodType handle_call_type = inferMethodType(function, false);
         if (stub_call_type.equals(handle_call_type)) {
             return handle;
         }
-        return makeTransformer(handle_call_type,
-                getTransformerI(handle, function));
+        return makeTransformer(handle_call_type, getTransformerI(handle, function));
     }
 
     private static String getStubName(long address, ProtoId proto) {
@@ -159,8 +152,9 @@ public class Linker {
         return new EmptyClassLoader(Linker.class.getClassLoader());
     }
 
-    private static Class<?> newStub(Addressable symbol, String stub_name,
-                                    MethodType stub_call_type, ProtoId proto) {
+    private static Class<?> newStub(Pointer symbol, MethodType stub_call_type) {
+        ProtoId proto = ProtoId.of(stub_call_type);
+        String stub_name = getStubName(symbol.getRawAddress(), proto);
         TypeId stub_id = TypeId.of(stub_name);
         ClassDef clazz = new ClassDef(stub_id);
         clazz.setSuperClass(TypeId.of(Object.class));
@@ -176,8 +170,7 @@ public class Linker {
         );
         clazz.getClassData().getStaticFields().add(
                 new EncodedField(
-                        new FieldId(stub_id, TypeId.of(
-                                MethodHandle.class), "handler"),
+                        new FieldId(stub_id, TypeId.of(MethodHandle.class), "handler"),
                         Modifier.PUBLIC | Modifier.STATIC, null
                 )
         );
@@ -194,20 +187,14 @@ public class Linker {
         return stub;
     }
 
-    private static MethodType inferMethodType(
-            FunctionDescriptor descriptor, boolean forStub) {
-        MethodType type;
-        if (descriptor.returnLayout().isPresent()) {
-            type = MethodType.methodType(carrierFor(
-                    descriptor.returnLayout().get(), forStub, false));
-        } else {
-            type = MethodType.methodType(void.class);
+    private static MethodType inferMethodType(FunctionDescriptor descriptor, boolean forStub) {
+        Class<?> ret = !descriptor.returnLayout().isPresent() ? void.class :
+                carrierFor(descriptor.returnLayout().get(), forStub, false);
+        Class<?>[] args = new Class<?>[descriptor.argumentCount()];
+        for (int i = 0; i < args.length; i++) {
+            args[i] = carrierFor(descriptor.argumentLayout(i), forStub, true);
         }
-        for (Layout argLayout : descriptor.argumentLayouts()) {
-            type = type.appendParameterTypes(
-                    carrierFor(argLayout, forStub, true));
-        }
-        return type;
+        return MethodType.methodType(ret, args);
     }
 
     private static Class<?> carrierFor(Layout layout, boolean forStub, boolean forArg) {

@@ -13,7 +13,7 @@ import static com.v7878.unsafe.AndroidUnsafe5.staticFieldOffset;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.nothrows_run;
 import static com.v7878.unsafe.methodhandle.EmulatedStackFrame.RETURN_VALUE_IDX;
-import static com.v7878.unsafe.methodhandle.Transformers.invokeExactFromTransform;
+import static com.v7878.unsafe.methodhandle.Transformers.invokeExactWithFrameNoChecks;
 import static com.v7878.unsafe.methodhandle.Transformers.makeTransformer;
 
 import android.util.Pair;
@@ -54,7 +54,7 @@ class Test {
 
 public class Linker {
 
-    private static final SoftReferenceCache<Pair<Pointer, MethodType>, Class<?>>
+    private static final SoftReferenceCache<Pair<Pointer, FunctionDescriptor>, Class<?>>
             DOWNCALL_CACHE = new SoftReferenceCache<>();
     private static final int HANDLER_OFFSET = classSizeField(Test.class);
 
@@ -113,7 +113,7 @@ public class Linker {
             for (Class<?> arg : args) {
                 copyArg(thiz_acc, stub_acc, arg);
             }
-            invokeExactFromTransform(stub, stub_frame);
+            invokeExactWithFrameNoChecks(stub, stub_frame);
             if (ret != null) {
                 thiz_acc.moveTo(RETURN_VALUE_IDX);
                 stub_acc.moveTo(RETURN_VALUE_IDX);
@@ -122,29 +122,20 @@ public class Linker {
         };
     }
 
-    public static MethodHandle downcallHandle(
-            Addressable symbol, FunctionDescriptor function) {
+    public static MethodHandle downcallHandle(Addressable symbol, FunctionDescriptor function) {
         assert_(!symbol.pointer().isNull(), IllegalArgumentException::new,
                 "symbol == nullptr");
         Objects.requireNonNull(function);
 
-        MethodType stub_call_type = inferMethodType(function, true);
-        Class<?> stub = DOWNCALL_CACHE.get(new Pair<>(symbol.pointer(), stub_call_type),
+        Class<?> stub = DOWNCALL_CACHE.get(new Pair<>(symbol.pointer(), function),
                 pair -> newStub(pair.first, pair.second));
 
-        MethodHandle handle = (MethodHandle) getObject(stub, HANDLER_OFFSET);
-
-        //TODO: skip check
-        MethodType handle_call_type = inferMethodType(function, false);
-        if (stub_call_type.equals(handle_call_type)) {
-            return handle;
-        }
-        return makeTransformer(handle_call_type, getTransformerI(handle, function));
+        return (MethodHandle) getObject(stub, HANDLER_OFFSET);
     }
 
-    private static String getStubName(long address, ProtoId proto) {
+    private static String getStubName(Pointer symbol, ProtoId proto) {
         return Linker.class.getName() + "$Stub_"
-                + address + "_" + proto.getShorty();
+                + symbol.getRawAddress() + "_" + proto.getShorty();
     }
 
     private static ClassLoader getStubClassLoader() {
@@ -152,9 +143,10 @@ public class Linker {
         return new EmptyClassLoader(Linker.class.getClassLoader());
     }
 
-    private static Class<?> newStub(Pointer symbol, MethodType stub_call_type) {
+    private static Class<?> newStub(Pointer symbol, FunctionDescriptor stub_desc) {
+        MethodType stub_call_type = inferMethodType(stub_desc, true);
         ProtoId proto = ProtoId.of(stub_call_type);
-        String stub_name = getStubName(symbol.getRawAddress(), proto);
+        String stub_name = getStubName(symbol, proto);
         TypeId stub_id = TypeId.of(stub_name);
         ClassDef clazz = new ClassDef(stub_id);
         clazz.setSuperClass(TypeId.of(Object.class));
@@ -183,11 +175,18 @@ public class Linker {
         MethodHandle handler = nothrows_run(() -> MethodHandles.lookup().unreflect(function));
         Field handler_field = getDeclaredField(stub, "handler");
         assert_(HANDLER_OFFSET == staticFieldOffset(handler_field), AssertionError::new);
+
+        //TODO: skip check
+        MethodType handle_call_type = inferMethodType(stub_desc, false);
+        if (!stub_call_type.equals(handle_call_type)) {
+            handler = makeTransformer(handle_call_type, getTransformerI(handler, stub_desc));
+        }
+
         putObject(stub, HANDLER_OFFSET, handler);
         return stub;
     }
 
-    private static MethodType inferMethodType(FunctionDescriptor descriptor, boolean forStub) {
+    static MethodType inferMethodType(FunctionDescriptor descriptor, boolean forStub) {
         Class<?> ret = !descriptor.returnLayout().isPresent() ? void.class :
                 carrierFor(descriptor.returnLayout().get(), forStub, false);
         Class<?>[] args = new Class<?>[descriptor.argumentCount()];

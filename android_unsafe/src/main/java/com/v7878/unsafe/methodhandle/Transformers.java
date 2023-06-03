@@ -38,6 +38,7 @@ import com.v7878.unsafe.dex.bytecode.ReturnVoid;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.WrongMethodTypeException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -86,32 +87,26 @@ public class Transformers {
 
         transformer_def.getClassData().getDirectMethods().add(
                 new EncodedMethod(
-                        MethodId.constructor(transformer_id, mt,
-                                TypeId.of(TransformerImpl.class)),
-                        Modifier.PUBLIC | 0x10000,
-                        null, null,
+                        MethodId.constructor(transformer_id, mt, TypeId.of(TransformerImpl.class)),
+                        Modifier.PUBLIC | 0x10000, null, null,
                         new CodeItem(3, 3, 2, code, null)
                 )
         );
 
         code.clear();
         code.add(new IGetObject(0, 2, impl_field));
-        code.add(new InvokeKind.InvokeStatic(1,
-                new MethodId(mesf, new ProtoId(mesf,
-                        TypeId.of(Object.class)), "wrap"),
+        code.add(new InvokeKind.InvokeStatic(1, new MethodId(mesf,
+                new ProtoId(mesf, TypeId.of(Object.class)), "wrap"),
                 3, 0, 0, 0, 0));
         code.add(new MoveResultObject(1));
-        code.add(new InvokeVirtual(3,
-                new MethodId(TypeId.of(TransformerImpl.class),
-                        new ProtoId(TypeId.V, mh, mesf), "transform"),
+        code.add(new InvokeVirtual(3, new MethodId(TypeId.of(TransformerImpl.class),
+                new ProtoId(TypeId.V, mh, mesf), "transform"),
                 0, 2, 1, 0, 0));
         code.add(new ReturnVoid());
 
         transformer_def.getClassData().getVirtualMethods().add(
                 new EncodedMethod(
-                        new MethodId(transformer_id,
-                                new ProtoId(TypeId.V, esf),
-                                "transform"),
+                        new MethodId(transformer_id, new ProtoId(TypeId.V, esf), "transform"),
                         Modifier.PUBLIC, null, null,
                         new CodeItem(4, 2, 3, code, null)
                 )
@@ -119,18 +114,16 @@ public class Transformers {
 
         code.clear();
         code.add(new IGetObject(0, 1, impl_field));
-        code.add(new InvokeVirtual(2,
-                new MethodId(TypeId.of(TransformerImpl.class),
-                        new ProtoId(TypeId.Z, mh),
-                        "isVarargsCollector"),
+        code.add(new InvokeVirtual(2, new MethodId(TypeId.of(TransformerImpl.class),
+                new ProtoId(TypeId.Z, mh), "isVarargsCollector"),
                 0, 1, 0, 0, 0));
         code.add(new MoveResult(0));
         code.add(new Return(0));
 
         transformer_def.getClassData().getVirtualMethods().add(
                 new EncodedMethod(
-                        new MethodId(transformer_id, new ProtoId(TypeId.Z),
-                                "isVarargsCollector"),
+                        new MethodId(transformer_id,
+                                new ProtoId(TypeId.Z), "isVarargsCollector"),
                         Modifier.PUBLIC, null, null,
                         new CodeItem(2, 1, 2, code, null)
                 )
@@ -138,9 +131,8 @@ public class Transformers {
 
         code.clear();
         code.add(new IGetObject(0, 1, impl_field));
-        code.add(new InvokeVirtual(2,
-                new MethodId(TypeId.of(TransformerImpl.class),
-                        new ProtoId(mh, mh), "asFixedArity"),
+        code.add(new InvokeVirtual(2, new MethodId(TypeId.of(TransformerImpl.class),
+                new ProtoId(mh, mh), "asFixedArity"),
                 0, 1, 0, 0, 0));
         code.add(new MoveResultObject(0));
         code.add(new ReturnObject(0));
@@ -156,9 +148,8 @@ public class Transformers {
 
         code.clear();
         code.add(new IGetObject(0, 1, impl_field));
-        code.add(new InvokeVirtual(3,
-                new MethodId(TypeId.of(TransformerImpl.class),
-                        new ProtoId(mh, mh, mt), "asType"),
+        code.add(new InvokeVirtual(3, new MethodId(TypeId.of(TransformerImpl.class),
+                new ProtoId(mh, mh, mt), "asType"),
                 0, 1, 2, 0, 0));
         code.add(new MoveResultObject(0));
         code.add(new ReturnObject(0));
@@ -197,12 +188,10 @@ public class Transformers {
         if (getSdkInt() < 33) {
             code.clear();
             code.add(new CheckCast(2, esf));
-            code.add(new InvokePolymorphic(2,
-                    new MethodId(mh, new ProtoId(TypeId.of(Object.class),
-                            TypeId.of(Object[].class)),
-                            "invoke"),
-                    1, 2, 0, 0, 0,
-                    new ProtoId(TypeId.V, esf)));
+            code.add(new InvokePolymorphic(2, new MethodId(mh,
+                    new ProtoId(TypeId.of(Object.class),
+                            TypeId.of(Object[].class)), "invoke"),
+                    1, 2, 0, 0, 0, new ProtoId(TypeId.V, esf)));
             code.add(new ReturnVoid());
         } else {
             Method tmp = getDeclaredMethod(MethodHandle.class,
@@ -213,9 +202,7 @@ public class Transformers {
 
             code.clear();
             code.add(new CheckCast(2, esf));
-            code.add(new InvokeVirtual(2,
-                    MethodId.of(tmp),
-                    1, 2, 0, 0, 0));
+            code.add(new InvokeVirtual(2, MethodId.of(tmp), 1, 2, 0, 0, 0));
             code.add(new ReturnVoid());
         }
 
@@ -224,8 +211,7 @@ public class Transformers {
                         new MethodId(invoker_id,
                                 new ProtoId(TypeId.V, mh, TypeId.of(Object.class)),
                                 "invokeExactWithFrame"),
-                        Modifier.PUBLIC,
-                        null, null,
+                        Modifier.PUBLIC, null, null,
                         new CodeItem(3, 3, 2, code, null)
                 )
         );
@@ -238,16 +224,13 @@ public class Transformers {
 
         code.clear();
         code.add(new CheckCast(2, esf));
-        code.add(new InvokeVirtual(2, MethodId.of(tmp),
-                1, 2, 0, 0, 0));
+        code.add(new InvokeVirtual(2, MethodId.of(tmp), 1, 2, 0, 0, 0));
         code.add(new ReturnVoid());
 
         invoker_def.getClassData().getVirtualMethods().add(
                 new EncodedMethod(
-                        new MethodId(invoker_id,
-                                new ProtoId(TypeId.V,
-                                        TypeId.of(MethodHandle.class),
-                                        TypeId.of(Object.class)),
+                        new MethodId(invoker_id, new ProtoId(TypeId.V,
+                                TypeId.of(MethodHandle.class), TypeId.of(Object.class)),
                                 "transform"),
                         Modifier.PUBLIC, null, null,
                         new CodeItem(3, 3, 2, code, null)
@@ -255,8 +238,7 @@ public class Transformers {
         );
 
         //noinspection deprecation
-        DexFile dex = openDexFile(new Dex(transformer_def,
-                invoker_def).compile());
+        DexFile dex = openDexFile(new Dex(transformer_def, invoker_def).compile());
         setTrusted(dex);
 
         ClassLoader loader = Transformers.class.getClassLoader();
@@ -265,9 +247,8 @@ public class Transformers {
         Class<?> invoker_class = loadClass(dex, invoker_name, loader);
         invoker = (InvokerI) allocateInstance(invoker_class);
 
-        transformer_constructor = nothrows_run(
-                () -> transformer.getDeclaredConstructor(
-                        MethodType.class, TransformerImpl.class));
+        transformer_constructor = nothrows_run(() -> transformer.getDeclaredConstructor(
+                MethodType.class, TransformerImpl.class));
 
         transformer_superAsType = nothrows_run(() -> transformer.getDeclaredMethod(
                 "superAsType", MethodType.class));
@@ -301,8 +282,7 @@ public class Transformers {
 
     private abstract static class InvokerI {
 
-        abstract void transform(MethodHandle handle,
-                                Object stackFrame) throws Throwable;
+        abstract void transform(MethodHandle handle, Object stackFrame) throws Throwable;
 
         abstract void invokeExactWithFrame(MethodHandle handle,
                                            Object stackFrame) throws Throwable;
@@ -363,17 +343,14 @@ public class Transformers {
             }
 
             @Override
-            MethodHandle asFixedArity(MethodHandle ignored) {
-                return makeTransformer(fixed, this);
+            MethodHandle asFixedArity(MethodHandle thiz) {
+                return asType(thiz, fixed);
             }
 
             @Override
             MethodHandle asType(MethodHandle thiz, MethodType newType) {
-                //TODO
-                if (newType.equals(thiz.type())) {
-                    return thiz;
-                }
-                return makeTransformer(newType, this);
+                //TODO: maybe caching?
+                return makeTransformer(newType, callback);
             }
         };
     }
@@ -388,25 +365,31 @@ public class Transformers {
         abstract MethodHandle asType(MethodHandle thiz, MethodType newType);
     }
 
-    public static void invokeFromTransform(MethodHandle target,
-                                           EmulatedStackFrame stackFrame) throws Throwable {
-        if (invoke_transformer.isInstance(target)) {
-            //it's wrong, but that's how android does it
-            //why is asType not being called?
-            invoker.transform(target, stackFrame.esf);
-        } else {
-            final MethodHandle adaptedTarget = target.asType(stackFrame.type());
-            invoker.invokeExactWithFrame(adaptedTarget, stackFrame.esf);
-        }
+    public static void throwWrongMethodTypeException(MethodType from, MethodType to) {
+        throw new WrongMethodTypeException("Cannot convert " + from + " to " + to);
     }
 
-    public static void invokeExactFromTransform(MethodHandle target,
-                                                EmulatedStackFrame stackFrame) throws Throwable {
-        //where are the checks?
+    public static void invokeExactWithFrameNoChecks(
+            MethodHandle target, EmulatedStackFrame stackFrame) throws Throwable {
         if (invoke_transformer.isInstance(target)) {
+            //TODO: android 8-12L check type-nominalType
             invoker.transform(target, stackFrame.esf);
         } else {
             invoker.invokeExactWithFrame(target, stackFrame.esf);
         }
+    }
+
+    public static void invokeExactWithFrame(
+            MethodHandle target, EmulatedStackFrame stackFrame) throws Throwable {
+        if (!target.type().equals(stackFrame.type())) {
+            throwWrongMethodTypeException(stackFrame.type(), target.type());
+        }
+        invokeExactWithFrameNoChecks(target, stackFrame);
+    }
+
+    public static void invokeWithFrame(
+            MethodHandle target, EmulatedStackFrame stackFrame) throws Throwable {
+        MethodHandle adaptedTarget = target.asType(stackFrame.type());
+        invokeExactWithFrameNoChecks(adaptedTarget, stackFrame);
     }
 }

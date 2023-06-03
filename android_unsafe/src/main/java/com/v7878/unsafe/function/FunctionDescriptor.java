@@ -9,6 +9,7 @@ import com.v7878.unsafe.memory.Layout;
 import com.v7878.unsafe.memory.ValueLayout;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,6 +75,10 @@ public class FunctionDescriptor implements Bindable<MethodHandle> {
 
     public static FunctionDescriptor ofVoid(Layout... argLayouts) {
         return ofAny(null, argLayouts);
+    }
+
+    public MethodType toMethodType() {
+        return Linker.inferMethodType(this, false);
     }
 
     public FunctionDescriptor appendArgumentLayouts(Layout... addedLayouts) {

@@ -372,7 +372,7 @@ public class Transformers {
     public static void invokeExactWithFrameNoChecks(
             MethodHandle target, EmulatedStackFrame stackFrame) throws Throwable {
         if (invoke_transformer.isInstance(target)) {
-            //TODO: android 8-12L check type-nominalType
+            //TODO: android 8-12L nominalType to type
             invoker.transform(target, stackFrame.esf);
         } else {
             invoker.invokeExactWithFrame(target, stackFrame.esf);

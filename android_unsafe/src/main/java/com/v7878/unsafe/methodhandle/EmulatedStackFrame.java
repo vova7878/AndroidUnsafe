@@ -360,7 +360,7 @@ public final class EmulatedStackFrame {
 
     @Override
     public String toString() {
-        return "EmulatedStackFrame{stackFrame=[" + toHexString(stackFrame())
+        return "EmulatedStackFrame{type=" + type() + ", stackFrame=[" + toHexString(stackFrame())
                 + "], references=" + Arrays.deepToString(references()) + "}";
     }
 }

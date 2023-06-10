@@ -55,10 +55,10 @@ public class Transformers {
     private static final Constructor<MethodHandle> transformer_constructor;
     private static final MethodHandle directAsType = nothrows_run(() -> unreflectDirect(
             getDeclaredMethod(MethodHandle.class, "asType", MethodType.class)));
+    private static final MethodHandle directAsVarargsCollector = nothrows_run(() -> unreflectDirect(
+            getDeclaredMethod(MethodHandle.class, "asVarargsCollector", Class.class)));
     private static final InvokerI invoker;
 
-    //TODO: Cloneable?
-    //TODO: asVarargsCollector?
     //TODO: bindTo?
     static {
         TypeId mh = TypeId.of(MethodHandle.class);
@@ -67,11 +67,16 @@ public class Transformers {
         TypeId esf = TypeId.of("dalvik.system.EmulatedStackFrame");
         TypeId mesf = TypeId.of(EmulatedStackFrame.class);
 
+        //public final class Transformer extends MethodHandle implements Cloneable {
+        //    TransformerImpl impl;
+        //    <...>
+        //}
         String transformer_name = Transformers.class.getName() + "$Transformer";
         TypeId transformer_id = TypeId.of(transformer_name);
 
         ClassDef transformer_def = new ClassDef(transformer_id);
         transformer_def.setSuperClass(TypeId.of(invoke_transformer));
+        transformer_def.getInterfaces().add(TypeId.of(Cloneable.class));
         transformer_def.setAccessFlags(Modifier.PUBLIC | Modifier.FINAL);
 
         FieldId impl_field = new FieldId(transformer_id,
@@ -80,6 +85,10 @@ public class Transformers {
                 new EncodedField(impl_field, Modifier.PUBLIC, null)
         );
 
+        //public Transformer(MethodType type, TransformerImpl impl) {
+        //    super(type);
+        //    this.impl = impl;
+        //}
         PCList<Instruction> code = PCList.empty();
         code.add(new InvokeKind.InvokeDirect(2,
                 MethodId.constructor(TypeId.of(invoke_transformer), mt),
@@ -95,6 +104,9 @@ public class Transformers {
                 )
         );
 
+        //public void transform(dalvik.system.EmulatedStackFrame stack) {
+        //    impl.transform(com.v7878.unsafe.methodhandle.EmulatedStackFrame.wrap(stack));
+        //}
         code.clear();
         code.add(new IGetObject(0, 2, impl_field));
         code.add(new InvokeKind.InvokeStatic(1, new MethodId(mesf,
@@ -114,6 +126,9 @@ public class Transformers {
                 )
         );
 
+        //public boolean isVarargsCollector() {
+        //    return impl.isVarargsCollector(this);
+        //}
         code.clear();
         code.add(new IGetObject(0, 1, impl_field));
         code.add(new InvokeVirtual(2, new MethodId(TypeId.of(TransformerImpl.class),
@@ -131,6 +146,29 @@ public class Transformers {
                 )
         );
 
+        //public MethodHandle asVarargsCollector(Class<?> arrayType) {
+        //    return impl.asVarargsCollector(this, arrayType);
+        //}
+        code.clear();
+        code.add(new IGetObject(0, 1, impl_field));
+        code.add(new InvokeVirtual(3, new MethodId(TypeId.of(TransformerImpl.class),
+                new ProtoId(mh, mh, TypeId.of(Class.class)), "asVarargsCollector"),
+                0, 1, 2, 0, 0));
+        code.add(new MoveResultObject(0));
+        code.add(new ReturnObject(0));
+
+        transformer_def.getClassData().getVirtualMethods().add(
+                new EncodedMethod(
+                        new MethodId(transformer_id, new ProtoId(mh, TypeId.of(Class.class)),
+                                "asVarargsCollector"),
+                        Modifier.PUBLIC, null, null,
+                        new CodeItem(3, 2, 3, code, null)
+                )
+        );
+
+        //public MethodHandle asFixedArity() {
+        //    return impl.asFixedArity(this);
+        //}
         code.clear();
         code.add(new IGetObject(0, 1, impl_field));
         code.add(new InvokeVirtual(2, new MethodId(TypeId.of(TransformerImpl.class),
@@ -148,6 +186,9 @@ public class Transformers {
                 )
         );
 
+        //public MethodHandle asType(MethodType type) {
+        //    return impl.asType(this, type);
+        //}
         code.clear();
         code.add(new IGetObject(0, 1, impl_field));
         code.add(new InvokeVirtual(3, new MethodId(TypeId.of(TransformerImpl.class),
@@ -165,6 +206,29 @@ public class Transformers {
                 )
         );
 
+        //public String toString() {
+        //    return impl.toString(this);
+        //}
+        code.clear();
+        code.add(new IGetObject(0, 1, impl_field));
+        code.add(new InvokeVirtual(2, new MethodId(TypeId.of(TransformerImpl.class),
+                new ProtoId(TypeId.of(String.class), mh), "toString"),
+                0, 1, 0, 0, 0));
+        code.add(new MoveResultObject(0));
+        code.add(new ReturnObject(0));
+
+        transformer_def.getClassData().getVirtualMethods().add(
+                new EncodedMethod(
+                        new MethodId(transformer_id, new ProtoId(
+                                TypeId.of(String.class)), "toString"),
+                        Modifier.PUBLIC, null, null,
+                        new CodeItem(2, 1, 2, code, null)
+                )
+        );
+
+        //public final class Invoker extends InvokerI {
+        //    <...>
+        //}
         String invoker_name = Transformers.class.getName() + "$Invoker";
         TypeId invoker_id = TypeId.of(invoker_name);
 
@@ -172,7 +236,12 @@ public class Transformers {
         invoker_def.setSuperClass(TypeId.of(InvokerI.class));
         invoker_def.setAccessFlags(Modifier.PUBLIC | Modifier.FINAL);
 
+
+        //public void invokeExactWithFrame(MethodHandle handle, Object stack) {
+        //    <...>
+        //}
         if (getSdkInt() < 33) {
+            //handle.invoke((dalvik.system.EmulatedStackFrame) stack);
             code.clear();
             code.add(new CheckCast(2, esf));
             code.add(new InvokePolymorphic(2, new MethodId(mh,
@@ -187,6 +256,7 @@ public class Transformers {
             setExecutableAccessFlags(tmp, flags | Modifier.PUBLIC);
             fullFence();
 
+            //handle.invokeExactWithFrame((dalvik.system.EmulatedStackFrame) stack);
             code.clear();
             code.add(new CheckCast(2, esf));
             code.add(new InvokeVirtual(2, MethodId.of(tmp), 1, 2, 0, 0, 0));
@@ -209,6 +279,9 @@ public class Transformers {
         setExecutableAccessFlags(tmp, flags | Modifier.PUBLIC);
         fullFence();
 
+        //public void transform(MethodHandle handle, Object stack) {
+        //    handle.transform((dalvik.system.EmulatedStackFrame) stack);
+        //}
         code.clear();
         code.add(new CheckCast(2, esf));
         code.add(new InvokeVirtual(2, MethodId.of(tmp), 1, 2, 0, 0, 0));
@@ -289,6 +362,24 @@ public class Transformers {
         void transform(MethodHandle thiz, EmulatedStackFrame stackFrame) throws Throwable;
     }
 
+    private static String toStringTransformer(MethodType type, boolean isVararg) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Transformer(");
+        for (int i = 0; i < type.parameterCount(); i++) {
+            if (i > 0) sb.append(",");
+            sb.append(type.parameterType(i).getSimpleName());
+        }
+        if (isVararg) {
+            if (type.parameterCount() > 0) {
+                sb.append(", ");
+            }
+            sb.append("...");
+        }
+        sb.append(")");
+        sb.append(type.returnType().getSimpleName());
+        return sb.toString();
+    }
+
     private static TransformerImpl regularImpl(TransformerF callback) {
         return new TransformerImpl() {
             @Override
@@ -309,6 +400,17 @@ public class Transformers {
             @Override
             MethodHandle asType(MethodHandle thiz, MethodType newType) {
                 return nothrows_run(() -> (MethodHandle) directAsType.invoke(thiz, newType));
+            }
+
+            @Override
+            MethodHandle asVarargsCollector(MethodHandle thiz, Class<?> arrayType) {
+                return (MethodHandle) nothrows_run(
+                        () -> directAsVarargsCollector.invoke(thiz, arrayType));
+            }
+
+            @Override
+            String toString(MethodHandle thiz) {
+                return toStringTransformer(thiz.type(), false);
             }
         };
     }
@@ -332,9 +434,19 @@ public class Transformers {
             }
 
             @Override
-            MethodHandle asType(MethodHandle thiz, MethodType newType) {
+            MethodHandle asType(MethodHandle ignored, MethodType newType) {
                 //TODO: maybe caching?
                 return makeTransformer(newType, callback);
+            }
+
+            @Override
+            MethodHandle asVarargsCollector(MethodHandle thiz, Class<?> arrayType) {
+                return thiz;
+            }
+
+            @Override
+            String toString(MethodHandle thiz) {
+                return toStringTransformer(thiz.type(), true);
             }
         };
     }
@@ -347,6 +459,10 @@ public class Transformers {
         abstract MethodHandle asFixedArity(MethodHandle thiz);
 
         abstract MethodHandle asType(MethodHandle thiz, MethodType newType);
+
+        abstract MethodHandle asVarargsCollector(MethodHandle thiz, Class<?> arrayType);
+
+        abstract String toString(MethodHandle thiz);
     }
 
     public static void throwWrongMethodTypeException(MethodType from, MethodType to) {

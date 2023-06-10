@@ -92,8 +92,8 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     public static class MethodHandleMirror {
 
         public MethodType type;
-        public Object different; // TODO: check offset
-        public MethodHandleImplMirror cachedSpreadInvoker;
+        public Object different1;
+        public Object different2;
         public int handleKind;
         public long artFieldOrMethod;
     }
@@ -144,7 +144,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     public static final int ART_FIELD_SIZE;
     public static final int ART_FIELD_PADDING;
 
-    private static final Method mGetArtField;
+    private static final MethodHandle mGetArtField;
 
     static {
         ClassMirror[] tm = arrayCast(ClassMirror.class, Test.class);
@@ -157,7 +157,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         ART_METHOD_PADDING = (int) (am - tm[0].methods - length_field_size)
                 % ART_METHOD_SIZE + length_field_size;
 
-        mGetArtField = getDeclaredMethod(Field.class, "getArtField");
+        mGetArtField = unreflectDirect(getDeclaredMethod(Field.class, "getArtField"));
 
         long af = getArtField(Test.af);
         long bf = getArtField(Test.bf);
@@ -168,7 +168,6 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         try {
             Class<?> bits = Class.forName("java.nio.Bits");
             Method unaligned = getDeclaredMethod(bits, "unaligned");
-            setAccessible(unaligned, true);
             //noinspection ConstantConditions
             UNALIGNED_ACCESS = (boolean) unaligned.invoke(null);
         } catch (@SuppressWarnings("UseSpecificCatch") Throwable ignored) {
@@ -217,7 +216,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
     }
 
     public static long getArtField(Field f) {
-        return (long) nothrows_run(() -> mGetArtField.invoke(f), true);
+        return (long) nothrows_run(() -> mGetArtField.invoke(f));
     }
 
     public static Executable[] getDeclaredExecutables0(Class<?> clazz) {
@@ -237,7 +236,9 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         for (int i = 0; i < col; i++) {
             mhh[0].artFieldOrMethod = methods + ART_METHOD_PADDING + (long) ART_METHOD_SIZE * i;
             mhh[0].info = null;
-            out[i] = MethodHandles.reflectAs(Executable.class, mh);
+            Executable tmp = MethodHandles.reflectAs(Executable.class, mh);
+            setAccessible(tmp, true);
+            out[i] = tmp;
         }
         return out;
     }
@@ -260,7 +261,9 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
             mhh[0].artFieldOrMethod = fields + ART_FIELD_PADDING + (long) ART_FIELD_SIZE * i;
             mhh[0].info = null;
             mhh[0].handleKind = Integer.MAX_VALUE;
-            out[i] = MethodHandles.reflectAs(Field.class, mh);
+            Field tmp = MethodHandles.reflectAs(Field.class, mh);
+            setAccessible(tmp, true);
+            out[i] = tmp;
         }
         return out;
     }
@@ -293,13 +296,14 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         ExecutableMirror[] eb = arrayCast(ExecutableMirror.class, ct, out);
 
         eb[1].override = eb[0].override;
-        eb[1].accessFlags = eb[0].accessFlags;
-        eb[1].artMethod = eb[0].artMethod;
-        eb[1].hasRealParameterData = eb[0].hasRealParameterData;
-        eb[1].declaringClass = eb[0].declaringClass;
-        eb[1].dexMethodIndex = eb[0].dexMethodIndex;
+
         eb[1].hasRealParameterData = eb[0].hasRealParameterData;
         eb[1].parameters = eb[0].parameters;
+        eb[1].accessFlags = eb[0].accessFlags;
+        eb[1].artMethod = eb[0].artMethod;
+        eb[1].declaringClass = eb[0].declaringClass;
+        eb[1].declaringClassOfOverriddenMethod = eb[0].declaringClassOfOverriddenMethod;
+        eb[1].dexMethodIndex = eb[0].dexMethodIndex;
 
         return out;
     }
@@ -357,5 +361,30 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
             c = c.getSuperclass();
         }
         return out.toArray(new Method[0]);
+    }
+
+    public static MethodHandle unreflect(Method m) {
+        setAccessible(m, true);
+        return nothrows_run(() -> MethodHandles.publicLookup().unreflect(m));
+    }
+
+    public static MethodHandle unreflect(Constructor<?> c) {
+        setAccessible(c, true);
+        return nothrows_run(() -> MethodHandles.publicLookup().unreflectConstructor(c));
+    }
+
+    public static MethodHandle unreflectDirect(Method m) {
+        int modifiers = m.getModifiers();
+        if (Modifier.isAbstract(modifiers) || Modifier.isStatic(modifiers)) {
+            throw new IllegalArgumentException("only non-static and non-abstract methods allowed");
+        }
+
+        setAccessible(m, true);
+        MethodHandle out = nothrows_run(() -> MethodHandles.publicLookup().unreflect(m));
+
+        MethodHandleMirror[] mhm = arrayCast(MethodHandleMirror.class, out);
+        mhm[0].handleKind = /*INVOKE_DIRECT*/ 2;
+
+        return out;
     }
 }

@@ -4,13 +4,13 @@ import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.isSigned32Bit;
 import static com.v7878.unsafe.Utils.nothrows_run;
 import static com.v7878.unsafe.Utils.roundUp;
-import static com.v7878.unsafe.Utils.searchField;
-import static com.v7878.unsafe.Utils.searchMethod;
+import static com.v7878.unsafe.Utils.runOnce;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 @DangerLevel(4)
 public class AndroidUnsafe4 extends AndroidUnsafe3 {
@@ -44,12 +44,22 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     public static final int OBJECT_FIELD_SIZE_SHIFT = 2;
     public static final int OBJECT_FIELD_SIZE = 1 << OBJECT_FIELD_SIZE_SHIFT;
 
-    private static Field shadow$_klass_;
-    private static Field shadow$_monitor_;
-    private static Method newNonMovableArray;
-    private static Method addressOf;
-    private static Object vmruntime;
-    private static Method internalClone;
+    private static final Supplier<Field> shadow$_klass_ =
+            runOnce(() -> getDeclaredField(Object.class, "shadow$_klass_"));
+    private static final Supplier<Field> shadow$_monitor_ =
+            runOnce(() -> getDeclaredField(Object.class, "shadow$_monitor_"));
+    private static final Supplier<Object> vmruntime = runOnce(() -> {
+        Class<?> vmrc = nothrows_run(() -> Class.forName("dalvik.system.VMRuntime"));
+        return allocateInstance(vmrc);
+    });
+    private static final Supplier<MethodHandle> newNonMovableArray =
+            runOnce(() -> unreflectDirect(getDeclaredMethod(vmruntime.get().getClass(),
+                    "newNonMovableArray", Class.class, int.class)));
+    private static final Supplier<MethodHandle> addressOf =
+            runOnce(() -> unreflectDirect(getDeclaredMethod(vmruntime.get().getClass(),
+                    "addressOf", Object.class)));
+    private static final Supplier<MethodHandle> internalClone =
+            runOnce(() -> unreflectDirect(getDeclaredMethod(Object.class, "internalClone")));
 
     static {
         assert_(ARRAY_OBJECT_INDEX_SCALE == OBJECT_FIELD_SIZE, RuntimeException::new,
@@ -60,50 +70,17 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
                 "OBJECT_SIZE must be equal to 8");
     }
 
-    private synchronized static void initShadow() {
-        if (shadow$_monitor_ == null) {
-            Field[] fds = getDeclaredFields0(Object.class, false);
-            shadow$_klass_ = searchField(fds, "shadow$_klass_", true);
-            setAccessible(shadow$_klass_, true);
-            shadow$_monitor_ = searchField(fds, "shadow$_monitor_", true);
-            setAccessible(shadow$_monitor_, true);
-        }
-    }
-
-    private synchronized static void initVMRuntime() {
-        if (vmruntime == null) {
-            Class<?> vmrc = nothrows_run(() -> Class.forName("dalvik.system.VMRuntime"));
-            Method[] mtds = getDeclaredMethods(vmrc);
-            newNonMovableArray = searchMethod(mtds, "newNonMovableArray", true,
-                    Class.class, int.class);
-            addressOf = searchMethod(mtds, "addressOf", true, Object.class);
-            Method gr = searchMethod(mtds, "getRuntime", true);
-            //noinspection ConstantConditions
-            vmruntime = nothrows_run(() -> gr.invoke(null), true);
-        }
-    }
-
-    private synchronized static void initInternalClone() {
-        if (internalClone == null) {
-            internalClone = getDeclaredMethod(Object.class, "internalClone");
-            setAccessible(internalClone, true);
-        }
-    }
-
     public static Field getShadowKlassField() {
-        initShadow();
-        return shadow$_klass_;
+        return shadow$_klass_.get();
     }
 
     public static Field getShadowMonitorField() {
-        initShadow();
-        return shadow$_monitor_;
+        return shadow$_monitor_.get();
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T internalClone(T obj) {
-        initInternalClone();
-        return (T) nothrows_run(() -> internalClone.invoke(obj), true);
+        return (T) nothrows_run(() -> internalClone.get().invoke(obj));
     }
 
     @DangerLevel(DangerLevel.VERY_CAREFUL)
@@ -115,13 +92,12 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     }
 
     public static Object newNonMovableArrayVM(Class<?> componentType, int length) {
-        initVMRuntime();
-        return nothrows_run(() -> newNonMovableArray.invoke(vmruntime, componentType, length), true);
+        return nothrows_run(() -> newNonMovableArray.get()
+                .invoke(vmruntime.get(), componentType, length));
     }
 
     public static long addressOfNonMovableArrayData(Object array) {
-        initVMRuntime();
-        return (long) nothrows_run(() -> addressOf.invoke(vmruntime, array), true);
+        return (long) nothrows_run(() -> addressOf.get().invoke(vmruntime.get(), array));
     }
 
     public static long addressOfNonMovableArray(Object array) {
@@ -228,11 +204,9 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         if (obj instanceof Class) {
             return classSizeField((Class<?>) obj);
         }
-        @SuppressWarnings("null")
         Class<?> clazz = obj.getClass();
         if (clazz.isArray()) {
-            return arrayBaseOffset(clazz)
-                    + arrayIndexScale(clazz) * getArrayLength(obj);
+            return arrayBaseOffset(clazz) + arrayIndexScale(clazz) * getArrayLength(obj);
         }
         return objectSizeField(clazz);
     }
@@ -315,50 +289,42 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return rawIntToObject(getIntN(address));
     }
 
-    private static Boolean kPoisonReferences;
-
-    @DangerLevel(DangerLevel.MAX)
-    private static synchronized void initKPoisonReferences() {
-        if (kPoisonReferences == null) {
-            Object test = allocateNonMovableObject(0);
-            long address = addressOfNonMovableArray(test);
-            assert_(isSigned32Bit(address), IllegalStateException::new);
-            int real = (int) address;
-            int raw = rawObjectToInt(test);
-            if (real == raw) {
-                kPoisonReferences = false;
-            } else if (real == -raw) {
-                kPoisonReferences = true;
-            } else {
-                throw new IllegalStateException(real + " " + raw);
-            }
+    private static final Supplier<Boolean> kPoisonReferences = runOnce(() -> {
+        Object test = allocateNonMovableObject(0);
+        long address = addressOfNonMovableArray(test);
+        assert_(isSigned32Bit(address), IllegalStateException::new);
+        int real = (int) address;
+        int raw = rawObjectToInt(test);
+        if (real == raw) {
+            return false;
+        } else if (real == -raw) {
+            return true;
+        } else {
+            throw new IllegalStateException(real + " " + raw);
         }
-    }
+    });
 
     @DangerLevel(DangerLevel.MAX)
     public static int objectToInt(Object obj) {
-        initKPoisonReferences();
         int out = rawObjectToInt(obj);
-        return kPoisonReferences ? -out : out;
+        return kPoisonReferences.get() ? -out : out;
     }
 
     @DangerLevel(DangerLevel.MAX)
     public static Object intToObject(int obj) {
-        initKPoisonReferences();
-        return rawIntToObject(kPoisonReferences ? -obj : obj);
+        return rawIntToObject(kPoisonReferences.get() ? -obj : obj);
     }
 
-    private static Class<?> voidArrayClass;
+    private static final Supplier<Class<?>> voidArrayClass = runOnce(() -> {
+        Class<?> out = cloneBySize(int[].class);
+        ClassMirror[] clh = arrayCast(ClassMirror.class, out);
+        clh[0].componentType = void.class;
+        clh[0].name = null;
+        return out;
+    });
 
     @DangerLevel(DangerLevel.MAX)
-    public synchronized static Class<?> getVoidArrayClass() {
-        if (voidArrayClass == null) {
-            Class<?> nc = cloneBySize(int[].class);
-            ClassMirror[] clh = arrayCast(ClassMirror.class, nc);
-            clh[0].componentType = void.class;
-            clh[0].name = null;
-            voidArrayClass = nc;
-        }
-        return voidArrayClass;
+    public static Class<?> getVoidArrayClass() {
+        return voidArrayClass.get();
     }
 }

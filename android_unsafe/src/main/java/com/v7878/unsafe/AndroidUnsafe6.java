@@ -322,11 +322,8 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
         }
     });
 
-    private static final Field threadNativePeer = nothrows_run(() -> {
-        Field tmp = getDeclaredField(Thread.class, "nativePeer");
-        setAccessible(tmp, true);
-        return tmp;
-    });
+    private static final Field threadNativePeer = nothrows_run(
+            () -> getDeclaredField(Thread.class, "nativePeer"));
 
     public static Pointer getNativePeer(Thread thread) {
         Objects.requireNonNull(thread);

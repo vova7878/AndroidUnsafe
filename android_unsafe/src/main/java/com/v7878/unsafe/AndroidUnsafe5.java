@@ -3,6 +3,7 @@ package com.v7878.unsafe;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.nothrows_run;
+import static com.v7878.unsafe.Utils.runOnce;
 import static com.v7878.unsafe.memory.LayoutPath.PathElement.groupElement;
 import static com.v7878.unsafe.memory.ValueLayout.ADDRESS;
 import static com.v7878.unsafe.memory.ValueLayout.JAVA_BOOLEAN;
@@ -26,6 +27,7 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import dalvik.system.DexFile;
 
@@ -254,11 +256,8 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
 
     private static final Class<?> dexCacheClass
             = nothrows_run(() -> Class.forName("java.lang.DexCache"));
-    private static final Field dexFile = nothrows_run(() -> {
-        Field tmp = getDeclaredField(dexCacheClass, "dexFile");
-        setAccessible(tmp, true);
-        return tmp;
-    });
+    private static final Field dexFile = nothrows_run(
+            () -> getDeclaredField(dexCacheClass, "dexFile"));
 
     public static Object getDexCache(Class<?> clazz) {
         ClassMirror[] m = arrayCast(ClassMirror.class, clazz);
@@ -296,33 +295,25 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         return getArtMethodLayout().bind(getArtMethodPointer(ex));
     }
 
-    private static Constructor<DexFile> dex_constructor;
-
-    private synchronized static void initDex() {
-        if (dex_constructor == null) {
-            if (getSdkInt() >= 26 && getSdkInt() <= 28) {
-                dex_constructor = nothrows_run(() -> getDeclaredConstructor(
-                        DexFile.class, ByteBuffer.class));
-            } else if (getSdkInt() >= 29 && getSdkInt() <= 34) {
-                Class<?> dex_path_list_elements = nothrows_run(
-                        () -> Class.forName("[Ldalvik.system.DexPathList$Element;"));
-                dex_constructor = nothrows_run(() -> getDeclaredConstructor(
-                        DexFile.class, ByteBuffer[].class,
-                        ClassLoader.class, dex_path_list_elements));
-            } else {
-                throw new IllegalStateException("unsupported sdk: " + getSdkInt());
-            }
-            setAccessible(dex_constructor, true);
+    private static final Supplier<Constructor<DexFile>> dex_constructor = runOnce(() -> {
+        if (getSdkInt() >= 26 && getSdkInt() <= 28) {
+            return getDeclaredConstructor(DexFile.class, ByteBuffer.class);
         }
-    }
+        if (getSdkInt() >= 29 && getSdkInt() <= 34) {
+            Class<?> dex_path_list_elements = nothrows_run(
+                    () -> Class.forName("[Ldalvik.system.DexPathList$Element;"));
+            return getDeclaredConstructor(DexFile.class, ByteBuffer[].class,
+                    ClassLoader.class, dex_path_list_elements);
+        }
+        throw new IllegalStateException("unsupported sdk: " + getSdkInt());
+    });
 
     public static DexFile openDexFile(ByteBuffer data) {
-        initDex();
         if (getSdkInt() >= 26 && getSdkInt() <= 28) {
-            return nothrows_run(() -> dex_constructor.newInstance(data), true);
+            return nothrows_run(() -> dex_constructor.get().newInstance(data));
         } else if (getSdkInt() >= 29 && getSdkInt() <= 34) {
-            return nothrows_run(() -> dex_constructor.newInstance(
-                    new ByteBuffer[]{data}, null, null), true);
+            return nothrows_run(() -> dex_constructor.get().newInstance(
+                    new ByteBuffer[]{data}, null, null));
         } else {
             throw new IllegalStateException("unsupported sdk: " + getSdkInt());
         }
@@ -332,48 +323,28 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         return openDexFile(ByteBuffer.wrap(data));
     }
 
-    private static Method set_dex_trusted;
-
-    private synchronized static void initSetTrusted() {
-        if (getSdkInt() >= 26 && getSdkInt() <= 27) {
-            return;
+    private static final Supplier<Method> set_dex_trusted = runOnce(() -> {
+        if (getSdkInt() >= 28 && getSdkInt() <= 34) {
+            return getDeclaredMethod(DexFile.class, "setTrusted");
         }
-        if (set_dex_trusted == null) {
-            if (getSdkInt() >= 28 && getSdkInt() <= 34) {
-                set_dex_trusted = nothrows_run(() -> getDeclaredMethod(
-                        DexFile.class, "setTrusted"));
-            } else {
-                throw new IllegalStateException("unsupported sdk: " + getSdkInt());
-            }
-            setAccessible(set_dex_trusted, true);
-        }
-    }
+        throw new IllegalStateException("unsupported sdk: " + getSdkInt());
+    });
 
     public static void setTrusted(DexFile dex) {
         if (getSdkInt() >= 26 && getSdkInt() <= 27) {
             return;
         }
-        initSetTrusted();
-        nothrows_run(() -> set_dex_trusted.invoke(dex), true);
+        nothrows_run(() -> set_dex_trusted.get().invoke(dex));
     }
 
-    private static Method loadClassBinaryName;
-
-    private synchronized static void initLoad() {
-        if (loadClassBinaryName == null) {
-            loadClassBinaryName = getDeclaredMethod(DexFile.class,
-                    "loadClassBinaryName", String.class,
-                    ClassLoader.class, List.class);
-            setAccessible(loadClassBinaryName, true);
-        }
-    }
+    private static final Supplier<Method> loadClassBinaryName = runOnce(
+            () -> getDeclaredMethod(DexFile.class, "loadClassBinaryName",
+                    String.class, ClassLoader.class, List.class));
 
     public static Class<?> loadClass(DexFile dex, String name, ClassLoader loader) {
-        initLoad();
         List<Throwable> suppressed = new ArrayList<>();
-        Class<?> out = (Class<?>) nothrows_run(() -> loadClassBinaryName
-                .invoke(dex, name.replace('.', '/'),
-                        loader, suppressed), true);
+        Class<?> out = (Class<?>) nothrows_run(() -> loadClassBinaryName.get()
+                .invoke(dex, name.replace('.', '/'), loader, suppressed));
         if (!suppressed.isEmpty()) {
             RuntimeException err = new RuntimeException();
             for (Throwable tmp : suppressed) {
@@ -384,9 +355,8 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         return out;
     }
 
-    private static final long DATA_OFFSET = getArtMethodLayout()
-            .selectPath(groupElement("ptr_sized_fields_"),
-                    groupElement("data_")).offset();
+    private static final long DATA_OFFSET = getArtMethodLayout().selectPath(
+            groupElement("ptr_sized_fields_"), groupElement("data_")).offset();
 
     public static Pointer getExecutableData(Executable ex) {
         long art_method = getArtMethod(ex);

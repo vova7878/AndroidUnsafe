@@ -4,10 +4,10 @@ import static com.v7878.unsafe.AndroidUnsafe.getObject;
 import static com.v7878.unsafe.AndroidUnsafe.objectFieldOffset;
 import static com.v7878.unsafe.AndroidUnsafe3.getDeclaredField;
 import static com.v7878.unsafe.AndroidUnsafe3.getDeclaredMethod;
-import static com.v7878.unsafe.AndroidUnsafe3.setAccessible;
 import static com.v7878.unsafe.Utils.nothrows_run;
 import static com.v7878.unsafe.Utils.toHexString;
 
+import com.v7878.unsafe.DangerLevel;
 import com.v7878.unsafe.dex.TypeId;
 
 import java.lang.invoke.MethodType;
@@ -49,7 +49,6 @@ public final class EmulatedStackFrame {
 
     private static final Method esf_create = nothrows_run(() -> {
         Method out = getDeclaredMethod(esf_class, "create", MethodType.class);
-        setAccessible(out, true);
         return out;
     });
 
@@ -69,6 +68,7 @@ public final class EmulatedStackFrame {
         return objectFieldOffset(tmp);
     });
 
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public Object[] references() {
         return (Object[]) getObject(esf, references_offset);
     }
@@ -78,6 +78,7 @@ public final class EmulatedStackFrame {
         return objectFieldOffset(tmp);
     });
 
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public byte[] stackFrame() {
         return (byte[]) getObject(esf, stackFrame_offset);
     }
@@ -98,6 +99,7 @@ public final class EmulatedStackFrame {
     }
 
     /*//TODO
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static void copyArguments(StackFrameAccessor reader, int reader_start_idx,
                                      StackFrameAccessor writer, int writer_start_idx, int count) {
         checkFromIndexSize(reader_start_idx, count,
@@ -227,7 +229,7 @@ public final class EmulatedStackFrame {
 
         public StackFrameAccessor moveTo(int argumentIndex) {
             if (argumentIndex == RETURN_VALUE_IDX) {
-                makeReturnValueAccessor();
+                moveToReturn();
             } else {
                 referencesOffset = referencesOffsets[argumentIndex];
                 frameBuf.position(frameOffsets[argumentIndex]);
@@ -236,7 +238,7 @@ public final class EmulatedStackFrame {
             return this;
         }
 
-        private void makeReturnValueAccessor() {
+        private void moveToReturn() {
             Class<?> rtype = frame.type().returnType();
             argumentIdx = RETURN_VALUE_IDX;
             // Position the cursor appropriately. The return value is either the last element

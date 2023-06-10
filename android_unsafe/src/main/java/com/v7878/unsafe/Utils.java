@@ -6,7 +6,6 @@ import com.v7878.Thrower;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -64,8 +63,7 @@ public class Utils {
                 return m;
             }
         }
-        assert_(!thw, NoSuchMethodException::new,
-                methodToString(name, parameterTypes));
+        assert_(!thw, NoSuchMethodException::new, methodToString(name, parameterTypes));
         return null;
     }
 
@@ -76,8 +74,7 @@ public class Utils {
                 return c;
             }
         }
-        assert_(!thw, NoSuchMethodException::new,
-                methodToString("<init>", parameterTypes));
+        assert_(!thw, NoSuchMethodException::new, methodToString("<init>", parameterTypes));
         return null;
     }
 
@@ -120,38 +117,40 @@ public class Utils {
         void run() throws Throwable;
     }
 
-    public static <T> T nothrows_run(TRun<T> r, boolean tie) {
+    public static <T> T nothrows_run(TRun<T> r) {
         try {
             return r.run();
         } catch (Throwable th) {
-            Throwable err = th;
-            if (tie && (err instanceof InvocationTargetException)) {
-                err = err.getCause();
-            }
-            Thrower.throwException(err);
-            throw new RuntimeException(err);
-        }
-    }
-
-    public static <T> T nothrows_run(TRun<T> r) {
-        return nothrows_run(r, false);
-    }
-
-    public static void nothrows_run(VTRun r, boolean tie) {
-        try {
-            r.run();
-        } catch (Throwable th) {
-            Throwable err = th;
-            if (tie && (err instanceof InvocationTargetException)) {
-                err = err.getCause();
-            }
-            Thrower.throwException(err);
-            throw new RuntimeException(err);
+            Thrower.throwException(th);
+            throw new RuntimeException(th);
         }
     }
 
     public static void nothrows_run(VTRun r) {
-        nothrows_run(r, false);
+        try {
+            r.run();
+        } catch (Throwable th) {
+            Thrower.throwException(th);
+            throw new RuntimeException(th);
+        }
+    }
+
+    public static <T> Supplier<T> runOnce(Supplier<T> task) {
+        return new Supplier<T>() {
+            volatile T value;
+
+            @Override
+            public T get() {
+                if (value == null) {
+                    synchronized (this) {
+                        if (value == null) {
+                            value = task.get();
+                        }
+                    }
+                }
+                return value;
+            }
+        };
     }
 
     public static String toHexString(byte[] arr) {

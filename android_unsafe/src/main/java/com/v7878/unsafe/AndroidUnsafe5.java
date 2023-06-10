@@ -323,18 +323,42 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         return openDexFile(ByteBuffer.wrap(data));
     }
 
-    private static final Supplier<MethodHandle> set_dex_trusted = runOnce(() -> {
-        if (getSdkInt() >= 28 && getSdkInt() <= 34) {
-            return unreflectDirect(getDeclaredMethod(DexFile.class, "setTrusted"));
+    private static final Field cookie = nothrows_run(
+            () -> getDeclaredField(DexFile.class, "mCookie"));
+
+    public static long[] getCookie(DexFile dex) {
+        return (long[]) nothrows_run(() -> cookie.get(dex));
+    }
+
+    public static void setTrusted(Addressable dexfile) {
+        if (getSdkInt() >= 26 && getSdkInt() <= 27) {
+            return;
+        }
+        if (getSdkInt() == 28) {
+            getDexFileLayout().bind(dexfile).select(groupElement("is_platform_dex_"))
+                    .put(JAVA_BOOLEAN, 0, true);
+            return;
+        }
+        if (getSdkInt() >= 29 && getSdkInt() <= 34) {
+            getDexFileLayout().bind(dexfile).select(groupElement("hiddenapi_domain_"))
+                    .put(JAVA_BYTE, 0, /*kCorePlatform*/ (byte) 0);
+            return;
         }
         throw new IllegalStateException("unsupported sdk: " + getSdkInt());
-    });
+    }
 
     public static void setTrusted(DexFile dex) {
         if (getSdkInt() >= 26 && getSdkInt() <= 27) {
             return;
         }
-        nothrows_run(() -> set_dex_trusted.get().invoke(dex));
+        if (getSdkInt() >= 28 && getSdkInt() <= 34) {
+            long[] cookie = getCookie(dex);
+            for (int i = 1; i < cookie.length; i++) {
+                setTrusted(new Pointer(cookie[i]));
+            }
+            return;
+        }
+        throw new IllegalStateException("unsupported sdk: " + getSdkInt());
     }
 
     private static final Supplier<MethodHandle> loadClassBinaryName = runOnce(

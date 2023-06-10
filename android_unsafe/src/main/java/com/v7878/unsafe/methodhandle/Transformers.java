@@ -1,6 +1,7 @@
 package com.v7878.unsafe.methodhandle;
 
 import static com.v7878.unsafe.AndroidUnsafe3.arrayCast;
+import static com.v7878.unsafe.AndroidUnsafe3.unreflectDirect;
 import static com.v7878.unsafe.AndroidUnsafe5.allocateInstance;
 import static com.v7878.unsafe.AndroidUnsafe5.fullFence;
 import static com.v7878.unsafe.AndroidUnsafe5.getDeclaredMethod;
@@ -52,7 +53,8 @@ public class Transformers {
             () -> Class.forName("java.lang.invoke.Transformers$Transformer"));
     private static final Class<MethodHandle> transformer;
     private static final Constructor<MethodHandle> transformer_constructor;
-    private static final Method transformer_superAsType;
+    private static final MethodHandle directAsType = nothrows_run(() -> unreflectDirect(
+            getDeclaredMethod(MethodHandle.class, "asType", MethodType.class)));
     private static final InvokerI invoker;
 
     //TODO: Cloneable?
@@ -163,21 +165,6 @@ public class Transformers {
                 )
         );
 
-        code.clear();
-        code.add(new InvokeKind.InvokeSuper(2,
-                new MethodId(mh, new ProtoId(mh, mt), "asType"),
-                0, 1, 0, 0, 0));
-        code.add(new MoveResultObject(0));
-        code.add(new ReturnObject(0));
-
-        transformer_def.getClassData().getVirtualMethods().add(
-                new EncodedMethod(
-                        new MethodId(transformer_id, new ProtoId(mh, mt), "superAsType"),
-                        Modifier.PUBLIC, null, null,
-                        new CodeItem(2, 2, 2, code, null)
-                )
-        );
-
         String invoker_name = Transformers.class.getName() + "$Invoker";
         TypeId invoker_id = TypeId.of(invoker_name);
 
@@ -249,9 +236,6 @@ public class Transformers {
 
         transformer_constructor = nothrows_run(() -> transformer.getDeclaredConstructor(
                 MethodType.class, TransformerImpl.class));
-
-        transformer_superAsType = nothrows_run(() -> transformer.getDeclaredMethod(
-                "superAsType", MethodType.class));
     }
 
     private static MethodHandle makeTransformer(MethodType type, TransformerImpl impl) {
@@ -266,7 +250,7 @@ public class Transformers {
         MethodHandle out = nothrows_run(() -> transformer_constructor.newInstance(fixed, impl));
         if (getSdkInt() < 33) {
             //TODO: improve
-            MethodHandleMirror m[] = arrayCast(MethodHandleMirror.class, out);
+            MethodHandleMirror[] m = arrayCast(MethodHandleMirror.class, out);
             m[0].handleKind = /*INVOKE_CALLSITE_TRANSFORM*/ 6;
         }
         return out;
@@ -324,7 +308,7 @@ public class Transformers {
 
             @Override
             MethodHandle asType(MethodHandle thiz, MethodType newType) {
-                return nothrows_run(() -> (MethodHandle) transformer_superAsType.invoke(thiz, newType));
+                return nothrows_run(() -> (MethodHandle) directAsType.invoke(thiz, newType));
             }
         };
     }

@@ -4,15 +4,16 @@ import static com.v7878.unsafe.AndroidUnsafe.getObject;
 import static com.v7878.unsafe.AndroidUnsafe.objectFieldOffset;
 import static com.v7878.unsafe.AndroidUnsafe3.getDeclaredField;
 import static com.v7878.unsafe.AndroidUnsafe3.getDeclaredMethod;
+import static com.v7878.unsafe.AndroidUnsafe3.unreflect;
 import static com.v7878.unsafe.Utils.nothrows_run;
 import static com.v7878.unsafe.Utils.toHexString;
 
 import com.v7878.unsafe.DangerLevel;
 import com.v7878.unsafe.dex.TypeId;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -47,14 +48,11 @@ public final class EmulatedStackFrame {
         return new EmulatedStackFrame(esf);
     }
 
-    private static final Method esf_create = nothrows_run(() -> {
-        Method out = getDeclaredMethod(esf_class, "create", MethodType.class);
-        return out;
-    });
+    private static final MethodHandle esf_create = nothrows_run(
+            () -> unreflect(getDeclaredMethod(esf_class, "create", MethodType.class)));
 
     public static EmulatedStackFrame create(MethodType frameType) {
-        return new EmulatedStackFrame(nothrows_run(
-                () -> esf_create.invoke(null, frameType)));
+        return new EmulatedStackFrame(nothrows_run(() -> esf_create.invoke(frameType)));
     }
 
     final Object esf;

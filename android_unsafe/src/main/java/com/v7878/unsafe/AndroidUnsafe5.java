@@ -20,10 +20,10 @@ import com.v7878.unsafe.memory.GroupLayout;
 import com.v7878.unsafe.memory.MemorySegment;
 import com.v7878.unsafe.memory.Pointer;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -323,9 +323,9 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         return openDexFile(ByteBuffer.wrap(data));
     }
 
-    private static final Supplier<Method> set_dex_trusted = runOnce(() -> {
+    private static final Supplier<MethodHandle> set_dex_trusted = runOnce(() -> {
         if (getSdkInt() >= 28 && getSdkInt() <= 34) {
-            return getDeclaredMethod(DexFile.class, "setTrusted");
+            return unreflectDirect(getDeclaredMethod(DexFile.class, "setTrusted"));
         }
         throw new IllegalStateException("unsupported sdk: " + getSdkInt());
     });
@@ -337,9 +337,9 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         nothrows_run(() -> set_dex_trusted.get().invoke(dex));
     }
 
-    private static final Supplier<Method> loadClassBinaryName = runOnce(
-            () -> getDeclaredMethod(DexFile.class, "loadClassBinaryName",
-                    String.class, ClassLoader.class, List.class));
+    private static final Supplier<MethodHandle> loadClassBinaryName = runOnce(
+            () -> unreflectDirect(getDeclaredMethod(DexFile.class, "loadClassBinaryName",
+                    String.class, ClassLoader.class, List.class)));
 
     public static Class<?> loadClass(DexFile dex, String name, ClassLoader loader) {
         List<Throwable> suppressed = new ArrayList<>();

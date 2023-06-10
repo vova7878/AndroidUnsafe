@@ -22,6 +22,7 @@ import java.util.Objects;
 @DangerLevel(6)
 public class AndroidUnsafe6 extends AndroidUnsafe5 {
 
+    //TODO: set content
     private static final GroupLayout jni_native_interface = structLayout(
             ADDRESS.withName("reserved0"),
             ADDRESS.withName("reserved1"),
@@ -258,6 +259,7 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
             ADDRESS.withName("GetObjectRefType")
     );
 
+    //TODO: set content
     private static final GroupLayout jni_invoke_interface = structLayout(
             ADDRESS.withName("reserved0"),
             ADDRESS.withName("reserved1"),

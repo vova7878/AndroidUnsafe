@@ -239,7 +239,7 @@ public final class EmulatedStackFrame {
             return this;
         }
 
-        private void moveToReturn() {
+        public void moveToReturn() {
             Class<?> rtype = frame.type().returnType();
             argumentIdx = RETURN_VALUE_IDX;
             // Position the cursor appropriately. The return value is either the last element

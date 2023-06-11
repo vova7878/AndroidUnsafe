@@ -59,9 +59,10 @@ public class Transformers {
             getDeclaredMethod(MethodHandle.class, "asType", MethodType.class)));
     private static final MethodHandle directAsVarargsCollector = nothrows_run(() -> unreflectDirect(
             getDeclaredMethod(MethodHandle.class, "asVarargsCollector", Class.class)));
+    private static final MethodHandle directBindTo = nothrows_run(() -> unreflectDirect(
+            getDeclaredMethod(MethodHandle.class, "bindTo", Object.class)));
     private static final InvokerI invoker;
 
-    //TODO: bindTo?
     static {
         TypeId mh = TypeId.of(MethodHandle.class);
         TypeId mt = TypeId.of(MethodType.class);
@@ -208,6 +209,26 @@ public class Transformers {
                 )
         );
 
+        //public MethodHandle bindTo(Object value) {
+        //    return impl.bindTo(this, value);
+        //}
+        code.clear();
+        code.add(new IGetObject(0, 1, impl_field));
+        code.add(new InvokeVirtual(3, new MethodId(TypeId.of(TransformerImpl.class),
+                new ProtoId(mh, mh, TypeId.of(Object.class)), "bindTo"),
+                0, 1, 2, 0, 0));
+        code.add(new MoveResultObject(0));
+        code.add(new ReturnObject(0));
+
+        transformer_def.getClassData().getVirtualMethods().add(
+                new EncodedMethod(
+                        new MethodId(transformer_id, new ProtoId(mh, TypeId.of(Object.class)),
+                                "bindTo"),
+                        Modifier.PUBLIC, null, null,
+                        new CodeItem(3, 2, 3, code, null)
+                )
+        );
+
         //public String toString() {
         //    return impl.toString(this);
         //}
@@ -332,7 +353,7 @@ public class Transformers {
     }
 
     public static MethodHandle makeVarargsTransformer(MethodType fixed, TransformerF callback) {
-        return makeVarargsTransformer(fixed, varargsImpl(fixed, callback));
+        return makeVarargsTransformer(fixed, varargsImpl(callback));
     }
 
     public static MethodHandle makeVarargsTransformer(TransformerF callback) {
@@ -407,6 +428,11 @@ public class Transformers {
             }
 
             @Override
+            MethodHandle bindTo(MethodHandle thiz, Object value) {
+                return nothrows_run(() -> (MethodHandle) directBindTo.invoke(thiz, value));
+            }
+
+            @Override
             MethodHandle asVarargsCollector(MethodHandle thiz, Class<?> arrayType) {
                 return (MethodHandle) nothrows_run(
                         () -> directAsVarargsCollector.invoke(thiz, arrayType));
@@ -420,7 +446,7 @@ public class Transformers {
     }
 
     //TODO: checks
-    private static TransformerImpl varargsImpl(MethodType fixed, TransformerF callback) {
+    private static TransformerImpl varargsImpl(TransformerF callback) {
         return new TransformerImpl() {
             @Override
             void transform(MethodHandle thiz, EmulatedStackFrame stackFrame) throws Throwable {
@@ -434,13 +460,19 @@ public class Transformers {
 
             @Override
             MethodHandle asFixedArity(MethodHandle thiz) {
-                return asType(thiz, fixed);
+                return asType(thiz, thiz.type());
             }
 
             @Override
             MethodHandle asType(MethodHandle ignored, MethodType newType) {
                 //TODO: maybe caching?
                 return makeTransformer(newType, callback);
+            }
+
+            @Override
+            MethodHandle bindTo(MethodHandle thiz, Object value) {
+                //TODO
+                throw new UnsupportedOperationException("Not implemented yet");
             }
 
             @Override
@@ -461,11 +493,13 @@ public class Transformers {
 
         abstract boolean isVarargsCollector(MethodHandle thiz);
 
+        abstract MethodHandle asVarargsCollector(MethodHandle thiz, Class<?> arrayType);
+
         abstract MethodHandle asFixedArity(MethodHandle thiz);
 
         abstract MethodHandle asType(MethodHandle thiz, MethodType newType);
 
-        abstract MethodHandle asVarargsCollector(MethodHandle thiz, Class<?> arrayType);
+        abstract MethodHandle bindTo(MethodHandle thiz, Object value);
 
         abstract String toString(MethodHandle thiz);
     }

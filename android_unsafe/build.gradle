@@ -15,7 +15,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -28,4 +28,5 @@ android {
 dependencies {
     implementation files('libs/Thrower.jar')
     implementation project(path: ':sun_unsafe')
+    compileOnly 'androidx.annotation:annotation:+'
 }

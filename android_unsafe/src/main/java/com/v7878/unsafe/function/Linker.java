@@ -18,6 +18,8 @@ import static com.v7878.unsafe.methodhandle.Transformers.makeTransformer;
 
 import android.util.Pair;
 
+import androidx.annotation.Keep;
+
 import com.v7878.unsafe.dex.AnnotationItem;
 import com.v7878.unsafe.dex.AnnotationSet;
 import com.v7878.unsafe.dex.ClassDef;
@@ -49,6 +51,7 @@ import java.util.Objects;
 
 import dalvik.system.DexFile;
 
+@Keep
 class Test {
 }
 

@@ -6,6 +6,8 @@ import static com.v7878.unsafe.Utils.nothrows_run;
 import static com.v7878.unsafe.Utils.roundUp;
 import static com.v7878.unsafe.Utils.runOnce;
 
+import androidx.annotation.Keep;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -15,11 +17,13 @@ import java.util.function.Supplier;
 @DangerLevel(4)
 public class AndroidUnsafe4 extends AndroidUnsafe3 {
 
+    @Keep
     public static class ArrayMirror {
 
         public int length;
     }
 
+    @Keep
     public static class StringMirror {
 
         public static final boolean COMPACT_STRINGS = nothrows_run(() -> {

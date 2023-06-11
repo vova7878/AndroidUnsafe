@@ -13,6 +13,8 @@ import static com.v7878.unsafe.AndroidUnsafe5.setTrusted;
 import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.nothrows_run;
 
+import androidx.annotation.Keep;
+
 import com.v7878.unsafe.AndroidUnsafe3.MethodHandleMirror;
 import com.v7878.unsafe.dex.ClassDef;
 import com.v7878.unsafe.dex.CodeItem;
@@ -337,6 +339,7 @@ public class Transformers {
         return makeVarargsTransformer(MethodType.methodType(void.class), callback);
     }
 
+    @Keep
     private abstract static class InvokerI {
 
         abstract void transform(MethodHandle handle, Object stackFrame) throws Throwable;
@@ -356,6 +359,7 @@ public class Transformers {
         }
     }
 
+    @Keep
     @FunctionalInterface
     public interface TransformerF {
 
@@ -451,6 +455,7 @@ public class Transformers {
         };
     }
 
+    @Keep
     private abstract static class TransformerImpl {
         abstract void transform(MethodHandle thiz, EmulatedStackFrame stackFrame) throws Throwable;
 

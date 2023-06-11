@@ -8,6 +8,8 @@ import static com.v7878.unsafe.AndroidUnsafe3.unreflect;
 import static com.v7878.unsafe.Utils.nothrows_run;
 import static com.v7878.unsafe.Utils.toHexString;
 
+import androidx.annotation.Keep;
+
 import com.v7878.unsafe.DangerLevel;
 import com.v7878.unsafe.dex.TypeId;
 
@@ -43,6 +45,7 @@ public final class EmulatedStackFrame {
     static final Class<?> esf_class = nothrows_run(
             () -> Class.forName("dalvik.system.EmulatedStackFrame"));
 
+    @Keep
     public static EmulatedStackFrame wrap(Object esf) {
         esf.getClass().asSubclass(esf_class);
         return new EmulatedStackFrame(esf);

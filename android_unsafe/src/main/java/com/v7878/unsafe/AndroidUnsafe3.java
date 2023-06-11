@@ -8,6 +8,8 @@ import static com.v7878.unsafe.Utils.searchMethod;
 
 import android.os.Build;
 
+import androidx.annotation.Keep;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -33,6 +35,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         assert_(Utils.getSdkInt() <= 34, IllegalStateException::new);
     }
 
+    @Keep
     public static class ClassMirror {
 
         public ClassLoader classLoader;
@@ -63,11 +66,13 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         public short virtualMethodsOffset;
     }
 
+    @Keep
     public static class AccessibleObjectMirror {
 
         public boolean override;
     }
 
+    @Keep
     public static class FieldMirror extends AccessibleObjectMirror {
 
         public int accessFlags;
@@ -77,6 +82,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         public Class<?> type;
     }
 
+    @Keep
     public static class ExecutableMirror extends AccessibleObjectMirror {
 
         public volatile boolean hasRealParameterData;
@@ -89,6 +95,7 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         public int dexMethodIndex;
     }
 
+    @Keep
     public static class MethodHandleMirror {
 
         public MethodType type;
@@ -98,17 +105,20 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
         public long artFieldOrMethod;
     }
 
+    @Keep
     public static final class MethodHandleImplMirror extends MethodHandleMirror {
 
         public HandleInfoMirror info;
     }
 
+    @Keep
     public static final class HandleInfoMirror {
 
         public Member member;
         public MethodHandleImplMirror handle;
     }
 
+    @Keep
     private static class Test {
 
         public static final Method am = nothrows_run(()

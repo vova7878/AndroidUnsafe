@@ -5,6 +5,7 @@ import static com.v7878.unsafe.AndroidUnsafe3.IS64BIT;
 import static com.v7878.unsafe.AndroidUnsafe3.copyMemory;
 import static com.v7878.unsafe.AndroidUnsafe3.getDeclaredMethod;
 import static com.v7878.unsafe.AndroidUnsafe3.throwException;
+import static com.v7878.unsafe.AndroidUnsafe3.unreflect;
 import static com.v7878.unsafe.AndroidUnsafe3.unreflectDirect;
 import static com.v7878.unsafe.Utils.nothrows_run;
 import static com.v7878.unsafe.Utils.runOnce;
@@ -172,7 +173,7 @@ public class NativeLibrary implements SymbolLookup {
     }
 
     private static final Supplier<MethodHandle> findLibrary = runOnce(
-            () -> unreflectDirect(getDeclaredMethod(ClassLoader.class,
+            () -> unreflect(getDeclaredMethod(ClassLoader.class,
                     "findLibrary", String.class)));
 
     private static final Supplier<String[]> systemLibPaths = runOnce(() -> {

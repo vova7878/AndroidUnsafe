@@ -1,5 +1,6 @@
 package com.v7878.unsafe.function;
 
+import static com.v7878.unsafe.AndroidUnsafe3.unreflect;
 import static com.v7878.unsafe.AndroidUnsafe5.IS64BIT;
 import static com.v7878.unsafe.AndroidUnsafe5.classSizeField;
 import static com.v7878.unsafe.AndroidUnsafe5.getDeclaredField;
@@ -11,7 +12,6 @@ import static com.v7878.unsafe.AndroidUnsafe5.putObject;
 import static com.v7878.unsafe.AndroidUnsafe5.setExecutableData;
 import static com.v7878.unsafe.AndroidUnsafe5.staticFieldOffset;
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.Utils.nothrows_run;
 import static com.v7878.unsafe.methodhandle.EmulatedStackFrame.RETURN_VALUE_IDX;
 import static com.v7878.unsafe.methodhandle.Transformers.invokeExactWithFrameNoChecks;
 import static com.v7878.unsafe.methodhandle.Transformers.makeTransformer;
@@ -42,7 +42,6 @@ import com.v7878.unsafe.methodhandle.EmulatedStackFrame.StackFrameAccessor;
 import com.v7878.unsafe.methodhandle.Transformers.TransformerI;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -175,7 +174,7 @@ public class Linker {
         Method function = getDeclaredMethod(stub, "function",
                 stub_call_type.parameterArray());
         setExecutableData(function, symbol);
-        MethodHandle handler = nothrows_run(() -> MethodHandles.lookup().unreflect(function));
+        MethodHandle handler = unreflect(function);
         Field handler_field = getDeclaredField(stub, "handler");
         assert_(HANDLER_OFFSET == staticFieldOffset(handler_field), AssertionError::new);
 

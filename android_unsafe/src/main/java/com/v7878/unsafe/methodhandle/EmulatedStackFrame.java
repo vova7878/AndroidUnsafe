@@ -47,6 +47,7 @@ public final class EmulatedStackFrame {
 
     @Keep
     public static EmulatedStackFrame wrap(Object esf) {
+        //null + class check
         esf.getClass().asSubclass(esf_class);
         return new EmulatedStackFrame(esf);
     }

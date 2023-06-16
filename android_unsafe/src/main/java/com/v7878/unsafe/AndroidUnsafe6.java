@@ -3,14 +3,13 @@ package com.v7878.unsafe;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.nothrows_run;
-import static com.v7878.unsafe.function.Linker.downcallHandle;
+import static com.v7878.unsafe.Utils.runOnce;
 import static com.v7878.unsafe.memory.LayoutPath.PathElement.groupElement;
 import static com.v7878.unsafe.memory.ValueLayout.ADDRESS;
 import static com.v7878.unsafe.memory.ValueLayout.JAVA_INT;
 import static com.v7878.unsafe.memory.ValueLayout.structLayout;
 
 import com.v7878.unsafe.function.FunctionDescriptor;
-import com.v7878.unsafe.memory.Addressable;
 import com.v7878.unsafe.memory.GroupLayout;
 import com.v7878.unsafe.memory.MemorySegment;
 import com.v7878.unsafe.memory.Pointer;
@@ -18,6 +17,7 @@ import com.v7878.unsafe.memory.Pointer;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 @DangerLevel(6)
 public class AndroidUnsafe6 extends AndroidUnsafe5 {
@@ -243,7 +243,7 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
             ADDRESS.withName("UnregisterNatives"),
             ADDRESS.withName("MonitorEnter"),
             ADDRESS.withName("MonitorExit"),
-            ADDRESS.withName("GetJavaVM"),
+            ADDRESS.withName("GetJavaVM").withContent(FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)),
             ADDRESS.withName("GetStringRegion"),
             ADDRESS.withName("GetStringUTFRegion"),
             ADDRESS.withName("GetPrimitiveArrayCritical"),
@@ -352,18 +352,20 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
         return getJNINativeInterface(Thread.currentThread());
     }
 
-    public static Pointer getJavaVMPtr() {
+    private static final Supplier<Pointer> javaVMPtr = runOnce(() -> {
         Pointer env = getCurrentEnvPtr();
-        Addressable symbol = (Addressable) jni_native_interface.bind(env.get(ADDRESS))
+        MethodHandle get_vm = (MethodHandle) jni_native_interface.bind(env.get(ADDRESS))
                 .select(groupElement("GetJavaVM")).getValue();
-        MethodHandle mh = downcallHandle(symbol, FunctionDescriptor
-                .of(JAVA_INT, ADDRESS, ADDRESS));
         MemorySegment jvm = ADDRESS.allocateHeap();
-        int status = (int) nothrows_run(() -> mh.invoke(env, jvm));
+        int status = (int) nothrows_run(() -> get_vm.invoke(env, jvm));
         if (status != 0) {
             throw new IllegalStateException("can`t get JavaVM: " + status);
         }
         return (Pointer) jvm.getValue();
+    });
+
+    public static Pointer getJavaVMPtr() {
+        return javaVMPtr.get();
     }
 
     public static MemorySegment getJNIInvokeInterface() {

@@ -1,8 +1,8 @@
 package com.v7878.unsafe.dex.modifications;
 
+import static com.v7878.unsafe.AndroidUnsafe5.DEXFILE_LAYOUT;
 import static com.v7878.unsafe.AndroidUnsafe5.arrayCast;
 import static com.v7878.unsafe.AndroidUnsafe5.getDexFile;
-import static com.v7878.unsafe.AndroidUnsafe5.getDexFileLayout;
 import static com.v7878.unsafe.AndroidUnsafe5.loadClass;
 import static com.v7878.unsafe.AndroidUnsafe5.openDexFile;
 import static com.v7878.unsafe.AndroidUnsafe5.setTrusted;
@@ -38,8 +38,7 @@ public class Modifications {
                 throw new IllegalArgumentException("classes must be from the same dex file");
             }
         }
-        MemorySegment dex_segment = getDexFileLayout()
-                .bind(new Pointer(dex_file));
+        MemorySegment dex_segment = DEXFILE_LAYOUT.bind(new Pointer(dex_file));
         Pointer data = dex_segment.select(groupElement("begin_"))
                 .get(ADDRESS, 0);
         long size = dex_segment.select(groupElement("size_"))

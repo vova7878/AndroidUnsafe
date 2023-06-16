@@ -330,25 +330,31 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
     public static Pointer getNativePeer(Thread thread) {
         Objects.requireNonNull(thread);
         long tmp = nothrows_run(() -> threadNativePeer.getLong(thread));
-        assert_(tmp != 0, IllegalArgumentException::new, "nativePeer == 0");
+        assert_(tmp != 0, IllegalArgumentException::new, "nativePeer == nullptr");
         return new Pointer(tmp);
     }
 
     public static Pointer getEnvPtr(Thread thread) {
-        Pointer peer = getNativePeer(thread);
-        Pointer tmp = peer.addOffset(env_offset).get(ADDRESS);
-        assert_(!tmp.isNull(), IllegalArgumentException::new, "env == nullptr");
-        return tmp;
+        Pointer out = getNativePeer(thread).addOffset(env_offset).get(ADDRESS);
+        assert_(!out.isNull(), IllegalArgumentException::new, "env == nullptr");
+        return out;
+    }
+
+    public static Pointer getCurrentEnvPtr() {
+        return getEnvPtr(Thread.currentThread());
     }
 
     public static MemorySegment getJNINativeInterface(Thread thread) {
         return jni_native_interface.bind(getEnvPtr(thread).get(ADDRESS));
     }
 
+    public static MemorySegment getCurrentJNINativeInterface() {
+        return getJNINativeInterface(Thread.currentThread());
+    }
+
     public static Pointer getJavaVMPtr() {
-        Pointer env = getEnvPtr(Thread.currentThread());
-        Addressable symbol = (Addressable) jni_native_interface
-                .bind(env.get(ADDRESS))
+        Pointer env = getCurrentEnvPtr();
+        Addressable symbol = (Addressable) jni_native_interface.bind(env.get(ADDRESS))
                 .select(groupElement("GetJavaVM")).getValue();
         MethodHandle mh = downcallHandle(symbol, FunctionDescriptor
                 .of(JAVA_INT, ADDRESS, ADDRESS));

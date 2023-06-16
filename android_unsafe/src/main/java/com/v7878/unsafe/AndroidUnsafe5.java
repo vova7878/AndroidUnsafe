@@ -214,7 +214,7 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
             ).withName("ptr_sized_fields_")
     );
 
-    private static final GroupLayout currentDexFileLayout = nothrows_run(() -> {
+    public static final GroupLayout DEXFILE_LAYOUT = nothrows_run(() -> {
         switch (getSdkInt()) {
             case 34: // android 14
                 return dex_file_14_layout;
@@ -234,7 +234,7 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         }
     });
 
-    private static final GroupLayout currentArtMethodLayout = nothrows_run(() -> {
+    public static final GroupLayout ARTMETHOD_LAYOUT = nothrows_run(() -> {
         switch (getSdkInt()) {
             case 34: // android 14
             case 33: // android 13
@@ -264,14 +264,6 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         return m[0].dexCache;
     }
 
-    public static GroupLayout getDexFileLayout() {
-        return currentDexFileLayout;
-    }
-
-    public static GroupLayout getArtMethodLayout() {
-        return currentArtMethodLayout;
-    }
-
     public static long getDexFile(Class<?> clazz) {
         Object dexCache = getDexCache(clazz);
         long address = nothrows_run(() -> dexFile.getLong(dexCache));
@@ -284,7 +276,7 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
     }
 
     public static MemorySegment getDexFileSegment(Class<?> clazz) {
-        return getDexFileLayout().bind(getDexFilePointer(clazz));
+        return DEXFILE_LAYOUT.bind(getDexFilePointer(clazz));
     }
 
     public static Pointer getArtMethodPointer(Executable ex) {
@@ -292,7 +284,7 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
     }
 
     public static MemorySegment getArtMethodSegment(Executable ex) {
-        return getArtMethodLayout().bind(getArtMethodPointer(ex));
+        return ARTMETHOD_LAYOUT.bind(getArtMethodPointer(ex));
     }
 
     private static final Supplier<Constructor<DexFile>> dex_constructor = runOnce(() -> {
@@ -335,12 +327,12 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
             return;
         }
         if (getSdkInt() == 28) {
-            getDexFileLayout().bind(dexfile).select(groupElement("is_platform_dex_"))
+            DEXFILE_LAYOUT.bind(dexfile).select(groupElement("is_platform_dex_"))
                     .put(JAVA_BOOLEAN, 0, true);
             return;
         }
         if (getSdkInt() >= 29 && getSdkInt() <= 34) {
-            getDexFileLayout().bind(dexfile).select(groupElement("hiddenapi_domain_"))
+            DEXFILE_LAYOUT.bind(dexfile).select(groupElement("hiddenapi_domain_"))
                     .put(JAVA_BYTE, 0, /*kCorePlatform*/ (byte) 0);
             return;
         }
@@ -379,12 +371,11 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         return out;
     }
 
-    private static final long DATA_OFFSET = getArtMethodLayout().selectPath(
+    private static final long DATA_OFFSET = ARTMETHOD_LAYOUT.selectPath(
             groupElement("ptr_sized_fields_"), groupElement("data_")).offset();
 
     public static Pointer getExecutableData(Executable ex) {
-        long art_method = getArtMethod(ex);
-        return new Pointer(getWordN(art_method + DATA_OFFSET));
+        return new Pointer(getWordN(getArtMethod(ex) + DATA_OFFSET));
     }
 
     public static Pointer getExecutableData(Addressable art_method) {
@@ -392,8 +383,7 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
     }
 
     public static void setExecutableData(Executable ex, Addressable data) {
-        long art_method = getArtMethod(ex);
-        putWordN(art_method + DATA_OFFSET, data.pointer().getRawAddress());
+        putWordN(getArtMethod(ex) + DATA_OFFSET, data.pointer().getRawAddress());
     }
 
     public static void setExecutableData(Addressable art_method, Addressable data) {
@@ -401,20 +391,18 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
                 data.pointer().getRawAddress());
     }
 
-    private static final long ACCESS_FLAGS_OFFSET = getArtMethodLayout()
+    private static final long ACCESS_FLAGS_OFFSET = ARTMETHOD_LAYOUT
             .selectPath(groupElement("access_flags_")).offset();
 
     public static int getExecutableAccessFlags(Executable ex) {
-        long art_method = getArtMethod(ex);
-        return getIntN(art_method + ACCESS_FLAGS_OFFSET);
+        return getIntN(getArtMethod(ex) + ACCESS_FLAGS_OFFSET);
     }
 
     public static void setExecutableAccessFlags(Executable ex, int flags) {
-        long art_method = getArtMethod(ex);
-        putIntN(art_method + ACCESS_FLAGS_OFFSET, flags);
+        putIntN(getArtMethod(ex) + ACCESS_FLAGS_OFFSET, flags);
     }
 
-    private static final long ENTRY_POINT_OFFSET = getArtMethodLayout()
+    private static final long ENTRY_POINT_OFFSET = ARTMETHOD_LAYOUT
             .selectPath(groupElement("ptr_sized_fields_"),
                     groupElement("entry_point_from_quick_compiled_code_")).offset();
 

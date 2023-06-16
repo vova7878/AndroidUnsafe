@@ -105,7 +105,7 @@ public class LayoutPath {
         Layout elem = members.get(index);
         long elem_offset = 0;
         if (g.isStruct()) {
-            for (int i = 0; i < members.size(); i++) {
+            for (int i = 0; i < index; i++) {
                 elem_offset += members.get(i).size();
             }
         }

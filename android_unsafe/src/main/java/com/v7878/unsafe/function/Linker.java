@@ -12,7 +12,6 @@ import static com.v7878.unsafe.AndroidUnsafe5.putObject;
 import static com.v7878.unsafe.AndroidUnsafe5.setExecutableData;
 import static com.v7878.unsafe.AndroidUnsafe5.staticFieldOffset;
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.methodhandle.EmulatedStackFrame.RETURN_VALUE_IDX;
 import static com.v7878.unsafe.methodhandle.Transformers.invokeExactWithFrameNoChecks;
 import static com.v7878.unsafe.methodhandle.Transformers.makeTransformer;
 
@@ -117,8 +116,8 @@ public class Linker {
             }
             invokeExactWithFrameNoChecks(stub, stub_frame);
             if (ret != null) {
-                thiz_acc.moveTo(RETURN_VALUE_IDX);
-                stub_acc.moveTo(RETURN_VALUE_IDX);
+                thiz_acc.moveToReturn();
+                stub_acc.moveToReturn();
                 copyRet(stub_acc, thiz_acc, ret);
             }
         };

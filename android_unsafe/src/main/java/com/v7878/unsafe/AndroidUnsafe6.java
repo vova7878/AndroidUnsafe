@@ -9,15 +9,29 @@ import static com.v7878.unsafe.memory.ValueLayout.ADDRESS;
 import static com.v7878.unsafe.memory.ValueLayout.JAVA_INT;
 import static com.v7878.unsafe.memory.ValueLayout.structLayout;
 
+import com.v7878.unsafe.dex.AnnotationItem;
+import com.v7878.unsafe.dex.AnnotationSet;
+import com.v7878.unsafe.dex.ClassDef;
+import com.v7878.unsafe.dex.Dex;
+import com.v7878.unsafe.dex.EncodedMethod;
+import com.v7878.unsafe.dex.MethodId;
+import com.v7878.unsafe.dex.ProtoId;
+import com.v7878.unsafe.dex.TypeId;
 import com.v7878.unsafe.function.FunctionDescriptor;
 import com.v7878.unsafe.memory.GroupLayout;
 import com.v7878.unsafe.memory.MemorySegment;
 import com.v7878.unsafe.memory.Pointer;
+import com.v7878.unsafe.memory.Word;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Objects;
 import java.util.function.Supplier;
+
+import dalvik.system.DexFile;
 
 @DangerLevel(6)
 public class AndroidUnsafe6 extends AndroidUnsafe5 {
@@ -370,5 +384,75 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
 
     public static MemorySegment getJNIInvokeInterface() {
         return jni_invoke_interface.bind(getJavaVMPtr().get(ADDRESS));
+    }
+
+    private static final Supplier<Class<?>> refUtils = runOnce(() -> {
+        Class<?> word = IS64BIT ? long.class : int.class;
+        String name = "RefUtils";
+        TypeId id = TypeId.of(name);
+        ClassDef clazz = new ClassDef(id);
+        clazz.setSuperClass(TypeId.of(Object.class));
+        clazz.setAccessFlags(Modifier.PUBLIC | Modifier.FINAL);
+        clazz.getClassData().getDirectMethods().add(
+                new EncodedMethod(
+                        new MethodId(id, new ProtoId(TypeId.of(word)), "NewGlobalRef"),
+                        Modifier.PRIVATE | Modifier.NATIVE,
+                        new AnnotationSet(
+                                AnnotationItem.FastNative()
+                        ), null, null
+                )
+        );
+        clazz.getClassData().getDirectMethods().add(
+                new EncodedMethod(
+                        new MethodId(id, new ProtoId(TypeId.V, TypeId.of(word),
+                                TypeId.of(word)), "DeleteGlobalRef"),
+                        Modifier.PRIVATE | Modifier.STATIC | Modifier.NATIVE,
+                        new AnnotationSet(
+                                AnnotationItem.CriticalNative()
+                        ), null, null
+                )
+        );
+        DexFile dex = openDexFile(new Dex(clazz).compile());
+        return loadClass(dex, name, AndroidUnsafe6.class.getClassLoader());
+    });
+
+    private static final Supplier<MethodHandle> newGlobalRef = runOnce(() -> {
+        Class<?> word = IS64BIT ? long.class : int.class;
+
+        Method m = getDeclaredMethod(refUtils.get(), "NewGlobalRef");
+        setExecutableData(m, getCurrentJNINativeInterface()
+                .select(groupElement("NewGlobalRef")).get(ADDRESS, 0));
+        MethodHandle out = unreflectDirect(m);
+
+        MethodHandleMirror[] mirror = arrayCast(MethodHandleMirror.class, out);
+        mirror[0].type = MethodType.methodType(word, Object.class);
+
+        return out;
+    });
+
+    public static Word NewGlobalRef(Object obj) {
+        return nothrows_run(() -> new Word((long) newGlobalRef.get().invoke(obj)));
+    }
+
+    private static final Supplier<MethodHandle> deleteGlobalRef = runOnce(() -> {
+        Class<?> word = IS64BIT ? long.class : int.class;
+
+        Method m = getDeclaredMethod(refUtils.get(), "DeleteGlobalRef", word, word);
+        setExecutableData(m, getCurrentJNINativeInterface()
+                .select(groupElement("DeleteGlobalRef")).get(ADDRESS, 0));
+
+        return unreflect(m);
+    });
+
+    public static void DeleteGlobalRef(Word ref) {
+        nothrows_run(() -> {
+            MethodHandle f = deleteGlobalRef.get();
+            long env = getCurrentEnvPtr().getRawAddress();
+            if (IS64BIT) {
+                f.invoke(env, ref.longValue());
+            } else {
+                f.invoke((int) env, ref.intValue());
+            }
+        });
     }
 }

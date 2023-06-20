@@ -11,12 +11,14 @@ import static com.v7878.unsafe.AndroidUnsafe5.loadClass;
 import static com.v7878.unsafe.AndroidUnsafe5.openDexFile;
 import static com.v7878.unsafe.AndroidUnsafe5.setExecutableAccessFlags;
 import static com.v7878.unsafe.AndroidUnsafe5.setTrusted;
+import static com.v7878.unsafe.AndroidUnsafe7.setClassStatus;
 import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.nothrows_run;
 
 import androidx.annotation.Keep;
 
 import com.v7878.unsafe.AndroidUnsafe3.MethodHandleMirror;
+import com.v7878.unsafe.AndroidUnsafe7.ClassStatus;
 import com.v7878.unsafe.dex.ClassDef;
 import com.v7878.unsafe.dex.CodeItem;
 import com.v7878.unsafe.dex.Dex;
@@ -27,7 +29,6 @@ import com.v7878.unsafe.dex.MethodId;
 import com.v7878.unsafe.dex.PCList;
 import com.v7878.unsafe.dex.ProtoId;
 import com.v7878.unsafe.dex.TypeId;
-import com.v7878.unsafe.dex.bytecode.CheckCast;
 import com.v7878.unsafe.dex.bytecode.IInstanceOp;
 import com.v7878.unsafe.dex.bytecode.IInstanceOp.IGetObject;
 import com.v7878.unsafe.dex.bytecode.Instruction;
@@ -252,7 +253,7 @@ public class Transformers {
         if (getSdkInt() < 33) {
             //handle.invoke((dalvik.system.EmulatedStackFrame) stack);
             code.clear();
-            code.add(new CheckCast(2, esf));
+            //code.add(new CheckCast(2, esf)); // verified
             code.add(new InvokePolymorphic(2, new MethodId(mh,
                     new ProtoId(TypeId.of(Object.class),
                             TypeId.of(Object[].class)), "invoke"),
@@ -267,7 +268,7 @@ public class Transformers {
 
             //handle.invokeExactWithFrame((dalvik.system.EmulatedStackFrame) stack);
             code.clear();
-            code.add(new CheckCast(2, esf));
+            //code.add(new CheckCast(2, esf)); // verified
             code.add(new InvokeVirtual(2, MethodId.of(tmp), 1, 2, 0, 0, 0));
             code.add(new ReturnVoid());
         }
@@ -289,7 +290,7 @@ public class Transformers {
         //    handle.transform((dalvik.system.EmulatedStackFrame) stack);
         //}
         code.clear();
-        code.add(new CheckCast(2, esf));
+        //code.add(new CheckCast(2, esf)); // verified
         code.add(new InvokeVirtual(2, MethodId.of(tmp), 1, 2, 0, 0, 0));
         code.add(new ReturnVoid());
 
@@ -305,7 +306,9 @@ public class Transformers {
         setTrusted(dex);
 
         ClassLoader loader = Transformers.class.getClassLoader();
+
         Class<?> invoker_class = loadClass(dex, invoker_name, loader);
+        setClassStatus(invoker_class, ClassStatus.Verified);
         invoker = (InvokerI) allocateInstance(invoker_class);
 
         Class<?> transformer = loadClass(dex, transformer_name, loader);

@@ -293,7 +293,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return rawIntToObject(getIntN(address));
     }
 
-    private static final Supplier<Boolean> kPoisonReferences = runOnce(() -> {
+    protected static final Supplier<Boolean> kPoisonReferences = runOnce(() -> {
         Object test = allocateNonMovableObject(0);
         long address = addressOfNonMovableArray(test);
         assert_(isSigned32Bit(address), IllegalStateException::new);

@@ -388,7 +388,7 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
 
     private static final Supplier<Class<?>> refUtils = runOnce(() -> {
         Class<?> word = IS64BIT ? long.class : int.class;
-        String name = "RefUtils";
+        String name = AndroidUnsafe6.class.getName() + "$RefUtils";
         TypeId id = TypeId.of(name);
         ClassDef clazz = new ClassDef(id);
         clazz.setSuperClass(TypeId.of(Object.class));

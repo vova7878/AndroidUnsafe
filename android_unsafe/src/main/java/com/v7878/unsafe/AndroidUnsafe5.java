@@ -318,6 +318,7 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
     private static final Field cookie = nothrows_run(
             () -> getDeclaredField(DexFile.class, "mCookie"));
 
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static long[] getCookie(DexFile dex) {
         return (long[]) nothrows_run(() -> cookie.get(dex));
     }
@@ -382,10 +383,12 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         return new Pointer(getWordN(art_method.pointer().getRawAddress() + DATA_OFFSET));
     }
 
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static void setExecutableData(Executable ex, Addressable data) {
         putWordN(getArtMethod(ex) + DATA_OFFSET, data.pointer().getRawAddress());
     }
 
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static void setExecutableData(Addressable art_method, Addressable data) {
         putWordN(art_method.pointer().getRawAddress() + DATA_OFFSET,
                 data.pointer().getRawAddress());
@@ -398,6 +401,7 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         return getIntN(getArtMethod(ex) + ACCESS_FLAGS_OFFSET);
     }
 
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static void setExecutableAccessFlags(Executable ex, int flags) {
         putIntN(getArtMethod(ex) + ACCESS_FLAGS_OFFSET, flags);
     }

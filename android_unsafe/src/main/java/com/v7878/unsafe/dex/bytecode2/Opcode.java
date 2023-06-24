@@ -6,7 +6,6 @@ import java.util.function.Function;
 
 public enum Opcode {
 
-
     NOP(0x00, "nop", Format.Format10x::new),
     MOVE(0x01, "move", Format.Format12x::new),
     MOVE_FROM16(0x02, "move/from16", Format.Format22x::new),
@@ -299,8 +298,9 @@ public enum Opcode {
         return constraints.opcodeValue(options);
     }
 
-    public Format format() {
-        return format;
+    public <T extends Format> T format() {
+        //noinspection unchecked
+        return (T) format;
     }
 
     public boolean odexOnly() {

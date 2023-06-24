@@ -44,11 +44,11 @@ public abstract class Format {
 
             @Override
             public void write(WriteContext context, RandomOutput out) {
-                InstructionWriter.write_10x(out, opcode().opcodeValue(context.getOptions()));
+                InstructionWriter.write_10x(out, opcode2().opcodeValue(context.getOptions()));
             }
 
             @Override
-            public Opcode opcode() {
+            public Opcode opcode2() {
                 return opcode;
             }
 
@@ -59,21 +59,21 @@ public abstract class Format {
 
             @Override
             public String toString() {
-                return opcode().opname();
+                return opcode2().opname();
             }
 
             @Override
             public boolean equals(Object obj) {
                 if (obj instanceof Instance) {
                     Instance iobj = (Instance) obj;
-                    return Objects.equals(opcode(), iobj.opcode());
+                    return Objects.equals(opcode2(), iobj.opcode2());
                 }
                 return false;
             }
 
             @Override
             public int hashCode() {
-                return Objects.hash(opcode());
+                return Objects.hash(opcode2());
             }
 
             @Override
@@ -113,11 +113,11 @@ public abstract class Format {
 
             @Override
             public void write(WriteContext context, RandomOutput out) {
-                InstructionWriter.write_12x(out, opcode().opcodeValue(context.getOptions()), A, B);
+                InstructionWriter.write_12x(out, opcode2().opcodeValue(context.getOptions()), A, B);
             }
 
             @Override
-            public Opcode opcode() {
+            public Opcode opcode2() {
                 return opcode;
             }
 
@@ -128,14 +128,14 @@ public abstract class Format {
 
             @Override
             public String toString() {
-                return opcode().opname() + " " + A + " " + B;
+                return opcode2().opname() + " " + A + " " + B;
             }
 
             @Override
             public boolean equals(Object obj) {
                 if (obj instanceof Instance) {
                     Instance iobj = (Instance) obj;
-                    return Objects.equals(opcode(), iobj.opcode())
+                    return Objects.equals(opcode2(), iobj.opcode2())
                             && A == iobj.A && B == iobj.B;
                 }
                 return false;
@@ -143,7 +143,7 @@ public abstract class Format {
 
             @Override
             public int hashCode() {
-                return Objects.hash(opcode(), A, B);
+                return Objects.hash(opcode2(), A, B);
             }
 
             @Override
@@ -183,11 +183,11 @@ public abstract class Format {
 
             @Override
             public void write(WriteContext context, RandomOutput out) {
-                InstructionWriter.write_11n(out, opcode().opcodeValue(context.getOptions()), A, sB);
+                InstructionWriter.write_11n(out, opcode2().opcodeValue(context.getOptions()), A, sB);
             }
 
             @Override
-            public Opcode opcode() {
+            public Opcode opcode2() {
                 return opcode;
             }
 
@@ -198,14 +198,14 @@ public abstract class Format {
 
             @Override
             public String toString() {
-                return opcode().opname() + " " + A + " " + sB;
+                return opcode2().opname() + " " + A + " " + sB;
             }
 
             @Override
             public boolean equals(Object obj) {
                 if (obj instanceof Instance) {
                     Instance iobj = (Instance) obj;
-                    return Objects.equals(opcode(), iobj.opcode())
+                    return Objects.equals(opcode2(), iobj.opcode2())
                             && A == iobj.A && sB == iobj.sB;
                 }
                 return false;
@@ -213,7 +213,7 @@ public abstract class Format {
 
             @Override
             public int hashCode() {
-                return Objects.hash(opcode(), A, sB);
+                return Objects.hash(opcode2(), A, sB);
             }
 
             @Override
@@ -252,11 +252,11 @@ public abstract class Format {
 
             @Override
             public void write(WriteContext context, RandomOutput out) {
-                InstructionWriter.write_11x(out, opcode().opcodeValue(context.getOptions()), AA);
+                InstructionWriter.write_11x(out, opcode2().opcodeValue(context.getOptions()), AA);
             }
 
             @Override
-            public Opcode opcode() {
+            public Opcode opcode2() {
                 return opcode;
             }
 
@@ -267,14 +267,14 @@ public abstract class Format {
 
             @Override
             public String toString() {
-                return opcode().opname() + " " + AA;
+                return opcode2().opname() + " " + AA;
             }
 
             @Override
             public boolean equals(Object obj) {
                 if (obj instanceof Instance) {
                     Instance iobj = (Instance) obj;
-                    return Objects.equals(opcode(), iobj.opcode())
+                    return Objects.equals(opcode2(), iobj.opcode2())
                             && AA == iobj.AA;
                 }
                 return false;
@@ -282,7 +282,7 @@ public abstract class Format {
 
             @Override
             public int hashCode() {
-                return Objects.hash(opcode(), AA);
+                return Objects.hash(opcode2(), AA);
             }
 
             @Override
@@ -323,11 +323,11 @@ public abstract class Format {
             @Override
             public void write(WriteContext context, RandomOutput out) {
                 InstructionWriter.write_22x_21c(out,
-                        opcode().opcodeValue(context.getOptions()), AA, BBBB);
+                        opcode2().opcodeValue(context.getOptions()), AA, BBBB);
             }
 
             @Override
-            public Opcode opcode() {
+            public Opcode opcode2() {
                 return opcode;
             }
 
@@ -338,14 +338,14 @@ public abstract class Format {
 
             @Override
             public String toString() {
-                return opcode().opname() + " " + AA + " " + BBBB;
+                return opcode2().opname() + " " + AA + " " + BBBB;
             }
 
             @Override
             public boolean equals(Object obj) {
                 if (obj instanceof Instance) {
                     Instance iobj = (Instance) obj;
-                    return Objects.equals(opcode(), iobj.opcode())
+                    return Objects.equals(opcode2(), iobj.opcode2())
                             && AA == iobj.AA && BBBB == iobj.BBBB;
                 }
                 return false;
@@ -353,7 +353,7 @@ public abstract class Format {
 
             @Override
             public int hashCode() {
-                return Objects.hash(opcode(), AA, BBBB);
+                return Objects.hash(opcode2(), AA, BBBB);
             }
 
             @Override
@@ -398,12 +398,12 @@ public abstract class Format {
             @Override
             public void write(WriteContext context, RandomOutput out) {
                 InstructionWriter.write_22x_21c(out,
-                        opcode().opcodeValue(context.getOptions()), AA,
+                        opcode2().opcodeValue(context.getOptions()), AA,
                         referenceType.refToIndex(context, cBBBB));
             }
 
             @Override
-            public Opcode opcode() {
+            public Opcode opcode2() {
                 return opcode;
             }
 
@@ -414,14 +414,14 @@ public abstract class Format {
 
             @Override
             public String toString() {
-                return opcode().opname() + " " + AA + " " + cBBBB;
+                return opcode2().opname() + " " + AA + " " + cBBBB;
             }
 
             @Override
             public boolean equals(Object obj) {
                 if (obj instanceof Instance) {
                     Instance iobj = (Instance) obj;
-                    return Objects.equals(opcode(), iobj.opcode())
+                    return Objects.equals(opcode2(), iobj.opcode2())
                             && AA == iobj.AA && Objects.equals(cBBBB, iobj.cBBBB);
                 }
                 return false;
@@ -429,7 +429,7 @@ public abstract class Format {
 
             @Override
             public int hashCode() {
-                return Objects.hash(opcode(), AA, cBBBB);
+                return Objects.hash(opcode2(), AA, cBBBB);
             }
 
             @Override
@@ -477,12 +477,12 @@ public abstract class Format {
             @Override
             public void write(WriteContext context, RandomOutput out) {
                 InstructionWriter.write_22c(out,
-                        opcode().opcodeValue(context.getOptions()), A, B,
+                        opcode2().opcodeValue(context.getOptions()), A, B,
                         referenceType.refToIndex(context, cCCCC));
             }
 
             @Override
-            public Opcode opcode() {
+            public Opcode opcode2() {
                 return opcode;
             }
 
@@ -493,14 +493,14 @@ public abstract class Format {
 
             @Override
             public String toString() {
-                return opcode().opname() + " " + A + " " + B + " " + cCCCC;
+                return opcode2().opname() + " " + A + " " + B + " " + cCCCC;
             }
 
             @Override
             public boolean equals(Object obj) {
                 if (obj instanceof Instance) {
                     Instance iobj = (Instance) obj;
-                    return Objects.equals(opcode(), iobj.opcode())
+                    return Objects.equals(opcode2(), iobj.opcode2())
                             && A == iobj.A && B == iobj.B
                             && Objects.equals(cCCCC, iobj.cCCCC);
                 }
@@ -509,7 +509,7 @@ public abstract class Format {
 
             @Override
             public int hashCode() {
-                return Objects.hash(opcode(), A, B, cCCCC);
+                return Objects.hash(opcode2(), A, B, cCCCC);
             }
 
             @Override
@@ -553,11 +553,11 @@ public abstract class Format {
             @Override
             public void write(WriteContext context, RandomOutput out) {
                 InstructionWriter.write_23x(out,
-                        opcode().opcodeValue(context.getOptions()), AA, BB, CC);
+                        opcode2().opcodeValue(context.getOptions()), AA, BB, CC);
             }
 
             @Override
-            public Opcode opcode() {
+            public Opcode opcode2() {
                 return opcode;
             }
 
@@ -568,14 +568,14 @@ public abstract class Format {
 
             @Override
             public String toString() {
-                return opcode().opname() + " " + AA + " " + BB + " " + CC;
+                return opcode2().opname() + " " + AA + " " + BB + " " + CC;
             }
 
             @Override
             public boolean equals(Object obj) {
                 if (obj instanceof Instance) {
                     Instance iobj = (Instance) obj;
-                    return Objects.equals(opcode(), iobj.opcode())
+                    return Objects.equals(opcode2(), iobj.opcode2())
                             && AA == iobj.AA && BB == iobj.BB && CC == iobj.CC;
                 }
                 return false;
@@ -583,7 +583,7 @@ public abstract class Format {
 
             @Override
             public int hashCode() {
-                return Objects.hash(opcode(), AA, BB, CC);
+                return Objects.hash(opcode2(), AA, BB, CC);
             }
 
             @Override
@@ -625,11 +625,11 @@ public abstract class Format {
             @Override
             public void write(WriteContext context, RandomOutput out) {
                 InstructionWriter.write_32x(out,
-                        opcode().opcodeValue(context.getOptions()), AAAA, BBBB);
+                        opcode2().opcodeValue(context.getOptions()), AAAA, BBBB);
             }
 
             @Override
-            public Opcode opcode() {
+            public Opcode opcode2() {
                 return opcode;
             }
 
@@ -640,14 +640,14 @@ public abstract class Format {
 
             @Override
             public String toString() {
-                return opcode().opname() + " " + AAAA + " " + BBBB;
+                return opcode2().opname() + " " + AAAA + " " + BBBB;
             }
 
             @Override
             public boolean equals(Object obj) {
                 if (obj instanceof Instance) {
                     Instance iobj = (Instance) obj;
-                    return Objects.equals(opcode(), iobj.opcode())
+                    return Objects.equals(opcode2(), iobj.opcode2())
                             && AAAA == iobj.AAAA && BBBB == iobj.BBBB;
                 }
                 return false;
@@ -655,7 +655,7 @@ public abstract class Format {
 
             @Override
             public int hashCode() {
-                return Objects.hash(opcode(), AAAA, BBBB);
+                return Objects.hash(opcode2(), AAAA, BBBB);
             }
 
             @Override
@@ -707,12 +707,12 @@ public abstract class Format {
             @Override
             public void write(WriteContext context, RandomOutput out) {
                 InstructionWriter.write_35c_35ms_35mi(out,
-                        opcode().opcodeValue(context.getOptions()), A,
+                        opcode2().opcodeValue(context.getOptions()), A,
                         referenceType.refToIndex(context, cBBBB), C, D, E, F, G);
             }
 
             @Override
-            public Opcode opcode() {
+            public Opcode opcode2() {
                 return opcode;
             }
 
@@ -723,7 +723,7 @@ public abstract class Format {
 
             @Override
             public String toString() {
-                return opcode().opname() + " " + A + " " + cBBBB
+                return opcode2().opname() + " " + A + " " + cBBBB
                         + " " + C + " " + D + " " + E + " " + F + " " + G;
             }
 
@@ -731,7 +731,7 @@ public abstract class Format {
             public boolean equals(Object obj) {
                 if (obj instanceof Instance) {
                     Instance iobj = (Instance) obj;
-                    return Objects.equals(opcode(), iobj.opcode())
+                    return Objects.equals(opcode2(), iobj.opcode2())
                             && A == iobj.A && Objects.equals(cBBBB, iobj.cBBBB)
                             && C == iobj.C && D == iobj.D && E == iobj.E
                             && F == iobj.F && G == iobj.G;
@@ -741,7 +741,7 @@ public abstract class Format {
 
             @Override
             public int hashCode() {
-                return Objects.hash(opcode(), A, cBBBB, C, D, E, F, G);
+                return Objects.hash(opcode2(), A, cBBBB, C, D, E, F, G);
             }
 
             @Override
@@ -803,13 +803,13 @@ public abstract class Format {
             @Override
             public void write(WriteContext context, RandomOutput out) {
                 InstructionWriter.write_45cc(out,
-                        opcode().opcodeValue(context.getOptions()), A,
+                        opcode2().opcodeValue(context.getOptions()), A,
                         referenceType.refToIndex(context, cBBBB), C, D, E, F, G,
                         referenceType2.refToIndex(context, cHHHH));
             }
 
             @Override
-            public Opcode opcode() {
+            public Opcode opcode2() {
                 return opcode;
             }
 
@@ -820,7 +820,7 @@ public abstract class Format {
 
             @Override
             public String toString() {
-                return opcode().opname() + " " + A + " " + cBBBB + " " + C
+                return opcode2().opname() + " " + A + " " + cBBBB + " " + C
                         + " " + D + " " + E + " " + F + " " + G + " " + cHHHH;
             }
 
@@ -828,7 +828,7 @@ public abstract class Format {
             public boolean equals(Object obj) {
                 if (obj instanceof Instance) {
                     Instance iobj = (Instance) obj;
-                    return Objects.equals(opcode(), iobj.opcode())
+                    return Objects.equals(opcode2(), iobj.opcode2())
                             && A == iobj.A && Objects.equals(cBBBB, iobj.cBBBB)
                             && C == iobj.C && D == iobj.D && E == iobj.E
                             && F == iobj.F && G == iobj.G && Objects.equals(cHHHH, iobj.cHHHH);
@@ -838,7 +838,7 @@ public abstract class Format {
 
             @Override
             public int hashCode() {
-                return Objects.hash(opcode(), A, cBBBB, C, D, E, F, G, cHHHH);
+                return Objects.hash(opcode2(), A, cBBBB, C, D, E, F, G, cHHHH);
             }
 
             @Override

@@ -276,9 +276,7 @@ public enum Opcode {
     /*PACKED_SWITCH_PAYLOAD(0x100, "packed-switch-payload", ReferenceType.NONE, Format.PackedSwitchPayload, 0),
     SPARSE_SWITCH_PAYLOAD(0x200, "sparse-switch-payload", ReferenceType.NONE, Format.SparseSwitchPayload, 0),
     ARRAY_PAYLOAD(0x300, "array-payload", ReferenceType.NONE, Format.ArrayPayload, 0)*/;
-
-    private static final int IS_PAYLOAD = 0x1;
-    private static final int ODEX_ONLY = 0x2;
+    private static final int ODEX_ONLY = 0x1;
 
     @FunctionalInterface
     public interface VersionConstraints {
@@ -305,10 +303,6 @@ public enum Opcode {
 
     public boolean odexOnly() {
         return (flags & ODEX_ONLY) != 0;
-    }
-
-    public boolean isPayload() {
-        return (flags & IS_PAYLOAD) != 0;
     }
 
     Opcode(int opcodeValue, String name, Function<Opcode, Format> format) {

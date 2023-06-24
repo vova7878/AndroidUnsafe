@@ -10,13 +10,29 @@ import java.util.Objects;
 
 public abstract class Format {
     protected final Opcode opcode;
+    private int units;
+    private boolean payload;
 
-    Format(Opcode opcode) {
+    Format(Opcode opcode, int units) {
+        this(opcode, units, false);
+    }
+
+    Format(Opcode opcode, int units, boolean payload) {
         this.opcode = opcode;
+        this.units = units;
+        this.payload = payload;
     }
 
     public Opcode opcode() {
         return opcode;
+    }
+
+    public int units() {
+        return units;
+    }
+
+    public boolean isPayload() {
+        return payload;
     }
 
     public abstract Instruction read(RandomInput in, ReadContext context, int arg);
@@ -39,10 +55,6 @@ public abstract class Format {
             }
 
             @Override
-            public void collectData(DataCollector data) {
-            }
-
-            @Override
             public void write(WriteContext context, RandomOutput out) {
                 InstructionWriter.write_10x(out, opcode2().opcodeValue(context.getOptions()));
             }
@@ -50,11 +62,6 @@ public abstract class Format {
             @Override
             public Opcode opcode2() {
                 return opcode;
-            }
-
-            @Override
-            public int units() {
-                return 1;
             }
 
             @Override
@@ -83,7 +90,7 @@ public abstract class Format {
         }
 
         Format10x(Opcode opcode) {
-            super(opcode);
+            super(opcode, 1);
         }
 
         @Override
@@ -108,10 +115,6 @@ public abstract class Format {
             }
 
             @Override
-            public void collectData(DataCollector data) {
-            }
-
-            @Override
             public void write(WriteContext context, RandomOutput out) {
                 InstructionWriter.write_12x(out, opcode2().opcodeValue(context.getOptions()), A, B);
             }
@@ -119,11 +122,6 @@ public abstract class Format {
             @Override
             public Opcode opcode2() {
                 return opcode;
-            }
-
-            @Override
-            public int units() {
-                return 1;
             }
 
             @Override
@@ -153,7 +151,7 @@ public abstract class Format {
         }
 
         Format12x(Opcode opcode) {
-            super(opcode);
+            super(opcode, 1);
         }
 
         @Override
@@ -178,10 +176,6 @@ public abstract class Format {
             }
 
             @Override
-            public void collectData(DataCollector data) {
-            }
-
-            @Override
             public void write(WriteContext context, RandomOutput out) {
                 InstructionWriter.write_11n(out, opcode2().opcodeValue(context.getOptions()), A, sB);
             }
@@ -189,11 +183,6 @@ public abstract class Format {
             @Override
             public Opcode opcode2() {
                 return opcode;
-            }
-
-            @Override
-            public int units() {
-                return 1;
             }
 
             @Override
@@ -223,7 +212,7 @@ public abstract class Format {
         }
 
         Format11n(Opcode opcode) {
-            super(opcode);
+            super(opcode, 1);
         }
 
         @Override
@@ -247,10 +236,6 @@ public abstract class Format {
             }
 
             @Override
-            public void collectData(DataCollector data) {
-            }
-
-            @Override
             public void write(WriteContext context, RandomOutput out) {
                 InstructionWriter.write_11x(out, opcode2().opcodeValue(context.getOptions()), AA);
             }
@@ -258,11 +243,6 @@ public abstract class Format {
             @Override
             public Opcode opcode2() {
                 return opcode;
-            }
-
-            @Override
-            public int units() {
-                return 1;
             }
 
             @Override
@@ -292,7 +272,7 @@ public abstract class Format {
         }
 
         Format11x(Opcode opcode) {
-            super(opcode);
+            super(opcode, 1);
         }
 
         @Override
@@ -317,10 +297,6 @@ public abstract class Format {
             }
 
             @Override
-            public void collectData(DataCollector data) {
-            }
-
-            @Override
             public void write(WriteContext context, RandomOutput out) {
                 InstructionWriter.write_22x_21c(out,
                         opcode2().opcodeValue(context.getOptions()), AA, BBBB);
@@ -329,11 +305,6 @@ public abstract class Format {
             @Override
             public Opcode opcode2() {
                 return opcode;
-            }
-
-            @Override
-            public int units() {
-                return 2;
             }
 
             @Override
@@ -363,7 +334,7 @@ public abstract class Format {
         }
 
         Format22x(Opcode opcode) {
-            super(opcode);
+            super(opcode, 2);
         }
 
         @Override
@@ -408,11 +379,6 @@ public abstract class Format {
             }
 
             @Override
-            public int units() {
-                return 2;
-            }
-
-            @Override
             public String toString() {
                 return opcode2().opname() + " " + AA + " " + cBBBB;
             }
@@ -439,7 +405,7 @@ public abstract class Format {
         }
 
         Format21c(Opcode opcode, ReferenceType referenceType) {
-            super(opcode);
+            super(opcode, 2);
             this.referenceType = referenceType;
         }
 
@@ -487,11 +453,6 @@ public abstract class Format {
             }
 
             @Override
-            public int units() {
-                return 2;
-            }
-
-            @Override
             public String toString() {
                 return opcode2().opname() + " " + A + " " + B + " " + cCCCC;
             }
@@ -519,7 +480,7 @@ public abstract class Format {
         }
 
         Format22c(Opcode opcode, ReferenceType referenceType) {
-            super(opcode);
+            super(opcode, 2);
             this.referenceType = referenceType;
         }
 
@@ -547,10 +508,6 @@ public abstract class Format {
             }
 
             @Override
-            public void collectData(DataCollector data) {
-            }
-
-            @Override
             public void write(WriteContext context, RandomOutput out) {
                 InstructionWriter.write_23x(out,
                         opcode2().opcodeValue(context.getOptions()), AA, BB, CC);
@@ -559,11 +516,6 @@ public abstract class Format {
             @Override
             public Opcode opcode2() {
                 return opcode;
-            }
-
-            @Override
-            public int units() {
-                return 2;
             }
 
             @Override
@@ -593,7 +545,7 @@ public abstract class Format {
         }
 
         Format23x(Opcode opcode) {
-            super(opcode);
+            super(opcode, 2);
         }
 
         @Override
@@ -619,10 +571,6 @@ public abstract class Format {
             }
 
             @Override
-            public void collectData(DataCollector data) {
-            }
-
-            @Override
             public void write(WriteContext context, RandomOutput out) {
                 InstructionWriter.write_32x(out,
                         opcode2().opcodeValue(context.getOptions()), AAAA, BBBB);
@@ -631,11 +579,6 @@ public abstract class Format {
             @Override
             public Opcode opcode2() {
                 return opcode;
-            }
-
-            @Override
-            public int units() {
-                return 3;
             }
 
             @Override
@@ -665,7 +608,7 @@ public abstract class Format {
         }
 
         Format32x(Opcode opcode) {
-            super(opcode);
+            super(opcode, 3);
         }
 
         @Override
@@ -717,11 +660,6 @@ public abstract class Format {
             }
 
             @Override
-            public int units() {
-                return 3;
-            }
-
-            @Override
             public String toString() {
                 return opcode2().opname() + " " + A + " " + cBBBB
                         + " " + C + " " + D + " " + E + " " + F + " " + G;
@@ -751,7 +689,7 @@ public abstract class Format {
         }
 
         Format35c(Opcode opcode, ReferenceType referenceType) {
-            super(opcode);
+            super(opcode, 3);
             this.referenceType = referenceType;
         }
 
@@ -814,11 +752,6 @@ public abstract class Format {
             }
 
             @Override
-            public int units() {
-                return 4;
-            }
-
-            @Override
             public String toString() {
                 return opcode2().opname() + " " + A + " " + cBBBB + " " + C
                         + " " + D + " " + E + " " + F + " " + G + " " + cHHHH;
@@ -848,7 +781,7 @@ public abstract class Format {
         }
 
         Format45cc(Opcode opcode, ReferenceType referenceType, ReferenceType referenceType2) {
-            super(opcode);
+            super(opcode, 4);
             this.referenceType = referenceType;
             this.referenceType2 = referenceType2;
         }

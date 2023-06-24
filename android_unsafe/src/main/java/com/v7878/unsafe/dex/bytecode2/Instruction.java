@@ -14,14 +14,17 @@ public abstract class Instruction extends com.v7878.unsafe.dex.bytecode.Instruct
         return null;
     }*/
 
-    public abstract void collectData(DataCollector data);
+    public void collectData(DataCollector data) {
+    }
 
     public abstract void write(WriteContext context, RandomOutput out);
 
     //TODO: rename to opcode
     public abstract Opcode opcode2();
 
-    public abstract int units();
+    public int units() {
+        return opcode2().format().units();
+    }
 
     @Override
     public abstract String toString();

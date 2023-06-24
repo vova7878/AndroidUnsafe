@@ -387,7 +387,7 @@ public abstract class Format {
 
             Instance(int AA, Object cBBBB) {
                 this.AA = AA;
-                this.cBBBB = referenceType.verify(cBBBB);
+                this.cBBBB = referenceType.clone(cBBBB);
             }
 
             @Override
@@ -466,7 +466,7 @@ public abstract class Format {
             Instance(int A, int B, Object cCCCC) {
                 this.A = A;
                 this.B = B;
-                this.cCCCC = referenceType.verify(cCCCC);
+                this.cCCCC = referenceType.clone(cCCCC);
             }
 
             @Override
@@ -691,7 +691,7 @@ public abstract class Format {
 
             Instance(int A, Object cBBBB, int C, int D, int E, int F, int G) {
                 this.A = A;
-                this.cBBBB = referenceType.verify(cBBBB);
+                this.cBBBB = referenceType.clone(cBBBB);
                 this.C = C;
                 this.D = D;
                 this.E = E;
@@ -785,13 +785,13 @@ public abstract class Format {
 
             Instance(int A, Object cBBBB, int C, int D, int E, int F, int G, Object cHHHH) {
                 this.A = A;
-                this.cBBBB = referenceType.verify(cBBBB);
+                this.cBBBB = referenceType.clone(cBBBB);
                 this.C = C;
                 this.D = D;
                 this.E = E;
                 this.F = F;
                 this.G = G;
-                this.cHHHH = referenceType2.verify(cHHHH);
+                this.cHHHH = referenceType2.clone(cHHHH);
             }
 
             @Override

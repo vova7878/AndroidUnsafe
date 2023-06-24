@@ -4,6 +4,7 @@ import static com.v7878.unsafe.Utils.assert_;
 
 import com.v7878.unsafe.Checks;
 import com.v7878.unsafe.dex.bytecode.Instruction;
+import com.v7878.unsafe.dex.bytecode2.CodeBuilder;
 import com.v7878.unsafe.io.RandomInput;
 import com.v7878.unsafe.io.RandomOutput;
 
@@ -11,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class CodeItem implements PublicCloneable {
 
@@ -29,6 +31,12 @@ public class CodeItem implements PublicCloneable {
         setOutputsSize(outs_size);
         setInstructions(insns);
         setTries(tries);
+    }
+
+    public static CodeItem build(int registers_size, int ins_size, Consumer<CodeBuilder> consumer) {
+        CodeBuilder builder = CodeBuilder.begin(registers_size, ins_size);
+        consumer.accept(builder);
+        return builder.build();
     }
 
     public final void setRegistersSize(int registers_size) {

@@ -2,6 +2,7 @@ package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.assert_;
 
+import com.v7878.unsafe.Checks;
 import com.v7878.unsafe.dex.bytecode.Instruction;
 import com.v7878.unsafe.io.RandomInput;
 import com.v7878.unsafe.io.RandomOutput;
@@ -31,8 +32,7 @@ public class CodeItem implements PublicCloneable {
     }
 
     public final void setRegistersSize(int registers_size) {
-        assert_(registers_size >= 0, IllegalArgumentException::new,
-                "registers_size can`t be negative");
+        Checks.checkRange(registers_size, 0, 1 << 16);
         this.registers_size = registers_size;
     }
 
@@ -41,8 +41,7 @@ public class CodeItem implements PublicCloneable {
     }
 
     public final void setInputsSize(int ins_size) {
-        assert_(ins_size >= 0, IllegalArgumentException::new,
-                "ins_size can`t be negative");
+        Checks.checkRange(ins_size, 0, 1 << 16);
         this.ins_size = ins_size;
     }
 
@@ -51,8 +50,7 @@ public class CodeItem implements PublicCloneable {
     }
 
     public final void setOutputsSize(int outs_size) {
-        assert_(outs_size >= 0, IllegalArgumentException::new,
-                "outs_size can`t be negative");
+        Checks.checkRange(ins_size, 0, 1 << 8);
         this.outs_size = outs_size;
     }
 

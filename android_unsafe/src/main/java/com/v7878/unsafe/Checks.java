@@ -83,4 +83,22 @@ public class Checks {
         }
         return index;
     }
+
+    public static int checkRange(int value, int start, int length) {
+        if (length < 0 || value < start || value >= start + length) {
+            throw new IndexOutOfBoundsException(
+                    String.format("value %s out of range [%s, %<s + %s)",
+                            value, start, length));
+        }
+        return value;
+    }
+
+    public static long checkRange(long value, long start, long length) {
+        if (length < 0 || value < start || value >= start + length) {
+            throw new IndexOutOfBoundsException(
+                    String.format("value %s out of range [%s, %<s + %s)",
+                            value, start, length));
+        }
+        return value;
+    }
 }

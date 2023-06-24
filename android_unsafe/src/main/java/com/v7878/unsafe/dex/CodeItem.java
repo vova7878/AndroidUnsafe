@@ -24,7 +24,6 @@ public class CodeItem implements PublicCloneable {
     public CodeItem(int registers_size, int ins_size, int outs_size,
                     PCList<Instruction> insns, PCList<TryItem> tries) {
         setRegistersSize(registers_size);
-        //TODO: checks
         setInputsSize(ins_size);
         setOutputsSize(outs_size);
         setInstructions(insns);

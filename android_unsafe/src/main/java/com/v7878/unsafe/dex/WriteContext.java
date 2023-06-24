@@ -5,6 +5,7 @@ import com.v7878.unsafe.dex.EncodedValue.ArrayValue;
 import java.util.Comparator;
 
 public interface WriteContext {
+    DexOptions getOptions();
 
     Comparator<TypeId> type_comparator();
 

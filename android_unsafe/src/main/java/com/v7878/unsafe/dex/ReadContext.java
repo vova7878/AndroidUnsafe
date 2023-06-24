@@ -2,6 +2,8 @@ package com.v7878.unsafe.dex;
 
 public interface ReadContext {
 
+    DexOptions getOptions();
+
     String string(int index);
 
     TypeId type(int index);

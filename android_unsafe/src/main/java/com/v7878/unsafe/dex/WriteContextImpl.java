@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 // Temporary object. Needed to read or write
-public final class WriteContextImpl implements WriteContext {
+final class WriteContextImpl implements WriteContext {
 
     public final Comparator<TypeId> type_comparator
             = TypeId.getComparator(this);
@@ -92,7 +92,11 @@ public final class WriteContextImpl implements WriteContext {
     private final Map<ClassDef, Integer> annotations_directories;
     private final Map<CodeItem, Integer> code_items;
 
-    public WriteContextImpl(DataSet data) {
+    private final DexOptions options;
+
+    public WriteContextImpl(DataSet data, DexOptions options) {
+        this.options = options;
+
         strings = data.getStrings();
         Arrays.sort(strings, StringId.COMPARATOR);
         types = data.getTypes();
@@ -120,6 +124,11 @@ public final class WriteContextImpl implements WriteContext {
 
         //TODO: sort
         call_sites = data.getCallSites();
+    }
+
+    @Override
+    public DexOptions getOptions() {
+        return options;
     }
 
     public void addTypeList(TypeList value, int offset) {

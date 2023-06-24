@@ -1,7 +1,7 @@
 package com.v7878.unsafe.dex;
 
 // Temporary object. Needed to read or write
-public class ReadContextImpl implements ReadContext {
+class ReadContextImpl implements ReadContext {
 
     private String[] strings;
     private TypeId[] types;
@@ -10,6 +10,17 @@ public class ReadContextImpl implements ReadContext {
     private MethodId[] methods;
     private MethodHandleItem[] method_handles;
     private CallSiteId[] call_sites;
+
+    private DexOptions options;
+
+    public ReadContextImpl(DexOptions options) {
+        this.options = options;
+    }
+
+    @Override
+    public DexOptions getOptions() {
+        return options;
+    }
 
     @Override
     public String string(int index) {

@@ -25,17 +25,19 @@ import static com.v7878.unsafe.dex.DexConstants.TYPE_STRING_ID_ITEM;
 import static com.v7878.unsafe.dex.DexConstants.TYPE_TYPE_ID_ITEM;
 import static com.v7878.unsafe.dex.DexConstants.TYPE_TYPE_LIST;
 
+import com.v7878.unsafe.dex.DexConstants.DexVersion;
 import com.v7878.unsafe.io.RandomIO;
 import com.v7878.unsafe.io.RandomInput;
 import com.v7878.unsafe.io.RandomOutput;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.zip.Adler32;
 
 // Temporary object. Needed to read or write
-public class FileMap {
+class FileMap {
 
     public static class MapItem {
 
@@ -120,12 +122,13 @@ public class FileMap {
     public int hiddenapi_class_data_items_size;
     public int hiddenapi_class_data_items_off;
 
-    public static FileMap read(RandomInput in) {
+    public static FileMap read(RandomInput in, DexOptions options) {
         FileMap out = new FileMap();
-        String magic = new String(in.readByteArray(8));
-        //TODO: version check
-        assert_(magic.startsWith("dex\n"),
-                IllegalArgumentException::new, "invalid magic: " + magic);
+        byte[] magic = in.readByteArray(8);
+        assert_(magic[0] == 'd' && magic[1] == 'e' && magic[2] == 'x' && magic[3] == '\n' && magic[7] == '\0',
+                IllegalArgumentException::new, "invalid magic: " + Arrays.toString(magic));
+        DexVersion version = DexVersion.fromBytes(magic[4], magic[5], magic[6]);
+        options.requireMinApi(version.getMinApi());
         in.skipBytes(4); //checksum
         in.skipBytes(20); //signature
         in.skipBytes(4); //file_size
@@ -309,11 +312,12 @@ public class FileMap {
         }
     }
 
-    public void writeHeader(RandomIO out, int file_size) {
+    public void writeHeader(RandomIO out, DexOptions options, int file_size) {
         out.position(0);
         out.writeByteArray(new byte[]{'d', 'e', 'x', '\n'});
-        //TODO: version check
-        out.writeByteArray(new byte[]{'0', '3', '7', '\0'});
+        DexVersion version = DexVersion.fromApi(options.getTargetApi());
+        out.writeByteArray(new byte[]{version.firstByte(),
+                version.secondByte(), version.thirdByte(), '\0'});
         out.skipBytes(4); //checksum
         out.skipBytes(20); //signature
         out.writeInt(file_size);

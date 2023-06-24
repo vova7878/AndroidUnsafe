@@ -29,8 +29,13 @@ public class Dex extends PCList<ClassDef> {
         return read(in, null);
     }
 
+
     public static Dex read(RandomInput in, int[] class_def_ids) {
-        FileMap map = FileMap.read(in);
+        return read(in, DexOptions.defaultOptions(), class_def_ids);
+    }
+
+    public static Dex read(RandomInput in, DexOptions options, int[] class_def_ids) {
+        FileMap map = FileMap.read(in, options);
 
         if (class_def_ids == null) {
             class_def_ids = new int[map.class_defs_size];
@@ -48,7 +53,7 @@ public class Dex extends PCList<ClassDef> {
             return new Dex();
         }
 
-        ReadContextImpl context = new ReadContextImpl();
+        ReadContextImpl context = new ReadContextImpl(options);
         String[] strings = new String[map.string_ids_size];
         if (map.string_ids_size != 0) {
             RandomInput in2 = in.duplicate(map.string_ids_off);
@@ -121,12 +126,16 @@ public class Dex extends PCList<ClassDef> {
     }
 
     public void write(RandomIO out) {
+        write(out, DexOptions.defaultOptions());
+    }
+
+    public void write(RandomIO out, DexOptions options) {
         assert_(out.position() == 0, IllegalArgumentException::new);
 
         DataSet data = new DataSet();
         collectData(data);
 
-        WriteContextImpl context = new WriteContextImpl(data);
+        WriteContextImpl context = new WriteContextImpl(data, options);
 
         FileMap map = new FileMap();
 
@@ -319,7 +328,7 @@ public class Dex extends PCList<ClassDef> {
         out.position(map.method_handles_off);
         context.methodHandlesStream().forEach((value) -> value.write(context, out));
 
-        map.writeHeader(out, file_size);
+        map.writeHeader(out, options, file_size);
     }
 
     public ClassDef findClassDef(TypeId type) {
@@ -331,14 +340,14 @@ public class Dex extends PCList<ClassDef> {
         return null;
     }
 
-    public byte[] compile(int size) {
-        ByteArrayIO out = new ByteArrayIO(size);
-        write(out);
+    public byte[] compile(DexOptions options) {
+        ByteArrayIO out = new ByteArrayIO();
+        write(out, options);
         return out.toByteArray();
     }
 
     public byte[] compile() {
-        return compile(0);
+        return compile(DexOptions.defaultOptions());
     }
 
     @Override

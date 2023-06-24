@@ -46,8 +46,8 @@ public enum Opcode {
     /*FILLED_NEW_ARRAY_RANGE(0x25, "filled-new-array/range", ReferenceType.TYPE, Format.Format3rc, Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),
     FILL_ARRAY_DATA(0x26, "fill-array-data", Format.Format31t, Opcode.CAN_CONTINUE),*/
     THROW(0x27, "throw", Format.Format11x::new),
-    /*GOTO(0x28, "goto", Format.Format10t),
-    GOTO_16(0x29, "goto/16", Format.Format20t),
+    GOTO(0x28, "goto", Format.Format10t::new),
+    /*GOTO_16(0x29, "goto/16", Format.Format20t),
     GOTO_32(0x2a, "goto/32", Format.Format30t),
     PACKED_SWITCH(0x2b, "packed-switch", Format.Format31t, Opcode.CAN_CONTINUE),
     SPARSE_SWITCH(0x2c, "sparse-switch", Format.Format31t, Opcode.CAN_CONTINUE),*/

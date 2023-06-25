@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -39,14 +40,16 @@ public final class CodeBuilder {
         current_unit = 0;
     }
 
-    public static CodeBuilder begin(int registers_size, int ins_size) {
-        return new CodeBuilder(registers_size, ins_size);
-    }
-
-    public CodeItem build() {
+    private CodeItem end() {
         PCList<com.v7878.unsafe.dex.bytecode.Instruction> out = PCList.empty();
         out.addAll(instructions.stream().map(Supplier::get).collect(Collectors.toList()));
         return new CodeItem(registers_size, ins_size, max_outs, out, null);
+    }
+
+    public static CodeItem build(int registers_size, int ins_size, Consumer<CodeBuilder> consumer) {
+        CodeBuilder builder = new CodeBuilder(registers_size, ins_size);
+        consumer.accept(builder);
+        return builder.end();
     }
 
     public int v(int register) {

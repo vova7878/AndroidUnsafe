@@ -33,12 +33,6 @@ public class CodeItem implements PublicCloneable {
         setTries(tries);
     }
 
-    public static CodeItem build(int registers_size, int ins_size, Consumer<CodeBuilder> consumer) {
-        CodeBuilder builder = CodeBuilder.begin(registers_size, ins_size);
-        consumer.accept(builder);
-        return builder.build();
-    }
-
     public final void setRegistersSize(int registers_size) {
         Checks.checkRange(registers_size, 0, 1 << 16);
         this.registers_size = registers_size;

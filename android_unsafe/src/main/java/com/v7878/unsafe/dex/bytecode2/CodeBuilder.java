@@ -4,11 +4,16 @@ import static com.v7878.unsafe.Utils.assert_;
 
 import com.v7878.unsafe.Checks;
 import com.v7878.unsafe.dex.CodeItem;
+import com.v7878.unsafe.dex.FieldId;
+import com.v7878.unsafe.dex.MethodId;
 import com.v7878.unsafe.dex.PCList;
+import com.v7878.unsafe.dex.TypeId;
 import com.v7878.unsafe.dex.bytecode2.Format.Format10t;
 import com.v7878.unsafe.dex.bytecode2.Format.Format10x;
 import com.v7878.unsafe.dex.bytecode2.Format.Format11x;
 import com.v7878.unsafe.dex.bytecode2.Format.Format21c;
+import com.v7878.unsafe.dex.bytecode2.Format.Format22c;
+import com.v7878.unsafe.dex.bytecode2.Format.Format35c;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,7 +70,7 @@ public final class CodeBuilder {
     }
 
     private int check_register_pair(int register_pair, int width) {
-        Checks.checkRange(register_pair + 1, 1, registers_size);
+        Checks.checkRange(register_pair + 1, 1, registers_size - 1);
         return Checks.checkRange(register_pair, 0, Math.min(1 << width, registers_size));
     }
 
@@ -151,6 +156,12 @@ public final class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder const_class(int destination_register, TypeId value) {
+        add(Opcode.CONST_CLASS.<Format21c>format().make(
+                check_register(destination_register, 8), value));
+        return this;
+    }
+
     public CodeBuilder goto_(String label) {
         int start_unit = current_unit;
         add(Opcode.GOTO.<Format10t>format(), format -> {
@@ -159,5 +170,351 @@ public final class CodeBuilder {
             return format.make(branch_offset);
         });
         return this;
+    }
+
+    public CodeBuilder iget(int value_register, int object_register, FieldId instance_field) {
+        add(Opcode.IGET.<Format22c>format().make(check_register(value_register, 4),
+                check_register(object_register, 4), instance_field));
+        return this;
+    }
+
+    public CodeBuilder iget_wide(int value_register_pair, int object_register, FieldId instance_field) {
+        add(Opcode.IGET_WIDE.<Format22c>format().make(
+                check_register_pair(value_register_pair, 4),
+                check_register(object_register, 4), instance_field));
+        return this;
+    }
+
+    public CodeBuilder iget_object(int value_register, int object_register, FieldId instance_field) {
+        add(Opcode.IGET_OBJECT.<Format22c>format().make(check_register(value_register, 4),
+                check_register(object_register, 4), instance_field));
+        return this;
+    }
+
+    public CodeBuilder iget_boolean(int value_register, int object_register, FieldId instance_field) {
+        add(Opcode.IGET_BOOLEAN.<Format22c>format().make(check_register(value_register, 4),
+                check_register(object_register, 4), instance_field));
+        return this;
+    }
+
+    public CodeBuilder iget_byte(int value_register, int object_register, FieldId instance_field) {
+        add(Opcode.IGET_BYTE.<Format22c>format().make(check_register(value_register, 4),
+                check_register(object_register, 4), instance_field));
+        return this;
+    }
+
+    public CodeBuilder iget_char(int value_register, int object_register, FieldId instance_field) {
+        add(Opcode.IGET_CHAR.<Format22c>format().make(check_register(value_register, 4),
+                check_register(object_register, 4), instance_field));
+        return this;
+    }
+
+    public CodeBuilder iget_short(int value_register, int object_register, FieldId instance_field) {
+        add(Opcode.IGET_SHORT.<Format22c>format().make(check_register(value_register, 4),
+                check_register(object_register, 4), instance_field));
+        return this;
+    }
+
+    public CodeBuilder iput(int value_register, int object_register, FieldId instance_field) {
+        add(Opcode.IPUT.<Format22c>format().make(check_register(value_register, 4),
+                check_register(object_register, 4), instance_field));
+        return this;
+    }
+
+    public CodeBuilder iput_wide(int value_register_pair, int object_register, FieldId instance_field) {
+        add(Opcode.IPUT_WIDE.<Format22c>format().make(
+                check_register_pair(value_register_pair, 4),
+                check_register(object_register, 4), instance_field));
+        return this;
+    }
+
+    public CodeBuilder iput_object(int value_register, int object_register, FieldId instance_field) {
+        add(Opcode.IPUT_OBJECT.<Format22c>format().make(check_register(value_register, 4),
+                check_register(object_register, 4), instance_field));
+        return this;
+    }
+
+    public CodeBuilder iput_boolean(int value_register, int object_register, FieldId instance_field) {
+        add(Opcode.IPUT_BOOLEAN.<Format22c>format().make(check_register(value_register, 4),
+                check_register(object_register, 4), instance_field));
+        return this;
+    }
+
+    public CodeBuilder iput_byte(int value_register, int object_register, FieldId instance_field) {
+        add(Opcode.IPUT_BYTE.<Format22c>format().make(check_register(value_register, 4),
+                check_register(object_register, 4), instance_field));
+        return this;
+    }
+
+    public CodeBuilder iput_char(int value_register, int object_register, FieldId instance_field) {
+        add(Opcode.IPUT_CHAR.<Format22c>format().make(check_register(value_register, 4),
+                check_register(object_register, 4), instance_field));
+        return this;
+    }
+
+    public CodeBuilder iput_short(int value_register, int object_register, FieldId instance_field) {
+        add(Opcode.IPUT_SHORT.<Format22c>format().make(check_register(value_register, 4),
+                check_register(object_register, 4), instance_field));
+        return this;
+    }
+
+    private void format_35c_checks(int argument_count, int argument_registers1,
+                                   int argument_registers2, int argument_registers3,
+                                   int argument_registers4, int argument_registers5) {
+        Checks.checkRange(argument_count, 0, 6);
+        if (argument_count == 5) check_register(argument_registers5, 4);
+        else assert_(argument_registers5 == 0, IllegalArgumentException::new,
+                "argument_count < 5, but argument_registers5 != 0");
+
+        if (argument_count >= 4) check_register(argument_registers4, 4);
+        else assert_(argument_registers4 == 0, IllegalArgumentException::new,
+                "argument_count < 4, but argument_registers4 != 0");
+
+        if (argument_count >= 3) check_register(argument_registers3, 4);
+        else assert_(argument_registers3 == 0, IllegalArgumentException::new,
+                "argument_count < 3, but argument_registers3 != 0");
+
+        if (argument_count >= 2) check_register(argument_registers2, 4);
+        else assert_(argument_registers2 == 0, IllegalArgumentException::new,
+                "argument_count < 2, but argument_registers2 != 0");
+
+        if (argument_count >= 1) check_register(argument_registers1, 4);
+        else assert_(argument_registers1 == 0, IllegalArgumentException::new,
+                "argument_count == 0, but argument_registers1 != 0");
+    }
+
+    private void add_outs(int outs_count) {
+        Checks.checkRange(outs_count, 0, 1 << 8);
+        max_outs = Math.max(max_outs, outs_count);
+    }
+
+    public CodeBuilder invoke_virtual(
+            MethodId method, int argument_count, int argument_registers1,
+            int argument_registers2, int argument_registers3,
+            int argument_registers4, int argument_registers5) {
+        format_35c_checks(argument_count, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5);
+        add(Opcode.INVOKE_VIRTUAL.<Format35c>format().make(argument_count,
+                method, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5));
+        add_outs(argument_count);
+        return this;
+    }
+
+    public CodeBuilder invoke_virtual(
+            MethodId method, int argument_registers1,
+            int argument_registers2, int argument_registers3,
+            int argument_registers4, int argument_registers5) {
+        return invoke_virtual(method, 5, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5);
+    }
+
+    public CodeBuilder invoke_virtual(
+            MethodId method, int argument_registers1, int argument_registers2,
+            int argument_registers3, int argument_registers4) {
+        return invoke_virtual(method, 4, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, 0);
+    }
+
+    public CodeBuilder invoke_virtual(MethodId method, int argument_registers1,
+                                      int argument_registers2, int argument_registers3) {
+        return invoke_virtual(method, 3, argument_registers1, argument_registers2,
+                argument_registers3, 0, 0);
+    }
+
+    public CodeBuilder invoke_virtual(
+            MethodId method, int argument_registers1, int argument_registers2) {
+        return invoke_virtual(method, 2, argument_registers1, argument_registers2,
+                0, 0, 0);
+    }
+
+    public CodeBuilder invoke_virtual(MethodId method, int argument_registers1) {
+        return invoke_virtual(method, 1, argument_registers1, 0,
+                0, 0, 0);
+    }
+
+    public CodeBuilder invoke_super(
+            MethodId method, int argument_count, int argument_registers1,
+            int argument_registers2, int argument_registers3,
+            int argument_registers4, int argument_registers5) {
+        format_35c_checks(argument_count, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5);
+        add(Opcode.INVOKE_SUPER.<Format35c>format().make(argument_count,
+                method, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5));
+        add_outs(argument_count);
+        return this;
+    }
+
+    public CodeBuilder invoke_super(
+            MethodId method, int argument_registers1,
+            int argument_registers2, int argument_registers3,
+            int argument_registers4, int argument_registers5) {
+        return invoke_super(method, 5, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5);
+    }
+
+    public CodeBuilder invoke_super(
+            MethodId method, int argument_registers1, int argument_registers2,
+            int argument_registers3, int argument_registers4) {
+        return invoke_super(method, 4, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, 0);
+    }
+
+    public CodeBuilder invoke_super(MethodId method, int argument_registers1,
+                                    int argument_registers2, int argument_registers3) {
+        return invoke_super(method, 3, argument_registers1, argument_registers2,
+                argument_registers3, 0, 0);
+    }
+
+    public CodeBuilder invoke_super(
+            MethodId method, int argument_registers1, int argument_registers2) {
+        return invoke_super(method, 2, argument_registers1, argument_registers2,
+                0, 0, 0);
+    }
+
+    public CodeBuilder invoke_super(MethodId method, int argument_registers1) {
+        return invoke_super(method, 1, argument_registers1, 0,
+                0, 0, 0);
+    }
+
+    public CodeBuilder invoke_direct(
+            MethodId method, int argument_count, int argument_registers1,
+            int argument_registers2, int argument_registers3,
+            int argument_registers4, int argument_registers5) {
+        format_35c_checks(argument_count, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5);
+        add(Opcode.INVOKE_DIRECT.<Format35c>format().make(argument_count,
+                method, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5));
+        add_outs(argument_count);
+        return this;
+    }
+
+    public CodeBuilder invoke_direct(
+            MethodId method, int argument_registers1,
+            int argument_registers2, int argument_registers3,
+            int argument_registers4, int argument_registers5) {
+        return invoke_direct(method, 5, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5);
+    }
+
+    public CodeBuilder invoke_direct(
+            MethodId method, int argument_registers1, int argument_registers2,
+            int argument_registers3, int argument_registers4) {
+        return invoke_direct(method, 4, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, 0);
+    }
+
+    public CodeBuilder invoke_direct(MethodId method, int argument_registers1,
+                                     int argument_registers2, int argument_registers3) {
+        return invoke_direct(method, 3, argument_registers1, argument_registers2,
+                argument_registers3, 0, 0);
+    }
+
+    public CodeBuilder invoke_direct(
+            MethodId method, int argument_registers1, int argument_registers2) {
+        return invoke_direct(method, 2, argument_registers1, argument_registers2,
+                0, 0, 0);
+    }
+
+    public CodeBuilder invoke_direct(MethodId method, int argument_registers1) {
+        return invoke_direct(method, 1, argument_registers1, 0,
+                0, 0, 0);
+    }
+
+    public CodeBuilder invoke_static(
+            MethodId method, int argument_count, int argument_registers1,
+            int argument_registers2, int argument_registers3,
+            int argument_registers4, int argument_registers5) {
+        format_35c_checks(argument_count, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5);
+        add(Opcode.INVOKE_STATIC.<Format35c>format().make(argument_count,
+                method, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5));
+        add_outs(argument_count);
+        return this;
+    }
+
+    public CodeBuilder invoke_static(
+            MethodId method, int argument_registers1,
+            int argument_registers2, int argument_registers3,
+            int argument_registers4, int argument_registers5) {
+        return invoke_static(method, 5, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5);
+    }
+
+    public CodeBuilder invoke_static(
+            MethodId method, int argument_registers1, int argument_registers2,
+            int argument_registers3, int argument_registers4) {
+        return invoke_static(method, 4, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, 0);
+    }
+
+    public CodeBuilder invoke_static(MethodId method, int argument_registers1,
+                                     int argument_registers2, int argument_registers3) {
+        return invoke_static(method, 3, argument_registers1, argument_registers2,
+                argument_registers3, 0, 0);
+    }
+
+    public CodeBuilder invoke_static(
+            MethodId method, int argument_registers1, int argument_registers2) {
+        return invoke_static(method, 2, argument_registers1, argument_registers2,
+                0, 0, 0);
+    }
+
+    public CodeBuilder invoke_static(MethodId method, int argument_registers1) {
+        return invoke_static(method, 1, argument_registers1, 0,
+                0, 0, 0);
+    }
+
+    public CodeBuilder invoke_static(MethodId method) {
+        return invoke_static(method, 0, 0, 0,
+                0, 0, 0);
+    }
+
+    public CodeBuilder invoke_interface(
+            MethodId method, int argument_count, int argument_registers1,
+            int argument_registers2, int argument_registers3,
+            int argument_registers4, int argument_registers5) {
+        format_35c_checks(argument_count, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5);
+        add(Opcode.INVOKE_INTERFACE.<Format35c>format().make(argument_count,
+                method, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5));
+        add_outs(argument_count);
+        return this;
+    }
+
+    public CodeBuilder invoke_interface(
+            MethodId method, int argument_registers1,
+            int argument_registers2, int argument_registers3,
+            int argument_registers4, int argument_registers5) {
+        return invoke_interface(method, 5, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, argument_registers5);
+    }
+
+    public CodeBuilder invoke_interface(
+            MethodId method, int argument_registers1, int argument_registers2,
+            int argument_registers3, int argument_registers4) {
+        return invoke_interface(method, 4, argument_registers1, argument_registers2,
+                argument_registers3, argument_registers4, 0);
+    }
+
+    public CodeBuilder invoke_interface(MethodId method, int argument_registers1,
+                                        int argument_registers2, int argument_registers3) {
+        return invoke_interface(method, 3, argument_registers1, argument_registers2,
+                argument_registers3, 0, 0);
+    }
+
+    public CodeBuilder invoke_interface(
+            MethodId method, int argument_registers1, int argument_registers2) {
+        return invoke_interface(method, 2, argument_registers1, argument_registers2,
+                0, 0, 0);
+    }
+
+    public CodeBuilder invoke_interface(MethodId method, int argument_registers1) {
+        return invoke_interface(method, 1, argument_registers1, 0,
+                0, 0, 0);
     }
 }

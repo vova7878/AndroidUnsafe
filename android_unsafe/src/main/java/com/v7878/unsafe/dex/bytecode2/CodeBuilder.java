@@ -127,6 +127,30 @@ public final class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder move_result(int destination_register) {
+        add(Opcode.MOVE_RESULT.<Format11x>format().make(
+                check_register(destination_register, 8)));
+        return this;
+    }
+
+    public CodeBuilder move_result_wide(int destination_register_pair) {
+        add(Opcode.MOVE_RESULT_WIDE.<Format11x>format().make(
+                check_register_pair(destination_register_pair, 8)));
+        return this;
+    }
+
+    public CodeBuilder move_result_object(int destination_register) {
+        add(Opcode.MOVE_RESULT_OBJECT.<Format11x>format().make(
+                check_register(destination_register, 8)));
+        return this;
+    }
+
+    public CodeBuilder move_exception(int destination_register) {
+        add(Opcode.MOVE_EXCEPTION.<Format11x>format().make(
+                check_register(destination_register, 8)));
+        return this;
+    }
+
     public CodeBuilder return_void() {
         add(Opcode.RETURN_VOID.<Format10x>format().make());
         return this;

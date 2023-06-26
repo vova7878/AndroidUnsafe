@@ -51,24 +51,29 @@ public enum Opcode {
     GOTO_32(0x2a, "goto/32", Format.Format30t),
     PACKED_SWITCH(0x2b, "packed-switch", Format.Format31t, Opcode.CAN_CONTINUE),
     SPARSE_SWITCH(0x2c, "sparse-switch", Format.Format31t, Opcode.CAN_CONTINUE),*/
+
     CMPL_FLOAT(0x2d, "cmpl-float", Format.Format23x::new),
     CMPG_FLOAT(0x2e, "cmpg-float", Format.Format23x::new),
     CMPL_DOUBLE(0x2f, "cmpl-double", Format.Format23x::new),
     CMPG_DOUBLE(0x30, "cmpg-double", Format.Format23x::new),
     CMP_LONG(0x31, "cmp-long", Format.Format23x::new),
+
     /*IF_EQ(0x32, "if-eq", Format.Format22t, Opcode.CAN_CONTINUE),
     IF_NE(0x33, "if-ne", Format.Format22t, Opcode.CAN_CONTINUE),
     IF_LT(0x34, "if-lt", Format.Format22t, Opcode.CAN_CONTINUE),
     IF_GE(0x35, "if-ge", Format.Format22t, Opcode.CAN_CONTINUE),
     IF_GT(0x36, "if-gt", Format.Format22t, Opcode.CAN_CONTINUE),
     IF_LE(0x37, "if-le", Format.Format22t, Opcode.CAN_CONTINUE),
+
     IF_EQZ(0x38, "if-eqz", Format.Format21t, Opcode.CAN_CONTINUE),
     IF_NEZ(0x39, "if-nez", Format.Format21t, Opcode.CAN_CONTINUE),
     IF_LTZ(0x3a, "if-ltz", Format.Format21t, Opcode.CAN_CONTINUE),
     IF_GEZ(0x3b, "if-gez", Format.Format21t, Opcode.CAN_CONTINUE),
     IF_GTZ(0x3c, "if-gtz", Format.Format21t, Opcode.CAN_CONTINUE),
     IF_LEZ(0x3d, "if-lez", Format.Format21t, Opcode.CAN_CONTINUE),*/
+
     // 3e - 43 unused
+
     AGET(0x44, "aget", Format.Format23x::new),
     AGET_WIDE(0x45, "aget-wide", Format.Format23x::new),
     AGET_OBJECT(0x46, "aget-object", Format.Format23x::new),
@@ -83,6 +88,7 @@ public enum Opcode {
     APUT_BYTE(0x4f, "aput-byte", Format.Format23x::new),
     APUT_CHAR(0x50, "aput-char", Format.Format23x::new),
     APUT_SHORT(0x51, "aput-short", Format.Format23x::new),
+
     IGET(0x52, "iget", opcode -> new Format.Format22c(opcode, ReferenceType.FIELD)),
     IGET_WIDE(0x53, "iget-wide", opcode -> new Format.Format22c(opcode, ReferenceType.FIELD)),
     IGET_OBJECT(0x54, "iget-object", opcode -> new Format.Format22c(opcode, ReferenceType.FIELD)),
@@ -97,6 +103,7 @@ public enum Opcode {
     IPUT_BYTE(0x5d, "iput-byte", opcode -> new Format.Format22c(opcode, ReferenceType.FIELD)),
     IPUT_CHAR(0x5e, "iput-char", opcode -> new Format.Format22c(opcode, ReferenceType.FIELD)),
     IPUT_SHORT(0x5f, "iput-short", opcode -> new Format.Format22c(opcode, ReferenceType.FIELD)),
+
     SGET(0x60, "sget", opcode -> new Format.Format21c(opcode, ReferenceType.FIELD)),
     SGET_WIDE(0x61, "sget-wide", opcode -> new Format.Format21c(opcode, ReferenceType.FIELD)),
     SGET_OBJECT(0x62, "sget-object", opcode -> new Format.Format21c(opcode, ReferenceType.FIELD)),
@@ -111,18 +118,23 @@ public enum Opcode {
     SPUT_BYTE(0x6b, "sput-byte", opcode -> new Format.Format21c(opcode, ReferenceType.FIELD)),
     SPUT_CHAR(0x6c, "sput-char", opcode -> new Format.Format21c(opcode, ReferenceType.FIELD)),
     SPUT_SHORT(0x6d, "sput-short", opcode -> new Format.Format21c(opcode, ReferenceType.FIELD)),
+
     INVOKE_VIRTUAL(0x6e, "invoke-virtual", opcode -> new Format.Format35c(opcode, ReferenceType.METHOD)),
     INVOKE_SUPER(0x6f, "invoke-super", opcode -> new Format.Format35c(opcode, ReferenceType.METHOD)),
     INVOKE_DIRECT(0x70, "invoke-direct", opcode -> new Format.Format35c(opcode, ReferenceType.METHOD)),
     INVOKE_STATIC(0x71, "invoke-static", opcode -> new Format.Format35c(opcode, ReferenceType.METHOD)),
     INVOKE_INTERFACE(0x72, "invoke-interface", opcode -> new Format.Format35c(opcode, ReferenceType.METHOD)),
+
     // 73 unused
-    /*INVOKE_VIRTUAL_RANGE(0x74, "invoke-virtual/range", ReferenceType.METHOD, Format.Format3rc, Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),
-    INVOKE_SUPER_RANGE(0x75, "invoke-super/range", ReferenceType.METHOD, Format.Format3rc, Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),
-    INVOKE_DIRECT_RANGE(0x76, "invoke-direct/range", ReferenceType.METHOD, Format.Format3rc, Opcode.CAN_CONTINUE | Opcode.SETS_RESULT | Opcode.CAN_INITIALIZE_REFERENCE),
-    INVOKE_STATIC_RANGE(0x77, "invoke-static/range", ReferenceType.METHOD, Format.Format3rc, Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),
-    INVOKE_INTERFACE_RANGE(0x78, "invoke-interface/range", ReferenceType.METHOD, Format.Format3rc, Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),*/
+
+    /*INVOKE_VIRTUAL_RANGE(0x74, "invoke-virtual/range", ReferenceType.METHOD, Format.Format3rc),
+    INVOKE_SUPER_RANGE(0x75, "invoke-super/range", ReferenceType.METHOD, Format.Format3rc),
+    INVOKE_DIRECT_RANGE(0x76, "invoke-direct/range", ReferenceType.METHOD, Format.Format3rc),
+    INVOKE_STATIC_RANGE(0x77, "invoke-static/range", ReferenceType.METHOD, Format.Format3rc),
+    INVOKE_INTERFACE_RANGE(0x78, "invoke-interface/range", ReferenceType.METHOD, Format.Format3rc),*/
+
     // 79 - 7a unused
+
     NEG_INT(0x7b, "neg-int", Format.Format12x::new),
     NOT_INT(0x7c, "not-int", Format.Format12x::new),
     NEG_LONG(0x7d, "neg-long", Format.Format12x::new),
@@ -144,6 +156,7 @@ public enum Opcode {
     INT_TO_BYTE(0x8d, "int-to-byte", Format.Format12x::new),
     INT_TO_CHAR(0x8e, "int-to-char", Format.Format12x::new),
     INT_TO_SHORT(0x8f, "int-to-short", Format.Format12x::new),
+
     ADD_INT(0x90, "add-int", Format.Format23x::new),
     SUB_INT(0x91, "sub-int", Format.Format23x::new),
     MUL_INT(0x92, "mul-int", Format.Format23x::new),
@@ -176,6 +189,7 @@ public enum Opcode {
     MUL_DOUBLE(0xad, "mul-double", Format.Format23x::new),
     DIV_DOUBLE(0xae, "div-double", Format.Format23x::new),
     REM_DOUBLE(0xaf, "rem-double", Format.Format23x::new),
+
     ADD_INT_2ADDR(0xb0, "add-int/2addr", Format.Format12x::new),
     SUB_INT_2ADDR(0xb1, "sub-int/2addr", Format.Format12x::new),
     MUL_INT_2ADDR(0xb2, "mul-int/2addr", Format.Format12x::new),
@@ -208,6 +222,7 @@ public enum Opcode {
     MUL_DOUBLE_2ADDR(0xcd, "mul-double/2addr", Format.Format12x::new),
     DIV_DOUBLE_2ADDR(0xce, "div-double/2addr", Format.Format12x::new),
     REM_DOUBLE_2ADDR(0xcf, "rem-double/2addr", Format.Format12x::new),
+
     /*ADD_INT_LIT16(0xd0, "add-int/lit16", Format.Format22s::new),
     RSUB_INT(0xd1, "rsub-int", Format.Format22s::new),
     MUL_INT_LIT16(0xd2, "mul-int/lit16", Format.Format22s::new),
@@ -226,57 +241,22 @@ public enum Opcode {
     XOR_INT_LIT8(0xdf, "xor-int/lit8", Format.Format22b::new),
     SHL_INT_LIT8(0xe0, "shl-int/lit8", Format.Format22b::new),
     SHR_INT_LIT8(0xe1, "shr-int/lit8", Format.Format22b::new),
-    USHR_INT_LIT8(0xe2, "ushr-int/lit8", Format.Format22b::new)
+    USHR_INT_LIT8(0xe2, "ushr-int/lit8", Format.Format22b::new)*/
 
-    IGET_VOLATILE(firstApi(0xe3, 9), "iget-volatile", ReferenceType.FIELD, Format.Format22c, Opcode.ODEX_ONLY | Opcode.VOLATILE_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_REGISTER),
-    IPUT_VOLATILE(firstApi(0xe4, 9), "iput-volatile", ReferenceType.FIELD, Format.Format22c, Opcode.ODEX_ONLY | Opcode.VOLATILE_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE),
-    SGET_VOLATILE(firstApi(0xe5, 9), "sget-volatile", ReferenceType.FIELD, Format.Format21c, Opcode.ODEX_ONLY | Opcode.VOLATILE_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_REGISTER | Opcode.STATIC_FIELD_ACCESSOR),
-    SPUT_VOLATILE(firstApi(0xe6, 9), "sput-volatile", ReferenceType.FIELD, Format.Format21c, Opcode.ODEX_ONLY | Opcode.VOLATILE_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.STATIC_FIELD_ACCESSOR),
-    IGET_OBJECT_VOLATILE(firstApi(0xe7, 9), "iget-object-volatile", ReferenceType.FIELD, Format.Format22c, Opcode.ODEX_ONLY | Opcode.VOLATILE_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_REGISTER),
-    IGET_WIDE_VOLATILE(firstApi(0xe8, 9), "iget-wide-volatile", ReferenceType.FIELD, Format.Format22c, Opcode.ODEX_ONLY | Opcode.VOLATILE_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_REGISTER | Opcode.SETS_WIDE_REGISTER),
-    IPUT_WIDE_VOLATILE(firstApi(0xe9, 9), "iput-wide-volatile", ReferenceType.FIELD, Format.Format22c, Opcode.ODEX_ONLY | Opcode.VOLATILE_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE),
-    SGET_WIDE_VOLATILE(firstApi(0xea, 9), "sget-wide-volatile", ReferenceType.FIELD, Format.Format21c, Opcode.ODEX_ONLY | Opcode.VOLATILE_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_REGISTER | Opcode.SETS_WIDE_REGISTER | Opcode.STATIC_FIELD_ACCESSOR),
-    SPUT_WIDE_VOLATILE(firstApi(0xeb, 9), "sput-wide-volatile", ReferenceType.FIELD, Format.Format21c, Opcode.ODEX_ONLY | Opcode.VOLATILE_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.STATIC_FIELD_ACCESSOR),
-    THROW_VERIFICATION_ERROR(firstApi(0xed, 5), "throw-verification-error", ReferenceType.NONE, Format.Format20bc, Opcode.ODEX_ONLY | Opcode.CAN_THROW),
-    EXECUTE_INLINE(allApis(0xee), "execute-inline", ReferenceType.NONE,  Format.Format35mi, Opcode.ODEX_ONLY | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),
-    EXECUTE_INLINE_RANGE(firstApi(0xef, 8), "execute-inline/range", ReferenceType.NONE,  Format.Format3rmi,  Opcode.ODEX_ONLY | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),
-    INVOKE_DIRECT_EMPTY(lastApi(0xf0, 13), "invoke-direct-empty", ReferenceType.METHOD,  Format.Format35c, Opcode.ODEX_ONLY | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_RESULT | Opcode.CAN_INITIALIZE_REFERENCE),
-    INVOKE_OBJECT_INIT_RANGE(firstApi(0xf0, 14), "invoke-object-init/range", ReferenceType.METHOD,  Format.Format3rc, Opcode.ODEX_ONLY | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_RESULT | Opcode.CAN_INITIALIZE_REFERENCE),
-    RETURN_VOID_BARRIER(combine(firstApi(0xf1, 11), lastArtVersion(0x73, 59)), "return-void-barrier", ReferenceType.NONE, Format.Format10x, Opcode.ODEX_ONLY),
-    RETURN_VOID_NO_BARRIER(firstArtVersion(0x73, 60), "return-void-no-barrier", ReferenceType.NONE, Format.Format10x, Opcode.ODEX_ONLY),
-    IGET_QUICK(combine(allApis(0xf2), allArtVersions(0xe3)), "iget-quick", ReferenceType.NONE,  Format.Format22cs, Opcode.ODEX_ONLY | Opcode.QUICK_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_REGISTER),
-    IGET_WIDE_QUICK(combine(allApis(0xf3), allArtVersions(0xe4)), "iget-wide-quick", ReferenceType.NONE,  Format.Format22cs, Opcode.ODEX_ONLY | Opcode.QUICK_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_REGISTER | Opcode.SETS_WIDE_REGISTER),
-    IGET_OBJECT_QUICK(combine(allApis(0xf4), allArtVersions(0xe5)), "iget-object-quick", ReferenceType.NONE,  Format.Format22cs, Opcode.ODEX_ONLY | Opcode.QUICK_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_REGISTER),
-    IPUT_QUICK(combine(allApis(0xf5), allArtVersions(0xe6)), "iput-quick", ReferenceType.NONE,  Format.Format22cs, Opcode.ODEX_ONLY | Opcode.QUICK_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE),
-    IPUT_WIDE_QUICK(combine(allApis(0xf6), allArtVersions(0xe7)), "iput-wide-quick", ReferenceType.NONE,  Format.Format22cs, Opcode.ODEX_ONLY | Opcode.QUICK_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE),
-    IPUT_OBJECT_QUICK(combine(allApis(0xf7), allArtVersions(0xe8)), "iput-object-quick", ReferenceType.NONE,  Format.Format22cs, Opcode.ODEX_ONLY | Opcode.QUICK_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE),
-    IPUT_BOOLEAN_QUICK(allArtVersions(0xeb), "iput-boolean-quick", ReferenceType.NONE, Format.Format22cs, Opcode.ODEX_ONLY | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.QUICK_FIELD_ACCESSOR),
-    IPUT_BYTE_QUICK(allArtVersions(0xec), "iput-byte-quick", ReferenceType.NONE, Format.Format22cs, Opcode.ODEX_ONLY | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.QUICK_FIELD_ACCESSOR),
-    IPUT_CHAR_QUICK(allArtVersions(0xed), "iput-char-quick", ReferenceType.NONE, Format.Format22cs, Opcode.ODEX_ONLY | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.QUICK_FIELD_ACCESSOR),
-    IPUT_SHORT_QUICK(allArtVersions(0xee), "iput-short-quick", ReferenceType.NONE, Format.Format22cs, Opcode.ODEX_ONLY | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.QUICK_FIELD_ACCESSOR),
-    IGET_BOOLEAN_QUICK(allArtVersions(0xef), "iget-boolean-quick", ReferenceType.NONE, Format.Format22cs, Opcode.ODEX_ONLY | Opcode.QUICK_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_REGISTER),
-    IGET_BYTE_QUICK(allArtVersions(0xf0), "iget-byte-quick", ReferenceType.NONE, Format.Format22cs, Opcode.ODEX_ONLY | Opcode.QUICK_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_REGISTER),
-    IGET_CHAR_QUICK(allArtVersions(0xf1), "iget-char-quick", ReferenceType.NONE, Format.Format22cs, Opcode.ODEX_ONLY | Opcode.QUICK_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_REGISTER),
-    IGET_SHORT_QUICK(allArtVersions(0xf2), "iget-short-quick", ReferenceType.NONE, Format.Format22cs, Opcode.ODEX_ONLY | Opcode.QUICK_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_REGISTER),
-    INVOKE_VIRTUAL_QUICK(combine(allApis(0xf8), allArtVersions(0xe9)), "invoke-virtual-quick", ReferenceType.NONE,  Format.Format35ms, Opcode.ODEX_ONLY | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),
-    INVOKE_VIRTUAL_QUICK_RANGE(combine(allApis(0xf9), allArtVersions(0xea)), "invoke-virtual-quick/range", ReferenceType.NONE,  Format.Format3rms, Opcode.ODEX_ONLY | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),
-    INVOKE_SUPER_QUICK(lastApi(0xfa, 25), "invoke-super-quick", ReferenceType.NONE,  Format.Format35ms, Opcode.ODEX_ONLY | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),
-    INVOKE_SUPER_QUICK_RANGE(lastApi(0xfb, 25), "invoke-super-quick/range", ReferenceType.NONE,  Format.Format3rms, Opcode.ODEX_ONLY | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),
-    IPUT_OBJECT_VOLATILE(firstApi(0xfc, 9), "iput-object-volatile", ReferenceType.FIELD, Format.Format22c, Opcode.ODEX_ONLY | Opcode.VOLATILE_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE),
-    SGET_OBJECT_VOLATILE(firstApi(0xfd, 9), "sget-object-volatile", ReferenceType.FIELD, Format.Format21c, Opcode.ODEX_ONLY | Opcode.VOLATILE_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_REGISTER | Opcode.STATIC_FIELD_ACCESSOR),
-    SPUT_OBJECT_VOLATILE(betweenApi(0xfe, 9, 19), "sput-object-volatile", ReferenceType.FIELD, Format.Format21c, Opcode.ODEX_ONLY | Opcode.VOLATILE_FIELD_ACCESSOR | Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.STATIC_FIELD_ACCESSOR),*/
+    // e3 - f9 unused
 
     INVOKE_POLYMORPHIC(firstApi(0xfa, 26), "invoke-polymorphic", opcode -> new Format.Format45cc(opcode, ReferenceType.METHOD, ReferenceType.PROTO)),
-    /*INVOKE_POLYMORPHIC_RANGE(firstArtVersion(0xfb, 87), "invoke-polymorphic/range", ReferenceType.METHOD, ReferenceType.METHOD_PROTO, Format.Format4rcc, Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),*/
-    /*INVOKE_CUSTOM(firstArtVersion(0xfc, 111), "invoke-custom", ReferenceType.CALL_SITE, Format.Format35c, Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),*/
-    /*INVOKE_CUSTOM_RANGE(firstArtVersion(0xfd, 111), "invoke-custom/range", ReferenceType.CALL_SITE, Format.Format3rc, Opcode.CAN_THROW | Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),*/
+    /*INVOKE_POLYMORPHIC_RANGE(firstArtVersion(0xfb, 87), "invoke-polymorphic/range", ReferenceType.METHOD, ReferenceType.METHOD_PROTO, Format.Format4rcc),*/
+    /*INVOKE_CUSTOM(firstArtVersion(0xfc, 111), "invoke-custom", ReferenceType.CALL_SITE, Format.Format35c),*/
+    /*INVOKE_CUSTOM_RANGE(firstArtVersion(0xfd, 111), "invoke-custom/range", ReferenceType.CALL_SITE, Format.Format3rc),*/
     CONST_METHOD_HANDLE(firstApi(0xfe, 28), "const-method-handle", opcode -> new Format.Format21c(opcode, ReferenceType.METHOD_HANDLE)),
     CONST_METHOD_TYPE(firstApi(0xff, 28), "const-method-type", opcode -> new Format.Format21c(opcode, ReferenceType.PROTO)),
 
     /*PACKED_SWITCH_PAYLOAD(0x100, "packed-switch-payload", ReferenceType.NONE, Format.PackedSwitchPayload, 0),
     SPARSE_SWITCH_PAYLOAD(0x200, "sparse-switch-payload", ReferenceType.NONE, Format.SparseSwitchPayload, 0),
     ARRAY_PAYLOAD(0x300, "array-payload", ReferenceType.NONE, Format.ArrayPayload, 0)*/;
-    private static final int ODEX_ONLY = 0x1;
+
+    private static final int ODEX_ONLY = 1;
 
     @FunctionalInterface
     public interface VersionConstraints {
@@ -301,7 +281,7 @@ public enum Opcode {
         return (T) format;
     }
 
-    public boolean odexOnly() {
+    public boolean isOdexOnly() {
         return (flags & ODEX_ONLY) != 0;
     }
 
@@ -314,10 +294,10 @@ public enum Opcode {
     }
 
     Opcode(VersionConstraints constraints, String name, Function<Opcode, Format> format, int flags) {
-        this.constraints = constraints;
+        this.flags = flags;
+        this.constraints = isOdexOnly() ? onlyOdex(constraints) : constraints;
         this.name = name;
         this.format = format.apply(this);
-        this.flags = flags;
     }
 
     private static VersionConstraints allApis(int opcodeValue) {

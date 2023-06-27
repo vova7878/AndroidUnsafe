@@ -16,6 +16,7 @@ import com.v7878.unsafe.dex.bytecode2.Format.Format11x;
 import com.v7878.unsafe.dex.bytecode2.Format.Format21c;
 import com.v7878.unsafe.dex.bytecode2.Format.Format22c;
 import com.v7878.unsafe.dex.bytecode2.Format.Format35c;
+import com.v7878.unsafe.dex.bytecode2.Format.Format45cc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -517,5 +518,48 @@ public final class CodeBuilder {
         add(Opcode.CONST_METHOD_TYPE.<Format21c>format().make(
                 check_reg(dst_reg, 8), value));
         return this;
+    }
+
+    public CodeBuilder invoke_polymorphic(MethodId method, ProtoId proto, int arg_count, int arg_reg1,
+                                          int arg_reg2, int arg_reg3, int arg_reg4, int arg_reg5) {
+        format_35c_checks(arg_count, arg_reg1, arg_reg2, arg_reg3, arg_reg4, arg_reg5);
+        add(Opcode.INVOKE_POLYMORPHIC.<Format45cc>format().make(arg_count,
+                method, arg_reg1, arg_reg2, arg_reg3, arg_reg4, arg_reg5, proto));
+        add_outs(arg_count);
+        return this;
+    }
+
+    public CodeBuilder invoke_polymorphic(MethodId method, ProtoId proto, int arg_reg1,
+                                          int arg_reg2, int arg_reg3, int arg_reg4, int arg_reg5) {
+        return invoke_polymorphic(method, proto, 5, arg_reg1,
+                arg_reg2, arg_reg3, arg_reg4, arg_reg5);
+    }
+
+    public CodeBuilder invoke_polymorphic(MethodId method, ProtoId proto, int arg_reg1,
+                                          int arg_reg2, int arg_reg3, int arg_reg4) {
+        return invoke_polymorphic(method, proto, 4, arg_reg1,
+                arg_reg2, arg_reg3, arg_reg4, 0);
+    }
+
+    public CodeBuilder invoke_polymorphic(
+            MethodId method, ProtoId proto, int arg_reg1, int arg_reg2, int arg_reg3) {
+        return invoke_polymorphic(method, proto, 3, arg_reg1,
+                arg_reg2, arg_reg3, 0, 0);
+    }
+
+    public CodeBuilder invoke_polymorphic(
+            MethodId method, ProtoId proto, int arg_reg1, int arg_reg2) {
+        return invoke_polymorphic(method, proto, 2, arg_reg1,
+                arg_reg2, 0, 0, 0);
+    }
+
+    public CodeBuilder invoke_polymorphic(MethodId method, ProtoId proto, int arg_reg1) {
+        return invoke_polymorphic(method, proto, 1, arg_reg1,
+                0, 0, 0, 0);
+    }
+
+    public CodeBuilder invoke_polymorphic(MethodId method, ProtoId proto) {
+        return invoke_polymorphic(method, proto, 0, 0,
+                0, 0, 0, 0);
     }
 }

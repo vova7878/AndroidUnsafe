@@ -4,12 +4,10 @@ import static com.v7878.unsafe.AndroidUnsafe3.ClassMirror;
 import static com.v7878.unsafe.AndroidUnsafe3.arrayCast;
 import static com.v7878.unsafe.AndroidUnsafe3.unreflectDirect;
 import static com.v7878.unsafe.AndroidUnsafe5.allocateInstance;
-import static com.v7878.unsafe.AndroidUnsafe5.fullFence;
 import static com.v7878.unsafe.AndroidUnsafe5.getDeclaredMethod;
-import static com.v7878.unsafe.AndroidUnsafe5.getExecutableAccessFlags;
 import static com.v7878.unsafe.AndroidUnsafe5.loadClass;
 import static com.v7878.unsafe.AndroidUnsafe5.openDexFile;
-import static com.v7878.unsafe.AndroidUnsafe5.setExecutableAccessFlags;
+import static com.v7878.unsafe.AndroidUnsafe5.replaceExecutableAccessModifier;
 import static com.v7878.unsafe.AndroidUnsafe5.setTrusted;
 import static com.v7878.unsafe.AndroidUnsafe7.setClassStatus;
 import static com.v7878.unsafe.Utils.getSdkInt;
@@ -18,6 +16,7 @@ import static com.v7878.unsafe.Utils.nothrows_run;
 import androidx.annotation.Keep;
 
 import com.v7878.unsafe.AndroidUnsafe3.MethodHandleMirror;
+import com.v7878.unsafe.AndroidUnsafe5.AccessModifier;
 import com.v7878.unsafe.AndroidUnsafe7.ClassStatus;
 import com.v7878.unsafe.dex.ClassDef;
 import com.v7878.unsafe.dex.Dex;
@@ -219,12 +218,9 @@ public class Transformers {
                                 TypeId.of(Object[].class)), "invoke"),
                         new ProtoId(TypeId.V, esf), b.p(1), b.p(2));
             } else {
-                //TODO: setExecutableModifier
                 Method tmp = getDeclaredMethod(MethodHandle.class,
                         "invokeExactWithFrame", EmulatedStackFrame.esf_class);
-                int flags = getExecutableAccessFlags(tmp);
-                setExecutableAccessFlags(tmp, flags | Modifier.PUBLIC);
-                fullFence();
+                replaceExecutableAccessModifier(tmp, AccessModifier.PUBLIC);
 
                 //handle.invokeExactWithFrame((dalvik.system.EmulatedStackFrame) stack);
                 b.invoke_virtual(MethodId.of(tmp), b.p(1), b.p(2));
@@ -234,9 +230,7 @@ public class Transformers {
 
         Method tmp = getDeclaredMethod(MethodHandle.class,
                 "transform", EmulatedStackFrame.esf_class);
-        int flags = getExecutableAccessFlags(tmp);
-        setExecutableAccessFlags(tmp, flags | Modifier.PUBLIC);
-        fullFence();
+        replaceExecutableAccessModifier(tmp, AccessModifier.PUBLIC);
 
         //public void transform(MethodHandle handle, Object stack) {
         //    handle.transform((dalvik.system.EmulatedStackFrame) stack);

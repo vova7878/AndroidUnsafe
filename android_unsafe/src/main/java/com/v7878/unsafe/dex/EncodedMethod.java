@@ -1,5 +1,6 @@
 package com.v7878.unsafe.dex;
 
+import com.v7878.unsafe.dex.bytecode2.CodeBuilder;
 import com.v7878.unsafe.io.RandomInput;
 import com.v7878.unsafe.io.RandomOutput;
 
@@ -8,6 +9,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class EncodedMethod implements PublicCloneable {
 
@@ -42,6 +44,10 @@ public class EncodedMethod implements PublicCloneable {
         setAnnotations(annotations);
         setParameterAnnotations(parameter_annotations);
         setCode(code);
+    }
+
+    public EncodedMethod(MethodId method, int access_flags) {
+        this(method, access_flags, null, null, null);
     }
 
     public final void setMethod(MethodId method) {
@@ -82,6 +88,15 @@ public class EncodedMethod implements PublicCloneable {
 
     public final void setCode(CodeItem code) {
         this.code = code == null ? null : code.clone();
+    }
+
+    public EncodedMethod withCode(int locals_size, Consumer<CodeBuilder> consumer) {
+        int ins_size = method.getProto().getInputRegistersCount();
+        if ((access_flags & Modifier.STATIC) == 0) {
+            ins_size++; // this
+        }
+        setCode(CodeBuilder.build(ins_size + locals_size, ins_size, consumer));
+        return this;
     }
 
     public final CodeItem getCode() {

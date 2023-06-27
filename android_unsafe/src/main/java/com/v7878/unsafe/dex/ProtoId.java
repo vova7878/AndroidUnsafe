@@ -89,12 +89,20 @@ public class ProtoId implements PublicCloneable {
     }
 
     public String getShorty() {
-        StringBuilder out = new StringBuilder();
+        StringBuilder out = new StringBuilder(parameters.size() + 1);
         out.append(return_type.getShorty());
         for (TypeId tmp : parameters) {
             out.append(tmp.getShorty());
         }
         return out.toString();
+    }
+
+    public int getInputRegistersCount() {
+        int out = 0;
+        for (TypeId tmp : parameters) {
+            out += tmp.getRegistersCount();
+        }
+        return out;
     }
 
     public void collectData(DataCollector data) {

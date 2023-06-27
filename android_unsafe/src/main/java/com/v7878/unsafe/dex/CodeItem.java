@@ -1,18 +1,18 @@
 package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.assert_;
+import static com.v7878.unsafe.Utils.roundUpL;
+
+import android.util.SparseArray;
 
 import com.v7878.unsafe.Checks;
 import com.v7878.unsafe.dex.bytecode.Instruction;
-import com.v7878.unsafe.dex.bytecode2.CodeBuilder;
 import com.v7878.unsafe.io.RandomInput;
 import com.v7878.unsafe.io.RandomOutput;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 public class CodeItem implements PublicCloneable {
 
@@ -95,37 +95,25 @@ public class CodeItem implements PublicCloneable {
         //TODO
         in.readInt(); //out.debug_info_off = in.readInt();
 
-        int[] offsets = Instruction.readArray(in, context, out.insns);
-        int insns_units_size = offsets[out.insns.size()]; // in code units
+        Instruction.readArray(in, context, out.insns);
 
-        //TODO: remove after tests
-        /*for (int i = 0; i < out.insns.size(); i++) {
-            System.out.println(offsets[i] + " " + out.insns.get(i));
-        }*/
         if (tries_size > 0) {
-            if ((insns_units_size & 1) != 0) {
-                in.readShort(); // padding
-            }
-
+            in.position(roundUpL(in.position(), 4));
             long tries_pos = in.position();
             in.skipBytes((long) tries_size * TryItem.SIZE);
 
             long handlers_start = in.position();
             int handlers_size = in.readULeb128();
-            assert_(tries_size >= handlers_size, IllegalArgumentException::new,
-                    String.format("tries_size(%s) less than handlers_size(%s)",
-                            tries_size, handlers_size));
 
-            Map<Integer, CatchHandler> handlers = new HashMap<>(handlers_size);
+            SparseArray<CatchHandler> handlers = new SparseArray<>(handlers_size);
             for (int i = 0; i < handlers_size; i++) {
                 int handler_offset = (int) (in.position() - handlers_start);
-                handlers.put(handler_offset,
-                        CatchHandler.read(in, context, offsets));
+                handlers.put(handler_offset, CatchHandler.read(in, context));
             }
 
             in.position(tries_pos);
             for (int i = 0; i < tries_size; i++) {
-                out.tries.add(TryItem.read(in, handlers, offsets));
+                out.tries.add(TryItem.read(in, handlers));
             }
         }
         return out;
@@ -151,40 +139,26 @@ public class CodeItem implements PublicCloneable {
         out.writeInt(0); // TODO: debug_info_off
 
         long insns_size_pos = out.position();
-        int insns_size = insns.size();
         out.skipBytes(4);
 
         long insns_start = out.position();
-        int[] offsets = new int[insns_size + 1];
-        for (int i = 0; i <= insns_size; i++) {
-            int offset = (int) (out.position() - insns_start);
-            assert_((offset & 1) == 0, IllegalStateException::new,
-                    "Unaligned code unit");
-            offsets[i] = offset / 2;
-            if (i != insns_size) {
-                insns.get(i).write(context, out);
-            }
+        for (Instruction tmp : insns) {
+            tmp.write(context, out);
         }
+        int insns_size = (int) (out.position() - insns_start);
+        assert_((insns_size & 1) == 0, IllegalStateException::new, "insns_size is odd");
 
         out.position(insns_size_pos);
-        out.writeInt(offsets[insns_size]); // size in code units
-        out.position(insns_start + offsets[insns_size] * 2L);
+        out.writeInt(insns_size / 2); // size in code units
+        out.position(insns_start + insns_size);
 
-        //TODO: remove after tests
-        /*System.out.println(registers_size + " " + ins_size + " " + outs_size);
-        for (int i = 0; i < insns.size(); i++) {
-            System.out.println(offsets[i] + " " + insns.get(i));
-        }*/
         if (tries_size != 0) {
-            if ((offsets[insns_size] & 1) != 0) {
-                out.writeShort(0); // padding
-            }
+            out.alignPositionAndFillZeros(TryItem.ALIGNMENT);
 
             RandomOutput tries_out = out.duplicate(out.position());
             out.skipBytes((long) TryItem.SIZE * tries_size);
 
-            HashMap<CatchHandler, Integer> handlers
-                    = new HashMap<>(tries_size);
+            HashMap<CatchHandler, Integer> handlers = new HashMap<>(tries_size);
             for (TryItem tmp : tries) {
                 handlers.put(tmp.getHandler(), null);
             }
@@ -194,11 +168,11 @@ public class CodeItem implements PublicCloneable {
 
             for (CatchHandler tmp : handlers.keySet()) {
                 int handler_offset = (int) (out.position() - handlers_start);
-                tmp.write(context, out, offsets);
+                tmp.write(context, out);
                 handlers.replace(tmp, handler_offset);
             }
             for (TryItem tmp : tries) {
-                tmp.write(context, tries_out, handlers, offsets);
+                tmp.write(tries_out, handlers);
             }
         }
     }

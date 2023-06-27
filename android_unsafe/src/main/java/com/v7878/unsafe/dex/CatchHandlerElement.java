@@ -36,19 +36,17 @@ public class CatchHandlerElement implements PublicCloneable {
         return address;
     }
 
-    public static CatchHandlerElement read(RandomInput in,
-                                           ReadContext context, int[] offsets) {
-        return new CatchHandlerElement(context.type(in.readULeb128()),
-                CodeItem.getInstructionIndex(offsets, in.readULeb128()));
+    public static CatchHandlerElement read(RandomInput in, ReadContext context) {
+        return new CatchHandlerElement(context.type(in.readULeb128()), in.readULeb128());
     }
 
     public void collectData(DataCollector data) {
         data.add(type);
     }
 
-    public void write(WriteContext context, RandomOutput out, int[] offsets) {
+    public void write(WriteContext context, RandomOutput out) {
         out.writeULeb128(context.getTypeIndex(type));
-        out.writeULeb128(offsets[address]);
+        out.writeULeb128(address);
     }
 
     @Override

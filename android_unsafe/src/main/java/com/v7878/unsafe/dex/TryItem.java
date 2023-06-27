@@ -2,6 +2,9 @@ package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.assert_;
 
+import android.util.SparseArray;
+
+import com.v7878.unsafe.Checks;
 import com.v7878.unsafe.io.RandomInput;
 import com.v7878.unsafe.io.RandomOutput;
 
@@ -11,6 +14,7 @@ import java.util.Objects;
 public class TryItem implements PublicCloneable {
 
     public static final int SIZE = 8;
+    public static final int ALIGNMENT = 4;
 
     public int start_addr;
     public int insn_count;
@@ -33,8 +37,7 @@ public class TryItem implements PublicCloneable {
     }
 
     public final void setInstructionCount(int insn_count) {
-        assert_(insn_count >= 0, IllegalArgumentException::new,
-                "instruction count can`t be negative");
+        Checks.checkRange(insn_count, 0, 1 << 16);
         this.insn_count = insn_count;
     }
 
@@ -51,14 +54,9 @@ public class TryItem implements PublicCloneable {
         return handler;
     }
 
-    public static TryItem read(RandomInput in,
-                               Map<Integer, CatchHandler> handlers, int[] offsets) {
-        int tmp = in.readInt(); // start_addr in code units
-        int start_addr = CodeItem.getInstructionIndex(offsets, tmp);
-
-        tmp += in.readUnsignedShort(); // insn_count in code units
-        int insn_count = CodeItem.getInstructionIndex(offsets, tmp);
-        insn_count -= start_addr;
+    public static TryItem read(RandomInput in, SparseArray<CatchHandler> handlers) {
+        int start_addr = in.readInt(); // in code units
+        int insn_count = in.readUnsignedShort(); // in code units
 
         int handler_off = in.readUnsignedShort();
         CatchHandler handler = handlers.get(handler_off);
@@ -71,15 +69,12 @@ public class TryItem implements PublicCloneable {
         data.fill(handler);
     }
 
-    public void write(WriteContext context, RandomOutput out,
-                      Map<CatchHandler, Integer> handlers, int[] offsets) {
-        int tmp = offsets[start_addr];
-        out.writeInt(tmp);
-        tmp = offsets[start_addr + insn_count] - tmp;
-        out.writeShort(tmp);
+    public void write(RandomOutput out, Map<CatchHandler, Integer> handlers) {
+        out.writeInt(start_addr);
+        out.writeShort(insn_count);
         Integer offset = handlers.get(handler);
         assert_(offset != null, IllegalStateException::new,
-                "unable to find offset for catch handler: " + handler);
+                "unable to find offset for catch handler");
         out.writeShort(offset);
     }
 

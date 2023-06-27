@@ -46,7 +46,7 @@ public class EncodedMethod implements PublicCloneable {
 
     public final void setMethod(MethodId method) {
         this.method = Objects.requireNonNull(method,
-                "mathod can`t be null").clone();
+                "method can`t be null").clone();
     }
 
     public final MethodId getMethod() {

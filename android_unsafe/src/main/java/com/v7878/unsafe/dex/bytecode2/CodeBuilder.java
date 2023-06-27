@@ -5,8 +5,10 @@ import static com.v7878.unsafe.Utils.assert_;
 import com.v7878.unsafe.Checks;
 import com.v7878.unsafe.dex.CodeItem;
 import com.v7878.unsafe.dex.FieldId;
+import com.v7878.unsafe.dex.MethodHandleItem;
 import com.v7878.unsafe.dex.MethodId;
 import com.v7878.unsafe.dex.PCList;
+import com.v7878.unsafe.dex.ProtoId;
 import com.v7878.unsafe.dex.TypeId;
 import com.v7878.unsafe.dex.bytecode2.Format.Format10t;
 import com.v7878.unsafe.dex.bytecode2.Format.Format10x;
@@ -63,6 +65,10 @@ public final class CodeBuilder {
 
     public int p(int reg) {
         return Checks.checkRange(reg, 0, ins_size) + registers_size - ins_size;
+    }
+
+    public int this_() {
+        return p(0);
     }
 
     private int check_reg(int reg, int width) {
@@ -499,5 +505,17 @@ public final class CodeBuilder {
     public CodeBuilder invoke_interface(MethodId method, int arg_reg1) {
         return invoke_interface(method, 1, arg_reg1, 0,
                 0, 0, 0);
+    }
+
+    public CodeBuilder const_method_handle(int dst_reg, MethodHandleItem value) {
+        add(Opcode.CONST_METHOD_HANDLE.<Format21c>format().make(
+                check_reg(dst_reg, 8), value));
+        return this;
+    }
+
+    public CodeBuilder const_method_type(int dst_reg, ProtoId value) {
+        add(Opcode.CONST_METHOD_TYPE.<Format21c>format().make(
+                check_reg(dst_reg, 8), value));
+        return this;
     }
 }

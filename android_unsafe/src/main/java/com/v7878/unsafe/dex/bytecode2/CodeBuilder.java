@@ -36,12 +36,16 @@ public final class CodeBuilder {
     private final int registers_size, ins_size;
     private final List<Supplier<Instruction>> instructions;
     private final Map<Object, Integer> labels;
+    private final boolean has_this;
 
     private int current_instruction, current_unit, max_outs;
 
-    private CodeBuilder(int registers_size, int ins_size) {
-        this.registers_size = Checks.checkRange(registers_size, 0, 1 << 16);
-        this.ins_size = Checks.checkRange(ins_size, 0, registers_size + 1);
+    private CodeBuilder(int registers_size, int ins_size, boolean has_hidden_this) {
+        this.has_this = has_hidden_this;
+        this.registers_size = Checks.checkRange(registers_size, 0,
+                (1 << 16) - (has_this ? 1 : 0)) + (has_this ? 1 : 0);
+        this.ins_size = Checks.checkRange(ins_size, 0,
+                registers_size + 1) + (has_this ? 1 : 0);
         instructions = new ArrayList<>();
         labels = new HashMap<>();
         current_instruction = 0;
@@ -54,22 +58,45 @@ public final class CodeBuilder {
         return new CodeItem(registers_size, ins_size, max_outs, out, null);
     }
 
+    public static CodeItem build(int registers_size, int ins_size,
+                                 boolean has_hidden_this, Consumer<CodeBuilder> consumer) {
+        CodeBuilder builder = new CodeBuilder(registers_size, ins_size, has_hidden_this);
+        consumer.accept(builder);
+        return builder.end();
+    }
+
     public static CodeItem build(int registers_size, int ins_size, Consumer<CodeBuilder> consumer) {
-        CodeBuilder builder = new CodeBuilder(registers_size, ins_size);
+        CodeBuilder builder = new CodeBuilder(registers_size, ins_size, false);
         consumer.accept(builder);
         return builder.end();
     }
 
     public int v(int reg) {
+        //all registers
         return Checks.checkRange(reg, 0, registers_size);
     }
 
+    public int l(int reg) {
+        //only local registers
+        int locals = registers_size - ins_size;
+        return Checks.checkRange(reg, 0, locals);
+    }
+
+    private int p(int reg, boolean include_this) {
+        //only parameter registers
+        int locals = registers_size - ins_size;
+        return locals + Checks.checkRange(reg, 0,
+                ins_size - (include_this ? 1 : 0)) + (include_this ? 1 : 0);
+    }
+
     public int p(int reg) {
-        return Checks.checkRange(reg, 0, ins_size) + registers_size - ins_size;
+        //only parameter registers without hidden this
+        return p(reg, has_this);
     }
 
     public int this_() {
-        return p(0);
+        assert_(has_this, IllegalArgumentException::new, "builder has no 'this' register");
+        return p(0, false);
     }
 
     private int check_reg(int reg, int width) {

@@ -92,10 +92,8 @@ public class EncodedMethod implements PublicCloneable {
 
     public EncodedMethod withCode(int locals_size, Consumer<CodeBuilder> consumer) {
         int ins_size = method.getProto().getInputRegistersCount();
-        if ((access_flags & Modifier.STATIC) == 0) {
-            ins_size++; // this
-        }
-        setCode(CodeBuilder.build(ins_size + locals_size, ins_size, consumer));
+        setCode(CodeBuilder.build(ins_size + locals_size, ins_size,
+                (access_flags & Modifier.STATIC) == 0, consumer));
         return this;
     }
 

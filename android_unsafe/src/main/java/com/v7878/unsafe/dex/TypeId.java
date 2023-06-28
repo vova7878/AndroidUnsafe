@@ -105,6 +105,10 @@ public class TypeId implements PublicCloneable {
         return c == '[' ? 'L' : c;
     }
 
+    public final int getRegistersCount() {
+        return equals(V) ? 0 : equals(D) || equals(J) ? 2 : 1;
+    }
+
     public static TypeId read(RandomInput in, ReadContext context) {
         return new TypeId(context.string(in.readInt()));
     }

@@ -169,6 +169,7 @@ public class Dex extends PCList<ClassDef> {
         /*map.call_site_ids_off = offset;
         map.call_site_ids_size = context.getCallSitesCount();
         offset += map.call_site_ids_size * CallSiteId.SIZE;*/
+
         map.method_handles_off = offset;
         map.method_handles_size = context.getMethodHandlesCount();
         offset += map.method_handles_size * MethodHandleItem.SIZE;
@@ -185,6 +186,8 @@ public class Dex extends PCList<ClassDef> {
         data_out.position(map.string_data_items_off);
         context.stringsStream().forEach((value) -> StringId.write(value, context, out, data_out));
         offset = (int) data_out.position();
+
+        //TODO: use align methods?
 
         TypeList[] lists = data.getTypeLists();
         if (lists.length != 0) {

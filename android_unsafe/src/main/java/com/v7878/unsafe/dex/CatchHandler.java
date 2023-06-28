@@ -39,17 +39,16 @@ public class CatchHandler implements PublicCloneable {
         return catch_all_addr;
     }
 
-    public static CatchHandler read(RandomInput in,
-                                    ReadContext context, int[] offsets) {
+    public static CatchHandler read(RandomInput in, ReadContext context) {
         int size = in.readSLeb128();
         int handlersCount = Math.abs(size);
         PCList<CatchHandlerElement> handlers = PCList.empty();
         for (int i = 0; i < handlersCount; i++) {
-            handlers.add(CatchHandlerElement.read(in, context, offsets));
+            handlers.add(CatchHandlerElement.read(in, context));
         }
         Integer catch_all_addr = null;
         if (size <= 0) {
-            catch_all_addr = CodeItem.getInstructionIndex(offsets, in.readULeb128());
+            catch_all_addr = in.readULeb128();
         }
         return new CatchHandler(handlers, catch_all_addr);
     }
@@ -60,15 +59,15 @@ public class CatchHandler implements PublicCloneable {
         }
     }
 
-    public void write(WriteContext context, RandomOutput out, int[] offsets) {
+    public void write(WriteContext context, RandomOutput out) {
         assert_(!(handlers.isEmpty() && catch_all_addr == null),
                 IllegalStateException::new, "unable to write empty catch handler");
         out.writeSLeb128(catch_all_addr == null ? handlers.size() : -handlers.size());
         for (CatchHandlerElement tmp : handlers) {
-            tmp.write(context, out, offsets);
+            tmp.write(context, out);
         }
         if (catch_all_addr != null) {
-            out.writeULeb128(offsets[catch_all_addr]);
+            out.writeULeb128(catch_all_addr);
         }
     }
 

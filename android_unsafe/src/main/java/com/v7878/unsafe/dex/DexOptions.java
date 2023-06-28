@@ -2,6 +2,7 @@ package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.getSdkInt;
 
+//TODO: split into Read and Write Options
 public class DexOptions {
     private final int targetApi;
     private final boolean includesOdexInstructions;

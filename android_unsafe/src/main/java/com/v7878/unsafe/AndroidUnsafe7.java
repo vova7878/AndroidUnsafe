@@ -7,20 +7,11 @@ import static com.v7878.unsafe.Utils.runOnce;
 import com.v7878.unsafe.dex.AnnotationItem;
 import com.v7878.unsafe.dex.AnnotationSet;
 import com.v7878.unsafe.dex.ClassDef;
-import com.v7878.unsafe.dex.CodeItem;
 import com.v7878.unsafe.dex.Dex;
 import com.v7878.unsafe.dex.EncodedMethod;
 import com.v7878.unsafe.dex.MethodId;
-import com.v7878.unsafe.dex.PCList;
 import com.v7878.unsafe.dex.ProtoId;
 import com.v7878.unsafe.dex.TypeId;
-import com.v7878.unsafe.dex.bytecode.Instruction;
-import com.v7878.unsafe.dex.bytecode.InvokeKind;
-import com.v7878.unsafe.dex.bytecode.MoveResult;
-import com.v7878.unsafe.dex.bytecode.MoveResultWide;
-import com.v7878.unsafe.dex.bytecode.Return;
-import com.v7878.unsafe.dex.bytecode.ReturnVoid;
-import com.v7878.unsafe.dex.bytecode.ReturnWide;
 import com.v7878.unsafe.function.NativeLibrary;
 import com.v7878.unsafe.memory.Pointer;
 import com.v7878.unsafe.memory.Word;
@@ -191,165 +182,88 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         clazz.getInterfaces().add(TypeId.of(LocalRefUtils.class));
         clazz.setAccessFlags(Modifier.PUBLIC | Modifier.FINAL);
 
-        PCList<Instruction> code = PCList.empty();
+        MethodId nlr_id = new MethodId(id, new ProtoId(word_id, word_id, word_id), "NewLocalRef");
+        clazz.getClassData().getDirectMethods().add(new EncodedMethod(
+                nlr_id, Modifier.PUBLIC | Modifier.STATIC | Modifier.NATIVE,
+                new AnnotationSet(
+                        AnnotationItem.CriticalNative()
+                ), null, null
+        ));
 
-        clazz.getClassData().getDirectMethods().add(
-                new EncodedMethod(
-                        new MethodId(id, new ProtoId(word_id, word_id, word_id), "NewLocalRef"),
-                        Modifier.PUBLIC | Modifier.STATIC | Modifier.NATIVE,
-                        new AnnotationSet(
-                                AnnotationItem.CriticalNative()
-                        ), null, null
-                )
-        );
-
+        //it's broken: object is cast to pointer
         if (IS64BIT) {
-            //it`s broken, only use for little-endian
-            //v0 = 0
-            //v1 = this
-            //v2|v3 = (long) env
-            //v4 = obj
-            code.clear();
-            code.add(new InvokeKind.InvokeStatic(4, new MethodId(id, new ProtoId(TypeId.J,
-                    TypeId.J, TypeId.J), "NewLocalRef"), 2, 3, 4, 0, 0));
-            code.add(new MoveResultWide(0));
-            code.add(new ReturnWide(0));
-            clazz.getClassData().getVirtualMethods().add(
-                    new EncodedMethod(
-                            new MethodId(id, new ProtoId(TypeId.J, TypeId.J,
-                                    TypeId.of(Object.class)), "NewLocalRef64"),
-                            Modifier.PUBLIC, null, null,
-                            new CodeItem(5, 4, 4, code, null)
-                    )
-            );
+            //pointer 64-bit, object 32-bit -> fill upper 32 bits with zeros (l0 register)
+            clazz.getClassData().getVirtualMethods().add(new EncodedMethod(
+                    new MethodId(id, new ProtoId(TypeId.J, TypeId.J,
+                            TypeId.of(Object.class)), "NewLocalRef64"),
+                    Modifier.PUBLIC).withCode(1, b -> b
+                    .invoke_static(nlr_id, b.p(0), b.p(1), b.p(2), b.l(0))
+                    .move_result_wide(b.v(0))
+                    .return_wide(b.v(0))
+            ));
         } else {
-            code.clear();
-            code.add(new InvokeKind.InvokeStatic(2, new MethodId(id, new ProtoId(TypeId.I,
-                    TypeId.I, TypeId.I), "NewLocalRef"), 1, 2, 0, 0, 0));
-            code.add(new MoveResult(0));
-            code.add(new Return(0));
-            clazz.getClassData().getVirtualMethods().add(
-                    new EncodedMethod(
-                            new MethodId(id, new ProtoId(TypeId.I, TypeId.I,
-                                    TypeId.of(Object.class)), "NewLocalRef32"),
-                            Modifier.PUBLIC, null, null,
-                            new CodeItem(3, 3, 2, code, null)
-                    )
-            );
+            clazz.getClassData().getVirtualMethods().add(new EncodedMethod(
+                    new MethodId(id, new ProtoId(TypeId.I, TypeId.I,
+                            TypeId.of(Object.class)), "NewLocalRef32"),
+                    Modifier.PUBLIC).withCode(0, b -> b
+                    .invoke_static(nlr_id, b.p(0), b.p(1))
+                    .move_result(b.v(0))
+                    .return_(b.v(0))
+            ));
         }
 
-        clazz.getClassData().getDirectMethods().add(
-                new EncodedMethod(
-                        new MethodId(id, new ProtoId(TypeId.V, word_id, word_id), "DeleteLocalRef"),
-                        Modifier.PUBLIC | Modifier.STATIC | Modifier.NATIVE,
-                        new AnnotationSet(
-                                AnnotationItem.CriticalNative()
-                        ), null, null
-                )
-        );
+        MethodId dlr_id = new MethodId(id, new ProtoId(TypeId.V, word_id, word_id), "DeleteLocalRef");
+        clazz.getClassData().getDirectMethods().add(new EncodedMethod(
+                dlr_id, Modifier.PUBLIC | Modifier.STATIC | Modifier.NATIVE,
+                new AnnotationSet(
+                        AnnotationItem.CriticalNative()
+                ), null, null
+        ));
 
-        if (IS64BIT) {
-            code.clear();
-            code.add(new InvokeKind.InvokeStatic(4, new MethodId(id, new ProtoId(TypeId.V,
-                    TypeId.J, TypeId.J), "DeleteLocalRef"), 1, 2, 3, 4, 0));
-            code.add(new ReturnVoid());
-            clazz.getClassData().getVirtualMethods().add(
-                    new EncodedMethod(
-                            new MethodId(id, new ProtoId(TypeId.V, TypeId.J,
-                                    TypeId.J), "DeleteLocalRef64"),
-                            Modifier.PUBLIC, null, null,
-                            new CodeItem(5, 5, 4, code, null)
-                    )
-            );
-        } else {
-            code.clear();
-            code.add(new InvokeKind.InvokeStatic(2, new MethodId(id, new ProtoId(TypeId.V,
-                    TypeId.I, TypeId.I), "DeleteLocalRef"), 1, 2, 0, 0, 0));
-            code.add(new ReturnVoid());
-            clazz.getClassData().getVirtualMethods().add(
-                    new EncodedMethod(
-                            new MethodId(id, new ProtoId(TypeId.V, TypeId.I,
-                                    TypeId.I), "DeleteLocalRef32"),
-                            Modifier.PUBLIC, null, null,
-                            new CodeItem(3, 3, 2, code, null)
-                    )
-            );
-        }
+        clazz.getClassData().getVirtualMethods().add(new EncodedMethod(
+                new MethodId(id, new ProtoId(TypeId.V, word_id, word_id),
+                        IS64BIT ? "DeleteLocalRef64" : "DeleteLocalRef32"),
+                Modifier.PUBLIC).withCode(0, b -> (IS64BIT ?
+                b.invoke_static(dlr_id, b.p(0), b.p(1), b.p(2), b.p(3)) :
+                b.invoke_static(dlr_id, b.p(0), b.p(1)))
+                .return_void()
+        ));
 
-        clazz.getClassData().getDirectMethods().add(
-                new EncodedMethod(
-                        new MethodId(id, new ProtoId(TypeId.V, word_id, TypeId.I), "PushLocalFrame"),
-                        Modifier.PUBLIC | Modifier.STATIC | Modifier.NATIVE,
-                        new AnnotationSet(
-                                AnnotationItem.CriticalNative()
-                        ), null, null
-                )
-        );
+        MethodId push_id = new MethodId(id, new ProtoId(TypeId.V, word_id, TypeId.I), "PushLocalFrame");
+        clazz.getClassData().getDirectMethods().add(new EncodedMethod(
+                push_id, Modifier.PUBLIC | Modifier.STATIC | Modifier.NATIVE,
+                new AnnotationSet(
+                        AnnotationItem.CriticalNative()
+                ), null, null
+        ));
 
-        if (IS64BIT) {
-            code.clear();
-            code.add(new InvokeKind.InvokeStatic(3, new MethodId(id, new ProtoId(TypeId.V,
-                    TypeId.J, TypeId.I), "PushLocalFrame"), 1, 2, 3, 0, 0));
-            code.add(new ReturnVoid());
-            clazz.getClassData().getVirtualMethods().add(
-                    new EncodedMethod(
-                            new MethodId(id, new ProtoId(TypeId.V, TypeId.J,
-                                    TypeId.I), "PushLocalFrame64"),
-                            Modifier.PUBLIC, null, null,
-                            new CodeItem(4, 4, 3, code, null)
-                    )
-            );
-        } else {
-            code.clear();
-            code.add(new InvokeKind.InvokeStatic(2, new MethodId(id, new ProtoId(TypeId.V,
-                    TypeId.I, TypeId.I), "PushLocalFrame"), 1, 2, 0, 0, 0));
-            code.add(new ReturnVoid());
-            clazz.getClassData().getVirtualMethods().add(
-                    new EncodedMethod(
-                            new MethodId(id, new ProtoId(TypeId.V, TypeId.I,
-                                    TypeId.I), "PushLocalFrame32"),
-                            Modifier.PUBLIC, null, null,
-                            new CodeItem(3, 3, 2, code, null)
-                    )
-            );
-        }
+        clazz.getClassData().getVirtualMethods().add(new EncodedMethod(
+                new MethodId(id, new ProtoId(TypeId.V, word_id, TypeId.I),
+                        IS64BIT ? "PushLocalFrame64" : "PushLocalFrame32"),
+                Modifier.PUBLIC).withCode(0, b -> (IS64BIT ?
+                b.invoke_static(push_id, b.p(0), b.p(1), b.p(2)) :
+                b.invoke_static(push_id, b.p(0), b.p(1)))
+                .return_void()
+        ));
 
-        clazz.getClassData().getDirectMethods().add(
-                new EncodedMethod(
-                        new MethodId(id, new ProtoId(TypeId.V, word_id), "PopLocalFrame"),
-                        Modifier.PUBLIC | Modifier.STATIC | Modifier.NATIVE,
-                        new AnnotationSet(
-                                AnnotationItem.CriticalNative()
-                        ), null, null
-                )
-        );
+        MethodId pop_id = new MethodId(id, new ProtoId(TypeId.V, word_id), "PopLocalFrame");
+        clazz.getClassData().getDirectMethods().add(new EncodedMethod(
+                pop_id, Modifier.PUBLIC | Modifier.STATIC | Modifier.NATIVE,
+                new AnnotationSet(
+                        AnnotationItem.CriticalNative()
+                ), null, null
+        ));
 
-        if (IS64BIT) {
-            code.clear();
-            code.add(new InvokeKind.InvokeStatic(2, new MethodId(id, new ProtoId(TypeId.V,
-                    TypeId.J), "PopLocalFrame"), 1, 2, 0, 0, 0));
-            code.add(new ReturnVoid());
-            clazz.getClassData().getVirtualMethods().add(
-                    new EncodedMethod(
-                            new MethodId(id, new ProtoId(TypeId.V, TypeId.J), "PopLocalFrame64"),
-                            Modifier.PUBLIC, null, null,
-                            new CodeItem(3, 3, 2, code, null)
-                    )
-            );
-        } else {
-            code.clear();
-            code.add(new InvokeKind.InvokeStatic(1, new MethodId(id, new ProtoId(TypeId.V,
-                    TypeId.I), "PopLocalFrame"), 1, 0, 0, 0, 0));
-            code.add(new ReturnVoid());
-            clazz.getClassData().getVirtualMethods().add(
-                    new EncodedMethod(
-                            new MethodId(id, new ProtoId(TypeId.V, TypeId.I), "PopLocalFrame32"),
-                            Modifier.PUBLIC, null, null,
-                            new CodeItem(2, 2, 1, code, null)
-                    )
-            );
-        }
+        clazz.getClassData().getVirtualMethods().add(new EncodedMethod(
+                new MethodId(id, new ProtoId(TypeId.V, word_id),
+                        IS64BIT ? "PopLocalFrame64" : "PopLocalFrame32"),
+                Modifier.PUBLIC).withCode(0, b -> (IS64BIT ?
+                b.invoke_static(pop_id, b.p(0), b.p(1)) :
+                b.invoke_static(pop_id, b.p(0)))
+                .return_void()
+        ));
 
+        //noinspection deprecation
         DexFile dex = openDexFile(new Dex(clazz).compile());
         Class<?> utils = loadClass(dex, name, AndroidUnsafe7.class.getClassLoader());
         setClassStatus(utils, ClassStatus.Verified);
@@ -393,6 +307,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
     }
 
     public static void PushLocalFrame(int capacity) {
+        //TODO: capacity checks
         LocalRefUtils utils = localRefUtils.get();
         Pointer env = getCurrentEnvPtr();
         if (IS64BIT) {
@@ -409,6 +324,40 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
             utils.PopLocalFrame64(env.getRawAddress());
         } else {
             utils.PopLocalFrame32((int) env.getRawAddress());
+        }
+    }
+
+    public static class ScopedLocalRef implements AutoCloseable {
+
+        private final Word ref;
+
+        public ScopedLocalRef(Object obj) {
+            ref = NewLocalRef(obj);
+        }
+
+        public Word get() {
+            return ref;
+        }
+
+        @Override
+        public void close() {
+            DeleteLocalRef(ref);
+        }
+    }
+
+    public static class LocalFrame implements AutoCloseable {
+
+        public LocalFrame(int capacity) {
+            PushLocalFrame(capacity);
+        }
+
+        public Word newRef(Object obj) {
+            return NewLocalRef(obj);
+        }
+
+        @Override
+        public void close() {
+            PopLocalFrame();
         }
     }
 }

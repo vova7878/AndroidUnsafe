@@ -1,6 +1,10 @@
 package com.v7878.unsafe.dex;
 
-// Temporary object. Needed to read or write
+import android.util.SparseArray;
+
+import com.v7878.unsafe.dex.bytecode.Opcode;
+
+// Temporary object. Needed to read dex
 class ReadContextImpl implements ReadContext {
 
     private String[] strings;
@@ -11,10 +15,13 @@ class ReadContextImpl implements ReadContext {
     private MethodHandleItem[] method_handles;
     private CallSiteId[] call_sites;
 
-    private DexOptions options;
+    private final SparseArray<Opcode> opcodes;
+
+    private final DexOptions options;
 
     public ReadContextImpl(DexOptions options) {
         this.options = options;
+        this.opcodes = Opcode.forOptions(options);
     }
 
     @Override
@@ -55,6 +62,15 @@ class ReadContextImpl implements ReadContext {
     @Override
     public CallSiteId call_site(int index) {
         return call_sites[index];
+    }
+
+    @Override
+    public Opcode opcode(int opcodeValue) {
+        Opcode out = opcodes.get(opcodeValue);
+        if (out == null) {
+            throw new IllegalStateException("unknown opcode: " + Integer.toHexString(opcodeValue));
+        }
+        return out;
     }
 
     public void setStrings(String[] strings) {

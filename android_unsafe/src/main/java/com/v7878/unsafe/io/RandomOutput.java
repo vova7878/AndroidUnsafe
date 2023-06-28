@@ -1,6 +1,7 @@
 package com.v7878.unsafe.io;
 
 import static com.v7878.unsafe.AndroidUnsafe.IS64BIT;
+import static com.v7878.unsafe.Utils.roundUpL;
 
 import com.v7878.unsafe.Checks;
 import com.v7878.unsafe.memory.Word;
@@ -81,6 +82,21 @@ public interface RandomOutput extends AutoCloseable {
     long position();
 
     void position(long new_position);
+
+    default long alignPosition(long alignment) {
+        long new_position = roundUpL(position(), alignment);
+        position(new_position);
+        return new_position;
+    }
+
+    default long alignPositionAndFillZeros(long alignment) {
+        long old_position = position();
+        long new_position = roundUpL(old_position, alignment);
+        for (long i = 0; i < new_position - old_position; i++) {
+            writeByte(0);
+        }
+        return new_position;
+    }
 
     RandomOutput duplicate();
 

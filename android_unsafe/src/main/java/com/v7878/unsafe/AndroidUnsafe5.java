@@ -1,5 +1,8 @@
 package com.v7878.unsafe;
 
+import static com.v7878.unsafe.AndroidUnsafe5.AccessModifier.PRIVATE;
+import static com.v7878.unsafe.AndroidUnsafe5.AccessModifier.PROTECTED;
+import static com.v7878.unsafe.AndroidUnsafe5.AccessModifier.PUBLIC;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.nothrows_run;
@@ -24,6 +27,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -406,12 +410,24 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
         putIntN(getArtMethod(ex) + ACCESS_FLAGS_OFFSET, flags);
     }
 
-    private static final long ENTRY_POINT_OFFSET = ARTMETHOD_LAYOUT
-            .selectPath(groupElement("ptr_sized_fields_"),
-                    groupElement("entry_point_from_quick_compiled_code_")).offset();
+    public enum AccessModifier {
+        PUBLIC(Modifier.PUBLIC),
+        PROTECTED(Modifier.PROTECTED),
+        NONE(0),
+        PRIVATE(Modifier.PRIVATE);
 
-    public static Pointer getExecutableEntryPoint(Executable ex) {
-        long art_method = getArtMethod(ex);
-        return new Pointer(getWordN(art_method + ENTRY_POINT_OFFSET));
+        public final int value;
+
+        AccessModifier(int value) {
+            this.value = value;
+        }
+    }
+
+    @DangerLevel(DangerLevel.VERY_CAREFUL)
+    public static void replaceExecutableAccessModifier(Executable ex, AccessModifier modifier) {
+        final int all = PUBLIC.value | PROTECTED.value | PRIVATE.value;
+        int flags = getExecutableAccessFlags(ex) & ~all;
+        setExecutableAccessFlags(ex, flags | modifier.value);
+        fullFence();
     }
 }

@@ -263,6 +263,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                 .return_void()
         ));
 
+        //noinspection deprecation
         DexFile dex = openDexFile(new Dex(clazz).compile());
         Class<?> utils = loadClass(dex, name, AndroidUnsafe7.class.getClassLoader());
         setClassStatus(utils, ClassStatus.Verified);

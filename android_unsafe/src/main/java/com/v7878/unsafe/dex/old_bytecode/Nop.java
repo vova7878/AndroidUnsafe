@@ -1,0 +1,39 @@
+package com.v7878.unsafe.dex.old_bytecode;
+
+import com.v7878.unsafe.dex.WriteContext;
+import com.v7878.unsafe.dex.old_bytecode.InstructionReader.Reader_10x;
+import com.v7878.unsafe.io.RandomOutput;
+
+public class Nop extends Instruction {
+
+    public static final int OPCODE = 0x00;
+
+    static void init() {
+        InstructionReader.register(OPCODE, new Reader_10x(Nop::new));
+    }
+
+    @Override
+    public void write(WriteContext context, RandomOutput out) {
+        InstructionWriter.write_10x(out, OPCODE);
+    }
+
+    @Override
+    public int opcode_old() {
+        return OPCODE;
+    }
+
+    @Override
+    public String name() {
+        return "nop";
+    }
+
+    @Override
+    public String toString() {
+        return name();
+    }
+
+    @Override
+    public Nop clone() {
+        return new Nop();
+    }
+}

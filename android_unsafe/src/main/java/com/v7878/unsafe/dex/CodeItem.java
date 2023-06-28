@@ -86,8 +86,7 @@ public class CodeItem implements PublicCloneable {
 
         CodeItem out = new CodeItem(registers_size, ins_size, outs_size, null, null);
 
-        //TODO: migrate to new bytecode
-        out.insns = (PCList<Instruction>) (PCList<?>) com.v7878.unsafe.dex.bytecode2.Instruction.readArray(in, context);
+        out.insns = Instruction.readArray(in, context);
 
         if (tries_size > 0) {
             in.position(roundUpL(in.position(), 4));

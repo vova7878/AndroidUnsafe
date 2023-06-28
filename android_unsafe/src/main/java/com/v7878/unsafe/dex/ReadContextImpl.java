@@ -2,7 +2,7 @@ package com.v7878.unsafe.dex;
 
 import android.util.SparseArray;
 
-import com.v7878.unsafe.dex.bytecode2.Opcode;
+import com.v7878.unsafe.dex.bytecode.Opcode;
 
 // Temporary object. Needed to read dex
 class ReadContextImpl implements ReadContext {

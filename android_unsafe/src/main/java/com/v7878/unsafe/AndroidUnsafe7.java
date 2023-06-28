@@ -14,13 +14,13 @@ import com.v7878.unsafe.dex.MethodId;
 import com.v7878.unsafe.dex.PCList;
 import com.v7878.unsafe.dex.ProtoId;
 import com.v7878.unsafe.dex.TypeId;
-import com.v7878.unsafe.dex.bytecode.Instruction;
-import com.v7878.unsafe.dex.bytecode.InvokeKind;
-import com.v7878.unsafe.dex.bytecode.MoveResult;
-import com.v7878.unsafe.dex.bytecode.MoveResultWide;
-import com.v7878.unsafe.dex.bytecode.Return;
-import com.v7878.unsafe.dex.bytecode.ReturnVoid;
-import com.v7878.unsafe.dex.bytecode.ReturnWide;
+import com.v7878.unsafe.dex.old_bytecode.Instruction;
+import com.v7878.unsafe.dex.old_bytecode.InvokeKind;
+import com.v7878.unsafe.dex.old_bytecode.MoveResult;
+import com.v7878.unsafe.dex.old_bytecode.MoveResultWide;
+import com.v7878.unsafe.dex.old_bytecode.Return;
+import com.v7878.unsafe.dex.old_bytecode.ReturnVoid;
+import com.v7878.unsafe.dex.old_bytecode.ReturnWide;
 import com.v7878.unsafe.function.NativeLibrary;
 import com.v7878.unsafe.memory.Pointer;
 import com.v7878.unsafe.memory.Word;
@@ -177,6 +177,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         }
     }
 
+    //TODO: delete old_bytecode
     private static final Supplier<LocalRefUtils> localRefUtils = runOnce(() -> {
         //TODO: what if kPoisonReferences == true?
         //make sure reinterpret_cast<int>(obj) == addressof(obj)
@@ -219,7 +220,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                             new MethodId(id, new ProtoId(TypeId.J, TypeId.J,
                                     TypeId.of(Object.class)), "NewLocalRef64"),
                             Modifier.PUBLIC, null, null,
-                            new CodeItem(5, 4, 4, code, null)
+                            new CodeItem(5, 4, 4, (PCList<com.v7878.unsafe.dex.bytecode.Instruction>) (PCList) code, null)
                     )
             );
         } else {
@@ -233,7 +234,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                             new MethodId(id, new ProtoId(TypeId.I, TypeId.I,
                                     TypeId.of(Object.class)), "NewLocalRef32"),
                             Modifier.PUBLIC, null, null,
-                            new CodeItem(3, 3, 2, code, null)
+                            new CodeItem(3, 3, 2, (PCList<com.v7878.unsafe.dex.bytecode.Instruction>) (PCList) code, null)
                     )
             );
         }
@@ -258,7 +259,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                             new MethodId(id, new ProtoId(TypeId.V, TypeId.J,
                                     TypeId.J), "DeleteLocalRef64"),
                             Modifier.PUBLIC, null, null,
-                            new CodeItem(5, 5, 4, code, null)
+                            new CodeItem(5, 5, 4, (PCList<com.v7878.unsafe.dex.bytecode.Instruction>) (PCList) code, null)
                     )
             );
         } else {
@@ -271,7 +272,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                             new MethodId(id, new ProtoId(TypeId.V, TypeId.I,
                                     TypeId.I), "DeleteLocalRef32"),
                             Modifier.PUBLIC, null, null,
-                            new CodeItem(3, 3, 2, code, null)
+                            new CodeItem(3, 3, 2, (PCList<com.v7878.unsafe.dex.bytecode.Instruction>) (PCList) code, null)
                     )
             );
         }
@@ -296,7 +297,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                             new MethodId(id, new ProtoId(TypeId.V, TypeId.J,
                                     TypeId.I), "PushLocalFrame64"),
                             Modifier.PUBLIC, null, null,
-                            new CodeItem(4, 4, 3, code, null)
+                            new CodeItem(4, 4, 3, (PCList<com.v7878.unsafe.dex.bytecode.Instruction>) (PCList) code, null)
                     )
             );
         } else {
@@ -309,7 +310,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                             new MethodId(id, new ProtoId(TypeId.V, TypeId.I,
                                     TypeId.I), "PushLocalFrame32"),
                             Modifier.PUBLIC, null, null,
-                            new CodeItem(3, 3, 2, code, null)
+                            new CodeItem(3, 3, 2, (PCList<com.v7878.unsafe.dex.bytecode.Instruction>) (PCList) code, null)
                     )
             );
         }
@@ -333,7 +334,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                     new EncodedMethod(
                             new MethodId(id, new ProtoId(TypeId.V, TypeId.J), "PopLocalFrame64"),
                             Modifier.PUBLIC, null, null,
-                            new CodeItem(3, 3, 2, code, null)
+                            new CodeItem(3, 3, 2, (PCList<com.v7878.unsafe.dex.bytecode.Instruction>) (PCList) code, null)
                     )
             );
         } else {
@@ -345,7 +346,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                     new EncodedMethod(
                             new MethodId(id, new ProtoId(TypeId.V, TypeId.I), "PopLocalFrame32"),
                             Modifier.PUBLIC, null, null,
-                            new CodeItem(2, 2, 1, code, null)
+                            new CodeItem(2, 2, 1, (PCList<com.v7878.unsafe.dex.bytecode.Instruction>) (PCList) code, null)
                     )
             );
         }

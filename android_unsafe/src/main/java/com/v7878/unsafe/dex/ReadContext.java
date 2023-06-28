@@ -1,6 +1,6 @@
 package com.v7878.unsafe.dex;
 
-import com.v7878.unsafe.dex.bytecode2.Opcode;
+import com.v7878.unsafe.dex.bytecode.Opcode;
 
 public interface ReadContext {
 

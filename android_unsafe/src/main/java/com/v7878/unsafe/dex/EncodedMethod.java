@@ -1,6 +1,6 @@
 package com.v7878.unsafe.dex;
 
-import com.v7878.unsafe.dex.bytecode2.CodeBuilder;
+import com.v7878.unsafe.dex.bytecode.CodeBuilder;
 import com.v7878.unsafe.io.RandomInput;
 import com.v7878.unsafe.io.RandomOutput;
 

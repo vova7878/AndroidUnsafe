@@ -1,5 +1,6 @@
-package com.v7878.unsafe.dex.bytecode2;
+package com.v7878.unsafe.dex.bytecode;
 
+import com.v7878.unsafe.dex.CallSiteId;
 import com.v7878.unsafe.dex.DataCollector;
 import com.v7878.unsafe.dex.FieldId;
 import com.v7878.unsafe.dex.MethodHandleItem;
@@ -138,9 +139,7 @@ public enum ReferenceType {
         public ProtoId clone(Object ref) {
             return verify(ref).clone();
         }
-    }
-    //TODO
-    /*, CALLSITE {
+    }, CALLSITE {
         @Override
         public CallSiteId verify(Object ref) {
             return (CallSiteId) Objects.requireNonNull(ref);
@@ -158,14 +157,16 @@ public enum ReferenceType {
 
         @Override
         public int refToIndex(WriteContext context, Object ref) {
-            return context.getCallSiteIndex(verify(ref));
+            //TODO
+            //return context.getCallSiteIndex(verify(ref));
+            throw new UnsupportedOperationException("not implemented yet");
         }
 
         @Override
         public CallSiteId clone(Object ref) {
             return verify(ref).clone();
         }
-    }*/, METHOD_HANDLE {
+    }, METHOD_HANDLE {
         @Override
         public MethodHandleItem verify(Object ref) {
             return (MethodHandleItem) Objects.requireNonNull(ref);

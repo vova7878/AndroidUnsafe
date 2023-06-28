@@ -1,5 +1,7 @@
 package com.v7878.unsafe.dex.bytecode2;
 
+import android.util.SparseArray;
+
 import com.v7878.unsafe.dex.DexOptions;
 
 import java.util.function.Function;
@@ -259,7 +261,7 @@ public enum Opcode {
     private static final int ODEX_ONLY = 1;
 
     @FunctionalInterface
-    public interface VersionConstraints {
+    private interface VersionConstraints {
         int opcodeValue(DexOptions options);
     }
 
@@ -298,6 +300,17 @@ public enum Opcode {
         this.constraints = isOdexOnly() ? onlyOdex(constraints) : constraints;
         this.name = name;
         this.format = format.apply(this);
+    }
+
+    public static SparseArray<Opcode> forOptions(DexOptions options) {
+        SparseArray<Opcode> out = new SparseArray<>(values().length);
+        for (Opcode op : values()) {
+            try {
+                out.put(op.opcodeValue(options), op);
+            } catch (Throwable ignore) {
+            }
+        }
+        return out;
     }
 
     private static VersionConstraints allApis(int opcodeValue) {

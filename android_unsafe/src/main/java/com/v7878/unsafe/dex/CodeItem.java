@@ -10,7 +10,6 @@ import com.v7878.unsafe.dex.bytecode.Instruction;
 import com.v7878.unsafe.io.RandomInput;
 import com.v7878.unsafe.io.RandomOutput;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -78,24 +77,17 @@ public class CodeItem implements PublicCloneable {
         return tries;
     }
 
-    static int getInstructionIndex(int[] offsets, int addr) {
-        addr = Arrays.binarySearch(offsets, addr);
-        assert_(addr >= 0, IllegalStateException::new,
-                "unable to find instruction with offset " + addr);
-        return addr;
-    }
-
     public static CodeItem read(RandomInput in, ReadContext context) {
         int registers_size = in.readUnsignedShort();
         int ins_size = in.readUnsignedShort();
         int outs_size = in.readUnsignedShort();
-        CodeItem out = new CodeItem(registers_size, ins_size, outs_size, null, null);
         int tries_size = in.readUnsignedShort();
+        in.readInt(); //TODO: out.debug_info_off = in.readInt();
 
-        //TODO
-        in.readInt(); //out.debug_info_off = in.readInt();
+        CodeItem out = new CodeItem(registers_size, ins_size, outs_size, null, null);
 
-        Instruction.readArray(in, context, out.insns);
+        //TODO: migrate to new bytecode
+        out.insns = (PCList<Instruction>) (PCList<?>) com.v7878.unsafe.dex.bytecode2.Instruction.readArray(in, context);
 
         if (tries_size > 0) {
             in.position(roundUpL(in.position(), 4));

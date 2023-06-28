@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-// Temporary object. Needed to read or write
+// Temporary object. Needed to write dex
 final class WriteContextImpl implements WriteContext {
 
     public final Comparator<TypeId> type_comparator

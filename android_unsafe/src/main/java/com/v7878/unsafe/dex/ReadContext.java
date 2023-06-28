@@ -1,5 +1,7 @@
 package com.v7878.unsafe.dex;
 
+import com.v7878.unsafe.dex.bytecode2.Opcode;
+
 public interface ReadContext {
 
     DexOptions getOptions();
@@ -17,4 +19,6 @@ public interface ReadContext {
     MethodHandleItem method_handle(int index);
 
     CallSiteId call_site(int index);
+
+    Opcode opcode(int opcodeValue);
 }

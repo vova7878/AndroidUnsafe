@@ -1,57 +1,52 @@
-package com.v7878.unsafe.dex.bytecode2;
+package com.v7878.unsafe.dex.old_bytecode;
+
+import static com.v7878.unsafe.Utils.assert_;
 
 import com.v7878.unsafe.io.RandomOutput;
 
-class InstructionWriter {
+public class InstructionWriter {
 
-    public static int check_unsigned(int value, int width) {
-        if ((value >>> width) != 0) {
-            throw new IllegalStateException("illegal instruction unsigned value "
-                    + Integer.toHexString(width) + " for width " + width);
-        }
-        return value & (~0 >>> (32 - width));
+    private static void write_base(RandomOutput out, int opcode, int arg) {
+        assert_(opcode >= 0 && opcode < 256, IllegalStateException::new,
+                "illegal opcode: " + opcode);
+        assert_(arg >= 0 && arg < 256, IllegalStateException::new,
+                "illegal arg: " + arg);
+        out.writeShort((arg << 8) | opcode);
     }
 
-    public static int check_signed(int value, int width) {
-        if ((-(value >> width) & ~1) != 0) {
-            throw new IllegalStateException("illegal instruction signed value "
-                    + Integer.toHexString(value) + " for width " + width);
-        }
-        return value & (~0 >>> (32 - width));
+    private static int check_unsigned(int value, int width) {
+        assert_((value >>> width) == 0, IllegalStateException::new,
+                "illegal instruction unsigned value "
+                        + Integer.toHexString(width) + " for width " + width);
+        return value;
     }
 
-    public static long check_signed64(long value, int width) {
-        if ((-(value >> width) & ~1L) != 0) {
-            throw new IllegalStateException("illegal instruction signed value "
-                    + Long.toHexString(value) + " for width " + width);
-        }
-        return value & (~0L >>> (64 - width));
+    private static int check_signed(int value, int width) {
+        assert_(((-(value >> width)) & ~1) == 0, IllegalStateException::new,
+                "illegal instruction signed value "
+                        + Integer.toHexString(value) + " for width " + width);
+        return value & (-1 >>> (32 - width));
     }
 
-    public static int check_hat32(int value, int width) {
-        if ((value & -1 >>> width) != 0) {
-            throw new IllegalStateException("illegal instruction hat value "
-                    + Integer.toHexString(value) + " for width " + width);
-        }
+    private static long check_signed64(long value, int width) {
+        assert_(((-(value >> width)) & ~1L) == 0, IllegalStateException::new,
+                "illegal instruction signed value "
+                        + Long.toHexString(value) + " for width " + width);
+        return value & (-1L >>> (64 - width));
+    }
+
+    private static int check_hat32(int value, int width) {
+        assert_((value & (-1 >>> width)) == 0, IllegalStateException::new,
+                "illegal instruction hat value "
+                        + Integer.toHexString(value) + " for width " + width);
         return value >>> (32 - width);
     }
 
-    public static long check_hat64(long value, int width) {
-        if ((value & -1L >>> width) != 0) {
-            throw new IllegalStateException("illegal instruction hat value "
-                    + Long.toHexString(value) + " for width " + width);
-        }
+    private static long check_hat64(long value, int width) {
+        assert_((value & (-1L >>> width)) == 0, IllegalStateException::new,
+                "illegal instruction hat value "
+                        + Long.toHexString(value) + " for width " + width);
         return value >>> (64 - width);
-    }
-
-    private static void write_base(RandomOutput out, int opcode, int arg) {
-        if (opcode >>> 8 != 0) {
-            throw new IllegalStateException("illegal opcode: " + opcode);
-        }
-        if (arg >>> 8 != 0) {
-            throw new IllegalStateException("illegal arg: " + arg);
-        }
-        out.writeShort((arg << 8) | opcode);
     }
 
     public static void write_10x(RandomOutput out, int opcode) {
@@ -59,19 +54,19 @@ class InstructionWriter {
     }
 
     public static void write_12x(RandomOutput out, int opcode, int A, int B) {
-        A = check_unsigned(A, 4);
-        B = check_unsigned(B, 4);
+        check_unsigned(A, 4);
+        check_unsigned(B, 4);
         write_base(out, opcode, (B << 4) | A);
     }
 
     public static void write_11n(RandomOutput out, int opcode, int A, int sB) {
-        A = check_unsigned(A, 4);
+        check_unsigned(A, 4);
         sB = check_signed(sB, 4);
         write_base(out, opcode, (sB << 4) | A);
     }
 
     public static void write_11x(RandomOutput out, int opcode, int AA) {
-        AA = check_unsigned(AA, 8);
+        check_unsigned(AA, 8);
         write_base(out, opcode, AA);
     }
 
@@ -80,72 +75,17 @@ class InstructionWriter {
         write_base(out, opcode, sAA);
     }
 
-    public static void write_22x_21c(RandomOutput out, int opcode, int AA, int BBBB) {
-        AA = check_unsigned(AA, 8);
-        BBBB = check_unsigned(BBBB, 16);
-        write_base(out, opcode, AA);
-        out.writeShort(BBBB);
-    }
-
-    public static void write_22c(RandomOutput out, int opcode, int A, int B, int cCCCC) {
-        A = check_unsigned(A, 4);
-        B = check_unsigned(B, 4);
-        cCCCC = check_unsigned(cCCCC, 16);
-        write_base(out, opcode, (B << 4) | A);
-        out.writeShort(cCCCC);
-    }
-
-    public static void write_23x(RandomOutput out, int opcode, int AA, int BB, int CC) {
-        AA = check_unsigned(AA, 8);
-        BB = check_unsigned(BB, 8);
-        CC = check_unsigned(CC, 8);
-        write_base(out, opcode, AA);
-        out.writeShort((CC << 8) | BB);
-    }
-
-    public static void write_32x(RandomOutput out, int opcode, int AAAA, int BBBB) {
-        AAAA = check_unsigned(AAAA, 16);
-        BBBB = check_unsigned(BBBB, 16);
-        write_base(out, opcode, 0);
-        out.writeShort(AAAA);
-        out.writeShort(BBBB);
-    }
-
-    public static void write_35c_35ms_35mi(RandomOutput out, int opcode, int A,
-                                           int BBBB, int C, int D, int E, int F, int G) {
-        A = check_unsigned(A, 4);
-        BBBB = check_unsigned(BBBB, 16);
-        C = check_unsigned(C, 4);
-        D = check_unsigned(D, 4);
-        E = check_unsigned(E, 4);
-        F = check_unsigned(F, 4);
-        G = check_unsigned(G, 4);
-        write_base(out, opcode, (A << 4) | G);
-        out.writeShort(BBBB);
-        out.writeShort((F << 12) | (E << 8) | (D << 4) | C);
-    }
-
-    public static void write_45cc(RandomOutput out, int opcode, int A,
-                                  int BBBB, int C, int D, int E, int F, int G, int HHHH) {
-        A = check_unsigned(A, 4);
-        BBBB = check_unsigned(BBBB, 16);
-        C = check_unsigned(C, 4);
-        D = check_unsigned(D, 4);
-        E = check_unsigned(E, 4);
-        F = check_unsigned(F, 4);
-        G = check_unsigned(G, 4);
-        HHHH = check_unsigned(HHHH, 16);
-        write_base(out, opcode, (A << 4) | G);
-        out.writeShort(BBBB);
-        out.writeShort((F << 12) | (E << 8) | (D << 4) | C);
-        out.writeShort(HHHH);
-    }
-
-    /*
     public static void write_20t(RandomOutput out, int opcode, int sAAAA) {
         sAAAA = check_signed(sAAAA, 16);
         write_base(out, opcode, 0);
         out.writeShort(sAAAA);
+    }
+
+    public static void write_22x_20bc_21c(RandomOutput out, int opcode, int AA, int BBBB) {
+        check_unsigned(AA, 8);
+        check_unsigned(BBBB, 16);
+        write_base(out, opcode, AA);
+        out.writeShort(BBBB);
     }
 
     public static void write_21t_21s32(RandomOutput out, int opcode, int AA, int sBBBB) {
@@ -174,6 +114,14 @@ class InstructionWriter {
         int BBBB = (int) check_hat64(BBBB000000000000, 16);
         write_base(out, opcode, AA);
         out.writeShort(BBBB);
+    }
+
+    public static void write_23x(RandomOutput out, int opcode, int AA, int BB, int CC) {
+        check_unsigned(AA, 8);
+        check_unsigned(BB, 8);
+        check_unsigned(CC, 8);
+        write_base(out, opcode, AA);
+        out.writeShort((CC << 8) | BB);
     }
 
     public static void write_22b(RandomOutput out, int opcode, int AA, int BB, int sCC) {
@@ -238,10 +186,39 @@ class InstructionWriter {
         out.writeShort((int) (BBBBBBBBBBBBBBBB >>> 48));
     }
 
+    public static void write_35c_35ms_35mi(RandomOutput out, int opcode, int A,
+                                           int BBBB, int C, int D, int E, int F, int G) {
+        check_unsigned(A, 4);
+        check_unsigned(BBBB, 16);
+        check_unsigned(C, 4);
+        check_unsigned(D, 4);
+        check_unsigned(E, 4);
+        check_unsigned(F, 4);
+        check_unsigned(G, 4);
+        write_base(out, opcode, (A << 4) | G);
+        out.writeShort(BBBB);
+        out.writeShort((F << 12) | (E << 8) | (D << 4) | C);
+    }
+
+    public static void write_45cc(RandomOutput out, int opcode, int A,
+                                  int BBBB, int C, int D, int E, int F, int G, int HHHH) {
+        check_unsigned(A, 4);
+        check_unsigned(BBBB, 16);
+        check_unsigned(C, 4);
+        check_unsigned(D, 4);
+        check_unsigned(E, 4);
+        check_unsigned(F, 4);
+        check_unsigned(G, 4);
+        check_unsigned(HHHH, 16);
+        write_base(out, opcode, (A << 4) | G);
+        out.writeShort(BBBB);
+        out.writeShort((F << 12) | (E << 8) | (D << 4) | C);
+        out.writeShort(HHHH);
+    }
+
     public static void write_fill_array_data_payload(RandomOutput out,
                                                      int opcode, int element_width, byte[] data) {
         //TODO
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    */
 }

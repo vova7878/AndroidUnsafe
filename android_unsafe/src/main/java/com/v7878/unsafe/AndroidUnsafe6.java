@@ -455,4 +455,22 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
             }
         });
     }
+
+    public static class ScopedGlobalRef implements AutoCloseable {
+
+        private final Word ref;
+
+        public ScopedGlobalRef(Object obj) {
+            ref = NewGlobalRef(obj);
+        }
+
+        public Word get() {
+            return ref;
+        }
+
+        @Override
+        public void close() {
+            DeleteGlobalRef(ref);
+        }
+    }
 }

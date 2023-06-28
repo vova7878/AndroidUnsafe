@@ -307,6 +307,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
     }
 
     public static void PushLocalFrame(int capacity) {
+        //TODO: capacity checks
         LocalRefUtils utils = localRefUtils.get();
         Pointer env = getCurrentEnvPtr();
         if (IS64BIT) {
@@ -323,6 +324,40 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
             utils.PopLocalFrame64(env.getRawAddress());
         } else {
             utils.PopLocalFrame32((int) env.getRawAddress());
+        }
+    }
+
+    public static class ScopedLocalRef implements AutoCloseable {
+
+        private final Word ref;
+
+        public ScopedLocalRef(Object obj) {
+            ref = NewLocalRef(obj);
+        }
+
+        public Word get() {
+            return ref;
+        }
+
+        @Override
+        public void close() {
+            DeleteLocalRef(ref);
+        }
+    }
+
+    public static class LocalFrame implements AutoCloseable {
+
+        public LocalFrame(int capacity) {
+            PushLocalFrame(capacity);
+        }
+
+        public Word newRef(Object obj) {
+            return NewLocalRef(obj);
+        }
+
+        @Override
+        public void close() {
+            PopLocalFrame();
         }
     }
 }

@@ -27,11 +27,11 @@ public enum Opcode {
     RETURN_WIDE(0x10, "return-wide", Format.Format11x::new),
     RETURN_OBJECT(0x11, "return-object", Format.Format11x::new),
     CONST_4(0x12, "const/4", Format.Format11n::new),
-    /*CONST_16(0x13, "const/16", Format.Format21s::new),
-    CONST(0x14, "const", Format.Format31i::new),
-    CONST_HIGH16(0x15, "const/high16", Format.Format21ih::new),
-    CONST_WIDE_16(0x16, "const-wide/16", Format.Format21s::new),
-    CONST_WIDE_32(0x17, "const-wide/32", Format.Format31i::new),
+    CONST_16(0x13, "const/16", Format.Format21t21s::new),
+    /*CONST(0x14, "const", Format.Format31i::new),
+    CONST_HIGH16(0x15, "const/high16", Format.Format21ih::new),*/
+    CONST_WIDE_16(0x16, "const-wide/16", Format.Format21t21s::new),
+    /*CONST_WIDE_32(0x17, "const-wide/32", Format.Format31i::new),
     CONST_WIDE(0x18, "const-wide", Format.Format51l::new),
     CONST_WIDE_HIGH16(0x19, "const-wide/high16", Format.Format21lh::new),*/
     CONST_STRING(0x1a, "const-string", opcode -> new Format.Format21c(opcode, ReferenceType.STRING)),
@@ -65,14 +65,14 @@ public enum Opcode {
     IF_LT(0x34, "if-lt", Format.Format22t, Opcode.CAN_CONTINUE),
     IF_GE(0x35, "if-ge", Format.Format22t, Opcode.CAN_CONTINUE),
     IF_GT(0x36, "if-gt", Format.Format22t, Opcode.CAN_CONTINUE),
-    IF_LE(0x37, "if-le", Format.Format22t, Opcode.CAN_CONTINUE),
+    IF_LE(0x37, "if-le", Format.Format22t, Opcode.CAN_CONTINUE),*/
 
-    IF_EQZ(0x38, "if-eqz", Format.Format21t, Opcode.CAN_CONTINUE),
-    IF_NEZ(0x39, "if-nez", Format.Format21t, Opcode.CAN_CONTINUE),
-    IF_LTZ(0x3a, "if-ltz", Format.Format21t, Opcode.CAN_CONTINUE),
-    IF_GEZ(0x3b, "if-gez", Format.Format21t, Opcode.CAN_CONTINUE),
-    IF_GTZ(0x3c, "if-gtz", Format.Format21t, Opcode.CAN_CONTINUE),
-    IF_LEZ(0x3d, "if-lez", Format.Format21t, Opcode.CAN_CONTINUE),*/
+    IF_EQZ(0x38, "if-eqz", Format.Format21t21s::new),
+    IF_NEZ(0x39, "if-nez", Format.Format21t21s::new),
+    IF_LTZ(0x3a, "if-ltz", Format.Format21t21s::new),
+    IF_GEZ(0x3b, "if-gez", Format.Format21t21s::new),
+    IF_GTZ(0x3c, "if-gtz", Format.Format21t21s::new),
+    IF_LEZ(0x3d, "if-lez", Format.Format21t21s::new),
 
     // 3e - 43 unused
 

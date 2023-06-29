@@ -408,6 +408,69 @@ public abstract class Format {
         }
     }
 
+    public static class Format21t21s extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int AA, sBBBB;
+
+            Instance(int AA, int sBBBB) {
+                this.AA = AA;
+                this.sBBBB = sBBBB;
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_21t_21s(out,
+                        opcode().opcodeValue(context.getOptions()), AA, sBBBB);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + AA + " " + sBBBB;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && AA == iobj.AA && sBBBB == iobj.sBBBB;
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), AA, sBBBB);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(AA, sBBBB);
+            }
+        }
+
+        Format21t21s(Opcode opcode) {
+            super(opcode, 2);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int AA) {
+            int BBBB = in.readUnsignedShort();
+            return make(AA, extend_sign(BBBB, 16));
+        }
+
+        public Instruction make(int AA, int sBBBB) {
+            return new Instance(AA, sBBBB);
+        }
+    }
+
     public static class Format21c extends Format {
         public final ReferenceType referenceType;
 

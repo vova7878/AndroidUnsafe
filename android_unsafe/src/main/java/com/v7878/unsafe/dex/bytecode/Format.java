@@ -10,8 +10,8 @@ import java.util.Objects;
 
 public abstract class Format {
     protected final Opcode opcode;
-    private int units;
-    private boolean payload;
+    private final int units;
+    private final boolean payload;
 
     Format(Opcode opcode, int units) {
         this(opcode, units, false);

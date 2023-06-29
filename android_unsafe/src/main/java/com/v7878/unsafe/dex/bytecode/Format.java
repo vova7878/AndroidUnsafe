@@ -746,6 +746,69 @@ public abstract class Format {
         }
     }
 
+    public static class Format30t extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int sAAAAAAAA;
+
+            Instance(int sAAAAAAAA) {
+                this.sAAAAAAAA = sAAAAAAAA;
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_30t(out,
+                        opcode().opcodeValue(context.getOptions()), sAAAAAAAA);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + sAAAAAAAA;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && sAAAAAAAA == iobj.sAAAAAAAA;
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), sAAAAAAAA);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(sAAAAAAAA);
+            }
+        }
+
+        Format30t(Opcode opcode) {
+            super(opcode, 3);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int _00) {
+            int AAAAlo = in.readUnsignedShort();
+            int AAAAhi = in.readUnsignedShort();
+            return make(AAAAlo | (AAAAhi << 16));
+        }
+
+        public Instruction make(int sAAAAAAAA) {
+            return new Instance(sAAAAAAAA);
+        }
+    }
+
     public static class Format32x extends Format {
 
         public class Instance extends Instruction {

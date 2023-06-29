@@ -682,6 +682,70 @@ public abstract class Format {
         }
     }
 
+    public static class Format22b extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int AA, BB, sCC;
+
+            Instance(int AA, int BB, int sCC) {
+                this.AA = AA;
+                this.BB = BB;
+                this.sCC = sCC;
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_22b(out,
+                        opcode().opcodeValue(context.getOptions()), AA, BB, sCC);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + AA + " " + BB + " " + sCC;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && AA == iobj.AA && BB == iobj.BB && sCC == iobj.sCC;
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), AA, BB, sCC);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(AA, BB, sCC);
+            }
+        }
+
+        Format22b(Opcode opcode) {
+            super(opcode, 2);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int AA) {
+            int CCBB = in.readUnsignedShort();
+            return make(AA, CCBB & 0xff, extend_sign(CCBB >> 8, 8));
+        }
+
+        public Instruction make(int AA, int BB, int sCC) {
+            return new Instance(AA, BB, sCC);
+        }
+    }
+
     public static class Format22t22s extends Format {
 
         public class Instance extends Instruction {

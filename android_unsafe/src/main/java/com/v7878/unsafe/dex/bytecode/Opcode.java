@@ -234,7 +234,7 @@ public enum Opcode {
     OR_INT_LIT16(0xd6, "or-int/lit16", Format.Format22t22s::new),
     XOR_INT_LIT16(0xd7, "xor-int/lit16", Format.Format22t22s::new),
 
-    /*ADD_INT_LIT8(0xd8, "add-int/lit8", Format.Format22b::new),
+    ADD_INT_LIT8(0xd8, "add-int/lit8", Format.Format22b::new),
     RSUB_INT_LIT8(0xd9, "rsub-int/lit8", Format.Format22b::new),
     MUL_INT_LIT8(0xda, "mul-int/lit8", Format.Format22b::new),
     DIV_INT_LIT8(0xdb, "div-int/lit8", Format.Format22b::new),
@@ -244,7 +244,7 @@ public enum Opcode {
     XOR_INT_LIT8(0xdf, "xor-int/lit8", Format.Format22b::new),
     SHL_INT_LIT8(0xe0, "shl-int/lit8", Format.Format22b::new),
     SHR_INT_LIT8(0xe1, "shr-int/lit8", Format.Format22b::new),
-    USHR_INT_LIT8(0xe2, "ushr-int/lit8", Format.Format22b::new)*/
+    USHR_INT_LIT8(0xe2, "ushr-int/lit8", Format.Format22b::new),
 
     // e3 - f9 unused
 

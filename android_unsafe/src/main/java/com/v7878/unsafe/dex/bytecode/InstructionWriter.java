@@ -110,6 +110,14 @@ class InstructionWriter {
         out.writeShort((CC << 8) | BB);
     }
 
+    public static void write_22b(RandomOutput out, int opcode, int AA, int BB, int sCC) {
+        AA = check_unsigned(AA, 8);
+        BB = check_unsigned(BB, 8);
+        sCC = check_signed(sCC, 8);
+        write_base(out, opcode, AA);
+        out.writeShort((sCC << 8) | BB);
+    }
+
     public static void write_22t_22s(RandomOutput out, int opcode, int A, int B, int sCCCC) {
         A = check_unsigned(A, 4);
         B = check_unsigned(B, 4);
@@ -190,14 +198,6 @@ class InstructionWriter {
         int BBBB = (int) check_hat64(BBBB000000000000, 16);
         write_base(out, opcode, AA);
         out.writeShort(BBBB);
-    }
-
-    public static void write_22b(RandomOutput out, int opcode, int AA, int BB, int sCC) {
-        check_unsigned(AA, 8);
-        check_unsigned(BB, 8);
-        sCC = check_signed(sCC, 8);
-        write_base(out, opcode, AA);
-        out.writeShort((sCC << 8) | BB);
     }
 
     public static void write_22t_22s(RandomOutput out, int opcode, int A, int B, int sCCCC) {

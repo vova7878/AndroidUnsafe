@@ -28,11 +28,11 @@ public enum Opcode {
     RETURN_OBJECT(0x11, "return-object", Format.Format11x::new),
     CONST_4(0x12, "const/4", Format.Format11n::new),
     CONST_16(0x13, "const/16", Format.Format21t21s::new),
-    /*CONST(0x14, "const", Format.Format31i::new),
-    CONST_HIGH16(0x15, "const/high16", Format.Format21ih::new),*/
+    CONST(0x14, "const", Format.Format31i31t::new),
+    /*CONST_HIGH16(0x15, "const/high16", Format.Format21ih::new),*/
     CONST_WIDE_16(0x16, "const-wide/16", Format.Format21t21s::new),
-    /*CONST_WIDE_32(0x17, "const-wide/32", Format.Format31i::new),
-    CONST_WIDE(0x18, "const-wide", Format.Format51l::new),
+    CONST_WIDE_32(0x17, "const-wide/32", Format.Format31i31t::new),
+    /*CONST_WIDE(0x18, "const-wide", Format.Format51l::new),
     CONST_WIDE_HIGH16(0x19, "const-wide/high16", Format.Format21lh::new),*/
     CONST_STRING(0x1a, "const-string", opcode -> new Format.Format21c(opcode, ReferenceType.STRING)),
     /*CONST_STRING_JUMBO(0x1b, "const-string/jumbo", ReferenceType.STRING, Format.Format31c::new),*/
@@ -45,14 +45,14 @@ public enum Opcode {
     NEW_INSTANCE(0x22, "new-instance", opcode -> new Format.Format21c(opcode, ReferenceType.TYPE)),
     NEW_ARRAY(0x23, "new-array", opcode -> new Format.Format22c(opcode, ReferenceType.TYPE)),
     FILLED_NEW_ARRAY(0x24, "filled-new-array", opcode -> new Format.Format35c(opcode, ReferenceType.TYPE)),
-    /*FILLED_NEW_ARRAY_RANGE(0x25, "filled-new-array/range", ReferenceType.TYPE, Format.Format3rc, Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),
-    FILL_ARRAY_DATA(0x26, "fill-array-data", Format.Format31t, Opcode.CAN_CONTINUE),*/
+    /*FILLED_NEW_ARRAY_RANGE(0x25, "filled-new-array/range", ReferenceType.TYPE, Format.Format3rc, Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),*/
+    FILL_ARRAY_DATA(0x26, "fill-array-data", Format.Format31i31t::new),
     THROW(0x27, "throw", Format.Format11x::new),
     GOTO(0x28, "goto", Format.Format10t::new),
     /*GOTO_16(0x29, "goto/16", Format.Format20t),
-    GOTO_32(0x2a, "goto/32", Format.Format30t),
-    PACKED_SWITCH(0x2b, "packed-switch", Format.Format31t, Opcode.CAN_CONTINUE),
-    SPARSE_SWITCH(0x2c, "sparse-switch", Format.Format31t, Opcode.CAN_CONTINUE),*/
+    GOTO_32(0x2a, "goto/32", Format.Format30t),*/
+    PACKED_SWITCH(0x2b, "packed-switch", Format.Format31i31t::new),
+    SPARSE_SWITCH(0x2c, "sparse-switch", Format.Format31i31t::new),
 
     CMPL_FLOAT(0x2d, "cmpl-float", Format.Format23x::new),
     CMPG_FLOAT(0x2e, "cmpg-float", Format.Format23x::new),

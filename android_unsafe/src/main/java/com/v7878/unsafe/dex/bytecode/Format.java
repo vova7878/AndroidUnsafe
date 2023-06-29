@@ -746,6 +746,70 @@ public abstract class Format {
         }
     }
 
+    public static class Format31i31t extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int AA, sBBBBBBBB;
+
+            Instance(int AA, int sBBBBBBBB) {
+                this.AA = AA;
+                this.sBBBBBBBB = sBBBBBBBB;
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_31i_31t_31c(out,
+                        opcode().opcodeValue(context.getOptions()), AA, sBBBBBBBB);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + AA + " " + sBBBBBBBB;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && AA == iobj.AA && sBBBBBBBB == iobj.sBBBBBBBB;
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), AA, sBBBBBBBB);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(AA, sBBBBBBBB);
+            }
+        }
+
+        Format31i31t(Opcode opcode) {
+            super(opcode, 3);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int AA) {
+            int BBBBlo = in.readUnsignedShort();
+            int BBBBhi = in.readUnsignedShort();
+            return make(AA, BBBBlo | (BBBBhi << 16));
+        }
+
+        public Instruction make(int AA, int sBBBBBBBB) {
+            return new Instance(AA, sBBBBBBBB);
+        }
+    }
+
     public static class Format35c extends Format {
 
         public final ReferenceType referenceType;

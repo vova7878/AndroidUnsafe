@@ -118,6 +118,14 @@ class InstructionWriter {
         out.writeShort(BBBB);
     }
 
+    public static void write_31i_31t_31c(RandomOutput out, int opcode, int AA, int BBBBBBBB) {
+        check_unsigned(AA, 8);
+        // no need to check BBBBBBBB
+        write_base(out, opcode, AA);
+        out.writeShort(BBBBBBBB & 0xffff);
+        out.writeShort(BBBBBBBB >>> 16);
+    }
+
     public static void write_35c_35ms_35mi(RandomOutput out, int opcode, int A,
                                            int BBBB, int C, int D, int E, int F, int G) {
         A = check_unsigned(A, 4);
@@ -205,21 +213,6 @@ class InstructionWriter {
         write_base(out, opcode, 0);
         out.writeShort(AAAA);
         out.writeShort(BBBB);
-    }
-
-    public static void write_31i32_31t_31c(RandomOutput out, int opcode, int AA, int BBBBBBBB) {
-        check_unsigned(AA, 8);
-        write_base(out, opcode, AA);
-        out.writeShort(BBBBBBBB & 0xffff);
-        out.writeShort(BBBBBBBB >>> 16);
-    }
-
-    public static void write_31i64(RandomOutput out, int opcode, int AA, long sBBBBBBBB) {
-        check_unsigned(AA, 8);
-        int BBBBBBBB = (int) check_signed64(sBBBBBBBB, 32);
-        write_base(out, opcode, AA);
-        out.writeShort(BBBBBBBB & 0xffff);
-        out.writeShort(BBBBBBBB >>> 16);
     }
 
     public static void write_51l(RandomOutput out, int opcode, int AA, long BBBBBBBBBBBBBBBB) {

@@ -110,6 +110,14 @@ class InstructionWriter {
         out.writeShort((CC << 8) | BB);
     }
 
+    public static void write_22t_22s(RandomOutput out, int opcode, int A, int B, int sCCCC) {
+        A = check_unsigned(A, 4);
+        B = check_unsigned(B, 4);
+        sCCCC = check_signed(sCCCC, 16);
+        write_base(out, opcode, (B << 4) | A);
+        out.writeShort(sCCCC);
+    }
+
     public static void write_32x(RandomOutput out, int opcode, int AAAA, int BBBB) {
         AAAA = check_unsigned(AAAA, 16);
         BBBB = check_unsigned(BBBB, 16);

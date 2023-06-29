@@ -682,6 +682,70 @@ public abstract class Format {
         }
     }
 
+    public static class Format22t22s extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int A, B, sCCCC;
+
+            Instance(int A, int B, int sCCCC) {
+                this.A = A;
+                this.B = B;
+                this.sCCCC = sCCCC;
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_22t_22s(out,
+                        opcode().opcodeValue(context.getOptions()), A, B, sCCCC);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + A + " " + B + " " + sCCCC;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && A == iobj.A && B == iobj.B && sCCCC == iobj.sCCCC;
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), A, B, sCCCC);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(A, B, sCCCC);
+            }
+        }
+
+        Format22t22s(Opcode opcode) {
+            super(opcode, 2);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int BA) {
+            int CCCC = in.readUnsignedShort();
+            return make(BA & 0xf, BA >> 4, extend_sign(CCCC, 16));
+        }
+
+        public Instruction make(int A, int B, int sCCCC) {
+            return new Instance(A, B, sCCCC);
+        }
+    }
+
     public static class Format32x extends Format {
 
         public class Instance extends Instruction {

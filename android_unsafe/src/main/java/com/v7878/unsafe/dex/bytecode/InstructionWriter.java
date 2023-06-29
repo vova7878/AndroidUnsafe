@@ -13,19 +13,21 @@ class InstructionWriter {
     }
 
     public static int check_signed(int value, int width) {
-        if ((-(value >> width) & ~1) != 0) {
+        int empty_width = 32 - width;
+        if (value << empty_width >> empty_width != value) {
             throw new IllegalStateException("illegal instruction signed value "
                     + Integer.toHexString(value) + " for width " + width);
         }
-        return value & (~0 >>> (32 - width));
+        return value & (~0 >>> empty_width);
     }
 
     public static long check_signed64(long value, int width) {
-        if ((-(value >> width) & ~1L) != 0) {
+        int empty_width = 64 - width;
+        if (value << empty_width >> empty_width != value) {
             throw new IllegalStateException("illegal instruction signed value "
                     + Long.toHexString(value) + " for width " + width);
         }
-        return value & (~0L >>> (64 - width));
+        return value & (~0L >>> empty_width);
     }
 
     public static int check_hat32(int value, int width) {

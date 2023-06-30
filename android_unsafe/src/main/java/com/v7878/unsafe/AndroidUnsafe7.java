@@ -12,7 +12,8 @@ import com.v7878.unsafe.dex.EncodedMethod;
 import com.v7878.unsafe.dex.MethodId;
 import com.v7878.unsafe.dex.ProtoId;
 import com.v7878.unsafe.dex.TypeId;
-import com.v7878.unsafe.function.NativeLibrary;
+import com.v7878.unsafe.function.LibArt;
+import com.v7878.unsafe.function.SymbolLookup;
 import com.v7878.unsafe.memory.Pointer;
 import com.v7878.unsafe.memory.Word;
 
@@ -197,6 +198,8 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                     new MethodId(id, new ProtoId(TypeId.J, TypeId.J,
                             TypeId.of(Object.class)), "NewLocalRef64"),
                     Modifier.PUBLIC).withCode(1, b -> b
+                    //FIXME
+                    //.const_4(0)
                     .invoke_static(nlr_id, b.p(0), b.p(1), b.p(2), b.l(0))
                     .move_result_wide(b.v(0))
                     .return_wide(b.v(0))
@@ -268,8 +271,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         Class<?> utils = loadClass(dex, name, AndroidUnsafe7.class.getClassLoader());
         setClassStatus(utils, ClassStatus.Verified);
 
-        //it's safe because libart.so is already open by system
-        try (NativeLibrary art = NativeLibrary.load("libart.so")) {
+        try (SymbolLookup art = LibArt.open()) {
             Pointer nlr = art.lookup("_ZN3art9JNIEnvExt11NewLocalRefEPNS_6mirror6ObjectE");
             setExecutableData(getDeclaredMethod(utils, "NewLocalRef", word, word), nlr);
 

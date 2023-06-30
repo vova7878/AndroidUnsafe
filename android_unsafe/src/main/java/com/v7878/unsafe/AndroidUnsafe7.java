@@ -3,6 +3,7 @@ package com.v7878.unsafe;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.runOnce;
+import static com.v7878.unsafe.Utils.searchMethod;
 
 import com.v7878.unsafe.dex.AnnotationItem;
 import com.v7878.unsafe.dex.AnnotationSet;
@@ -17,6 +18,7 @@ import com.v7878.unsafe.function.SymbolLookup;
 import com.v7878.unsafe.memory.Pointer;
 import com.v7878.unsafe.memory.Word;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.function.Supplier;
 
@@ -271,18 +273,20 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         Class<?> utils = loadClass(dex, name, AndroidUnsafe7.class.getClassLoader());
         setClassStatus(utils, ClassStatus.Verified);
 
+        Method[] methods = getDeclaredMethods(utils);
+
         try (SymbolLookup art = LibArt.open()) {
             Pointer nlr = art.lookup("_ZN3art9JNIEnvExt11NewLocalRefEPNS_6mirror6ObjectE");
-            setExecutableData(getDeclaredMethod(utils, "NewLocalRef", word, word), nlr);
+            setExecutableData(searchMethod(methods, "NewLocalRef", word, word), nlr);
 
             Pointer dlr = art.lookup("_ZN3art9JNIEnvExt14DeleteLocalRefEP8_jobject");
-            setExecutableData(getDeclaredMethod(utils, "DeleteLocalRef", word, word), dlr);
+            setExecutableData(searchMethod(methods, "DeleteLocalRef", word, word), dlr);
 
             Pointer push = art.lookup("_ZN3art9JNIEnvExt9PushFrameEi");
-            setExecutableData(getDeclaredMethod(utils, "PushLocalFrame", word, int.class), push);
+            setExecutableData(searchMethod(methods, "PushLocalFrame", word, int.class), push);
 
             Pointer pop = art.lookup("_ZN3art9JNIEnvExt8PopFrameEv");
-            setExecutableData(getDeclaredMethod(utils, "PopLocalFrame", word), pop);
+            setExecutableData(searchMethod(methods, "PopLocalFrame", word), pop);
         }
 
         return (LocalRefUtils) allocateInstance(utils);

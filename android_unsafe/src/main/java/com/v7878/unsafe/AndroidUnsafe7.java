@@ -5,6 +5,8 @@ import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.runOnce;
 import static com.v7878.unsafe.Utils.searchMethod;
 
+import androidx.annotation.Keep;
+
 import com.v7878.unsafe.dex.AnnotationItem;
 import com.v7878.unsafe.dex.AnnotationSet;
 import com.v7878.unsafe.dex.ClassDef;
@@ -169,6 +171,14 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         default void PopLocalFrame32(int env) {
             throw new AssertionError();
         }
+
+        default void putRef64(Object obj, long offset, long ref) {
+            throw new AssertionError();
+        }
+
+        default void putRef32(Object obj, long offset, int ref) {
+            throw new AssertionError();
+        }
     }
 
     private static final Supplier<LocalRefUtils> localRefUtils = runOnce(() -> {
@@ -268,6 +278,13 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                 .return_void()
         ));
 
+        clazz.getClassData().getVirtualMethods().add(new EncodedMethod(
+                new MethodId(id, new ProtoId(TypeId.V, TypeId.of(Object.class),
+                        TypeId.J, word_id), IS64BIT ? "putRef64" : "putRef32"),
+                Modifier.PUBLIC | Modifier.FINAL | Modifier.NATIVE,
+                new AnnotationSet(AnnotationItem.FastNative()), null, null
+        ));
+
         //noinspection deprecation
         DexFile dex = openDexFile(new Dex(clazz).compile());
         Class<?> utils = loadClass(dex, name, AndroidUnsafe7.class.getClassLoader());
@@ -288,6 +305,12 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
             Pointer pop = art.lookup("_ZN3art9JNIEnvExt8PopFrameEv");
             setExecutableData(searchMethod(methods, "PopLocalFrame", word), pop);
         }
+
+        Method put = getDeclaredMethod(SunUnsafe.getUnsafeClass(), "putObject",
+                Object.class, long.class, Object.class);
+        assert_(Modifier.isNative(put.getModifiers()), AssertionError::new);
+        setExecutableData(searchMethod(methods, IS64BIT ? "putRef64" : "putRef32",
+                Object.class, long.class, word), getExecutableData(put));
 
         return (LocalRefUtils) allocateInstance(utils);
     });
@@ -331,6 +354,18 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         } else {
             utils.PopLocalFrame32((int) env.getRawAddress());
         }
+    }
+
+    @Keep
+    public static Object refToObject(Word ref) {
+        Object[] arr = new Object[1];
+        final long offset = ARRAY_OBJECT_BASE_OFFSET;
+        if (IS64BIT) {
+            localRefUtils.get().putRef64(arr, offset, ref.longValue());
+        } else {
+            localRefUtils.get().putRef32(arr, offset, ref.intValue());
+        }
+        return arr[0];
     }
 
     public static class ScopedLocalRef implements AutoCloseable {

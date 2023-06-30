@@ -16,6 +16,7 @@ import com.v7878.unsafe.dex.bytecode.Format.Format11x;
 import com.v7878.unsafe.dex.bytecode.Format.Format21c;
 import com.v7878.unsafe.dex.bytecode.Format.Format22c;
 import com.v7878.unsafe.dex.bytecode.Format.Format35c;
+import com.v7878.unsafe.dex.bytecode.Format.Format3rc;
 import com.v7878.unsafe.dex.bytecode.Format.Format45cc;
 
 import java.util.ArrayList;
@@ -105,7 +106,13 @@ public final class CodeBuilder {
 
     private int check_reg_pair(int reg_pair, int width) {
         Checks.checkRange(reg_pair + 1, 1, registers_size - 1);
-        return Checks.checkRange(reg_pair, 0, Math.min(1 << width, registers_size));
+        return check_reg(reg_pair, width);
+    }
+
+    private int check_reg_range(int first_reg, int reg_width, int count, int count_width) {
+        Checks.checkRange(count, 0, 1 << count_width);
+        Checks.checkRange(first_reg + count, count, registers_size - count);
+        return check_reg(first_reg, reg_width);
     }
 
     private void add(Instruction instruction) {
@@ -535,15 +542,38 @@ public final class CodeBuilder {
                 0, 0, 0);
     }
 
-    public CodeBuilder const_method_handle(int dst_reg, MethodHandleItem value) {
-        add(Opcode.CONST_METHOD_HANDLE.<Format21c>format().make(
-                check_reg(dst_reg, 8), value));
+    public CodeBuilder invoke_virtual_range(MethodId method, int arg_count, int first_arg_reg) {
+        check_reg_range(first_arg_reg, 16, arg_count, 8);
+        add(Opcode.INVOKE_VIRTUAL_RANGE.<Format3rc>format().make(arg_count, method, first_arg_reg));
+        add_outs(arg_count);
         return this;
     }
 
-    public CodeBuilder const_method_type(int dst_reg, ProtoId value) {
-        add(Opcode.CONST_METHOD_TYPE.<Format21c>format().make(
-                check_reg(dst_reg, 8), value));
+    public CodeBuilder invoke_super_range(MethodId method, int arg_count, int first_arg_reg) {
+        check_reg_range(first_arg_reg, 16, arg_count, 8);
+        add(Opcode.INVOKE_SUPER_RANGE.<Format3rc>format().make(arg_count, method, first_arg_reg));
+        add_outs(arg_count);
+        return this;
+    }
+
+    public CodeBuilder invoke_direct_range(MethodId method, int arg_count, int first_arg_reg) {
+        check_reg_range(first_arg_reg, 16, arg_count, 8);
+        add(Opcode.INVOKE_DIRECT_RANGE.<Format3rc>format().make(arg_count, method, first_arg_reg));
+        add_outs(arg_count);
+        return this;
+    }
+
+    public CodeBuilder invoke_static_range(MethodId method, int arg_count, int first_arg_reg) {
+        check_reg_range(first_arg_reg, 16, arg_count, 8);
+        add(Opcode.INVOKE_STATIC_RANGE.<Format3rc>format().make(arg_count, method, first_arg_reg));
+        add_outs(arg_count);
+        return this;
+    }
+
+    public CodeBuilder invoke_interface_range(MethodId method, int arg_count, int first_arg_reg) {
+        check_reg_range(first_arg_reg, 16, arg_count, 8);
+        add(Opcode.INVOKE_INTERFACE_RANGE.<Format3rc>format().make(arg_count, method, first_arg_reg));
+        add_outs(arg_count);
         return this;
     }
 
@@ -588,5 +618,17 @@ public final class CodeBuilder {
     public CodeBuilder invoke_polymorphic(MethodId method, ProtoId proto) {
         return invoke_polymorphic(method, proto, 0, 0,
                 0, 0, 0, 0);
+    }
+
+    public CodeBuilder const_method_handle(int dst_reg, MethodHandleItem value) {
+        add(Opcode.CONST_METHOD_HANDLE.<Format21c>format().make(
+                check_reg(dst_reg, 8), value));
+        return this;
+    }
+
+    public CodeBuilder const_method_type(int dst_reg, ProtoId value) {
+        add(Opcode.CONST_METHOD_TYPE.<Format21c>format().make(
+                check_reg(dst_reg, 8), value));
+        return this;
     }
 }

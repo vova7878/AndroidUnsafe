@@ -165,6 +165,16 @@ class InstructionWriter {
         out.writeShort((F << 12) | (E << 8) | (D << 4) | C);
     }
 
+    public static void write_3rc_3rms_3rmi(RandomOutput out, int opcode,
+                                           int AA, int BBBB, int CCCC) {
+        AA = check_unsigned(AA, 8);
+        BBBB = check_unsigned(BBBB, 16);
+        CCCC = check_unsigned(CCCC, 16);
+        write_base(out, opcode, AA);
+        out.writeShort(BBBB);
+        out.writeShort(CCCC);
+    }
+
     public static void write_45cc(RandomOutput out, int opcode, int A,
                                   int BBBB, int C, int D, int E, int F, int G, int HHHH) {
         A = check_unsigned(A, 4);

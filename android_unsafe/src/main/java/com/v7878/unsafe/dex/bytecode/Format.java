@@ -1089,6 +1089,82 @@ public abstract class Format {
         }
     }
 
+    public static class Format3rc extends Format {
+
+        public final ReferenceType referenceType;
+
+        public class Instance extends Instruction {
+
+            public final int AA;
+            public final Object cBBBB;
+            public final int CCCC;
+
+            Instance(int AA, Object cBBBB, int CCCC) {
+                this.AA = AA;
+                this.cBBBB = referenceType.clone(cBBBB);
+                this.CCCC = CCCC;
+            }
+
+            @Override
+            public void collectData(DataCollector data) {
+                referenceType.collectData(data, cBBBB);
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_3rc_3rms_3rmi(out,
+                        opcode().opcodeValue(context.getOptions()), AA,
+                        referenceType.refToIndex(context, cBBBB), CCCC);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + AA + " " + cBBBB + " " + CCCC;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode()) && AA == iobj.AA
+                            && Objects.equals(cBBBB, iobj.cBBBB) && CCCC == iobj.CCCC;
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), AA, cBBBB, CCCC);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(AA, cBBBB, CCCC);
+            }
+        }
+
+        Format3rc(Opcode opcode, ReferenceType referenceType) {
+            super(opcode, 3);
+            this.referenceType = referenceType;
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int AA) {
+            int BBBB = in.readUnsignedShort();
+            int CCCC = in.readUnsignedShort();
+            return make(AA, referenceType.indexToRef(context, BBBB), CCCC);
+        }
+
+        public Instruction make(int AA, Object cBBBB, int CCCC) {
+            return new Instance(AA, cBBBB, CCCC);
+        }
+    }
+
     public static class Format45cc extends Format {
 
         public final ReferenceType referenceType;

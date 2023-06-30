@@ -45,7 +45,7 @@ public enum Opcode {
     NEW_INSTANCE(0x22, "new-instance", opcode -> new Format.Format21c(opcode, ReferenceType.TYPE)),
     NEW_ARRAY(0x23, "new-array", opcode -> new Format.Format22c(opcode, ReferenceType.TYPE)),
     FILLED_NEW_ARRAY(0x24, "filled-new-array", opcode -> new Format.Format35c(opcode, ReferenceType.TYPE)),
-    /*FILLED_NEW_ARRAY_RANGE(0x25, "filled-new-array/range", ReferenceType.TYPE, Format.Format3rc, Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),*/
+    FILLED_NEW_ARRAY_RANGE(0x25, "filled-new-array/range", opcode -> new Format.Format3rc(opcode, ReferenceType.TYPE)),
     FILL_ARRAY_DATA(0x26, "fill-array-data", Format.Format31i31t::new),
     THROW(0x27, "throw", Format.Format11x::new),
     GOTO(0x28, "goto", Format.Format10t::new),
@@ -129,11 +129,11 @@ public enum Opcode {
 
     // 73 unused
 
-    /*INVOKE_VIRTUAL_RANGE(0x74, "invoke-virtual/range", ReferenceType.METHOD, Format.Format3rc),
-    INVOKE_SUPER_RANGE(0x75, "invoke-super/range", ReferenceType.METHOD, Format.Format3rc),
-    INVOKE_DIRECT_RANGE(0x76, "invoke-direct/range", ReferenceType.METHOD, Format.Format3rc),
-    INVOKE_STATIC_RANGE(0x77, "invoke-static/range", ReferenceType.METHOD, Format.Format3rc),
-    INVOKE_INTERFACE_RANGE(0x78, "invoke-interface/range", ReferenceType.METHOD, Format.Format3rc),*/
+    INVOKE_VIRTUAL_RANGE(0x74, "invoke-virtual/range", opcode -> new Format.Format3rc(opcode, ReferenceType.METHOD)),
+    INVOKE_SUPER_RANGE(0x75, "invoke-super/range", opcode -> new Format.Format3rc(opcode, ReferenceType.METHOD)),
+    INVOKE_DIRECT_RANGE(0x76, "invoke-direct/range", opcode -> new Format.Format3rc(opcode, ReferenceType.METHOD)),
+    INVOKE_STATIC_RANGE(0x77, "invoke-static/range", opcode -> new Format.Format3rc(opcode, ReferenceType.METHOD)),
+    INVOKE_INTERFACE_RANGE(0x78, "invoke-interface/range", opcode -> new Format.Format3rc(opcode, ReferenceType.METHOD)),
 
     // 79 - 7a unused
 
@@ -251,7 +251,7 @@ public enum Opcode {
     INVOKE_POLYMORPHIC(firstApi(0xfa, 26), "invoke-polymorphic", opcode -> new Format.Format45cc(opcode, ReferenceType.METHOD, ReferenceType.PROTO)),
     /*INVOKE_POLYMORPHIC_RANGE(firstArtVersion(0xfb, 87), "invoke-polymorphic/range", ReferenceType.METHOD, ReferenceType.METHOD_PROTO, Format.Format4rcc),*/
     INVOKE_CUSTOM(firstApi(0xfc, 26), "invoke-custom", opcode -> new Format.Format35c(opcode, ReferenceType.CALLSITE)),
-    /*INVOKE_CUSTOM_RANGE(firstArtVersion(0xfd, 111), "invoke-custom/range", ReferenceType.CALL_SITE, Format.Format3rc),*/
+    INVOKE_CUSTOM_RANGE(firstApi(0xfd, 26), "invoke-custom/range", opcode -> new Format.Format3rc(opcode, ReferenceType.CALLSITE)),
     CONST_METHOD_HANDLE(firstApi(0xfe, 28), "const-method-handle", opcode -> new Format.Format21c(opcode, ReferenceType.METHOD_HANDLE)),
     CONST_METHOD_TYPE(firstApi(0xff, 28), "const-method-type", opcode -> new Format.Format21c(opcode, ReferenceType.PROTO)),
 

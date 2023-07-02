@@ -232,11 +232,11 @@ public final class EmulatedStackFrame {
         public StackFrameAccessor moveTo(int argumentIndex) {
             if (argumentIndex == RETURN_VALUE_IDX) {
                 return moveToReturn();
-            } else {
-                referencesOffset = referencesOffsets[argumentIndex];
-                frameBuf.position(frameOffsets[argumentIndex]);
-                argumentIdx = argumentIndex;
             }
+            referencesOffset = referencesOffsets[argumentIndex];
+            frameBuf.position(frameOffsets[argumentIndex]);
+            argumentIdx = argumentIndex;
+            return this;
         }
 
         public StackFrameAccessor moveToReturn() {
@@ -249,7 +249,7 @@ public final class EmulatedStackFrame {
             } else {
                 referencesOffset = frame.references().length - 1;
             }
-            return this
+            return this;
         }
 
         public void putNextByte(byte value) {

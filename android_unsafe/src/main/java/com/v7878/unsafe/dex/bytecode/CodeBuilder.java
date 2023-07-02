@@ -259,7 +259,7 @@ public final class CodeBuilder {
     private CodeBuilder goto_32(Object label) {
         int start_unit = current_unit;
         add(Opcode.GOTO_32.<Format30t>format(), format -> {
-            int branch_offset = getLabelBranchOffset(label, start_unit);
+            int branch_offset = getLabelBranchOffset(label, start_unit, true);
             InstructionWriter.check_signed(branch_offset, 32);
             return format.make(branch_offset);
         });

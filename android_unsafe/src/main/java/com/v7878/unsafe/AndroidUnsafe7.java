@@ -4,6 +4,7 @@ import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.runOnce;
 import static com.v7878.unsafe.Utils.searchMethod;
+import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
 
 import androidx.annotation.Keep;
 
@@ -212,7 +213,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                     Modifier.PUBLIC).withCode(1, b -> b
                     //FIXME
                     //.const_4(0)
-                    .invoke_static(nlr_id, b.p(0), b.p(1), b.p(2), b.l(0))
+                    .invoke(STATIC, nlr_id, b.p(0), b.p(1), b.p(2), b.l(0))
                     .move_result_wide(b.v(0))
                     .return_wide(b.v(0))
             ));
@@ -221,7 +222,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                     new MethodId(id, new ProtoId(TypeId.I, TypeId.I,
                             TypeId.of(Object.class)), "NewLocalRef32"),
                     Modifier.PUBLIC).withCode(0, b -> b
-                    .invoke_static(nlr_id, b.p(0), b.p(1))
+                    .invoke(STATIC, nlr_id, b.p(0), b.p(1))
                     .move_result(b.v(0))
                     .return_(b.v(0))
             ));
@@ -239,8 +240,8 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                 new MethodId(id, new ProtoId(TypeId.V, word_id, word_id),
                         IS64BIT ? "DeleteLocalRef64" : "DeleteLocalRef32"),
                 Modifier.PUBLIC).withCode(0, b -> (IS64BIT ?
-                b.invoke_static(dlr_id, b.p(0), b.p(1), b.p(2), b.p(3)) :
-                b.invoke_static(dlr_id, b.p(0), b.p(1)))
+                b.invoke(STATIC, dlr_id, b.p(0), b.p(1), b.p(2), b.p(3)) :
+                b.invoke(STATIC, dlr_id, b.p(0), b.p(1)))
                 .return_void()
         ));
 
@@ -256,8 +257,8 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                 new MethodId(id, new ProtoId(TypeId.V, word_id, TypeId.I),
                         IS64BIT ? "PushLocalFrame64" : "PushLocalFrame32"),
                 Modifier.PUBLIC).withCode(0, b -> (IS64BIT ?
-                b.invoke_static(push_id, b.p(0), b.p(1), b.p(2)) :
-                b.invoke_static(push_id, b.p(0), b.p(1)))
+                b.invoke(STATIC, push_id, b.p(0), b.p(1), b.p(2)) :
+                b.invoke(STATIC, push_id, b.p(0), b.p(1)))
                 .return_void()
         ));
 
@@ -273,8 +274,8 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                 new MethodId(id, new ProtoId(TypeId.V, word_id),
                         IS64BIT ? "PopLocalFrame64" : "PopLocalFrame32"),
                 Modifier.PUBLIC).withCode(0, b -> (IS64BIT ?
-                b.invoke_static(pop_id, b.p(0), b.p(1)) :
-                b.invoke_static(pop_id, b.p(0)))
+                b.invoke(STATIC, pop_id, b.p(0), b.p(1)) :
+                b.invoke(STATIC, pop_id, b.p(0)))
                 .return_void()
         ));
 

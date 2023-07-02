@@ -12,6 +12,9 @@ import static com.v7878.unsafe.AndroidUnsafe5.setTrusted;
 import static com.v7878.unsafe.AndroidUnsafe7.setClassStatus;
 import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.nothrows_run;
+import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.DIRECT;
+import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
+import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.VIRTUAL;
 
 import androidx.annotation.Keep;
 
@@ -89,7 +92,7 @@ public class Transformers {
         transformer_def.getClassData().getDirectMethods().add(new EncodedMethod(
                 MethodId.constructor(transformer_id, mt, TypeId.of(TransformerImpl.class)),
                 Modifier.PUBLIC | 0x10000).withCode(0, b -> b
-                .invoke_direct(MethodId.constructor(TypeId.of(invoke_transformer), mt),
+                .invoke(DIRECT, MethodId.constructor(TypeId.of(invoke_transformer), mt),
                         b.this_(), b.p(0))
                 .iput_object(b.p(1), b.this_(), impl_field)
                 .return_void()
@@ -102,10 +105,10 @@ public class Transformers {
                 new MethodId(transformer_id, new ProtoId(TypeId.V, esf), "transform"),
                 Modifier.PUBLIC).withCode(2, b -> b
                 .iget_object(b.l(0), b.this_(), impl_field)
-                .invoke_static(new MethodId(mesf, new ProtoId(mesf,
+                .invoke(STATIC, new MethodId(mesf, new ProtoId(mesf,
                         TypeId.of(Object.class)), "wrap"), b.p(0))
                 .move_result_object(b.l(1))
-                .invoke_virtual(new MethodId(TypeId.of(TransformerImpl.class),
+                .invoke(VIRTUAL, new MethodId(TypeId.of(TransformerImpl.class),
                                 new ProtoId(TypeId.V, mh, mesf), "transform"),
                         b.l(0), b.this_(), b.l(1))
                 .return_void()
@@ -118,7 +121,7 @@ public class Transformers {
                 new MethodId(transformer_id, new ProtoId(TypeId.Z), "isVarargsCollector"),
                 Modifier.PUBLIC).withCode(1, b -> b
                 .iget_object(b.l(0), b.this_(), impl_field)
-                .invoke_virtual(new MethodId(TypeId.of(TransformerImpl.class),
+                .invoke(VIRTUAL, new MethodId(TypeId.of(TransformerImpl.class),
                                 new ProtoId(TypeId.Z, mh), "isVarargsCollector"),
                         b.l(0), b.this_())
                 .move_result(b.l(0))
@@ -132,7 +135,7 @@ public class Transformers {
                 new MethodId(transformer_id, new ProtoId(mh, TypeId.of(Class.class)),
                         "asVarargsCollector"), Modifier.PUBLIC).withCode(1, b -> b
                 .iget_object(b.l(0), b.this_(), impl_field)
-                .invoke_virtual(new MethodId(TypeId.of(TransformerImpl.class), new ProtoId(mh,
+                .invoke(VIRTUAL, new MethodId(TypeId.of(TransformerImpl.class), new ProtoId(mh,
                                 mh, TypeId.of(Class.class)), "asVarargsCollector"),
                         b.l(0), b.this_(), b.p(0))
                 .move_result_object(b.l(0))
@@ -146,7 +149,7 @@ public class Transformers {
                 new MethodId(transformer_id, new ProtoId(mh), "asFixedArity"),
                 Modifier.PUBLIC).withCode(1, b -> b
                 .iget_object(b.l(0), b.this_(), impl_field)
-                .invoke_virtual(new MethodId(TypeId.of(TransformerImpl.class),
+                .invoke(VIRTUAL, new MethodId(TypeId.of(TransformerImpl.class),
                         new ProtoId(mh, mh), "asFixedArity"), b.l(0), b.this_())
                 .move_result_object(b.l(0))
                 .return_object(b.l(0))
@@ -159,7 +162,7 @@ public class Transformers {
                 new MethodId(transformer_id, new ProtoId(mh, mt), "asType"),
                 Modifier.PUBLIC).withCode(1, b -> b
                 .iget_object(b.l(0), b.this_(), impl_field)
-                .invoke_virtual(new MethodId(TypeId.of(TransformerImpl.class),
+                .invoke(VIRTUAL, new MethodId(TypeId.of(TransformerImpl.class),
                                 new ProtoId(mh, mh, mt), "asType"),
                         b.l(0), b.this_(), b.p(0))
                 .move_result_object(b.l(0))
@@ -173,7 +176,7 @@ public class Transformers {
                 new MethodId(transformer_id, new ProtoId(mh, TypeId.of(Object.class)), "bindTo"),
                 Modifier.PUBLIC).withCode(1, b -> b
                 .iget_object(b.l(0), b.this_(), impl_field)
-                .invoke_virtual(new MethodId(TypeId.of(TransformerImpl.class),
+                .invoke(VIRTUAL, new MethodId(TypeId.of(TransformerImpl.class),
                                 new ProtoId(mh, mh, TypeId.of(Object.class)), "bindTo"),
                         b.l(0), b.this_(), b.p(0))
                 .move_result_object(b.l(0))
@@ -187,7 +190,7 @@ public class Transformers {
                 new MethodId(transformer_id, new ProtoId(TypeId.of(String.class)), "toString"),
                 Modifier.PUBLIC).withCode(1, b -> b
                 .iget_object(b.l(0), b.this_(), impl_field)
-                .invoke_virtual(new MethodId(TypeId.of(TransformerImpl.class),
+                .invoke(VIRTUAL, new MethodId(TypeId.of(TransformerImpl.class),
                                 new ProtoId(TypeId.of(String.class), mh), "toString"),
                         b.l(0), b.this_())
                 .move_result_object(b.l(0))
@@ -223,7 +226,7 @@ public class Transformers {
                 replaceExecutableAccessModifier(tmp, AccessModifier.PUBLIC);
 
                 //handle.invokeExactWithFrame((dalvik.system.EmulatedStackFrame) stack);
-                b.invoke_virtual(MethodId.of(tmp), b.p(0), b.p(1));
+                b.invoke(VIRTUAL, MethodId.of(tmp), b.p(0), b.p(1));
             }
             b.return_void();
         }));
@@ -240,7 +243,7 @@ public class Transformers {
                         TypeId.of(Object.class)), "transform"),
                 Modifier.PUBLIC).withCode(0, b -> b
                 //.check_cast(b.p(1), esf) // verified
-                .invoke_virtual(MethodId.of(tmp), b.p(0), b.p(1))
+                .invoke(VIRTUAL, MethodId.of(tmp), b.p(0), b.p(1))
                 .return_void()
         ));
 

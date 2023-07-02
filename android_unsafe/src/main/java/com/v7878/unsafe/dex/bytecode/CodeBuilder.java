@@ -423,227 +423,60 @@ public final class CodeBuilder {
         max_outs = Math.max(max_outs, outs_count);
     }
 
-    public CodeBuilder invoke_virtual(MethodId method, int arg_count, int arg_reg1,
-                                      int arg_reg2, int arg_reg3, int arg_reg4, int arg_reg5) {
+    public enum InvokeKind {
+        VIRTUAL(Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE),
+        SUPER(Opcode.INVOKE_SUPER, Opcode.INVOKE_SUPER_RANGE),
+        DIRECT(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE),
+        STATIC(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE),
+        INTERFACE(Opcode.INVOKE_INTERFACE, Opcode.INVOKE_INTERFACE_RANGE);
+
+        private final Opcode regular, range;
+
+        InvokeKind(Opcode regular, Opcode range) {
+            this.regular = regular;
+            this.range = range;
+        }
+    }
+
+    public CodeBuilder invoke(InvokeKind kind, MethodId method, int arg_count, int arg_reg1,
+                              int arg_reg2, int arg_reg3, int arg_reg4, int arg_reg5) {
         format_35c_checks(arg_count, arg_reg1, arg_reg2, arg_reg3, arg_reg4, arg_reg5);
-        add(Opcode.INVOKE_VIRTUAL.<Format35c>format().make(arg_count,
+        add(kind.regular.<Format35c>format().make(arg_count,
                 method, arg_reg1, arg_reg2, arg_reg3, arg_reg4, arg_reg5));
         add_outs(arg_count);
         return this;
     }
 
-    public CodeBuilder invoke_virtual(MethodId method, int arg_reg1, int arg_reg2,
-                                      int arg_reg3, int arg_reg4, int arg_reg5) {
-        return invoke_virtual(method, 5, arg_reg1, arg_reg2,
-                arg_reg3, arg_reg4, arg_reg5);
+    public CodeBuilder invoke(InvokeKind kind, MethodId method, int arg_reg1,
+                              int arg_reg2, int arg_reg3, int arg_reg4, int arg_reg5) {
+        return invoke(kind, method, 5, arg_reg1, arg_reg2, arg_reg3, arg_reg4, arg_reg5);
     }
 
-    public CodeBuilder invoke_virtual(
-            MethodId method, int arg_reg1, int arg_reg2, int arg_reg3, int arg_reg4) {
-        return invoke_virtual(method, 4, arg_reg1, arg_reg2,
-                arg_reg3, arg_reg4, 0);
+    public CodeBuilder invoke(InvokeKind kind, MethodId method, int arg_reg1,
+                              int arg_reg2, int arg_reg3, int arg_reg4) {
+        return invoke(kind, method, 4, arg_reg1, arg_reg2, arg_reg3, arg_reg4, 0);
     }
 
-    public CodeBuilder invoke_virtual(
-            MethodId method, int arg_reg1, int arg_reg2, int arg_reg3) {
-        return invoke_virtual(method, 3, arg_reg1, arg_reg2,
-                arg_reg3, 0, 0);
+    public CodeBuilder invoke(InvokeKind kind, MethodId method,
+                              int arg_reg1, int arg_reg2, int arg_reg3) {
+        return invoke(kind, method, 3, arg_reg1, arg_reg2, arg_reg3, 0, 0);
     }
 
-    public CodeBuilder invoke_virtual(MethodId method, int arg_reg1, int arg_reg2) {
-        return invoke_virtual(method, 2, arg_reg1, arg_reg2,
-                0, 0, 0);
+    public CodeBuilder invoke(InvokeKind kind, MethodId method, int arg_reg1, int arg_reg2) {
+        return invoke(kind, method, 2, arg_reg1, arg_reg2, 0, 0, 0);
     }
 
-    public CodeBuilder invoke_virtual(MethodId method, int arg_reg1) {
-        return invoke_virtual(method, 1, arg_reg1, 0,
-                0, 0, 0);
+    public CodeBuilder invoke(InvokeKind kind, MethodId method, int arg_reg1) {
+        return invoke(kind, method, 1, arg_reg1, 0, 0, 0, 0);
     }
 
-    public CodeBuilder invoke_super(MethodId method, int arg_count, int arg_reg1,
-                                    int arg_reg2, int arg_reg3, int arg_reg4, int arg_reg5) {
-        format_35c_checks(arg_count, arg_reg1, arg_reg2, arg_reg3, arg_reg4, arg_reg5);
-        add(Opcode.INVOKE_SUPER.<Format35c>format().make(arg_count,
-                method, arg_reg1, arg_reg2, arg_reg3, arg_reg4, arg_reg5));
-        add_outs(arg_count);
-        return this;
+    public CodeBuilder invoke(InvokeKind kind, MethodId method) {
+        return invoke(kind, method, 0, 0, 0, 0, 0, 0);
     }
 
-    public CodeBuilder invoke_super(MethodId method, int arg_reg1, int arg_reg2,
-                                    int arg_reg3, int arg_reg4, int arg_reg5) {
-        return invoke_super(method, 5, arg_reg1, arg_reg2,
-                arg_reg3, arg_reg4, arg_reg5);
-    }
-
-    public CodeBuilder invoke_super(
-            MethodId method, int arg_reg1, int arg_reg2, int arg_reg3, int arg_reg4) {
-        return invoke_super(method, 4, arg_reg1, arg_reg2,
-                arg_reg3, arg_reg4, 0);
-    }
-
-    public CodeBuilder invoke_super(
-            MethodId method, int arg_reg1, int arg_reg2, int arg_reg3) {
-        return invoke_super(method, 3, arg_reg1, arg_reg2,
-                arg_reg3, 0, 0);
-    }
-
-    public CodeBuilder invoke_super(MethodId method, int arg_reg1, int arg_reg2) {
-        return invoke_super(method, 2, arg_reg1, arg_reg2,
-                0, 0, 0);
-    }
-
-    public CodeBuilder invoke_super(MethodId method, int arg_reg1) {
-        return invoke_super(method, 1, arg_reg1, 0,
-                0, 0, 0);
-    }
-
-    public CodeBuilder invoke_direct(MethodId method, int arg_count, int arg_reg1,
-                                     int arg_reg2, int arg_reg3, int arg_reg4, int arg_reg5) {
-        format_35c_checks(arg_count, arg_reg1, arg_reg2, arg_reg3, arg_reg4, arg_reg5);
-        add(Opcode.INVOKE_DIRECT.<Format35c>format().make(arg_count,
-                method, arg_reg1, arg_reg2, arg_reg3, arg_reg4, arg_reg5));
-        add_outs(arg_count);
-        return this;
-    }
-
-    public CodeBuilder invoke_direct(MethodId method, int arg_reg1, int arg_reg2,
-                                     int arg_reg3, int arg_reg4, int arg_reg5) {
-        return invoke_direct(method, 5, arg_reg1, arg_reg2,
-                arg_reg3, arg_reg4, arg_reg5);
-    }
-
-    public CodeBuilder invoke_direct(
-            MethodId method, int arg_reg1, int arg_reg2, int arg_reg3, int arg_reg4) {
-        return invoke_direct(method, 4, arg_reg1, arg_reg2,
-                arg_reg3, arg_reg4, 0);
-    }
-
-    public CodeBuilder invoke_direct(
-            MethodId method, int arg_reg1, int arg_reg2, int arg_reg3) {
-        return invoke_direct(method, 3, arg_reg1, arg_reg2,
-                arg_reg3, 0, 0);
-    }
-
-    public CodeBuilder invoke_direct(MethodId method, int arg_reg1, int arg_reg2) {
-        return invoke_direct(method, 2, arg_reg1, arg_reg2,
-                0, 0, 0);
-    }
-
-    public CodeBuilder invoke_direct(MethodId method, int arg_reg1) {
-        return invoke_direct(method, 1, arg_reg1, 0,
-                0, 0, 0);
-    }
-
-    public CodeBuilder invoke_static(MethodId method, int arg_count, int arg_reg1,
-                                     int arg_reg2, int arg_reg3, int arg_reg4, int arg_reg5) {
-        format_35c_checks(arg_count, arg_reg1, arg_reg2, arg_reg3, arg_reg4, arg_reg5);
-        add(Opcode.INVOKE_STATIC.<Format35c>format().make(arg_count,
-                method, arg_reg1, arg_reg2, arg_reg3, arg_reg4, arg_reg5));
-        add_outs(arg_count);
-        return this;
-    }
-
-    public CodeBuilder invoke_static(MethodId method, int arg_reg1, int arg_reg2,
-                                     int arg_reg3, int arg_reg4, int arg_reg5) {
-        return invoke_static(method, 5, arg_reg1, arg_reg2,
-                arg_reg3, arg_reg4, arg_reg5);
-    }
-
-    public CodeBuilder invoke_static(
-            MethodId method, int arg_reg1, int arg_reg2, int arg_reg3, int arg_reg4) {
-        return invoke_static(method, 4, arg_reg1, arg_reg2,
-                arg_reg3, arg_reg4, 0);
-    }
-
-    public CodeBuilder invoke_static(
-            MethodId method, int arg_reg1, int arg_reg2, int arg_reg3) {
-        return invoke_static(method, 3, arg_reg1, arg_reg2,
-                arg_reg3, 0, 0);
-    }
-
-    public CodeBuilder invoke_static(MethodId method, int arg_reg1, int arg_reg2) {
-        return invoke_static(method, 2, arg_reg1, arg_reg2,
-                0, 0, 0);
-    }
-
-    public CodeBuilder invoke_static(MethodId method, int arg_reg1) {
-        return invoke_static(method, 1, arg_reg1, 0,
-                0, 0, 0);
-    }
-
-    public CodeBuilder invoke_static(MethodId method) {
-        return invoke_static(method, 0, 0, 0,
-                0, 0, 0);
-    }
-
-    public CodeBuilder invoke_interface(MethodId method, int arg_count, int arg_reg1,
-                                        int arg_reg2, int arg_reg3, int arg_reg4, int arg_reg5) {
-        format_35c_checks(arg_count, arg_reg1, arg_reg2, arg_reg3, arg_reg4, arg_reg5);
-        add(Opcode.INVOKE_INTERFACE.<Format35c>format().make(arg_count,
-                method, arg_reg1, arg_reg2, arg_reg3, arg_reg4, arg_reg5));
-        add_outs(arg_count);
-        return this;
-    }
-
-    public CodeBuilder invoke_interface(MethodId method, int arg_reg1, int arg_reg2,
-                                        int arg_reg3, int arg_reg4, int arg_reg5) {
-        return invoke_interface(method, 5, arg_reg1, arg_reg2,
-                arg_reg3, arg_reg4, arg_reg5);
-    }
-
-    public CodeBuilder invoke_interface(
-            MethodId method, int arg_reg1, int arg_reg2, int arg_reg3, int arg_reg4) {
-        return invoke_interface(method, 4, arg_reg1, arg_reg2,
-                arg_reg3, arg_reg4, 0);
-    }
-
-    public CodeBuilder invoke_interface(
-            MethodId method, int arg_reg1, int arg_reg2, int arg_reg3) {
-        return invoke_interface(method, 3, arg_reg1, arg_reg2,
-                arg_reg3, 0, 0);
-    }
-
-    public CodeBuilder invoke_interface(MethodId method, int arg_reg1, int arg_reg2) {
-        return invoke_interface(method, 2, arg_reg1, arg_reg2,
-                0, 0, 0);
-    }
-
-    public CodeBuilder invoke_interface(MethodId method, int arg_reg1) {
-        return invoke_interface(method, 1, arg_reg1, 0,
-                0, 0, 0);
-    }
-
-    public CodeBuilder invoke_virtual_range(MethodId method, int arg_count, int first_arg_reg) {
+    public CodeBuilder invoke_range(InvokeKind kind, MethodId method, int arg_count, int first_arg_reg) {
         check_reg_range(first_arg_reg, 16, arg_count, 8);
-        add(Opcode.INVOKE_VIRTUAL_RANGE.<Format3rc>format().make(arg_count, method, first_arg_reg));
-        add_outs(arg_count);
-        return this;
-    }
-
-    public CodeBuilder invoke_super_range(MethodId method, int arg_count, int first_arg_reg) {
-        check_reg_range(first_arg_reg, 16, arg_count, 8);
-        add(Opcode.INVOKE_SUPER_RANGE.<Format3rc>format().make(arg_count, method, first_arg_reg));
-        add_outs(arg_count);
-        return this;
-    }
-
-    public CodeBuilder invoke_direct_range(MethodId method, int arg_count, int first_arg_reg) {
-        check_reg_range(first_arg_reg, 16, arg_count, 8);
-        add(Opcode.INVOKE_DIRECT_RANGE.<Format3rc>format().make(arg_count, method, first_arg_reg));
-        add_outs(arg_count);
-        return this;
-    }
-
-    public CodeBuilder invoke_static_range(MethodId method, int arg_count, int first_arg_reg) {
-        check_reg_range(first_arg_reg, 16, arg_count, 8);
-        add(Opcode.INVOKE_STATIC_RANGE.<Format3rc>format().make(arg_count, method, first_arg_reg));
-        add_outs(arg_count);
-        return this;
-    }
-
-    public CodeBuilder invoke_interface_range(MethodId method, int arg_count, int first_arg_reg) {
-        check_reg_range(first_arg_reg, 16, arg_count, 8);
-        add(Opcode.INVOKE_INTERFACE_RANGE.<Format3rc>format().make(arg_count, method, first_arg_reg));
+        add(kind.range.<Format3rc>format().make(arg_count, method, first_arg_reg));
         add_outs(arg_count);
         return this;
     }

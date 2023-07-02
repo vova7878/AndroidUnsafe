@@ -231,16 +231,15 @@ public final class EmulatedStackFrame {
 
         public StackFrameAccessor moveTo(int argumentIndex) {
             if (argumentIndex == RETURN_VALUE_IDX) {
-                moveToReturn();
+                return moveToReturn();
             } else {
                 referencesOffset = referencesOffsets[argumentIndex];
                 frameBuf.position(frameOffsets[argumentIndex]);
                 argumentIdx = argumentIndex;
             }
-            return this;
         }
 
-        public void moveToReturn() {
+        public StackFrameAccessor moveToReturn() {
             Class<?> rtype = frame.type().returnType();
             argumentIdx = RETURN_VALUE_IDX;
             // Position the cursor appropriately. The return value is either the last element
@@ -250,6 +249,7 @@ public final class EmulatedStackFrame {
             } else {
                 referencesOffset = frame.references().length - 1;
             }
+            return this
         }
 
         public void putNextByte(byte value) {

@@ -15,6 +15,8 @@ import com.v7878.unsafe.dex.bytecode.Format.Format10x;
 import com.v7878.unsafe.dex.bytecode.Format.Format11x;
 import com.v7878.unsafe.dex.bytecode.Format.Format21c;
 import com.v7878.unsafe.dex.bytecode.Format.Format22c;
+import com.v7878.unsafe.dex.bytecode.Format.Format22t22s;
+import com.v7878.unsafe.dex.bytecode.Format.Format30t;
 import com.v7878.unsafe.dex.bytecode.Format.Format35c;
 import com.v7878.unsafe.dex.bytecode.Format.Format3rc;
 import com.v7878.unsafe.dex.bytecode.Format.Format45cc;
@@ -111,7 +113,9 @@ public final class CodeBuilder {
 
     private int check_reg_range(int first_reg, int reg_width, int count, int count_width) {
         Checks.checkRange(count, 0, 1 << count_width);
-        Checks.checkRange(first_reg + count, count, registers_size - count);
+        if (count > 0) {
+            Checks.checkRange(first_reg + count - 1, count, registers_size - count);
+        }
         return check_reg(first_reg, reg_width);
     }
 
@@ -160,6 +164,16 @@ public final class CodeBuilder {
 
     public CodeBuilder label(String label) {
         putLabel(label);
+        return this;
+    }
+
+    public CodeBuilder if_(boolean value, Consumer<CodeBuilder> true_branch,
+                           Consumer<CodeBuilder> false_branch) {
+        if (value) {
+            true_branch.accept(this);
+        } else {
+            false_branch.accept(this);
+        }
         return this;
     }
 
@@ -227,7 +241,7 @@ public final class CodeBuilder {
         return this;
     }
 
-    public CodeBuilder goto_(String label) {
+    private CodeBuilder goto_(Object label) {
         int start_unit = current_unit;
         add(Opcode.GOTO.<Format10t>format(), format -> {
             int branch_offset = getLabelBranchOffset(label, start_unit);
@@ -237,10 +251,67 @@ public final class CodeBuilder {
         return this;
     }
 
-    public CodeBuilder iget(int value_reg, int object_reg, FieldId instance_field) {
-        add(Opcode.IGET.<Format22c>format().make(check_reg(value_reg, 4),
-                check_reg(object_reg, 4), instance_field));
+    public CodeBuilder goto_(String label) {
+        return goto_((Object) label);
+    }
+
+    private CodeBuilder goto_32(Object label) {
+        int start_unit = current_unit;
+        add(Opcode.GOTO_32.<Format30t>format(), format -> {
+            int branch_offset = getLabelBranchOffset(label, start_unit);
+            InstructionWriter.check_signed(branch_offset, 32);
+            return format.make(branch_offset);
+        });
         return this;
+    }
+
+    public CodeBuilder goto_32(String label) {
+        return goto_32((Object) label);
+    }
+
+    public enum Test {
+        EQ(Opcode.IF_EQ, Opcode.IF_EQZ),
+        NE(Opcode.IF_NE, Opcode.IF_NEZ),
+        LT(Opcode.IF_LT, Opcode.IF_LTZ),
+        GE(Opcode.IF_GE, Opcode.IF_GEZ),
+        GT(Opcode.IF_GT, Opcode.IF_GTZ),
+        LE(Opcode.IF_LE, Opcode.IF_LEZ);
+
+        private final Opcode test, testz;
+
+        Test(Opcode test, Opcode testz) {
+            this.test = test;
+            this.testz = testz;
+        }
+    }
+
+    private CodeBuilder if_test(Test test, int first_reg_to_test, int second_reg_to_test, Object label) {
+        int start_unit = current_unit;
+        add(test.test.<Format22t22s>format(), format -> {
+            int branch_offset = getLabelBranchOffset(label, start_unit);
+            InstructionWriter.check_signed(branch_offset, 16);
+            return format.make(check_reg(first_reg_to_test, 4),
+                    check_reg(second_reg_to_test, 4), branch_offset);
+        });
+        return this;
+    }
+
+    public CodeBuilder if_test(Test test, int first_reg_to_test, int second_reg_to_test, String label) {
+        return if_test(test, first_reg_to_test, second_reg_to_test, (Object) label);
+    }
+
+    private CodeBuilder if_testz(Test test, int reg_to_test, Object label) {
+        int start_unit = current_unit;
+        add(test.testz.<Format.Format21t21s>format(), format -> {
+            int branch_offset = getLabelBranchOffset(label, start_unit);
+            InstructionWriter.check_signed(branch_offset, 16);
+            return format.make(check_reg(reg_to_test, 8), branch_offset);
+        });
+        return this;
+    }
+
+    public CodeBuilder if_testz(Test test, int reg_to_test, String label) {
+        return if_testz(test, reg_to_test, (Object) label);
     }
 
     public CodeBuilder iget_wide(int value_reg_peir, int object_reg, FieldId instance_field) {

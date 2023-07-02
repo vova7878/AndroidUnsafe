@@ -16,6 +16,7 @@ import com.v7878.unsafe.dex.bytecode.Format.Format11x;
 import com.v7878.unsafe.dex.bytecode.Format.Format21c;
 import com.v7878.unsafe.dex.bytecode.Format.Format22c;
 import com.v7878.unsafe.dex.bytecode.Format.Format22t22s;
+import com.v7878.unsafe.dex.bytecode.Format.Format23x;
 import com.v7878.unsafe.dex.bytecode.Format.Format30t;
 import com.v7878.unsafe.dex.bytecode.Format.Format35c;
 import com.v7878.unsafe.dex.bytecode.Format.Format3rc;
@@ -314,83 +315,53 @@ public final class CodeBuilder {
         return if_testz(test, reg_to_test, (Object) label);
     }
 
-    public CodeBuilder iget_wide(int value_reg_peir, int object_reg, FieldId instance_field) {
-        add(Opcode.IGET_WIDE.<Format22c>format().make(
-                check_reg_pair(value_reg_peir, 4),
+    public enum Op {
+        GET(Opcode.AGET, Opcode.IGET, Opcode.SGET, false),
+        GET_WIDE(Opcode.AGET_WIDE, Opcode.IGET_WIDE, Opcode.SGET_WIDE, true),
+        GET_OBJECT(Opcode.AGET_OBJECT, Opcode.IGET_OBJECT, Opcode.SGET_OBJECT, false),
+        GET_BOOLEAN(Opcode.AGET_BOOLEAN, Opcode.IGET_BOOLEAN, Opcode.SGET_BOOLEAN, false),
+        GET_BYTE(Opcode.AGET_BYTE, Opcode.IGET_BYTE, Opcode.SGET_BYTE, false),
+        GET_CHAR(Opcode.AGET_CHAR, Opcode.IGET_CHAR, Opcode.SGET_CHAR, false),
+        GET_SHORT(Opcode.AGET_SHORT, Opcode.IGET_SHORT, Opcode.SGET_SHORT, false),
+        PUT(Opcode.APUT, Opcode.IPUT, Opcode.SPUT, false),
+        PUT_WIDE(Opcode.APUT_WIDE, Opcode.IPUT_WIDE, Opcode.SPUT_WIDE, true),
+        PUT_OBJECT(Opcode.APUT_OBJECT, Opcode.IPUT_OBJECT, Opcode.SPUT_OBJECT, false),
+        PUT_BOOLEAN(Opcode.APUT_BOOLEAN, Opcode.IPUT_BOOLEAN, Opcode.SPUT_BOOLEAN, false),
+        PUT_BYTE(Opcode.APUT_BYTE, Opcode.IPUT_BYTE, Opcode.SPUT_BYTE, false),
+        PUT_CHAR(Opcode.APUT_CHAR, Opcode.IPUT_CHAR, Opcode.SPUT_CHAR, false),
+        PUT_SHORT(Opcode.APUT_SHORT, Opcode.IPUT_SHORT, Opcode.SPUT_SHORT, false);
+
+        private final Opcode aop, iop, sop;
+        private final boolean isWide;
+
+        Op(Opcode aop, Opcode iop, Opcode sop, boolean isWide) {
+            this.aop = aop;
+            this.iop = iop;
+            this.sop = sop;
+            this.isWide = isWide;
+        }
+    }
+
+    public CodeBuilder iop(Op op, int value_reg_or_pair, int array_reg, int index_reg) {
+        add(op.aop.<Format23x>format().make(
+                op.isWide ? check_reg_pair(value_reg_or_pair, 8)
+                        : check_reg(value_reg_or_pair, 8),
+                check_reg(array_reg, 8), check_reg(index_reg, 8)));
+        return this;
+    }
+
+    public CodeBuilder iop(Op op, int value_reg_or_pair, int object_reg, FieldId instance_field) {
+        add(op.iop.<Format22c>format().make(
+                op.isWide ? check_reg_pair(value_reg_or_pair, 4)
+                        : check_reg(value_reg_or_pair, 4),
                 check_reg(object_reg, 4), instance_field));
         return this;
     }
 
-    public CodeBuilder iget_object(int value_reg, int object_reg, FieldId instance_field) {
-        add(Opcode.IGET_OBJECT.<Format22c>format().make(check_reg(value_reg, 4),
-                check_reg(object_reg, 4), instance_field));
-        return this;
-    }
-
-    public CodeBuilder iget_boolean(int value_reg, int object_reg, FieldId instance_field) {
-        add(Opcode.IGET_BOOLEAN.<Format22c>format().make(check_reg(value_reg, 4),
-                check_reg(object_reg, 4), instance_field));
-        return this;
-    }
-
-    public CodeBuilder iget_byte(int value_reg, int object_reg, FieldId instance_field) {
-        add(Opcode.IGET_BYTE.<Format22c>format().make(check_reg(value_reg, 4),
-                check_reg(object_reg, 4), instance_field));
-        return this;
-    }
-
-    public CodeBuilder iget_char(int value_reg, int object_reg, FieldId instance_field) {
-        add(Opcode.IGET_CHAR.<Format22c>format().make(check_reg(value_reg, 4),
-                check_reg(object_reg, 4), instance_field));
-        return this;
-    }
-
-    public CodeBuilder iget_short(int value_reg, int object_reg, FieldId instance_field) {
-        add(Opcode.IGET_SHORT.<Format22c>format().make(check_reg(value_reg, 4),
-                check_reg(object_reg, 4), instance_field));
-        return this;
-    }
-
-    public CodeBuilder iput(int value_reg, int object_reg, FieldId instance_field) {
-        add(Opcode.IPUT.<Format22c>format().make(check_reg(value_reg, 4),
-                check_reg(object_reg, 4), instance_field));
-        return this;
-    }
-
-    public CodeBuilder iput_wide(int value_reg_peir, int object_reg, FieldId instance_field) {
-        add(Opcode.IPUT_WIDE.<Format22c>format().make(
-                check_reg_pair(value_reg_peir, 4),
-                check_reg(object_reg, 4), instance_field));
-        return this;
-    }
-
-    public CodeBuilder iput_object(int value_reg, int object_reg, FieldId instance_field) {
-        add(Opcode.IPUT_OBJECT.<Format22c>format().make(check_reg(value_reg, 4),
-                check_reg(object_reg, 4), instance_field));
-        return this;
-    }
-
-    public CodeBuilder iput_boolean(int value_reg, int object_reg, FieldId instance_field) {
-        add(Opcode.IPUT_BOOLEAN.<Format22c>format().make(check_reg(value_reg, 4),
-                check_reg(object_reg, 4), instance_field));
-        return this;
-    }
-
-    public CodeBuilder iput_byte(int value_reg, int object_reg, FieldId instance_field) {
-        add(Opcode.IPUT_BYTE.<Format22c>format().make(check_reg(value_reg, 4),
-                check_reg(object_reg, 4), instance_field));
-        return this;
-    }
-
-    public CodeBuilder iput_char(int value_reg, int object_reg, FieldId instance_field) {
-        add(Opcode.IPUT_CHAR.<Format22c>format().make(check_reg(value_reg, 4),
-                check_reg(object_reg, 4), instance_field));
-        return this;
-    }
-
-    public CodeBuilder iput_short(int value_reg, int object_reg, FieldId instance_field) {
-        add(Opcode.IPUT_SHORT.<Format22c>format().make(check_reg(value_reg, 4),
-                check_reg(object_reg, 4), instance_field));
+    public CodeBuilder sop(Op op, int value_reg_or_pair, FieldId static_field) {
+        add(op.sop.<Format21c>format().make(
+                op.isWide ? check_reg_pair(value_reg_or_pair, 8)
+                        : check_reg(value_reg_or_pair, 8), static_field));
         return this;
     }
 

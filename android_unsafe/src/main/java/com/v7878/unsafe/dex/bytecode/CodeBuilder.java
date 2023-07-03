@@ -12,12 +12,15 @@ import com.v7878.unsafe.dex.ProtoId;
 import com.v7878.unsafe.dex.TypeId;
 import com.v7878.unsafe.dex.bytecode.Format.Format10t;
 import com.v7878.unsafe.dex.bytecode.Format.Format10x;
+import com.v7878.unsafe.dex.bytecode.Format.Format11n;
 import com.v7878.unsafe.dex.bytecode.Format.Format11x;
 import com.v7878.unsafe.dex.bytecode.Format.Format21c;
+import com.v7878.unsafe.dex.bytecode.Format.Format21t21s;
 import com.v7878.unsafe.dex.bytecode.Format.Format22c;
 import com.v7878.unsafe.dex.bytecode.Format.Format22t22s;
 import com.v7878.unsafe.dex.bytecode.Format.Format23x;
 import com.v7878.unsafe.dex.bytecode.Format.Format30t;
+import com.v7878.unsafe.dex.bytecode.Format.Format31i31t;
 import com.v7878.unsafe.dex.bytecode.Format.Format35c;
 import com.v7878.unsafe.dex.bytecode.Format.Format3rc;
 import com.v7878.unsafe.dex.bytecode.Format.Format45cc;
@@ -230,6 +233,26 @@ public final class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder const_4(int dst_reg, int value) {
+        InstructionWriter.check_signed(value, 4);
+        add(Opcode.CONST_4.<Format11n>format().make(
+                check_reg(dst_reg, 4), value));
+        return this;
+    }
+
+    public CodeBuilder const_16(int dst_reg, int value) {
+        InstructionWriter.check_signed(value, 16);
+        add(Opcode.CONST_16.<Format21t21s>format().make(
+                check_reg(dst_reg, 8), value));
+        return this;
+    }
+
+    public CodeBuilder const_(int dst_reg, int value) {
+        add(Opcode.CONST.<Format31i31t>format().make(
+                check_reg(dst_reg, 8), value));
+        return this;
+    }
+
     public CodeBuilder const_string(int dst_reg, String value) {
         add(Opcode.CONST_STRING.<Format21c>format().make(
                 check_reg(dst_reg, 8), value));
@@ -303,7 +326,7 @@ public final class CodeBuilder {
 
     private CodeBuilder if_testz(Test test, int reg_to_test, Object label) {
         int start_unit = current_unit;
-        add(test.testz.<Format.Format21t21s>format(), format -> {
+        add(test.testz.<Format21t21s>format(), format -> {
             int branch_offset = getLabelBranchOffset(label, start_unit);
             InstructionWriter.check_signed(branch_offset, 16);
             return format.make(check_reg(reg_to_test, 8), branch_offset);

@@ -211,8 +211,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                     new MethodId(id, new ProtoId(TypeId.J, TypeId.J,
                             TypeId.of(Object.class)), "NewLocalRef64"),
                     Modifier.PUBLIC).withCode(1, b -> b
-                    //FIXME
-                    //.const_4(0)
+                    .const_4(b.l(0), 0)
                     .invoke(STATIC, nlr_id, b.p(0), b.p(1), b.p(2), b.l(0))
                     .move_result_wide(b.v(0))
                     .return_wide(b.v(0))

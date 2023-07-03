@@ -121,8 +121,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                 return tmp;
             }
         }
-        //TODO: maybe throw exception?
-        return null;
+        throw new IllegalStateException("unknown raw class status: " + status);
     }
 
     @DangerLevel(DangerLevel.VERY_CAREFUL)

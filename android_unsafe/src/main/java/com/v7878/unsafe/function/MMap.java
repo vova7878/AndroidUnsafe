@@ -12,8 +12,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//TODO make non-public
-public class MMap {
+class MMap {
 
     public static final int PERMISSION_READ = 0b1;
     public static final int PERMISSION_WRITE = 0b10;

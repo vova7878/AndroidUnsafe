@@ -12,7 +12,6 @@ import static com.v7878.unsafe.AndroidUnsafe5.putObject;
 import static com.v7878.unsafe.AndroidUnsafe5.setExecutableData;
 import static com.v7878.unsafe.AndroidUnsafe5.staticFieldOffset;
 import static com.v7878.unsafe.AndroidUnsafe7.NewLocalRef;
-import static com.v7878.unsafe.AndroidUnsafe7.setClassStatus;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
 import static com.v7878.unsafe.methodhandle.Transformers.invokeExactWithFrameNoChecks;
@@ -23,7 +22,6 @@ import android.util.Pair;
 import androidx.annotation.Keep;
 
 import com.v7878.unsafe.AndroidUnsafe7;
-import com.v7878.unsafe.AndroidUnsafe7.ClassStatus;
 import com.v7878.unsafe.AndroidUnsafe7.LocalFrame;
 import com.v7878.unsafe.dex.AnnotationItem;
 import com.v7878.unsafe.dex.AnnotationSet;
@@ -210,8 +208,6 @@ public class Linker {
         //noinspection deprecation
         DexFile dex = openDexFile(new Dex(clazz).compile());
         Class<?> stub = loadClass(dex, stub_name, getStubClassLoader());
-        //TODO: delete
-        setClassStatus(stub, ClassStatus.Verified);
         Method function = getDeclaredMethod(stub, "function",
                 stub_call_type.parameterArray());
         if (ret_object) {

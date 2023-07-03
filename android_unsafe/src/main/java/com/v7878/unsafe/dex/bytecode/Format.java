@@ -10,8 +10,8 @@ import java.util.Objects;
 
 public abstract class Format {
     protected final Opcode opcode;
-    private int units;
-    private boolean payload;
+    private final int units;
+    private final boolean payload;
 
     Format(Opcode opcode, int units) {
         this(opcode, units, false);
@@ -408,6 +408,69 @@ public abstract class Format {
         }
     }
 
+    public static class Format21t21s extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int AA, sBBBB;
+
+            Instance(int AA, int sBBBB) {
+                this.AA = AA;
+                this.sBBBB = sBBBB;
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_21t_21s(out,
+                        opcode().opcodeValue(context.getOptions()), AA, sBBBB);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + AA + " " + sBBBB;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && AA == iobj.AA && sBBBB == iobj.sBBBB;
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), AA, sBBBB);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(AA, sBBBB);
+            }
+        }
+
+        Format21t21s(Opcode opcode) {
+            super(opcode, 2);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int AA) {
+            int BBBB = in.readUnsignedShort();
+            return make(AA, extend_sign(BBBB, 16));
+        }
+
+        public Instruction make(int AA, int sBBBB) {
+            return new Instance(AA, sBBBB);
+        }
+    }
+
     public static class Format21c extends Format {
         public final ReferenceType referenceType;
 
@@ -619,6 +682,197 @@ public abstract class Format {
         }
     }
 
+    public static class Format22b extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int AA, BB, sCC;
+
+            Instance(int AA, int BB, int sCC) {
+                this.AA = AA;
+                this.BB = BB;
+                this.sCC = sCC;
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_22b(out,
+                        opcode().opcodeValue(context.getOptions()), AA, BB, sCC);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + AA + " " + BB + " " + sCC;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && AA == iobj.AA && BB == iobj.BB && sCC == iobj.sCC;
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), AA, BB, sCC);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(AA, BB, sCC);
+            }
+        }
+
+        Format22b(Opcode opcode) {
+            super(opcode, 2);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int AA) {
+            int CCBB = in.readUnsignedShort();
+            return make(AA, CCBB & 0xff, extend_sign(CCBB >> 8, 8));
+        }
+
+        public Instruction make(int AA, int BB, int sCC) {
+            return new Instance(AA, BB, sCC);
+        }
+    }
+
+    public static class Format22t22s extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int A, B, sCCCC;
+
+            Instance(int A, int B, int sCCCC) {
+                this.A = A;
+                this.B = B;
+                this.sCCCC = sCCCC;
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_22t_22s(out,
+                        opcode().opcodeValue(context.getOptions()), A, B, sCCCC);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + A + " " + B + " " + sCCCC;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && A == iobj.A && B == iobj.B && sCCCC == iobj.sCCCC;
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), A, B, sCCCC);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(A, B, sCCCC);
+            }
+        }
+
+        Format22t22s(Opcode opcode) {
+            super(opcode, 2);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int BA) {
+            int CCCC = in.readUnsignedShort();
+            return make(BA & 0xf, BA >> 4, extend_sign(CCCC, 16));
+        }
+
+        public Instruction make(int A, int B, int sCCCC) {
+            return new Instance(A, B, sCCCC);
+        }
+    }
+
+    public static class Format30t extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int sAAAAAAAA;
+
+            Instance(int sAAAAAAAA) {
+                this.sAAAAAAAA = sAAAAAAAA;
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_30t(out,
+                        opcode().opcodeValue(context.getOptions()), sAAAAAAAA);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + sAAAAAAAA;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && sAAAAAAAA == iobj.sAAAAAAAA;
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), sAAAAAAAA);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(sAAAAAAAA);
+            }
+        }
+
+        Format30t(Opcode opcode) {
+            super(opcode, 3);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int _00) {
+            int AAAAlo = in.readUnsignedShort();
+            int AAAAhi = in.readUnsignedShort();
+            return make(AAAAlo | (AAAAhi << 16));
+        }
+
+        public Instruction make(int sAAAAAAAA) {
+            return new Instance(sAAAAAAAA);
+        }
+    }
+
     public static class Format32x extends Format {
 
         public class Instance extends Instruction {
@@ -680,6 +934,70 @@ public abstract class Format {
 
         public Instruction make(int AAAA, int BBBB) {
             return new Instance(AAAA, BBBB);
+        }
+    }
+
+    public static class Format31i31t extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int AA, sBBBBBBBB;
+
+            Instance(int AA, int sBBBBBBBB) {
+                this.AA = AA;
+                this.sBBBBBBBB = sBBBBBBBB;
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_31i_31t_31c(out,
+                        opcode().opcodeValue(context.getOptions()), AA, sBBBBBBBB);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + AA + " " + sBBBBBBBB;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && AA == iobj.AA && sBBBBBBBB == iobj.sBBBBBBBB;
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), AA, sBBBBBBBB);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(AA, sBBBBBBBB);
+            }
+        }
+
+        Format31i31t(Opcode opcode) {
+            super(opcode, 3);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int AA) {
+            int BBBBlo = in.readUnsignedShort();
+            int BBBBhi = in.readUnsignedShort();
+            return make(AA, BBBBlo | (BBBBhi << 16));
+        }
+
+        public Instruction make(int AA, int sBBBBBBBB) {
+            return new Instance(AA, sBBBBBBBB);
         }
     }
 
@@ -768,6 +1086,82 @@ public abstract class Format {
 
         public Instruction make(int A, Object cBBBB, int C, int D, int E, int F, int G) {
             return new Instance(A, cBBBB, C, D, E, F, G);
+        }
+    }
+
+    public static class Format3rc extends Format {
+
+        public final ReferenceType referenceType;
+
+        public class Instance extends Instruction {
+
+            public final int AA;
+            public final Object cBBBB;
+            public final int CCCC;
+
+            Instance(int AA, Object cBBBB, int CCCC) {
+                this.AA = AA;
+                this.cBBBB = referenceType.clone(cBBBB);
+                this.CCCC = CCCC;
+            }
+
+            @Override
+            public void collectData(DataCollector data) {
+                referenceType.collectData(data, cBBBB);
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_3rc_3rms_3rmi(out,
+                        opcode().opcodeValue(context.getOptions()), AA,
+                        referenceType.refToIndex(context, cBBBB), CCCC);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + AA + " " + cBBBB + " " + CCCC;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode()) && AA == iobj.AA
+                            && Objects.equals(cBBBB, iobj.cBBBB) && CCCC == iobj.CCCC;
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), AA, cBBBB, CCCC);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(AA, cBBBB, CCCC);
+            }
+        }
+
+        Format3rc(Opcode opcode, ReferenceType referenceType) {
+            super(opcode, 3);
+            this.referenceType = referenceType;
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int AA) {
+            int BBBB = in.readUnsignedShort();
+            int CCCC = in.readUnsignedShort();
+            return make(AA, referenceType.indexToRef(context, BBBB), CCCC);
+        }
+
+        public Instruction make(int AA, Object cBBBB, int CCCC) {
+            return new Instance(AA, cBBBB, CCCC);
         }
     }
 

@@ -3,6 +3,10 @@ package com.v7878.unsafe;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.runOnce;
+import static com.v7878.unsafe.Utils.searchMethod;
+import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
+
+import androidx.annotation.Keep;
 
 import com.v7878.unsafe.dex.AnnotationItem;
 import com.v7878.unsafe.dex.AnnotationSet;
@@ -12,10 +16,12 @@ import com.v7878.unsafe.dex.EncodedMethod;
 import com.v7878.unsafe.dex.MethodId;
 import com.v7878.unsafe.dex.ProtoId;
 import com.v7878.unsafe.dex.TypeId;
-import com.v7878.unsafe.function.NativeLibrary;
+import com.v7878.unsafe.function.LibArt;
+import com.v7878.unsafe.function.SymbolLookup;
 import com.v7878.unsafe.memory.Pointer;
 import com.v7878.unsafe.memory.Word;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.function.Supplier;
 
@@ -115,8 +121,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                 return tmp;
             }
         }
-        //TODO: maybe throw exception?
-        return null;
+        throw new IllegalStateException("unknown raw class status: " + status);
     }
 
     @DangerLevel(DangerLevel.VERY_CAREFUL)
@@ -166,6 +171,14 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         default void PopLocalFrame32(int env) {
             throw new AssertionError();
         }
+
+        default void putRef64(Object obj, long offset, long ref) {
+            throw new AssertionError();
+        }
+
+        default void putRef32(Object obj, long offset, int ref) {
+            throw new AssertionError();
+        }
     }
 
     private static final Supplier<LocalRefUtils> localRefUtils = runOnce(() -> {
@@ -197,7 +210,8 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                     new MethodId(id, new ProtoId(TypeId.J, TypeId.J,
                             TypeId.of(Object.class)), "NewLocalRef64"),
                     Modifier.PUBLIC).withCode(1, b -> b
-                    .invoke_static(nlr_id, b.p(0), b.p(1), b.p(2), b.l(0))
+                    .const_4(b.l(0), 0)
+                    .invoke(STATIC, nlr_id, b.p(0), b.p(1), b.p(2), b.l(0))
                     .move_result_wide(b.v(0))
                     .return_wide(b.v(0))
             ));
@@ -206,7 +220,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                     new MethodId(id, new ProtoId(TypeId.I, TypeId.I,
                             TypeId.of(Object.class)), "NewLocalRef32"),
                     Modifier.PUBLIC).withCode(0, b -> b
-                    .invoke_static(nlr_id, b.p(0), b.p(1))
+                    .invoke(STATIC, nlr_id, b.p(0), b.p(1))
                     .move_result(b.v(0))
                     .return_(b.v(0))
             ));
@@ -224,8 +238,8 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                 new MethodId(id, new ProtoId(TypeId.V, word_id, word_id),
                         IS64BIT ? "DeleteLocalRef64" : "DeleteLocalRef32"),
                 Modifier.PUBLIC).withCode(0, b -> (IS64BIT ?
-                b.invoke_static(dlr_id, b.p(0), b.p(1), b.p(2), b.p(3)) :
-                b.invoke_static(dlr_id, b.p(0), b.p(1)))
+                b.invoke(STATIC, dlr_id, b.p(0), b.p(1), b.p(2), b.p(3)) :
+                b.invoke(STATIC, dlr_id, b.p(0), b.p(1)))
                 .return_void()
         ));
 
@@ -241,8 +255,8 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                 new MethodId(id, new ProtoId(TypeId.V, word_id, TypeId.I),
                         IS64BIT ? "PushLocalFrame64" : "PushLocalFrame32"),
                 Modifier.PUBLIC).withCode(0, b -> (IS64BIT ?
-                b.invoke_static(push_id, b.p(0), b.p(1), b.p(2)) :
-                b.invoke_static(push_id, b.p(0), b.p(1)))
+                b.invoke(STATIC, push_id, b.p(0), b.p(1), b.p(2)) :
+                b.invoke(STATIC, push_id, b.p(0), b.p(1)))
                 .return_void()
         ));
 
@@ -258,9 +272,16 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                 new MethodId(id, new ProtoId(TypeId.V, word_id),
                         IS64BIT ? "PopLocalFrame64" : "PopLocalFrame32"),
                 Modifier.PUBLIC).withCode(0, b -> (IS64BIT ?
-                b.invoke_static(pop_id, b.p(0), b.p(1)) :
-                b.invoke_static(pop_id, b.p(0)))
+                b.invoke(STATIC, pop_id, b.p(0), b.p(1)) :
+                b.invoke(STATIC, pop_id, b.p(0)))
                 .return_void()
+        ));
+
+        clazz.getClassData().getVirtualMethods().add(new EncodedMethod(
+                new MethodId(id, new ProtoId(TypeId.V, TypeId.of(Object.class),
+                        TypeId.J, word_id), IS64BIT ? "putRef64" : "putRef32"),
+                Modifier.PUBLIC | Modifier.FINAL | Modifier.NATIVE,
+                new AnnotationSet(AnnotationItem.FastNative()), null, null
         ));
 
         //noinspection deprecation
@@ -268,20 +289,31 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         Class<?> utils = loadClass(dex, name, AndroidUnsafe7.class.getClassLoader());
         setClassStatus(utils, ClassStatus.Verified);
 
-        //it's safe because libart.so is already open by system
-        try (NativeLibrary art = NativeLibrary.load("libart.so")) {
+        Method[] methods = getDeclaredMethods(utils);
+
+        try (SymbolLookup art = LibArt.open()) {
             Pointer nlr = art.lookup("_ZN3art9JNIEnvExt11NewLocalRefEPNS_6mirror6ObjectE");
-            setExecutableData(getDeclaredMethod(utils, "NewLocalRef", word, word), nlr);
+            setExecutableData(searchMethod(methods, "NewLocalRef", word, word), nlr);
 
             Pointer dlr = art.lookup("_ZN3art9JNIEnvExt14DeleteLocalRefEP8_jobject");
-            setExecutableData(getDeclaredMethod(utils, "DeleteLocalRef", word, word), dlr);
+            setExecutableData(searchMethod(methods, "DeleteLocalRef", word, word), dlr);
 
             Pointer push = art.lookup("_ZN3art9JNIEnvExt9PushFrameEi");
-            setExecutableData(getDeclaredMethod(utils, "PushLocalFrame", word, int.class), push);
+            setExecutableData(searchMethod(methods, "PushLocalFrame", word, int.class), push);
 
             Pointer pop = art.lookup("_ZN3art9JNIEnvExt8PopFrameEv");
-            setExecutableData(getDeclaredMethod(utils, "PopLocalFrame", word), pop);
+            setExecutableData(searchMethod(methods, "PopLocalFrame", word), pop);
         }
+
+        Method put = getDeclaredMethod(SunUnsafe.getUnsafeClass(), "putObject",
+                Object.class, long.class, Object.class);
+        assert_(Modifier.isNative(put.getModifiers()), AssertionError::new);
+        setExecutableData(searchMethod(methods, IS64BIT ? "putRef64" : "putRef32",
+                Object.class, long.class, word), getExecutableData(put));
+
+        // make right helper public
+        replaceExecutableAccessModifier(getDeclaredMethod(AndroidUnsafe7.class,
+                "refToObjectHelper", word), AccessModifier.PUBLIC);
 
         return (LocalRefUtils) allocateInstance(utils);
     });
@@ -325,6 +357,31 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         } else {
             utils.PopLocalFrame32((int) env.getRawAddress());
         }
+    }
+
+    public static Object refToObject(Word ref) {
+        Object[] arr = new Object[1];
+        final long offset = ARRAY_OBJECT_BASE_OFFSET;
+        if (IS64BIT) {
+            localRefUtils.get().putRef64(arr, offset, ref.longValue());
+        } else {
+            localRefUtils.get().putRef32(arr, offset, ref.intValue());
+        }
+        return arr[0];
+    }
+
+    @Keep
+    private static Object refToObjectHelper(long ref) {
+        Object[] arr = new Object[1];
+        localRefUtils.get().putRef64(arr, ARRAY_OBJECT_BASE_OFFSET, ref);
+        return arr[0];
+    }
+
+    @Keep
+    private static Object refToObjectHelper(int ref) {
+        Object[] arr = new Object[1];
+        localRefUtils.get().putRef32(arr, ARRAY_OBJECT_BASE_OFFSET, ref);
+        return arr[0];
     }
 
     public static class ScopedLocalRef implements AutoCloseable {

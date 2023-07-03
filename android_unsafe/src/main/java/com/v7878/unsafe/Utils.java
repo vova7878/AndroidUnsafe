@@ -48,6 +48,10 @@ public class Utils {
         return null;
     }
 
+    public static Field searchField(Field[] fields, String name) {
+        return searchField(fields, name, true);
+    }
+
     private static String methodToString(String name, Class<?>[] argTypes) {
         return name + ((argTypes == null || argTypes.length == 0)
                 ? "()" : Arrays.stream(argTypes)
@@ -67,6 +71,10 @@ public class Utils {
         return null;
     }
 
+    public static Method searchMethod(Method[] methods, String name, Class<?>... parameterTypes) {
+        return searchMethod(methods, name, true, parameterTypes);
+    }
+
     public static <T> Constructor<T> searchConstructor(
             Constructor<T>[] constructors, boolean thw, Class<?>... parameterTypes) {
         for (Constructor<T> c : constructors) {
@@ -76,6 +84,11 @@ public class Utils {
         }
         assert_(!thw, NoSuchMethodException::new, methodToString("<init>", parameterTypes));
         return null;
+    }
+
+    public static <T> Constructor<T> searchConstructor(
+            Constructor<T>[] constructors, Class<?>... parameterTypes) {
+        return searchConstructor(constructors, true, parameterTypes);
     }
 
     public static <T extends Throwable> void assert_(

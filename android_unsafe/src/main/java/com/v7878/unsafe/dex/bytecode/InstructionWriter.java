@@ -13,19 +13,21 @@ class InstructionWriter {
     }
 
     public static int check_signed(int value, int width) {
-        if ((-(value >> width) & ~1) != 0) {
+        int empty_width = 32 - width;
+        if (value << empty_width >> empty_width != value) {
             throw new IllegalStateException("illegal instruction signed value "
                     + Integer.toHexString(value) + " for width " + width);
         }
-        return value & (~0 >>> (32 - width));
+        return value & (~0 >>> empty_width);
     }
 
     public static long check_signed64(long value, int width) {
-        if ((-(value >> width) & ~1L) != 0) {
+        int empty_width = 64 - width;
+        if (value << empty_width >> empty_width != value) {
             throw new IllegalStateException("illegal instruction signed value "
                     + Long.toHexString(value) + " for width " + width);
         }
-        return value & (~0L >>> (64 - width));
+        return value & (~0L >>> empty_width);
     }
 
     public static int check_hat32(int value, int width) {
@@ -87,6 +89,13 @@ class InstructionWriter {
         out.writeShort(BBBB);
     }
 
+    public static void write_21t_21s(RandomOutput out, int opcode, int AA, int sBBBB) {
+        AA = check_unsigned(AA, 8);
+        sBBBB = check_signed(sBBBB, 16);
+        write_base(out, opcode, AA);
+        out.writeShort(sBBBB);
+    }
+
     public static void write_22c(RandomOutput out, int opcode, int A, int B, int cCCCC) {
         A = check_unsigned(A, 4);
         B = check_unsigned(B, 4);
@@ -103,12 +112,43 @@ class InstructionWriter {
         out.writeShort((CC << 8) | BB);
     }
 
+    public static void write_22b(RandomOutput out, int opcode, int AA, int BB, int sCC) {
+        AA = check_unsigned(AA, 8);
+        BB = check_unsigned(BB, 8);
+        sCC = check_signed(sCC, 8);
+        write_base(out, opcode, AA);
+        out.writeShort((sCC << 8) | BB);
+    }
+
+    public static void write_22t_22s(RandomOutput out, int opcode, int A, int B, int sCCCC) {
+        A = check_unsigned(A, 4);
+        B = check_unsigned(B, 4);
+        sCCCC = check_signed(sCCCC, 16);
+        write_base(out, opcode, (B << 4) | A);
+        out.writeShort(sCCCC);
+    }
+
+    public static void write_30t(RandomOutput out, int opcode, int AAAAAAAA) {
+        // no need to check AAAAAAAA
+        write_base(out, opcode, 0);
+        out.writeShort(AAAAAAAA & 0xffff);
+        out.writeShort(AAAAAAAA >>> 16);
+    }
+
     public static void write_32x(RandomOutput out, int opcode, int AAAA, int BBBB) {
         AAAA = check_unsigned(AAAA, 16);
         BBBB = check_unsigned(BBBB, 16);
         write_base(out, opcode, 0);
         out.writeShort(AAAA);
         out.writeShort(BBBB);
+    }
+
+    public static void write_31i_31t_31c(RandomOutput out, int opcode, int AA, int BBBBBBBB) {
+        check_unsigned(AA, 8);
+        // no need to check BBBBBBBB
+        write_base(out, opcode, AA);
+        out.writeShort(BBBBBBBB & 0xffff);
+        out.writeShort(BBBBBBBB >>> 16);
     }
 
     public static void write_35c_35ms_35mi(RandomOutput out, int opcode, int A,
@@ -123,6 +163,16 @@ class InstructionWriter {
         write_base(out, opcode, (A << 4) | G);
         out.writeShort(BBBB);
         out.writeShort((F << 12) | (E << 8) | (D << 4) | C);
+    }
+
+    public static void write_3rc_3rms_3rmi(RandomOutput out, int opcode,
+                                           int AA, int BBBB, int CCCC) {
+        AA = check_unsigned(AA, 8);
+        BBBB = check_unsigned(BBBB, 16);
+        CCCC = check_unsigned(CCCC, 16);
+        write_base(out, opcode, AA);
+        out.writeShort(BBBB);
+        out.writeShort(CCCC);
     }
 
     public static void write_45cc(RandomOutput out, int opcode, int A,
@@ -148,20 +198,6 @@ class InstructionWriter {
         out.writeShort(sAAAA);
     }
 
-    public static void write_21t_21s32(RandomOutput out, int opcode, int AA, int sBBBB) {
-        check_unsigned(AA, 8);
-        sBBBB = check_signed(sBBBB, 16);
-        write_base(out, opcode, AA);
-        out.writeShort(sBBBB);
-    }
-
-    public static void write_21s64(RandomOutput out, int opcode, int AA, long sBBBB) {
-        check_unsigned(AA, 8);
-        int BBBB = (int) check_signed64(sBBBB, 16);
-        write_base(out, opcode, AA);
-        out.writeShort(BBBB);
-    }
-
     public static void write_21h32(RandomOutput out, int opcode, int AA, int BBBB0000) {
         check_unsigned(AA, 8);
         int BBBB = check_hat32(BBBB0000, 16);
@@ -174,59 +210,6 @@ class InstructionWriter {
         int BBBB = (int) check_hat64(BBBB000000000000, 16);
         write_base(out, opcode, AA);
         out.writeShort(BBBB);
-    }
-
-    public static void write_22b(RandomOutput out, int opcode, int AA, int BB, int sCC) {
-        check_unsigned(AA, 8);
-        check_unsigned(BB, 8);
-        sCC = check_signed(sCC, 8);
-        write_base(out, opcode, AA);
-        out.writeShort((sCC << 8) | BB);
-    }
-
-    public static void write_22t_22s(RandomOutput out, int opcode, int A, int B, int sCCCC) {
-        check_unsigned(A, 4);
-        check_unsigned(B, 4);
-        sCCCC = check_signed(sCCCC, 16);
-        write_base(out, opcode, (B << 4) | A);
-        out.writeShort(sCCCC);
-    }
-
-    public static void write_22c_22cs(RandomOutput out, int opcode, int A, int B, int CCCC) {
-        check_unsigned(A, 4);
-        check_unsigned(B, 4);
-        check_unsigned(CCCC, 16);
-        write_base(out, opcode, (B << 4) | A);
-        out.writeShort(CCCC);
-    }
-
-    public static void write_30t(RandomOutput out, int opcode, int AAAAAAAA) {
-        write_base(out, opcode, 0);
-        out.writeShort(AAAAAAAA & 0xffff);
-        out.writeShort(AAAAAAAA >>> 16);
-    }
-
-    public static void write_32x(RandomOutput out, int opcode, int AAAA, int BBBB) {
-        check_unsigned(AAAA, 16);
-        check_unsigned(BBBB, 16);
-        write_base(out, opcode, 0);
-        out.writeShort(AAAA);
-        out.writeShort(BBBB);
-    }
-
-    public static void write_31i32_31t_31c(RandomOutput out, int opcode, int AA, int BBBBBBBB) {
-        check_unsigned(AA, 8);
-        write_base(out, opcode, AA);
-        out.writeShort(BBBBBBBB & 0xffff);
-        out.writeShort(BBBBBBBB >>> 16);
-    }
-
-    public static void write_31i64(RandomOutput out, int opcode, int AA, long sBBBBBBBB) {
-        check_unsigned(AA, 8);
-        int BBBBBBBB = (int) check_signed64(sBBBBBBBB, 32);
-        write_base(out, opcode, AA);
-        out.writeShort(BBBBBBBB & 0xffff);
-        out.writeShort(BBBBBBBB >>> 16);
     }
 
     public static void write_51l(RandomOutput out, int opcode, int AA, long BBBBBBBBBBBBBBBB) {

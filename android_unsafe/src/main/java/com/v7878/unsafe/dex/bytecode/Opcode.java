@@ -27,12 +27,12 @@ public enum Opcode {
     RETURN_WIDE(0x10, "return-wide", Format.Format11x::new),
     RETURN_OBJECT(0x11, "return-object", Format.Format11x::new),
     CONST_4(0x12, "const/4", Format.Format11n::new),
-    /*CONST_16(0x13, "const/16", Format.Format21s::new),
-    CONST(0x14, "const", Format.Format31i::new),
-    CONST_HIGH16(0x15, "const/high16", Format.Format21ih::new),
-    CONST_WIDE_16(0x16, "const-wide/16", Format.Format21s::new),
-    CONST_WIDE_32(0x17, "const-wide/32", Format.Format31i::new),
-    CONST_WIDE(0x18, "const-wide", Format.Format51l::new),
+    CONST_16(0x13, "const/16", Format.Format21t21s::new),
+    CONST(0x14, "const", Format.Format31i31t::new),
+    /*CONST_HIGH16(0x15, "const/high16", Format.Format21ih::new),*/
+    CONST_WIDE_16(0x16, "const-wide/16", Format.Format21t21s::new),
+    CONST_WIDE_32(0x17, "const-wide/32", Format.Format31i31t::new),
+    /*CONST_WIDE(0x18, "const-wide", Format.Format51l::new),
     CONST_WIDE_HIGH16(0x19, "const-wide/high16", Format.Format21lh::new),*/
     CONST_STRING(0x1a, "const-string", opcode -> new Format.Format21c(opcode, ReferenceType.STRING)),
     /*CONST_STRING_JUMBO(0x1b, "const-string/jumbo", ReferenceType.STRING, Format.Format31c::new),*/
@@ -45,14 +45,14 @@ public enum Opcode {
     NEW_INSTANCE(0x22, "new-instance", opcode -> new Format.Format21c(opcode, ReferenceType.TYPE)),
     NEW_ARRAY(0x23, "new-array", opcode -> new Format.Format22c(opcode, ReferenceType.TYPE)),
     FILLED_NEW_ARRAY(0x24, "filled-new-array", opcode -> new Format.Format35c(opcode, ReferenceType.TYPE)),
-    /*FILLED_NEW_ARRAY_RANGE(0x25, "filled-new-array/range", ReferenceType.TYPE, Format.Format3rc, Opcode.CAN_CONTINUE | Opcode.SETS_RESULT),
-    FILL_ARRAY_DATA(0x26, "fill-array-data", Format.Format31t, Opcode.CAN_CONTINUE),*/
+    FILLED_NEW_ARRAY_RANGE(0x25, "filled-new-array/range", opcode -> new Format.Format3rc(opcode, ReferenceType.TYPE)),
+    FILL_ARRAY_DATA(0x26, "fill-array-data", Format.Format31i31t::new),
     THROW(0x27, "throw", Format.Format11x::new),
     GOTO(0x28, "goto", Format.Format10t::new),
-    /*GOTO_16(0x29, "goto/16", Format.Format20t),
-    GOTO_32(0x2a, "goto/32", Format.Format30t),
-    PACKED_SWITCH(0x2b, "packed-switch", Format.Format31t, Opcode.CAN_CONTINUE),
-    SPARSE_SWITCH(0x2c, "sparse-switch", Format.Format31t, Opcode.CAN_CONTINUE),*/
+    /*GOTO_16(0x29, "goto/16", Format.Format20t),*/
+    GOTO_32(0x2a, "goto/32", Format.Format30t::new),
+    PACKED_SWITCH(0x2b, "packed-switch", Format.Format31i31t::new),
+    SPARSE_SWITCH(0x2c, "sparse-switch", Format.Format31i31t::new),
 
     CMPL_FLOAT(0x2d, "cmpl-float", Format.Format23x::new),
     CMPG_FLOAT(0x2e, "cmpg-float", Format.Format23x::new),
@@ -60,19 +60,19 @@ public enum Opcode {
     CMPG_DOUBLE(0x30, "cmpg-double", Format.Format23x::new),
     CMP_LONG(0x31, "cmp-long", Format.Format23x::new),
 
-    /*IF_EQ(0x32, "if-eq", Format.Format22t, Opcode.CAN_CONTINUE),
-    IF_NE(0x33, "if-ne", Format.Format22t, Opcode.CAN_CONTINUE),
-    IF_LT(0x34, "if-lt", Format.Format22t, Opcode.CAN_CONTINUE),
-    IF_GE(0x35, "if-ge", Format.Format22t, Opcode.CAN_CONTINUE),
-    IF_GT(0x36, "if-gt", Format.Format22t, Opcode.CAN_CONTINUE),
-    IF_LE(0x37, "if-le", Format.Format22t, Opcode.CAN_CONTINUE),
+    IF_EQ(0x32, "if-eq", Format.Format22t22s::new),
+    IF_NE(0x33, "if-ne", Format.Format22t22s::new),
+    IF_LT(0x34, "if-lt", Format.Format22t22s::new),
+    IF_GE(0x35, "if-ge", Format.Format22t22s::new),
+    IF_GT(0x36, "if-gt", Format.Format22t22s::new),
+    IF_LE(0x37, "if-le", Format.Format22t22s::new),
 
-    IF_EQZ(0x38, "if-eqz", Format.Format21t, Opcode.CAN_CONTINUE),
-    IF_NEZ(0x39, "if-nez", Format.Format21t, Opcode.CAN_CONTINUE),
-    IF_LTZ(0x3a, "if-ltz", Format.Format21t, Opcode.CAN_CONTINUE),
-    IF_GEZ(0x3b, "if-gez", Format.Format21t, Opcode.CAN_CONTINUE),
-    IF_GTZ(0x3c, "if-gtz", Format.Format21t, Opcode.CAN_CONTINUE),
-    IF_LEZ(0x3d, "if-lez", Format.Format21t, Opcode.CAN_CONTINUE),*/
+    IF_EQZ(0x38, "if-eqz", Format.Format21t21s::new),
+    IF_NEZ(0x39, "if-nez", Format.Format21t21s::new),
+    IF_LTZ(0x3a, "if-ltz", Format.Format21t21s::new),
+    IF_GEZ(0x3b, "if-gez", Format.Format21t21s::new),
+    IF_GTZ(0x3c, "if-gtz", Format.Format21t21s::new),
+    IF_LEZ(0x3d, "if-lez", Format.Format21t21s::new),
 
     // 3e - 43 unused
 
@@ -129,11 +129,11 @@ public enum Opcode {
 
     // 73 unused
 
-    /*INVOKE_VIRTUAL_RANGE(0x74, "invoke-virtual/range", ReferenceType.METHOD, Format.Format3rc),
-    INVOKE_SUPER_RANGE(0x75, "invoke-super/range", ReferenceType.METHOD, Format.Format3rc),
-    INVOKE_DIRECT_RANGE(0x76, "invoke-direct/range", ReferenceType.METHOD, Format.Format3rc),
-    INVOKE_STATIC_RANGE(0x77, "invoke-static/range", ReferenceType.METHOD, Format.Format3rc),
-    INVOKE_INTERFACE_RANGE(0x78, "invoke-interface/range", ReferenceType.METHOD, Format.Format3rc),*/
+    INVOKE_VIRTUAL_RANGE(0x74, "invoke-virtual/range", opcode -> new Format.Format3rc(opcode, ReferenceType.METHOD)),
+    INVOKE_SUPER_RANGE(0x75, "invoke-super/range", opcode -> new Format.Format3rc(opcode, ReferenceType.METHOD)),
+    INVOKE_DIRECT_RANGE(0x76, "invoke-direct/range", opcode -> new Format.Format3rc(opcode, ReferenceType.METHOD)),
+    INVOKE_STATIC_RANGE(0x77, "invoke-static/range", opcode -> new Format.Format3rc(opcode, ReferenceType.METHOD)),
+    INVOKE_INTERFACE_RANGE(0x78, "invoke-interface/range", opcode -> new Format.Format3rc(opcode, ReferenceType.METHOD)),
 
     // 79 - 7a unused
 
@@ -225,14 +225,15 @@ public enum Opcode {
     DIV_DOUBLE_2ADDR(0xce, "div-double/2addr", Format.Format12x::new),
     REM_DOUBLE_2ADDR(0xcf, "rem-double/2addr", Format.Format12x::new),
 
-    /*ADD_INT_LIT16(0xd0, "add-int/lit16", Format.Format22s::new),
-    RSUB_INT(0xd1, "rsub-int", Format.Format22s::new),
-    MUL_INT_LIT16(0xd2, "mul-int/lit16", Format.Format22s::new),
-    DIV_INT_LIT16(0xd3, "div-int/lit16", Format.Format22s::new),
-    REM_INT_LIT16(0xd4, "rem-int/lit16", Format.Format22s::new),
-    AND_INT_LIT16(0xd5, "and-int/lit16", Format.Format22s::new),
-    OR_INT_LIT16(0xd6, "or-int/lit16", Format.Format22s::new),
-    XOR_INT_LIT16(0xd7, "xor-int/lit16", Format.Format22s::new),
+    ADD_INT_LIT16(0xd0, "add-int/lit16", Format.Format22t22s::new),
+    RSUB_INT(0xd1, "rsub-int", Format.Format22t22s::new),
+    MUL_INT_LIT16(0xd2, "mul-int/lit16", Format.Format22t22s::new),
+    DIV_INT_LIT16(0xd3, "div-int/lit16", Format.Format22t22s::new),
+    REM_INT_LIT16(0xd4, "rem-int/lit16", Format.Format22t22s::new),
+    AND_INT_LIT16(0xd5, "and-int/lit16", Format.Format22t22s::new),
+    OR_INT_LIT16(0xd6, "or-int/lit16", Format.Format22t22s::new),
+    XOR_INT_LIT16(0xd7, "xor-int/lit16", Format.Format22t22s::new),
+
     ADD_INT_LIT8(0xd8, "add-int/lit8", Format.Format22b::new),
     RSUB_INT_LIT8(0xd9, "rsub-int/lit8", Format.Format22b::new),
     MUL_INT_LIT8(0xda, "mul-int/lit8", Format.Format22b::new),
@@ -243,14 +244,14 @@ public enum Opcode {
     XOR_INT_LIT8(0xdf, "xor-int/lit8", Format.Format22b::new),
     SHL_INT_LIT8(0xe0, "shl-int/lit8", Format.Format22b::new),
     SHR_INT_LIT8(0xe1, "shr-int/lit8", Format.Format22b::new),
-    USHR_INT_LIT8(0xe2, "ushr-int/lit8", Format.Format22b::new)*/
+    USHR_INT_LIT8(0xe2, "ushr-int/lit8", Format.Format22b::new),
 
     // e3 - f9 unused
 
     INVOKE_POLYMORPHIC(firstApi(0xfa, 26), "invoke-polymorphic", opcode -> new Format.Format45cc(opcode, ReferenceType.METHOD, ReferenceType.PROTO)),
     /*INVOKE_POLYMORPHIC_RANGE(firstArtVersion(0xfb, 87), "invoke-polymorphic/range", ReferenceType.METHOD, ReferenceType.METHOD_PROTO, Format.Format4rcc),*/
     INVOKE_CUSTOM(firstApi(0xfc, 26), "invoke-custom", opcode -> new Format.Format35c(opcode, ReferenceType.CALLSITE)),
-    /*INVOKE_CUSTOM_RANGE(firstArtVersion(0xfd, 111), "invoke-custom/range", ReferenceType.CALL_SITE, Format.Format3rc),*/
+    INVOKE_CUSTOM_RANGE(firstApi(0xfd, 26), "invoke-custom/range", opcode -> new Format.Format3rc(opcode, ReferenceType.CALLSITE)),
     CONST_METHOD_HANDLE(firstApi(0xfe, 28), "const-method-handle", opcode -> new Format.Format21c(opcode, ReferenceType.METHOD_HANDLE)),
     CONST_METHOD_TYPE(firstApi(0xff, 28), "const-method-type", opcode -> new Format.Format21c(opcode, ReferenceType.PROTO)),
 

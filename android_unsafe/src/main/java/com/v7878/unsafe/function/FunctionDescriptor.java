@@ -24,10 +24,26 @@ public class FunctionDescriptor implements Bindable<MethodHandle> {
 
     private final Layout retLayout;
     private final List<Layout> argLayouts;
+    private final boolean has_local_frame;
+
+    private FunctionDescriptor(Layout retLayout, List<Layout> argLayouts,
+                               boolean has_local_frame) {
+        this.retLayout = retLayout;
+        this.argLayouts = argLayouts;
+        this.has_local_frame = has_local_frame;
+    }
 
     private FunctionDescriptor(Layout retLayout, List<Layout> argLayouts) {
         this.retLayout = retLayout;
         this.argLayouts = argLayouts;
+        this.has_local_frame = isLocalFrameNeeded(retLayout, argLayouts);
+    }
+
+    private static boolean isLocalFrameNeeded(Layout retLayout, List<Layout> argLayouts) {
+        if (retLayout instanceof ValueLayout.OfObject) {
+            return true;
+        }
+        return argLayouts.stream().anyMatch(layout -> layout instanceof ValueLayout.OfObject);
     }
 
     public Optional<Layout> returnLayout() {
@@ -46,16 +62,17 @@ public class FunctionDescriptor implements Bindable<MethodHandle> {
         return argLayouts.size();
     }
 
+    public boolean hasLocalFrame() {
+        return has_local_frame;
+    }
+
     private static void checkLayout(Layout value) {
         //TODO
         assert_(value instanceof ValueLayout, IllegalArgumentException::new,
                 "only ValueLayout supported");
         //noinspection ConstantConditions
         assert_(((ValueLayout) value).order() == ByteOrder.nativeOrder(),
-                IllegalArgumentException::new,
-                "only native order supported");
-        assert_(!(value instanceof ValueLayout.OfObject), IllegalArgumentException::new,
-                "OfObject isn`t supported");
+                IllegalArgumentException::new, "only native order supported");
     }
 
     private static FunctionDescriptor ofAny(Layout retLayout, Layout... argLayouts) {
@@ -106,6 +123,13 @@ public class FunctionDescriptor implements Bindable<MethodHandle> {
         return new FunctionDescriptor(null, argLayouts);
     }
 
+    public FunctionDescriptor withLocalFrame() {
+        if (has_local_frame) {
+            return this;
+        }
+        return new FunctionDescriptor(retLayout, argLayouts, true);
+    }
+
     @Override
     public MethodHandle bind(Addressable symbol) {
         return Linker.downcallHandle(symbol, this);
@@ -113,7 +137,8 @@ public class FunctionDescriptor implements Bindable<MethodHandle> {
 
     @Override
     public String toString() {
-        return String.format("(%s)%s",
+        return String.format("%s(%s)%s",
+                has_local_frame ? '+' : '-',
                 argLayouts.stream()
                         .map(Object::toString)
                         .collect(Collectors.joining()),
@@ -129,12 +154,13 @@ public class FunctionDescriptor implements Bindable<MethodHandle> {
             return false;
         }
         FunctionDescriptor otherDescriptor = (FunctionDescriptor) other;
-        return Objects.equals(retLayout, otherDescriptor.retLayout)
+        return has_local_frame == otherDescriptor.has_local_frame
+                && Objects.equals(retLayout, otherDescriptor.retLayout)
                 && Objects.equals(argLayouts, otherDescriptor.argLayouts);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(argLayouts, retLayout);
+        return Objects.hash(argLayouts, retLayout, has_local_frame);
     }
 }

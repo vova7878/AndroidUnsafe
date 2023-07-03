@@ -24,6 +24,10 @@ public class SunUnsafe {
         return unsafe;
     }
 
+    public static Class<?> getUnsafeClass() {
+        return Unsafe.class;
+    }
+
     public static long objectFieldOffset(Field field) {
         return unsafe.objectFieldOffset(field);
     }

@@ -179,16 +179,19 @@ public class Linker {
                             AnnotationItem.CriticalNative()
                     ), null, null
             ));
+            MethodId helper_id = new MethodId(TypeId.of(AndroidUnsafe7.class), new ProtoId(
+                    TypeId.of(Object.class), word_id), "refToObjectHelper");
             clazz.getClassData().getDirectMethods().add(new EncodedMethod(fid,
                     Modifier.STATIC).withCode(2, b -> b
                     .invoke_range(STATIC, rfid, proto.getInputRegistersCount(), b.p(0))
                     .if_(IS64BIT,
-                            ignored -> b.move_result_wide(b.l(0)),
-                            ignored -> b.move_result(b.l(0)) //TODO: int-to-long
+                            ignored -> b
+                                    .move_result_wide(b.l(0))
+                                    .invoke(STATIC, helper_id, b.l(0), b.l(1)),
+                            ignored -> b
+                                    .move_result(b.l(0))
+                                    .invoke(STATIC, helper_id, b.l(0))
                     )
-                    .invoke(STATIC, new MethodId(TypeId.of(AndroidUnsafe7.class), new ProtoId(
-                                    TypeId.of(Object.class), TypeId.J), "refToObjectHelper"),
-                            b.l(0), b.l(1))
                     .move_result_object(b.l(0))
                     .return_object(b.l(0))
             ));

@@ -312,9 +312,9 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         setExecutableData(searchMethod(methods, IS64BIT ? "putRef64" : "putRef32",
                 Object.class, long.class, word), getExecutableData(put));
 
-        // make helper public
+        // make right helper public
         replaceExecutableAccessModifier(getDeclaredMethod(AndroidUnsafe7.class,
-                "refToObjectHelper", long.class), AccessModifier.PUBLIC);
+                "refToObjectHelper", word), AccessModifier.PUBLIC);
 
         return (LocalRefUtils) allocateInstance(utils);
     });
@@ -374,12 +374,14 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
     @Keep
     private static Object refToObjectHelper(long ref) {
         Object[] arr = new Object[1];
-        final long offset = ARRAY_OBJECT_BASE_OFFSET;
-        if (IS64BIT) {
-            localRefUtils.get().putRef64(arr, offset, ref);
-        } else {
-            localRefUtils.get().putRef32(arr, offset, (int) ref);
-        }
+        localRefUtils.get().putRef64(arr, ARRAY_OBJECT_BASE_OFFSET, ref);
+        return arr[0];
+    }
+
+    @Keep
+    private static Object refToObjectHelper(int ref) {
+        Object[] arr = new Object[1];
+        localRefUtils.get().putRef32(arr, ARRAY_OBJECT_BASE_OFFSET, ref);
         return arr[0];
     }
 

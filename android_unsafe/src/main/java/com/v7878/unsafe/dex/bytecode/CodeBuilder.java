@@ -14,6 +14,7 @@ import com.v7878.unsafe.dex.bytecode.Format.Format10t;
 import com.v7878.unsafe.dex.bytecode.Format.Format10x;
 import com.v7878.unsafe.dex.bytecode.Format.Format11n;
 import com.v7878.unsafe.dex.bytecode.Format.Format11x;
+import com.v7878.unsafe.dex.bytecode.Format.Format12x;
 import com.v7878.unsafe.dex.bytecode.Format.Format21c;
 import com.v7878.unsafe.dex.bytecode.Format.Format21t21s;
 import com.v7878.unsafe.dex.bytecode.Format.Format22c;
@@ -472,6 +473,53 @@ public final class CodeBuilder {
         check_reg_range(first_arg_reg, 16, arg_count, 8);
         add(kind.range.<Format3rc>format().make(arg_count, method, first_arg_reg));
         add_outs(arg_count);
+        return this;
+    }
+
+    public enum UnOp {
+        NEG_INT(Opcode.NEG_INT, false, false),
+        NOT_INT(Opcode.NOT_INT, false, false),
+        NEG_LONG(Opcode.NEG_LONG, true, true),
+        NOT_LONG(Opcode.NOT_LONG, true, true),
+        NEG_FLOAT(Opcode.NEG_FLOAT, false, false),
+        NEG_DOUBLE(Opcode.NEG_DOUBLE, true, true),
+
+        INT_TO_LONG(Opcode.INT_TO_LONG, false, true),
+        INT_TO_FLOAT(Opcode.INT_TO_FLOAT, false, false),
+        INT_TO_DOUBLE(Opcode.INT_TO_DOUBLE, false, true),
+
+        LONG_TO_INT(Opcode.LONG_TO_INT, true, false),
+        LONG_TO_FLOAT(Opcode.LONG_TO_FLOAT, true, false),
+        LONG_TO_DOUBLE(Opcode.LONG_TO_DOUBLE, true, true),
+
+        FLOAT_TO_INT(Opcode.FLOAT_TO_INT, false, false),
+        FLOAT_TO_LONG(Opcode.FLOAT_TO_LONG, false, true),
+        FLOAT_TO_DOUBLE(Opcode.FLOAT_TO_DOUBLE, false, true),
+
+        DOUBLE_TO_INT(Opcode.DOUBLE_TO_INT, true, false),
+        DOUBLE_TO_LONG(Opcode.DOUBLE_TO_LONG, true, true),
+        DOUBLE_TO_DOUBLE(Opcode.DOUBLE_TO_FLOAT, true, false),
+
+        INT_TO_BYTE(Opcode.INT_TO_BYTE, false, false),
+        INT_TO_CHAR(Opcode.INT_TO_CHAR, false, false),
+        INT_TO_SHORT(Opcode.INT_TO_SHORT, false, false);
+
+        private final Opcode opcode;
+        private final boolean isDstWide, isSrcWide;
+
+        UnOp(Opcode opcode, boolean isDstWide, boolean isSrcWide) {
+            this.opcode = opcode;
+            this.isDstWide = isDstWide;
+            this.isSrcWide = isSrcWide;
+        }
+    }
+
+    public CodeBuilder unop(UnOp op, int dsr_reg, int src_reg) {
+        add(op.opcode.<Format12x>format().make(
+                op.isDstWide ? check_reg_pair(dsr_reg, 4)
+                        : check_reg(dsr_reg, 4),
+                op.isSrcWide ? check_reg_pair(src_reg, 4)
+                        : check_reg(src_reg, 4)));
         return this;
     }
 

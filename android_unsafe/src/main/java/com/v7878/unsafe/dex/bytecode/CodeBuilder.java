@@ -116,6 +116,10 @@ public final class CodeBuilder {
         return check_reg(reg_pair, width);
     }
 
+    private int check_reg_or_pair(int reg_or_pair, int width, boolean isPair) {
+        return isPair ? check_reg_pair(reg_or_pair, width) : check_reg(reg_or_pair, width);
+    }
+
     private int check_reg_range(int first_reg, int reg_width, int count, int count_width) {
         Checks.checkRange(count, 0, 1 << count_width);
         if (count > 0) {
@@ -368,24 +372,21 @@ public final class CodeBuilder {
 
     public CodeBuilder iop(Op op, int value_reg_or_pair, int array_reg, int index_reg) {
         add(op.aop.<Format23x>format().make(
-                op.isWide ? check_reg_pair(value_reg_or_pair, 8)
-                        : check_reg(value_reg_or_pair, 8),
+                check_reg_or_pair(value_reg_or_pair, 8, op.isWide),
                 check_reg(array_reg, 8), check_reg(index_reg, 8)));
         return this;
     }
 
     public CodeBuilder iop(Op op, int value_reg_or_pair, int object_reg, FieldId instance_field) {
         add(op.iop.<Format22c>format().make(
-                op.isWide ? check_reg_pair(value_reg_or_pair, 4)
-                        : check_reg(value_reg_or_pair, 4),
+                check_reg_or_pair(value_reg_or_pair, 4, op.isWide),
                 check_reg(object_reg, 4), instance_field));
         return this;
     }
 
     public CodeBuilder sop(Op op, int value_reg_or_pair, FieldId static_field) {
         add(op.sop.<Format21c>format().make(
-                op.isWide ? check_reg_pair(value_reg_or_pair, 8)
-                        : check_reg(value_reg_or_pair, 8), static_field));
+                check_reg_or_pair(value_reg_or_pair, 8, op.isWide), static_field));
         return this;
     }
 
@@ -514,12 +515,10 @@ public final class CodeBuilder {
         }
     }
 
-    public CodeBuilder unop(UnOp op, int dsr_reg, int src_reg) {
+    public CodeBuilder unop(UnOp op, int dsr_reg_or_pair, int src_reg_or_pair) {
         add(op.opcode.<Format12x>format().make(
-                op.isDstWide ? check_reg_pair(dsr_reg, 4)
-                        : check_reg(dsr_reg, 4),
-                op.isSrcWide ? check_reg_pair(src_reg, 4)
-                        : check_reg(src_reg, 4)));
+                check_reg_or_pair(dsr_reg_or_pair, 4, op.isDstWide),
+                check_reg_or_pair(src_reg_or_pair, 4, op.isSrcWide)));
         return this;
     }
 

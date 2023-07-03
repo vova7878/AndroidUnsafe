@@ -62,6 +62,10 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     private static final Supplier<MethodHandle> addressOf =
             runOnce(() -> unreflectDirect(getDeclaredMethod(vmruntime.get().getClass(),
                     "addressOf", Object.class)));
+    private static final Supplier<MethodHandle> vmLibrary =
+            runOnce(() -> unreflectDirect(getDeclaredMethod(vmruntime.get().getClass(),
+                    "vmLibrary")));
+
     private static final Supplier<MethodHandle> internalClone =
             runOnce(() -> unreflectDirect(getDeclaredMethod(Object.class, "internalClone")));
 
@@ -72,6 +76,10 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
                 "ARRAY_INT_BASE_OFFSET must be equal to 12");
         assert_(OBJECT_INSTANCE_SIZE == 8, RuntimeException::new,
                 "OBJECT_SIZE must be equal to 8");
+    }
+
+    public static String vmLibrary() {
+        return (String) nothrows_run(() -> vmLibrary.get().invoke(vmruntime.get()));
     }
 
     public static Field getShadowKlassField() {

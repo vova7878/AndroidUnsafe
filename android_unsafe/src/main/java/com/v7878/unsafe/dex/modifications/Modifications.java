@@ -20,6 +20,7 @@ import com.v7878.unsafe.memory.Pointer;
 
 import dalvik.system.DexFile;
 
+@SuppressWarnings("deprecation")
 public class Modifications {
 
     public static Dex readDex(Class<?>... classes) {
@@ -60,7 +61,6 @@ public class Modifications {
         Dex dex = readDex(clazz);
         dex.collectData(data);
         byte[] bytes = dex.compile();
-        //noinspection deprecation
         DexFile df = openDexFile(bytes);
         setTrusted(df);
         return loadClass(df, clazz.getName(), loader);

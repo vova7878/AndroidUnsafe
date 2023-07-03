@@ -28,6 +28,7 @@ import java.util.function.Supplier;
 import dalvik.system.DexFile;
 
 @DangerLevel(7)
+@SuppressWarnings("deprecation")
 public class AndroidUnsafe7 extends AndroidUnsafe6 {
     public enum ClassStatus {
         NotReady,  // Zero-initialized Class object starts in this state.
@@ -284,7 +285,6 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                 new AnnotationSet(AnnotationItem.FastNative()), null, null
         ));
 
-        //noinspection deprecation
         DexFile dex = openDexFile(new Dex(clazz).compile());
         Class<?> utils = loadClass(dex, name, AndroidUnsafe7.class.getClassLoader());
         setClassStatus(utils, ClassStatus.Verified);

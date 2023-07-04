@@ -552,6 +552,71 @@ public final class CodeBuilder {
         return this;
     }
 
+    public enum RawBinOp {
+        ADD_INT(Opcode.ADD_INT, Opcode.ADD_INT_2ADDR, false, false),
+        SUB_INT(Opcode.SUB_INT, Opcode.SUB_INT_2ADDR, false, false),
+        MUL_INT(Opcode.MUL_INT, Opcode.MUL_INT_2ADDR, false, false),
+        DIV_INT(Opcode.DIV_INT, Opcode.DIV_INT_2ADDR, false, false),
+        REM_INT(Opcode.REM_INT, Opcode.REM_INT_2ADDR, false, false),
+        AND_INT(Opcode.AND_INT, Opcode.AND_INT_2ADDR, false, false),
+        OR_INT(Opcode.OR_INT, Opcode.OR_INT_2ADDR, false, false),
+        XOR_INT(Opcode.XOR_INT, Opcode.XOR_INT_2ADDR, false, false),
+        SHL_INT(Opcode.SHL_INT, Opcode.SHL_INT_2ADDR, false, false),
+        SHR_INT(Opcode.SHR_INT, Opcode.SHR_INT_2ADDR, false, false),
+        USHR_INT(Opcode.USHR_INT, Opcode.USHR_INT_2ADDR, false, false),
+
+        ADD_LONG(Opcode.ADD_LONG, Opcode.ADD_LONG_2ADDR, true, true),
+        SUB_LONG(Opcode.SUB_LONG, Opcode.SUB_LONG_2ADDR, true, true),
+        MUL_LONG(Opcode.MUL_LONG, Opcode.MUL_LONG_2ADDR, true, true),
+        DIV_LONG(Opcode.DIV_LONG, Opcode.DIV_LONG_2ADDR, true, true),
+        REM_LONG(Opcode.REM_LONG, Opcode.REM_LONG_2ADDR, true, true),
+        AND_LONG(Opcode.AND_LONG, Opcode.AND_LONG_2ADDR, true, true),
+        OR_LONG(Opcode.OR_LONG, Opcode.OR_LONG_2ADDR, true, true),
+        XOR_LONG(Opcode.XOR_LONG, Opcode.XOR_LONG_2ADDR, true, true),
+        SHL_LONG(Opcode.SHL_LONG, Opcode.SHL_LONG_2ADDR, true, false),
+        SHR_LONG(Opcode.SHR_LONG, Opcode.SHR_LONG_2ADDR, true, false),
+        USHR_LONG(Opcode.USHR_LONG, Opcode.USHR_LONG_2ADDR, true, false),
+
+        ADD_FLOAT(Opcode.ADD_FLOAT, Opcode.ADD_FLOAT_2ADDR, false, false),
+        SUB_FLOAT(Opcode.SUB_FLOAT, Opcode.SUB_FLOAT_2ADDR, false, false),
+        MUL_FLOAT(Opcode.MUL_FLOAT, Opcode.MUL_FLOAT_2ADDR, false, false),
+        DIV_FLOAT(Opcode.DIV_FLOAT, Opcode.DIV_FLOAT_2ADDR, false, false),
+        REM_FLOAT(Opcode.REM_FLOAT, Opcode.REM_FLOAT_2ADDR, false, false),
+
+        ADD_DOUBLE(Opcode.ADD_DOUBLE, Opcode.ADD_DOUBLE_2ADDR, true, true),
+        SUB_DOUBLE(Opcode.SUB_DOUBLE, Opcode.SUB_DOUBLE_2ADDR, true, true),
+        MUL_DOUBLE(Opcode.MUL_DOUBLE, Opcode.MUL_DOUBLE_2ADDR, true, true),
+        DIV_DOUBLE(Opcode.DIV_DOUBLE, Opcode.DIV_DOUBLE_2ADDR, true, true),
+        REM_DOUBLE(Opcode.REM_DOUBLE, Opcode.REM_DOUBLE_2ADDR, true, true);
+
+        private final Opcode regular, _2addr;
+        private final boolean isDstAndSrc1Wide, isSrc2Wide;
+
+        RawBinOp(Opcode regular, Opcode _2addr, boolean isDstAndSrc1Wide, boolean isSrc2Wide) {
+            this.regular = regular;
+            this._2addr = _2addr;
+            this.isDstAndSrc1Wide = isDstAndSrc1Wide;
+            this.isSrc2Wide = isSrc2Wide;
+        }
+    }
+
+    public CodeBuilder raw_binop(RawBinOp op, int dsr_reg_or_pair,
+                                 int first_src_reg_or_pair, int second_src_reg_or_pair) {
+        add(op.regular.<Format23x>format().make(
+                check_reg_or_pair(dsr_reg_or_pair, 8, op.isDstAndSrc1Wide),
+                check_reg_or_pair(first_src_reg_or_pair, 8, op.isDstAndSrc1Wide),
+                check_reg_or_pair(second_src_reg_or_pair, 8, op.isSrc2Wide)));
+        return this;
+    }
+
+    public CodeBuilder raw_binop_2addr(RawBinOp op, int dst_and_first_src_reg_or_pair,
+                                       int second_src_reg_or_pair) {
+        add(op.regular.<Format12x>format().make(
+                check_reg_or_pair(dst_and_first_src_reg_or_pair, 4, op.isDstAndSrc1Wide),
+                check_reg_or_pair(second_src_reg_or_pair, 4, op.isDstAndSrc1Wide)));
+        return this;
+    }
+
     public CodeBuilder invoke_polymorphic(MethodId method, ProtoId proto, int arg_count, int arg_reg1,
                                           int arg_reg2, int arg_reg3, int arg_reg4, int arg_reg5) {
         format_35c_checks(arg_count, arg_reg1, arg_reg2, arg_reg3, arg_reg4, arg_reg5);

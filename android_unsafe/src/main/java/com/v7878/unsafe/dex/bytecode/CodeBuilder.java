@@ -507,7 +507,7 @@ public final class CodeBuilder {
         return this;
     }
 
-    public enum UnOp {
+    public enum RawUnOp {
         NEG_INT(Opcode.NEG_INT, false, false),
         NOT_INT(Opcode.NOT_INT, false, false),
         NEG_LONG(Opcode.NEG_LONG, true, true),
@@ -538,14 +538,14 @@ public final class CodeBuilder {
         private final Opcode opcode;
         private final boolean isDstWide, isSrcWide;
 
-        UnOp(Opcode opcode, boolean isDstWide, boolean isSrcWide) {
+        RawUnOp(Opcode opcode, boolean isDstWide, boolean isSrcWide) {
             this.opcode = opcode;
             this.isDstWide = isDstWide;
             this.isSrcWide = isSrcWide;
         }
     }
 
-    public CodeBuilder unop(UnOp op, int dsr_reg_or_pair, int src_reg_or_pair) {
+    public CodeBuilder raw_unop(RawUnOp op, int dsr_reg_or_pair, int src_reg_or_pair) {
         add(op.opcode.<Format12x>format().make(
                 check_reg_or_pair(dsr_reg_or_pair, 4, op.isDstWide),
                 check_reg_or_pair(src_reg_or_pair, 4, op.isSrcWide)));

@@ -329,6 +329,21 @@ public final class CodeBuilder {
         return if_test(test, first_reg_to_test, second_reg_to_test, (Object) label);
     }
 
+    public CodeBuilder if_test_else(Test test, int first_reg_to_test, int second_reg_to_test,
+                                    Consumer<CodeBuilder> true_branch, Consumer<CodeBuilder> false_branch) {
+        InternalLabel true_ = new InternalLabel();
+        InternalLabel end = new InternalLabel();
+
+        if_test(test, first_reg_to_test, second_reg_to_test, true_);
+        false_branch.accept(this);
+        goto_32(end);
+        putLabel(true_);
+        true_branch.accept(this);
+        putLabel(end);
+
+        return this;
+    }
+
     private CodeBuilder if_testz(Test test, int reg_to_test, Object label) {
         int start_unit = current_unit;
         add(test.testz.<Format21t21s>format(), format -> {
@@ -341,6 +356,21 @@ public final class CodeBuilder {
 
     public CodeBuilder if_testz(Test test, int reg_to_test, String label) {
         return if_testz(test, reg_to_test, (Object) label);
+    }
+
+    public CodeBuilder if_testz_else(Test test, int reg_to_test, Consumer<CodeBuilder> true_branch,
+                                     Consumer<CodeBuilder> false_branch) {
+        InternalLabel true_ = new InternalLabel();
+        InternalLabel end = new InternalLabel();
+
+        if_testz(test, reg_to_test, true_);
+        false_branch.accept(this);
+        goto_32(end);
+        putLabel(true_);
+        true_branch.accept(this);
+        putLabel(end);
+
+        return this;
     }
 
     public enum Op {

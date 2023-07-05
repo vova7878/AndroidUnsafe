@@ -16,7 +16,6 @@ import com.v7878.unsafe.dex.EncodedMethod;
 import com.v7878.unsafe.dex.MethodId;
 import com.v7878.unsafe.dex.ProtoId;
 import com.v7878.unsafe.dex.TypeId;
-import com.v7878.unsafe.function.LibArt;
 import com.v7878.unsafe.function.SymbolLookup;
 import com.v7878.unsafe.memory.Pointer;
 import com.v7878.unsafe.memory.Word;
@@ -291,7 +290,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
 
         Method[] methods = getDeclaredMethods(utils);
 
-        try (SymbolLookup art = LibArt.open()) {
+        try (SymbolLookup art = SymbolLookup.defaultLookup()) {
             Pointer nlr = art.lookup("_ZN3art9JNIEnvExt11NewLocalRefEPNS_6mirror6ObjectE");
             setExecutableData(searchMethod(methods, "NewLocalRef", word, word), nlr);
 

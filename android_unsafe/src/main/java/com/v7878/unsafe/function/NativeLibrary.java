@@ -105,6 +105,7 @@ public class NativeLibrary implements SymbolLookup {
                     FunctionDescriptor.of(ADDRESS)));
 
     static String dlerror() {
+        //TODO: free?
         Pointer msg = (Pointer) nothrows_run(() -> dlerror.get().invoke());
         return msg.isNull() ? null : msg.getCString();
     }
@@ -191,11 +192,11 @@ public class NativeLibrary implements SymbolLookup {
     });
 
     public static String findLibraryPath(ClassLoader loader, String name) {
-        if (loader != null) {
-            String tmp = (String) nothrows_run(() -> findLibrary.get().invoke(loader, name));
-            if (tmp != null) {
-                return tmp;
-            }
+        Objects.requireNonNull(loader);
+        Objects.requireNonNull(name);
+        String tmp = (String) nothrows_run(() -> findLibrary.get().invoke(loader, name));
+        if (tmp != null) {
+            return tmp;
         }
         String map_name = System.mapLibraryName(name);
         for (String path : systemLibPaths.get()) {
@@ -225,6 +226,7 @@ public class NativeLibrary implements SymbolLookup {
         return new NativeLibrary(tmp, path);
     }
 
+    //TODO: android_dlopen_ext with right namespace
     public static NativeLibrary loadLibrary(ClassLoader loader, String name) {
         if (name.indexOf(File.separatorChar) != -1) {
             throw new IllegalArgumentException(

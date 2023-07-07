@@ -394,25 +394,21 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
         ClassDef clazz = new ClassDef(id);
         clazz.setSuperClass(TypeId.of(Object.class));
         clazz.setAccessFlags(Modifier.PUBLIC | Modifier.FINAL);
-        clazz.getClassData().getDirectMethods().add(
-                new EncodedMethod(
-                        new MethodId(id, new ProtoId(TypeId.of(word)), "NewGlobalRef"),
-                        Modifier.PRIVATE | Modifier.NATIVE,
-                        new AnnotationSet(
-                                AnnotationItem.FastNative()
-                        ), null, null
-                )
-        );
-        clazz.getClassData().getDirectMethods().add(
-                new EncodedMethod(
-                        new MethodId(id, new ProtoId(TypeId.V, TypeId.of(word),
-                                TypeId.of(word)), "DeleteGlobalRef"),
-                        Modifier.PRIVATE | Modifier.STATIC | Modifier.NATIVE,
-                        new AnnotationSet(
-                                AnnotationItem.CriticalNative()
-                        ), null, null
-                )
-        );
+        clazz.getClassData().getDirectMethods().add(new EncodedMethod(
+                new MethodId(id, new ProtoId(TypeId.of(word)), "NewGlobalRef"),
+                Modifier.PRIVATE | Modifier.NATIVE,
+                new AnnotationSet(
+                        AnnotationItem.FastNative()
+                ), null, null
+        ));
+        clazz.getClassData().getDirectMethods().add(new EncodedMethod(
+                new MethodId(id, new ProtoId(TypeId.V, TypeId.of(word),
+                        TypeId.of(word)), "DeleteGlobalRef"),
+                Modifier.PRIVATE | Modifier.STATIC | Modifier.NATIVE,
+                new AnnotationSet(
+                        AnnotationItem.CriticalNative()
+                ), null, null
+        ));
         DexFile dex = openDexFile(new Dex(clazz).compile());
         return loadClass(dex, name, AndroidUnsafe6.class.getClassLoader());
     });

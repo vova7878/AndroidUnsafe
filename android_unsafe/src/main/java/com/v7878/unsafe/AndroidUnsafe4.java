@@ -226,7 +226,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return roundUp(sizeOf(obj), OBJECT_ALIGNMENT);
     }
 
-    @DangerLevel(5)
+    @DangerLevel(DangerLevel.BAD_GC_COLLISION)
     @SuppressWarnings("unchecked")
     public static <T> T cloneBySize(T obj, boolean nonmovable) {
         int size = sizeOf(obj);
@@ -235,16 +235,17 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return (T) out;
     }
 
-    @DangerLevel(5)
+    @DangerLevel(DangerLevel.BAD_GC_COLLISION)
     public static <T> T cloneBySize(T obj) {
         return cloneBySize(obj, false);
     }
 
-    @DangerLevel(5)
+    @DangerLevel(DangerLevel.BAD_GC_COLLISION)
     public static <T> T cloneNonMovable(T obj) {
         return cloneBySize(obj, true);
     }
 
+    @DangerLevel(DangerLevel.POTENTIAL_GC_COLLISION)
     public static byte[] dumpObject(Object obj) {
         if (obj == null) {
             return null;
@@ -255,7 +256,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return out;
     }
 
-    @DangerLevel(DangerLevel.VERY_CAREFUL)
+    @DangerLevel(DangerLevel.BAD_GC_COLLISION)
     public static Object makeObject(byte[] dump, boolean nonmovable) {
         if (dump == null) {
             return null;
@@ -266,36 +267,36 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         return out;
     }
 
-    @DangerLevel(DangerLevel.VERY_CAREFUL)
+    @DangerLevel(DangerLevel.BAD_GC_COLLISION)
     public static Object makeObject(byte[] dump) {
         return makeObject(dump, false);
     }
 
-    @DangerLevel(DangerLevel.VERY_CAREFUL)
+    @DangerLevel(DangerLevel.BAD_GC_COLLISION)
     public static Object makeNonMovableObject(byte[] dump) {
         return makeObject(dump, true);
     }
 
-    @DangerLevel(DangerLevel.VERY_CAREFUL)
+    @DangerLevel(DangerLevel.POTENTIAL_GC_COLLISION)
     public static int rawObjectToInt(Object obj) {
         Object[] arr = new Object[1];
         arr[0] = obj;
         return getInt(arr, ARRAY_OBJECT_BASE_OFFSET);
     }
 
-    @DangerLevel(DangerLevel.VERY_CAREFUL)
+    @DangerLevel(DangerLevel.POTENTIAL_GC_COLLISION)
     public static void putObjectRaw(long address, Object value) {
         putIntN(address, rawObjectToInt(value));
     }
 
-    @DangerLevel(DangerLevel.VERY_CAREFUL)
+    @DangerLevel(DangerLevel.GC_COLLISION_MOVABLE_OBJECTS)
     public static Object rawIntToObject(int obj) {
         int[] arr = new int[1];
         arr[0] = obj;
         return getObject(arr, ARRAY_INT_BASE_OFFSET);
     }
 
-    @DangerLevel(DangerLevel.VERY_CAREFUL)
+    @DangerLevel(DangerLevel.GC_COLLISION_MOVABLE_OBJECTS)
     public static Object getObjectRaw(long address) {
         return rawIntToObject(getIntN(address));
     }
@@ -315,13 +316,13 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
         }
     });
 
-    @DangerLevel(DangerLevel.MAX)
+    @DangerLevel(DangerLevel.POTENTIAL_GC_COLLISION)
     public static int objectToInt(Object obj) {
         int out = rawObjectToInt(obj);
         return kPoisonReferences.get() ? -out : out;
     }
 
-    @DangerLevel(DangerLevel.MAX)
+    @DangerLevel(DangerLevel.GC_COLLISION_MOVABLE_OBJECTS)
     public static Object intToObject(int obj) {
         return rawIntToObject(kPoisonReferences.get() ? -obj : obj);
     }

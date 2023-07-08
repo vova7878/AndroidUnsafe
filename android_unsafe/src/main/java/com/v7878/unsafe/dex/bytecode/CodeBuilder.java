@@ -400,7 +400,7 @@ public final class CodeBuilder {
         }
     }
 
-    public CodeBuilder iop(Op op, int value_reg_or_pair, int array_reg, int index_reg) {
+    public CodeBuilder aop(Op op, int value_reg_or_pair, int array_reg, int index_reg) {
         add(op.aop.<Format23x>format().make(
                 check_reg_or_pair(value_reg_or_pair, 8, op.isWide),
                 check_reg(array_reg, 8), check_reg(index_reg, 8)));

@@ -56,6 +56,13 @@ class InstructionWriter {
         out.writeShort((arg << 8) | opcode);
     }
 
+    private static void write_base(RandomOutput out, int payload_opcode) {
+        if (payload_opcode >>> 16 != 0) {
+            throw new IllegalStateException("illegal payload_opcode: " + payload_opcode);
+        }
+        out.writeShort(payload_opcode);
+    }
+
     public static void write_10x(RandomOutput out, int opcode) {
         write_base(out, opcode, 0);
     }
@@ -191,6 +198,23 @@ class InstructionWriter {
         out.writeShort(HHHH);
     }
 
+    public static void write_array_payload(RandomOutput out, int opcode,
+                                           int element_width, byte[] data) {
+        if (!(element_width == 1 || element_width == 2 || element_width == 4 || element_width == 8)) {
+            throw new IllegalStateException("unsupported element_width: " + element_width);
+        }
+        if (data.length % element_width != 0) {
+            throw new IllegalStateException("data.length is not multiple of element_width: " + data.length);
+        }
+        //TODO
+        //out.requireAlignment(PAYLOAD_ALIGNMENT);
+        write_base(out, opcode);
+        out.writeShort(element_width);
+        out.writeInt(data.length / element_width);
+        out.writeByteArray(data);
+        out.alignPositionAndFillZeros(2); // unit size
+    }
+
     /*
     public static void write_20t(RandomOutput out, int opcode, int sAAAA) {
         sAAAA = check_signed(sAAAA, 16);
@@ -219,12 +243,6 @@ class InstructionWriter {
         out.writeShort((int) ((BBBBBBBBBBBBBBBB >>> 16) & 0xffff));
         out.writeShort((int) ((BBBBBBBBBBBBBBBB >>> 32) & 0xffff));
         out.writeShort((int) (BBBBBBBBBBBBBBBB >>> 48));
-    }
-
-    public static void write_fill_array_data_payload(RandomOutput out,
-                                                     int opcode, int element_width, byte[] data) {
-        //TODO
-        throw new UnsupportedOperationException("Not supported yet.");
     }
     */
 }

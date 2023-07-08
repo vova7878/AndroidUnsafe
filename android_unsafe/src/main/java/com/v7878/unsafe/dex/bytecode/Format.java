@@ -6,9 +6,12 @@ import com.v7878.unsafe.dex.WriteContext;
 import com.v7878.unsafe.io.RandomInput;
 import com.v7878.unsafe.io.RandomOutput;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public abstract class Format {
+    public static final int PAYLOAD_ALIGNMENT = 4;
+
     protected final Opcode opcode;
     private final int units;
     private final boolean payload;
@@ -1257,6 +1260,90 @@ public abstract class Format {
 
         public Instruction make(int A, Object cBBBB, int C, int D, int E, int F, int G, Object cHHHH) {
             return new Instance(A, cBBBB, C, D, E, F, G, cHHHH);
+        }
+    }
+
+    public static class ArrayPayload extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int element_width;
+            public final byte[] data;
+
+            Instance(int element_width, byte[] data) {
+                this.element_width = element_width;
+                this.data = data.clone();
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_array_payload(out,
+                        opcode().opcodeValue(context.getOptions()),
+                        element_width, data);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public int units() {
+                return (data.length + 1) / 2 + 4;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + element_width + " " + Arrays.toString(data);
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && element_width == iobj.element_width
+                            && Arrays.equals(data, iobj.data);
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), element_width, Arrays.hashCode(data));
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(element_width, data);
+            }
+        }
+
+        ArrayPayload(Opcode opcode) {
+            super(opcode, -1, true);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int _00) {
+            //TODO: checks
+            //in.requireAlignment(PAYLOAD_ALIGNMENT);
+            int element_width = in.readUnsignedShort();
+            if (!(element_width == 1 || element_width == 2 || element_width == 4 || element_width == 8)) {
+                throw new IllegalStateException("unsupported element_width: " + element_width);
+            }
+            int size = in.readInt();
+            if (size < 0) {
+                throw new IllegalStateException("negative size: " + size);
+            }
+            byte[] data = in.readByteArray(size * element_width);
+            if ((size & 1) != 0) {
+                in.readByte(); // padding
+            }
+            return make(element_width, data);
+        }
+
+        public Instruction make(int element_width, byte[] data) {
+            return new Instance(element_width, data);
         }
     }
 }

@@ -35,6 +35,7 @@ public enum Opcode {
     CONST_WIDE(0x18, "const-wide", Format.Format51l::new),
     CONST_WIDE_HIGH16(0x19, "const-wide/high16", Format.Format21lh::new),
     CONST_STRING(0x1a, "const-string", opcode -> new Format.Format21c(opcode, ReferenceType.STRING)),
+    //TODO
     /*CONST_STRING_JUMBO(0x1b, "const-string/jumbo", ReferenceType.STRING, Format.Format31c::new),*/
     CONST_CLASS(0x1c, "const-class", opcode -> new Format.Format21c(opcode, ReferenceType.TYPE)),
     MONITOR_ENTER(0x1d, "monitor-enter", Format.Format11x::new),
@@ -249,15 +250,18 @@ public enum Opcode {
     // e3 - f9 unused
 
     INVOKE_POLYMORPHIC(firstApi(0xfa, 26), "invoke-polymorphic", opcode -> new Format.Format45cc(opcode, ReferenceType.METHOD, ReferenceType.PROTO)),
+    //TODO
     /*INVOKE_POLYMORPHIC_RANGE(firstArtVersion(0xfb, 87), "invoke-polymorphic/range", ReferenceType.METHOD, ReferenceType.METHOD_PROTO, Format.Format4rcc),*/
     INVOKE_CUSTOM(firstApi(0xfc, 26), "invoke-custom", opcode -> new Format.Format35c(opcode, ReferenceType.CALLSITE)),
     INVOKE_CUSTOM_RANGE(firstApi(0xfd, 26), "invoke-custom/range", opcode -> new Format.Format3rc(opcode, ReferenceType.CALLSITE)),
     CONST_METHOD_HANDLE(firstApi(0xfe, 28), "const-method-handle", opcode -> new Format.Format21c(opcode, ReferenceType.METHOD_HANDLE)),
     CONST_METHOD_TYPE(firstApi(0xff, 28), "const-method-type", opcode -> new Format.Format21c(opcode, ReferenceType.PROTO)),
 
+    //TODO
     /*PACKED_SWITCH_PAYLOAD(0x100, "packed-switch-payload", ReferenceType.NONE, Format.PackedSwitchPayload, 0),
     SPARSE_SWITCH_PAYLOAD(0x200, "sparse-switch-payload", ReferenceType.NONE, Format.SparseSwitchPayload, 0),*/
     ARRAY_PAYLOAD(0x300, "array-payload", Format.ArrayPayload::new);
+    //TODO: odex opcodes
 
     private static final int ODEX_ONLY = 1;
 

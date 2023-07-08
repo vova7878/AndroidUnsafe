@@ -109,6 +109,20 @@ class InstructionWriter {
         out.writeShort(sBBBB);
     }
 
+    public static void write_21ih(RandomOutput out, int opcode, int AA, int BBBB0000) {
+        AA = check_unsigned(AA, 8);
+        int BBBB = check_hat32(BBBB0000, 16);
+        write_base(out, opcode, AA);
+        out.writeShort(BBBB);
+    }
+
+    public static void write_21lh(RandomOutput out, int opcode, int AA, long BBBB000000000000) {
+        AA = check_unsigned(AA, 8);
+        int BBBB = (int) check_hat64(BBBB000000000000, 16);
+        write_base(out, opcode, AA);
+        out.writeShort(BBBB);
+    }
+
     public static void write_22c(RandomOutput out, int opcode, int A, int B, int cCCCC) {
         A = check_unsigned(A, 4);
         B = check_unsigned(B, 4);
@@ -229,21 +243,4 @@ class InstructionWriter {
         out.writeShort((int) ((BBBBBBBBBBBBBBBB >>> 32) & 0xffff));
         out.writeShort((int) (BBBBBBBBBBBBBBBB >>> 48));
     }
-
-    /*
-
-    public static void write_21h32(RandomOutput out, int opcode, int AA, int BBBB0000) {
-        check_unsigned(AA, 8);
-        int BBBB = check_hat32(BBBB0000, 16);
-        write_base(out, opcode, AA);
-        out.writeShort(BBBB);
-    }
-
-    public static void write_21h64(RandomOutput out, int opcode, int AA, long BBBB000000000000) {
-        check_unsigned(AA, 8);
-        int BBBB = (int) check_hat64(BBBB000000000000, 16);
-        write_base(out, opcode, AA);
-        out.writeShort(BBBB);
-    }
-    */
 }

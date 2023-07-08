@@ -21,15 +21,6 @@ class InstructionWriter {
         return value & (~0 >>> empty_width);
     }
 
-    public static long check_signed64(long value, int width) {
-        int empty_width = 64 - width;
-        if (value << empty_width >> empty_width != value) {
-            throw new IllegalStateException("illegal instruction signed value "
-                    + Long.toHexString(value) + " for width " + width);
-        }
-        return value & (~0L >>> empty_width);
-    }
-
     public static int check_hat32(int value, int width) {
         if ((value & -1 >>> width) != 0) {
             throw new IllegalStateException("illegal instruction hat value "
@@ -218,6 +209,15 @@ class InstructionWriter {
         out.writeShort(HHHH);
     }
 
+    public static void write_51l(RandomOutput out, int opcode, int AA, long BBBBBBBBBBBBBBBB) {
+        AA = check_unsigned(AA, 8);
+        write_base(out, opcode, AA);
+        out.writeShort((int) (BBBBBBBBBBBBBBBB & 0xffff));
+        out.writeShort((int) ((BBBBBBBBBBBBBBBB >>> 16) & 0xffff));
+        out.writeShort((int) ((BBBBBBBBBBBBBBBB >>> 32) & 0xffff));
+        out.writeShort((int) (BBBBBBBBBBBBBBBB >>> 48));
+    }
+
     public static void write_array_payload(RandomOutput out, int opcode,
                                            int element_width, byte[] data) {
         if (!(element_width == 1 || element_width == 2 || element_width == 4 || element_width == 8)) {
@@ -233,14 +233,5 @@ class InstructionWriter {
         out.writeInt(data.length / element_width);
         out.writeByteArray(data);
         out.alignPositionAndFillZeros(2); // unit size
-    }
-
-    public static void write_51l(RandomOutput out, int opcode, int AA, long BBBBBBBBBBBBBBBB) {
-        AA = check_unsigned(AA, 8);
-        write_base(out, opcode, AA);
-        out.writeShort((int) (BBBBBBBBBBBBBBBB & 0xffff));
-        out.writeShort((int) ((BBBBBBBBBBBBBBBB >>> 16) & 0xffff));
-        out.writeShort((int) ((BBBBBBBBBBBBBBBB >>> 32) & 0xffff));
-        out.writeShort((int) (BBBBBBBBBBBBBBBB >>> 48));
     }
 }

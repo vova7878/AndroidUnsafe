@@ -667,8 +667,8 @@ public final class CodeBuilder {
                 0, 0, 0, 0);
     }
 
-    public CodeBuilder invoke_polymorphic_range(InvokeKind kind, MethodId method,
-                                                ProtoId proto, int arg_count, int first_arg_reg) {
+    public CodeBuilder invoke_polymorphic_range(
+            MethodId method, ProtoId proto, int arg_count, int first_arg_reg) {
         check_reg_range(first_arg_reg, 16, arg_count, 8);
         add(Opcode.INVOKE_POLYMORPHIC_RANGE.<Format4rcc>format()
                 .make(arg_count, method, first_arg_reg, proto));

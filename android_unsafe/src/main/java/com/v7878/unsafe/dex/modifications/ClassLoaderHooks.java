@@ -39,6 +39,7 @@ import java.util.function.BiFunction;
 
 import dalvik.system.DexFile;
 
+@SuppressWarnings("deprecation")
 public class ClassLoaderHooks {
 
     private static final Object LOCK = new Object();

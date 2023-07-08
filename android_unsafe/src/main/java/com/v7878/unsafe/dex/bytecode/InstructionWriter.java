@@ -89,6 +89,12 @@ class InstructionWriter {
         write_base(out, opcode, sAA);
     }
 
+    public static void write_20t(RandomOutput out, int opcode, int sAAAA) {
+        sAAAA = check_signed(sAAAA, 16);
+        write_base(out, opcode, 0);
+        out.writeShort(sAAAA);
+    }
+
     public static void write_22x_21c(RandomOutput out, int opcode, int AA, int BBBB) {
         AA = check_unsigned(AA, 8);
         BBBB = check_unsigned(BBBB, 16);
@@ -225,11 +231,6 @@ class InstructionWriter {
     }
 
     /*
-    public static void write_20t(RandomOutput out, int opcode, int sAAAA) {
-        sAAAA = check_signed(sAAAA, 16);
-        write_base(out, opcode, 0);
-        out.writeShort(sAAAA);
-    }
 
     public static void write_21h32(RandomOutput out, int opcode, int AA, int BBBB0000) {
         check_unsigned(AA, 8);

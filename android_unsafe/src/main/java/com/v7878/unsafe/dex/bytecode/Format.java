@@ -348,6 +348,68 @@ public abstract class Format {
         }
     }
 
+    public static class Format20t extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int sAAAA;
+
+            Instance(int sAAAA) {
+                this.sAAAA = sAAAA;
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_20t(out,
+                        opcode().opcodeValue(context.getOptions()), sAAAA);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + sAAAA;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && sAAAA == iobj.sAAAA;
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), sAAAA);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(sAAAA);
+            }
+        }
+
+        Format20t(Opcode opcode) {
+            super(opcode, 2);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int _00) {
+            int AAAA = in.readUnsignedShort();
+            return make(extend_sign(AAAA, 16));
+        }
+
+        public Instruction make(int sAAAA) {
+            return new Instance(sAAAA);
+        }
+    }
+
     public static class Format22x extends Format {
 
         public class Instance extends Instruction {

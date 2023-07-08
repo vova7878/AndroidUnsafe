@@ -49,7 +49,7 @@ public enum Opcode {
     FILL_ARRAY_DATA(0x26, "fill-array-data", Format.Format31i31t::new),
     THROW(0x27, "throw", Format.Format11x::new),
     GOTO(0x28, "goto", Format.Format10t::new),
-    /*GOTO_16(0x29, "goto/16", Format.Format20t),*/
+    GOTO_16(0x29, "goto/16", Format.Format20t::new),
     GOTO_32(0x2a, "goto/32", Format.Format30t::new),
     PACKED_SWITCH(0x2b, "packed-switch", Format.Format31i31t::new),
     SPARSE_SWITCH(0x2c, "sparse-switch", Format.Format31i31t::new),

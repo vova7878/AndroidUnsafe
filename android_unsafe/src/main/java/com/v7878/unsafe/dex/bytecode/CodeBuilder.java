@@ -270,6 +270,12 @@ public final class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder check_cast(int ref_reg, TypeId value) {
+        add(Opcode.CHECK_CAST.<Format21c>format().make(
+                check_reg(ref_reg, 8), value));
+        return this;
+    }
+
     private CodeBuilder goto_(Object label) {
         int start_unit = current_unit;
         add(Opcode.GOTO.<Format10t>format(), format -> {

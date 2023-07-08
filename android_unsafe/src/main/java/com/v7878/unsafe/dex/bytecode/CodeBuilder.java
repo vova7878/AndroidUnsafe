@@ -25,6 +25,7 @@ import com.v7878.unsafe.dex.bytecode.Format.Format31i31t;
 import com.v7878.unsafe.dex.bytecode.Format.Format35c;
 import com.v7878.unsafe.dex.bytecode.Format.Format3rc;
 import com.v7878.unsafe.dex.bytecode.Format.Format45cc;
+import com.v7878.unsafe.dex.bytecode.Format.Format4rcc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -664,6 +665,15 @@ public final class CodeBuilder {
     public CodeBuilder invoke_polymorphic(MethodId method, ProtoId proto) {
         return invoke_polymorphic(method, proto, 0, 0,
                 0, 0, 0, 0);
+    }
+
+    public CodeBuilder invoke_polymorphic_range(InvokeKind kind, MethodId method,
+                                                ProtoId proto, int arg_count, int first_arg_reg) {
+        check_reg_range(first_arg_reg, 16, arg_count, 8);
+        add(Opcode.INVOKE_POLYMORPHIC_RANGE.<Format4rcc>format()
+                .make(arg_count, method, first_arg_reg, proto));
+        add_outs(arg_count);
+        return this;
     }
 
     public CodeBuilder const_method_handle(int dst_reg, MethodHandleItem value) {

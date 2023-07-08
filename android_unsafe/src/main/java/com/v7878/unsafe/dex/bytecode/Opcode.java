@@ -35,8 +35,7 @@ public enum Opcode {
     CONST_WIDE(0x18, "const-wide", Format.Format51l::new),
     CONST_WIDE_HIGH16(0x19, "const-wide/high16", Format.Format21lh::new),
     CONST_STRING(0x1a, "const-string", opcode -> new Format.Format21c(opcode, ReferenceType.STRING)),
-    //TODO
-    /*CONST_STRING_JUMBO(0x1b, "const-string/jumbo", ReferenceType.STRING, Format.Format31c::new),*/
+    CONST_STRING_JUMBO(0x1b, "const-string/jumbo", opcode -> new Format.Format31c(opcode, ReferenceType.STRING)),
     CONST_CLASS(0x1c, "const-class", opcode -> new Format.Format21c(opcode, ReferenceType.TYPE)),
     MONITOR_ENTER(0x1d, "monitor-enter", Format.Format11x::new),
     MONITOR_EXIT(0x1e, "monitor-exit", Format.Format11x::new),

@@ -211,6 +211,7 @@ class InstructionWriter {
 
     public static void write_51l(RandomOutput out, int opcode, int AA, long BBBBBBBBBBBBBBBB) {
         AA = check_unsigned(AA, 8);
+        // no need to check BBBBBBBBBBBBBBBB
         write_base(out, opcode, AA);
         out.writeShort((int) (BBBBBBBBBBBBBBBB & 0xffff));
         out.writeShort((int) ((BBBBBBBBBBBBBBBB >>> 16) & 0xffff));

@@ -249,8 +249,7 @@ public enum Opcode {
     // e3 - f9 unused
 
     INVOKE_POLYMORPHIC(firstApi(0xfa, 26), "invoke-polymorphic", opcode -> new Format.Format45cc(opcode, ReferenceType.METHOD, ReferenceType.PROTO)),
-    //TODO
-    /*INVOKE_POLYMORPHIC_RANGE(firstArtVersion(0xfb, 87), "invoke-polymorphic/range", ReferenceType.METHOD, ReferenceType.METHOD_PROTO, Format.Format4rcc),*/
+    INVOKE_POLYMORPHIC_RANGE(firstApi(0xfa, 26), "invoke-polymorphic/range", opcode -> new Format.Format4rcc(opcode, ReferenceType.METHOD, ReferenceType.PROTO)),
     INVOKE_CUSTOM(firstApi(0xfc, 26), "invoke-custom", opcode -> new Format.Format35c(opcode, ReferenceType.CALLSITE)),
     INVOKE_CUSTOM_RANGE(firstApi(0xfd, 26), "invoke-custom/range", opcode -> new Format.Format3rc(opcode, ReferenceType.CALLSITE)),
     CONST_METHOD_HANDLE(firstApi(0xfe, 28), "const-method-handle", opcode -> new Format.Format21c(opcode, ReferenceType.METHOD_HANDLE)),

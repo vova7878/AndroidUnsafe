@@ -209,6 +209,18 @@ class InstructionWriter {
         out.writeShort(HHHH);
     }
 
+    public static void write_4rcc(RandomOutput out, int opcode,
+                                  int AA, int BBBB, int CCCC, int HHHH) {
+        AA = check_unsigned(AA, 8);
+        BBBB = check_unsigned(BBBB, 16);
+        CCCC = check_unsigned(CCCC, 16);
+        HHHH = check_unsigned(HHHH, 16);
+        write_base(out, opcode, AA);
+        out.writeShort(BBBB);
+        out.writeShort(CCCC);
+        out.writeShort(HHHH);
+    }
+
     public static void write_51l(RandomOutput out, int opcode, int AA, long BBBBBBBBBBBBBBBB) {
         AA = check_unsigned(AA, 8);
         // no need to check BBBBBBBBBBBBBBBB

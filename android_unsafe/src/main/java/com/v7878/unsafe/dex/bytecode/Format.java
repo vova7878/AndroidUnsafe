@@ -1528,6 +1528,91 @@ public abstract class Format {
         }
     }
 
+    public static class Format4rcc extends Format {
+
+        public final ReferenceType referenceType;
+        public final ReferenceType referenceType2;
+
+        public class Instance extends Instruction {
+
+            public final int AA;
+            public final Object cBBBB;
+            public final int CCCC;
+            public final Object cHHHH;
+
+            Instance(int AA, Object cBBBB, int CCCC, Object cHHHH) {
+                this.AA = AA;
+                this.cBBBB = referenceType.clone(cBBBB);
+                this.CCCC = CCCC;
+                this.cHHHH = referenceType2.clone(cHHHH);
+            }
+
+            @Override
+            public void collectData(DataCollector data) {
+                referenceType.collectData(data, cBBBB);
+                referenceType2.collectData(data, cHHHH);
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_4rcc(out,
+                        opcode().opcodeValue(context.getOptions()), AA,
+                        referenceType.refToIndex(context, cBBBB), CCCC,
+                        referenceType2.refToIndex(context, cHHHH));
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + AA + " " + cBBBB + " " + CCCC + " " + cHHHH;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode()) && AA == iobj.AA
+                            && Objects.equals(cBBBB, iobj.cBBBB) && CCCC == iobj.CCCC
+                            && Objects.equals(cHHHH, iobj.cHHHH);
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), AA, cBBBB, CCCC, cHHHH);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(AA, cBBBB, CCCC, cHHHH);
+            }
+        }
+
+        Format4rcc(Opcode opcode, ReferenceType referenceType, ReferenceType referenceType2) {
+            super(opcode, 4);
+            this.referenceType = referenceType;
+            this.referenceType2 = referenceType2;
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int AA) {
+            int BBBB = in.readUnsignedShort();
+            int CCCC = in.readUnsignedShort();
+            int HHHH = in.readUnsignedShort();
+            return make(AA, referenceType.indexToRef(context, BBBB),
+                    CCCC, referenceType2.indexToRef(context, HHHH));
+        }
+
+        public Instruction make(int AA, Object cBBBB, int CCCC, Object cHHHH) {
+            return new Instance(AA, cBBBB, CCCC, cHHHH);
+        }
+    }
+
     public static class Format51l extends Format {
 
         public class Instance extends Instruction {

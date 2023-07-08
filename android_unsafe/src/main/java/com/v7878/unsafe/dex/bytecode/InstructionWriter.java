@@ -215,6 +215,15 @@ class InstructionWriter {
         out.alignPositionAndFillZeros(2); // unit size
     }
 
+    public static void write_51l(RandomOutput out, int opcode, int AA, long BBBBBBBBBBBBBBBB) {
+        AA = check_unsigned(AA, 8);
+        write_base(out, opcode, AA);
+        out.writeShort((int) (BBBBBBBBBBBBBBBB & 0xffff));
+        out.writeShort((int) ((BBBBBBBBBBBBBBBB >>> 16) & 0xffff));
+        out.writeShort((int) ((BBBBBBBBBBBBBBBB >>> 32) & 0xffff));
+        out.writeShort((int) (BBBBBBBBBBBBBBBB >>> 48));
+    }
+
     /*
     public static void write_20t(RandomOutput out, int opcode, int sAAAA) {
         sAAAA = check_signed(sAAAA, 16);
@@ -234,15 +243,6 @@ class InstructionWriter {
         int BBBB = (int) check_hat64(BBBB000000000000, 16);
         write_base(out, opcode, AA);
         out.writeShort(BBBB);
-    }
-
-    public static void write_51l(RandomOutput out, int opcode, int AA, long BBBBBBBBBBBBBBBB) {
-        check_unsigned(AA, 8);
-        write_base(out, opcode, AA);
-        out.writeShort((int) (BBBBBBBBBBBBBBBB & 0xffff));
-        out.writeShort((int) ((BBBBBBBBBBBBBBBB >>> 16) & 0xffff));
-        out.writeShort((int) ((BBBBBBBBBBBBBBBB >>> 32) & 0xffff));
-        out.writeShort((int) (BBBBBBBBBBBBBBBB >>> 48));
     }
     */
 }

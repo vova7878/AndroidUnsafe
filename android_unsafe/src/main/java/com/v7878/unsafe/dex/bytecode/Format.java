@@ -1263,6 +1263,74 @@ public abstract class Format {
         }
     }
 
+    public static class Format51l extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int AA;
+            public final long sBBBBBBBBBBBBBBBB;
+
+            Instance(int AA, long sBBBBBBBBBBBBBBBB) {
+                this.AA = AA;
+                this.sBBBBBBBBBBBBBBBB = sBBBBBBBBBBBBBBBB;
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.write_51l(out,
+                        opcode().opcodeValue(context.getOptions()), AA, sBBBBBBBBBBBBBBBB);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + AA + " " + sBBBBBBBBBBBBBBBB;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && AA == iobj.AA && sBBBBBBBBBBBBBBBB == iobj.sBBBBBBBBBBBBBBBB;
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), AA, sBBBBBBBBBBBBBBBB);
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(AA, sBBBBBBBBBBBBBBBB);
+            }
+        }
+
+        Format51l(Opcode opcode) {
+            super(opcode, 5);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int AA) {
+            long BBBBlolo = in.readUnsignedShort();
+            long BBBBhilo = in.readUnsignedShort();
+            long BBBBlohi = in.readUnsignedShort();
+            long BBBBhihi = in.readUnsignedShort();
+            return make(AA, (BBBBhihi << 48) | (BBBBlohi << 32)
+                    | (BBBBhilo << 16) | BBBBlolo);
+        }
+
+        public Instruction make(int AA, long sBBBBBBBBBBBBBBBB) {
+            return new Instance(AA, sBBBBBBBBBBBBBBBB);
+        }
+    }
+
     public static class ArrayPayload extends Format {
 
         public class Instance extends Instruction {

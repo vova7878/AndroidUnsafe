@@ -48,8 +48,6 @@ public interface RandomInput extends AutoCloseable {
         return result;
     }
 
-    void skipBytes(long n);
-
     default boolean readBoolean() {
         return readByte() != 0;
     }
@@ -102,12 +100,14 @@ public interface RandomInput extends AutoCloseable {
 
     long position();
 
-    void position(long new_position);
+    long position(long new_position);
+
+    default long addPosition(long delta) {
+        return position(position() + delta);
+    }
 
     default long alignPosition(long alignment) {
-        long new_position = roundUpL(position(), alignment);
-        position(new_position);
-        return new_position;
+        return position(roundUpL(position(), alignment));
     }
 
     default void requireAlignment(int alignment) {
@@ -121,7 +121,7 @@ public interface RandomInput extends AutoCloseable {
 
     default RandomInput duplicate(long offset) {
         RandomInput out = duplicate();
-        out.skipBytes(offset);
+        out.addPosition(offset);
         return out;
     }
 

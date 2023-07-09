@@ -55,7 +55,7 @@ class FileMap {
 
         public static MapItem read(RandomInput in) {
             int type = in.readUnsignedShort();
-            in.skipBytes(2); //unused
+            in.addPosition(2); //unused
             int size = in.readInt();
             int offset = in.readInt();
             return new MapItem(type, offset, size);
@@ -129,9 +129,9 @@ class FileMap {
                 IllegalArgumentException::new, "invalid magic: " + Arrays.toString(magic));
         DexVersion version = DexVersion.fromBytes(magic[4], magic[5], magic[6]);
         options.requireMinApi(version.getMinApi());
-        in.skipBytes(4); //checksum
-        in.skipBytes(20); //signature
-        in.skipBytes(4); //file_size
+        in.addPosition(4); //checksum
+        in.addPosition(20); //signature
+        in.addPosition(4); //file_size
         int header_size = in.readInt();
         assert_(header_size == HEADER_SIZE, IllegalArgumentException::new,
                 "invalid header size: " + header_size);
@@ -139,8 +139,8 @@ class FileMap {
         assert_(endian_tag == ENDIAN_CONSTANT,
                 IllegalArgumentException::new,
                 "invalid endian_tag: " + Integer.toHexString(endian_tag));
-        in.skipBytes(4); //link_size
-        in.skipBytes(4); //link_off
+        in.addPosition(4); //link_size
+        in.addPosition(4); //link_off
         out.map_list_off = in.readInt();
         out.string_ids_size = in.readInt();
         out.string_ids_off = in.readInt();
@@ -154,8 +154,8 @@ class FileMap {
         out.method_ids_off = in.readInt();
         out.class_defs_size = in.readInt();
         out.class_defs_off = in.readInt();
-        in.skipBytes(4); //data_size
-        in.skipBytes(4); //data_off
+        in.addPosition(4); //data_size
+        in.addPosition(4); //data_off
         RandomInput in2 = in.duplicate(out.map_list_off);
         int map_size = in2.readInt();
         for (int i = 0; i < map_size; i++) {
@@ -318,8 +318,8 @@ class FileMap {
         DexVersion version = DexVersion.fromApi(options.getTargetApi());
         out.writeByteArray(new byte[]{version.firstByte(),
                 version.secondByte(), version.thirdByte(), '\0'});
-        out.skipBytes(4); //checksum
-        out.skipBytes(20); //signature
+        out.addPosition(4); //checksum
+        out.addPosition(20); //signature
         out.writeInt(file_size);
         out.writeInt(HEADER_SIZE);
         out.writeInt(ENDIAN_CONSTANT);

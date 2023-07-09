@@ -91,7 +91,7 @@ public class CodeItem implements PublicCloneable {
         if (tries_size > 0) {
             in.position(roundUpL(in.position(), 4));
             long tries_pos = in.position();
-            in.skipBytes((long) tries_size * TryItem.SIZE);
+            in.addPosition((long) tries_size * TryItem.SIZE);
 
             long handlers_start = in.position();
             int handlers_size = in.readULeb128();
@@ -130,7 +130,7 @@ public class CodeItem implements PublicCloneable {
         out.writeInt(0); // TODO: debug_info_off
 
         long insns_size_pos = out.position();
-        out.skipBytes(4);
+        out.addPosition(4);
 
         long insns_start = out.position();
         for (Instruction tmp : insns) {
@@ -147,7 +147,7 @@ public class CodeItem implements PublicCloneable {
             out.alignPositionAndFillZeros(TryItem.ALIGNMENT);
 
             RandomOutput tries_out = out.duplicate(out.position());
-            out.skipBytes((long) TryItem.SIZE * tries_size);
+            out.addPosition((long) TryItem.SIZE * tries_size);
 
             HashMap<CatchHandler, Integer> handlers = new HashMap<>(tries_size);
             for (TryItem tmp : tries) {

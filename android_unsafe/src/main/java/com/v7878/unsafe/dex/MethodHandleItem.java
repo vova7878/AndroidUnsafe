@@ -68,9 +68,9 @@ public class MethodHandleItem implements PublicCloneable {
 
     public static MethodHandleItem read(RandomInput in, ReadContext context) {
         int type = in.readUnsignedShort();
-        in.skipBytes(2); //unused
+        in.addPosition(2); //unused
         int field_or_method_id = in.readUnsignedShort();
-        in.skipBytes(2); //unused
+        in.addPosition(2); //unused
         FieldOrMethodId field_or_method = isMethodType(type)
                 ? context.method(field_or_method_id)
                 : context.field(field_or_method_id);

@@ -17,35 +17,24 @@ public class MemoryInput implements RandomInput {
         this.offset = 0;
     }
 
-    private long grow(long n) {
-        long tmp = Checks.checkFromIndexSize(offset, n, data.size());
-        offset += n;
-        return tmp;
-    }
-
-    @Override
-    public void skipBytes(long n) {
-        grow(n);
-    }
-
     @Override
     public byte readByte() {
-        return data.get(ValueLayout.JAVA_BYTE, grow(1));
+        return data.get(ValueLayout.JAVA_BYTE, addPosition(1));
     }
 
     @Override
     public short readShort() {
-        return data.get(ValueLayout.JAVA_SHORT, grow(2));
+        return data.get(ValueLayout.JAVA_SHORT, addPosition(2));
     }
 
     @Override
     public int readInt() {
-        return data.get(ValueLayout.JAVA_INT, grow(4));
+        return data.get(ValueLayout.JAVA_INT, addPosition(4));
     }
 
     @Override
     public long readLong() {
-        return data.get(ValueLayout.JAVA_LONG, grow(8));
+        return data.get(ValueLayout.JAVA_LONG, addPosition(8));
     }
 
     @Override
@@ -59,8 +48,10 @@ public class MemoryInput implements RandomInput {
     }
 
     @Override
-    public void position(long new_position) {
-        offset = Checks.checkIndex(new_position, data.size());
+    public long position(long new_position) {
+        long tmp = offset;
+        offset = Checks.checkPosition(new_position, data.size());
+        return tmp;
     }
 
     @Override

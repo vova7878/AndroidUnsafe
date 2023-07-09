@@ -6,10 +6,12 @@ import com.v7878.unsafe.Utils;
 
 public interface RandomIO extends RandomInput, RandomOutput {
 
+    default long addPosition(long delta) {
+        return position(position() + delta);
+    }
+
     default long alignPosition(long alignment) {
-        long new_position = roundUpL(position(), alignment);
-        position(new_position);
-        return new_position;
+        return position(roundUpL(position(), alignment));
     }
 
     default void requireAlignment(int alignment) {
@@ -25,7 +27,7 @@ public interface RandomIO extends RandomInput, RandomOutput {
     @Override
     default RandomIO duplicate(long offset) {
         RandomIO out = duplicate();
-        out.skipBytes(offset);
+        out.addPosition(offset);
         return out;
     }
 

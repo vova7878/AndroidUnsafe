@@ -38,8 +38,6 @@ public interface RandomOutput extends AutoCloseable {
         }
     }
 
-    void skipBytes(long n);
-
     default void writeBoolean(boolean value) {
         writeByte(value ? 1 : 0);
     }
@@ -88,12 +86,14 @@ public interface RandomOutput extends AutoCloseable {
 
     long position();
 
-    void position(long new_position);
+    long position(long new_position);
+
+    default long addPosition(long delta) {
+        return position(position() + delta);
+    }
 
     default long alignPosition(long alignment) {
-        long new_position = roundUpL(position(), alignment);
-        position(new_position);
-        return new_position;
+        return position(roundUpL(position(), alignment));
     }
 
     default long alignPositionAndFillZeros(long alignment) {
@@ -102,7 +102,7 @@ public interface RandomOutput extends AutoCloseable {
         for (long i = 0; i < new_position - old_position; i++) {
             writeByte(0);
         }
-        return new_position;
+        return old_position;
     }
 
     default void requireAlignment(int alignment) {
@@ -116,7 +116,7 @@ public interface RandomOutput extends AutoCloseable {
 
     default RandomOutput duplicate(long offset) {
         RandomOutput out = duplicate();
-        out.skipBytes(offset);
+        out.addPosition(offset);
         return out;
     }
 

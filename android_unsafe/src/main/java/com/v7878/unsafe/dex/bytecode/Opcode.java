@@ -261,8 +261,8 @@ public enum Opcode {
     ARRAY_PAYLOAD(0x300, "array-payload", Format.ArrayPayload::new),
 
     //TODO
-    /*EXECUTE_INLINE(onlyDalvik(allApis(0xee)), "execute-inline", Format.TODO::new, Opcode.ODEX_ONLY),
-    INVOKE_DIRECT_EMPTY(onlyDalvik(lastApi(0xf0, 13)), "invoke-direct-empty", Format.TODO::new, Opcode.ODEX_ONLY),*/
+    EXECUTE_INLINE(onlyDalvik(allApis(0xee)), "execute-inline", opcode -> new Format.Format35c(opcode, ReferenceType.RAW), Opcode.ODEX_ONLY),
+    /*INVOKE_DIRECT_EMPTY(onlyDalvik(lastApi(0xf0, 13)), "invoke-direct-empty", Format.TODO::new, Opcode.ODEX_ONLY),*/
     IGET_QUICK(allApis(0xf2), lastApi(0xe3, 30), "iget-quick", opcode -> new Format.Format22c(opcode, ReferenceType.RAW), Opcode.ODEX_ONLY),
     IGET_WIDE_QUICK(allApis(0xf3), lastApi(0xe4, 30), "iget-wide-quick", opcode -> new Format.Format22c(opcode, ReferenceType.RAW), Opcode.ODEX_ONLY),
     IGET_OBJECT_QUICK(allApis(0xf4), lastApi(0xe5, 30), "iget-object-quick", opcode -> new Format.Format22c(opcode, ReferenceType.RAW), Opcode.ODEX_ONLY),
@@ -272,29 +272,29 @@ public enum Opcode {
 
     INVOKE_VIRTUAL_QUICK(allApis(0xf8), lastApi(0xe9, 30), "invoke-virtual-quick", opcode -> new Format.Format35c(opcode, ReferenceType.RAW), Opcode.ODEX_ONLY),
     INVOKE_VIRTUAL_QUICK_RANGE(allApis(0xf9), lastApi(0xea, 30), "invoke-virtual-quick/range", opcode -> new Format.Format3rc(opcode, ReferenceType.RAW), Opcode.ODEX_ONLY),
-    /*INVOKE_SUPER_QUICK(onlyDalvik(allApis(0xfa)), "invoke-super-quick", Format.TODO::new, Opcode.ODEX_ONLY),
-    INVOKE_SUPER_QUICK_RANGE(onlyDalvik(allApis(0xfb)), "invoke-super-quick/range", Format.TODO::new, Opcode.ODEX_ONLY),
+    INVOKE_SUPER_QUICK(onlyDalvik(allApis(0xfa)), "invoke-super-quick", opcode -> new Format.Format35c(opcode, ReferenceType.RAW), Opcode.ODEX_ONLY),
+    INVOKE_SUPER_QUICK_RANGE(onlyDalvik(allApis(0xfb)), "invoke-super-quick/range", opcode -> new Format.Format3rc(opcode, ReferenceType.RAW), Opcode.ODEX_ONLY),
 
-    THROW_VERIFICATION_ERROR(onlyDalvik(firstApi(0xed, 5)), "throw-verification-error", Format.TODO::new, Opcode.ODEX_ONLY),
+    /*THROW_VERIFICATION_ERROR(onlyDalvik(firstApi(0xed, 5)), "throw-verification-error", Format.TODO::new, Opcode.ODEX_ONLY),
 
-    BREAKPOINT(onlyDalvik(firstApi(0xec, 8)), "breakpoint", Format.TODO::new, Opcode.ODEX_ONLY),
-    EXECUTE_INLINE_RANGE(onlyDalvik(firstApi(0xef, 8)), "execute-inline/range", Format.TODO::new, Opcode.ODEX_ONLY),
+    BREAKPOINT(onlyDalvik(firstApi(0xec, 8)), "breakpoint", Format.TODO::new, Opcode.ODEX_ONLY),*/
+    EXECUTE_INLINE_RANGE(onlyDalvik(firstApi(0xef, 8)), "execute-inline/range", opcode -> new Format.Format3rc(opcode, ReferenceType.RAW), Opcode.ODEX_ONLY),
 
-    IGET_VOLATILE(onlyDalvik(firstApi(0xe3, 9)), "iget-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
-    IPUT_VOLATILE(onlyDalvik(firstApi(0xe4, 9)), "iput-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
-    SGET_VOLATILE(onlyDalvik(firstApi(0xe5, 9)), "sget-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
-    SPUT_VOLATILE(onlyDalvik(firstApi(0xe6, 9)), "sput-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+    IGET_VOLATILE(onlyDalvik(firstApi(0xe3, 9)), "iget-volatile", opcode -> new Format.Format22c(opcode, ReferenceType.FIELD), Opcode.ODEX_ONLY),
+    IPUT_VOLATILE(onlyDalvik(firstApi(0xe4, 9)), "iput-volatile", opcode -> new Format.Format22c(opcode, ReferenceType.FIELD), Opcode.ODEX_ONLY),
+    SGET_VOLATILE(onlyDalvik(firstApi(0xe5, 9)), "sget-volatile", opcode -> new Format.Format21c(opcode, ReferenceType.FIELD), Opcode.ODEX_ONLY),
+    SPUT_VOLATILE(onlyDalvik(firstApi(0xe6, 9)), "sput-volatile", opcode -> new Format.Format21c(opcode, ReferenceType.FIELD), Opcode.ODEX_ONLY),
 
-    IGET_OBJECT_VOLATILE(onlyDalvik(firstApi(0xe7, 9)), "iget-object-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+    IGET_OBJECT_VOLATILE(onlyDalvik(firstApi(0xe7, 9)), "iget-object-volatile", opcode -> new Format.Format22c(opcode, ReferenceType.FIELD), Opcode.ODEX_ONLY),
 
-    IGET_WIDE_VOLATILE(onlyDalvik(firstApi(0xe8, 9)), "iget-wide-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
-    IPUT_WIDE_VOLATILE(onlyDalvik(firstApi(0xe9, 9)), "iput-wide-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
-    SGET_WIDE_VOLATILE(onlyDalvik(firstApi(0xea, 9)), "sget-wide-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
-    SPUT_WIDE_VOLATILE(onlyDalvik(firstApi(0xeb, 9)), "sput-wide-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+    IGET_WIDE_VOLATILE(onlyDalvik(firstApi(0xe8, 9)), "iget-wide-volatile", opcode -> new Format.Format22c(opcode, ReferenceType.FIELD), Opcode.ODEX_ONLY),
+    IPUT_WIDE_VOLATILE(onlyDalvik(firstApi(0xe9, 9)), "iput-wide-volatile", opcode -> new Format.Format22c(opcode, ReferenceType.FIELD), Opcode.ODEX_ONLY),
+    SGET_WIDE_VOLATILE(onlyDalvik(firstApi(0xea, 9)), "sget-wide-volatile", opcode -> new Format.Format21c(opcode, ReferenceType.FIELD), Opcode.ODEX_ONLY),
+    SPUT_WIDE_VOLATILE(onlyDalvik(firstApi(0xeb, 9)), "sput-wide-volatile", opcode -> new Format.Format21c(opcode, ReferenceType.FIELD), Opcode.ODEX_ONLY),
 
-    IPUT_OBJECT_VOLATILE(onlyDalvik(firstApi(0xfc, 9)), "iput-object-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
-    SGET_OBJECT_VOLATILE(onlyDalvik(firstApi(0xfd, 9)), "sget-object-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
-    SPUT_OBJECT_VOLATILE(onlyDalvik(firstApi(0xfe, 9)), "sput-object-volatile", Format.TODO::new, Opcode.ODEX_ONLY),*/
+    IPUT_OBJECT_VOLATILE(onlyDalvik(firstApi(0xfc, 9)), "iput-object-volatile", opcode -> new Format.Format22c(opcode, ReferenceType.FIELD), Opcode.ODEX_ONLY),
+    SGET_OBJECT_VOLATILE(onlyDalvik(firstApi(0xfd, 9)), "sget-object-volatile", opcode -> new Format.Format21c(opcode, ReferenceType.FIELD), Opcode.ODEX_ONLY),
+    SPUT_OBJECT_VOLATILE(onlyDalvik(firstApi(0xfe, 9)), "sput-object-volatile", opcode -> new Format.Format21c(opcode, ReferenceType.FIELD), Opcode.ODEX_ONLY),
 
     RETURN_VOID_BARRIER(firstApi(0xf1, 11), lastApi(0x73, 22), "return-void-barrier", Format.Format10x::new, Opcode.ODEX_ONLY),
 

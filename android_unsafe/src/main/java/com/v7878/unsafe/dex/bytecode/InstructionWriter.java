@@ -249,6 +249,25 @@ class InstructionWriter {
         out.writeIntArray(targets);
     }
 
+    public static void sparse_switch_payload(RandomOutput out, int opcode,
+                                             int[] keys, int[] targets) {
+        Objects.requireNonNull(keys);
+        Objects.requireNonNull(targets);
+        if (keys.length != targets.length) {
+            throw new IllegalStateException("keys.length(" + keys.length
+                    + ") != targets.length(" + targets.length + ")");
+        }
+        int size = keys.length;
+        if ((size & 0xffff) != size) {
+            throw new IllegalStateException("size is too big: " + size);
+        }
+        out.requireAlignment(PAYLOAD_ALIGNMENT);
+        write_base(out, opcode);
+        out.writeShort(size);
+        out.writeIntArray(keys);
+        out.writeIntArray(targets);
+    }
+
     public static void write_array_payload(RandomOutput out, int opcode,
                                            int element_width, byte[] data) {
         Objects.requireNonNull(data);

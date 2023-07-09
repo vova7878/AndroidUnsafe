@@ -256,8 +256,7 @@ public enum Opcode {
     CONST_METHOD_TYPE(firstApi(0xff, 28), "const-method-type", opcode -> new Format.Format21c(opcode, ReferenceType.PROTO)),
 
     PACKED_SWITCH_PAYLOAD(0x100, "packed-switch-payload", Format.PackedSwitchPayload::new),
-    //TODO
-    //SPARSE_SWITCH_PAYLOAD(0x200, "sparse-switch-payload", Format.SparseSwitchPayload::new),
+    SPARSE_SWITCH_PAYLOAD(0x200, "sparse-switch-payload", Format.SparseSwitchPayload::new),
     ARRAY_PAYLOAD(0x300, "array-payload", Format.ArrayPayload::new),
 
     //TODO

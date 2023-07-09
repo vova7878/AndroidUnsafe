@@ -1755,6 +1755,80 @@ public abstract class Format {
         }
     }
 
+    public static class SparseSwitchPayload extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int[] keys;
+            public final int[] targets;
+
+            Instance(int[] keys, int[] targets) {
+                this.keys = keys.clone();
+                this.targets = targets.clone();
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.sparse_switch_payload(out,
+                        opcode().opcodeValue(context.getOptions()),
+                        keys, targets);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public int units() {
+                return keys.length * 4 + 2;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + Arrays.toString(keys) + " " + Arrays.toString(targets);
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && Arrays.equals(keys, iobj.keys)
+                            && Arrays.equals(targets, iobj.targets);
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), Arrays.hashCode(keys), Arrays.hashCode(targets));
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(keys, targets);
+            }
+        }
+
+        SparseSwitchPayload(Opcode opcode) {
+            super(opcode, -1, true);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int _00) {
+            in.requireAlignment(PAYLOAD_ALIGNMENT);
+            int size = in.readUnsignedShort();
+            int[] keys = in.readIntArray(size);
+            int[] targets = in.readIntArray(size);
+            return make(keys, targets);
+        }
+
+        public Instruction make(int[] keys, int[] targets) {
+            return new Instance(keys, targets);
+        }
+    }
+
     public static class ArrayPayload extends Format {
 
         public class Instance extends Instruction {

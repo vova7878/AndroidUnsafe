@@ -187,6 +187,13 @@ public final class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder add_raw(Instruction instruction) {
+        instructions.add(() -> instruction);
+        current_instruction++;
+        current_unit += instruction.units();
+        return this;
+    }
+
     public CodeBuilder nop() {
         add(Opcode.NOP.<Format10x>format().make());
         return this;

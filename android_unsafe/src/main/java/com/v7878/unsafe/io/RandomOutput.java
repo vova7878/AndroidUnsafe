@@ -4,6 +4,7 @@ import static com.v7878.unsafe.AndroidUnsafe.IS64BIT;
 import static com.v7878.unsafe.Utils.roundUpL;
 
 import com.v7878.unsafe.Checks;
+import com.v7878.unsafe.Utils;
 import com.v7878.unsafe.memory.Word;
 
 import java.util.Objects;
@@ -96,6 +97,12 @@ public interface RandomOutput extends AutoCloseable {
             writeByte(0);
         }
         return new_position;
+    }
+
+    default void requireAlignment(int alignment) {
+        if (!Utils.isAlignedL(position(), alignment)) {
+            throw new IllegalStateException("not aligned by " + alignment);
+        }
     }
 
     RandomOutput duplicate();

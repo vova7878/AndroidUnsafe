@@ -1,5 +1,7 @@
 package com.v7878.unsafe.dex.bytecode;
 
+import static com.v7878.unsafe.dex.bytecode.Format.PAYLOAD_ALIGNMENT;
+
 import com.v7878.unsafe.io.RandomOutput;
 
 class InstructionWriter {
@@ -239,8 +241,7 @@ class InstructionWriter {
         if (data.length % element_width != 0) {
             throw new IllegalStateException("data.length is not multiple of element_width: " + data.length);
         }
-        //TODO
-        //out.requireAlignment(PAYLOAD_ALIGNMENT);
+        out.requireAlignment(PAYLOAD_ALIGNMENT);
         write_base(out, opcode);
         out.writeShort(element_width);
         out.writeInt(data.length / element_width);

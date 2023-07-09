@@ -1743,8 +1743,7 @@ public abstract class Format {
 
         @Override
         public Instruction read(RandomInput in, ReadContext context, int _00) {
-            //TODO: checks
-            //in.requireAlignment(PAYLOAD_ALIGNMENT);
+            in.requireAlignment(PAYLOAD_ALIGNMENT);
             int element_width = in.readUnsignedShort();
             if (!(element_width == 1 || element_width == 2 || element_width == 4 || element_width == 8)) {
                 throw new IllegalStateException("unsupported element_width: " + element_width);

@@ -1,5 +1,7 @@
 package com.v7878.unsafe.dex.bytecode;
 
+import static com.v7878.unsafe.dex.bytecode.Format.PAYLOAD_ALIGNMENT;
+
 import com.v7878.unsafe.io.RandomOutput;
 
 import java.util.Objects;
@@ -240,8 +242,7 @@ class InstructionWriter {
         if ((size & 0xffff) != size) {
             throw new IllegalStateException("size is too big: " + size);
         }
-        //TODO why is this not always true?
-        //out.requireAlignment(PAYLOAD_ALIGNMENT);
+        out.requireAlignment(PAYLOAD_ALIGNMENT);
         write_base(out, opcode);
         out.writeShort(size);
         out.writeInt(first_key);
@@ -260,8 +261,7 @@ class InstructionWriter {
         if ((size & 0xffff) != size) {
             throw new IllegalStateException("size is too big: " + size);
         }
-        //TODO why is this not always true?
-        //out.requireAlignment(PAYLOAD_ALIGNMENT);
+        out.requireAlignment(PAYLOAD_ALIGNMENT);
         write_base(out, opcode);
         out.writeShort(size);
         out.writeIntArray(keys);
@@ -277,8 +277,7 @@ class InstructionWriter {
         if (data.length % element_width != 0) {
             throw new IllegalStateException("data.length is not multiple of element_width: " + data.length);
         }
-        //TODO why is this not always true?
-        //out.requireAlignment(PAYLOAD_ALIGNMENT);
+        out.requireAlignment(PAYLOAD_ALIGNMENT);
         write_base(out, opcode);
         out.writeShort(element_width);
         out.writeInt(data.length / element_width);

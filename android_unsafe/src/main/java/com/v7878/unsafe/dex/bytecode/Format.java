@@ -1743,8 +1743,10 @@ public abstract class Format {
 
         @Override
         public Instruction read(RandomInput in, ReadContext context, int _00) {
-            //TODO why is this not always true?
-            //in.requireAlignment(PAYLOAD_ALIGNMENT);
+            in.addPosition(-2); // code unit
+            in.requireAlignment(PAYLOAD_ALIGNMENT);
+            in.addPosition(2);
+
             int size = in.readUnsignedShort();
             int first_key = in.readInt();
             int[] targets = in.readIntArray(size);
@@ -1818,8 +1820,10 @@ public abstract class Format {
 
         @Override
         public Instruction read(RandomInput in, ReadContext context, int _00) {
-            //TODO why is this not always true?
-            //in.requireAlignment(PAYLOAD_ALIGNMENT);
+            in.addPosition(-2); // code unit
+            in.requireAlignment(PAYLOAD_ALIGNMENT);
+            in.addPosition(2);
+
             int size = in.readUnsignedShort();
             int[] keys = in.readIntArray(size);
             int[] targets = in.readIntArray(size);
@@ -1893,8 +1897,10 @@ public abstract class Format {
 
         @Override
         public Instruction read(RandomInput in, ReadContext context, int _00) {
-            //TODO why is this not always true?
-            //in.requireAlignment(PAYLOAD_ALIGNMENT);
+            in.addPosition(-2); // code unit
+            in.requireAlignment(PAYLOAD_ALIGNMENT);
+            in.addPosition(2);
+
             int element_width = in.readUnsignedShort();
             if (!(element_width == 1 || element_width == 2 || element_width == 4 || element_width == 8)) {
                 throw new IllegalStateException("unsupported element_width: " + element_width);

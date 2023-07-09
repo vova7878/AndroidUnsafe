@@ -13,8 +13,9 @@ public interface RandomIO extends RandomInput, RandomOutput {
     }
 
     default void requireAlignment(int alignment) {
-        if (!Utils.isAlignedL(position(), alignment)) {
-            throw new IllegalStateException("not aligned by " + alignment);
+        long pos = position();
+        if (!Utils.isAlignedL(pos, alignment)) {
+            throw new IllegalStateException("position " + pos + " not aligned by " + alignment);
         }
     }
 

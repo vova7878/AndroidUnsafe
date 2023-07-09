@@ -32,6 +32,12 @@ public interface RandomOutput extends AutoCloseable {
         }
     }
 
+    default void writeIntArray(int[] ints) {
+        for (int value : ints) {
+            writeInt(value);
+        }
+    }
+
     void skipBytes(long n);
 
     default void writeBoolean(boolean value) {

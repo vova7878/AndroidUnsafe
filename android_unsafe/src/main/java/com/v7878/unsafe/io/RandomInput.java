@@ -40,6 +40,14 @@ public interface RandomInput extends AutoCloseable {
         return result;
     }
 
+    default int[] readIntArray(int length) {
+        int[] result = new int[length];
+        for (int i = 0; i < length; i++) {
+            result[i] = readInt();
+        }
+        return result;
+    }
+
     void skipBytes(long n);
 
     default boolean readBoolean() {

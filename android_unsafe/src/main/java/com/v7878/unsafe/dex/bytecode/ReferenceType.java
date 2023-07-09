@@ -191,6 +191,31 @@ public enum ReferenceType {
         public MethodHandleItem clone(Object ref) {
             return verify(ref).clone();
         }
+    }, RAW {
+        @Override
+        public Integer verify(Object ref) {
+            return (Integer) Objects.requireNonNull(ref);
+        }
+
+        @Override
+        public void collectData(DataCollector data, Object ref) {
+            // nothing to do
+        }
+
+        @Override
+        public Integer indexToRef(ReadContext context, int index) {
+            return index;
+        }
+
+        @Override
+        public int refToIndex(WriteContext context, Object ref) {
+            return verify(ref);
+        }
+
+        @Override
+        public Integer clone(Object ref) {
+            return verify(ref);
+        }
     };
 
     public abstract Object verify(Object ref);

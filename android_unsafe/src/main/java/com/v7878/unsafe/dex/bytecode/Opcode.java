@@ -258,8 +258,65 @@ public enum Opcode {
     //TODO
     /*PACKED_SWITCH_PAYLOAD(0x100, "packed-switch-payload", ReferenceType.NONE, Format.PackedSwitchPayload, 0),
     SPARSE_SWITCH_PAYLOAD(0x200, "sparse-switch-payload", ReferenceType.NONE, Format.SparseSwitchPayload, 0),*/
-    ARRAY_PAYLOAD(0x300, "array-payload", Format.ArrayPayload::new);
-    //TODO: odex opcodes
+    ARRAY_PAYLOAD(0x300, "array-payload", Format.ArrayPayload::new),
+
+    //TODO
+    /*EXECUTE_INLINE(onlyDalvik(allApis(0xee)), "execute-inline", Format.TODO::new, Opcode.ODEX_ONLY),
+    INVOKE_DIRECT_EMPTY(onlyDalvik(lastApi(0xf0, 13)), "invoke-direct-empty", Format.TODO::new, Opcode.ODEX_ONLY),
+    IGET_QUICK(allApis(0xf2), lastApi(0xe3, 30), "iget-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+    IGET_WIDE_QUICK(allApis(0xf3), lastApi(0xe4, 30), "iget-wide-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+    IGET_OBJECT_QUICK(allApis(0xf4), lastApi(0xe5, 30), "iget-object-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+    IPUT_QUICK(allApis(0xf5), lastApi(0xe6, 30), "iput-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+    IPUT_WIDE_QUICK(allApis(0xf6), lastApi(0xe7, 30), "iput-wide-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+    IPUT_OBJECT_QUICK(allApis(0xf7), lastApi(0xe8, 30), "iput-object-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+
+    INVOKE_VIRTUAL_QUICK(allApis(0xf8), lastApi(0xe9, 30), "invoke-virtual-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+    INVOKE_VIRTUAL_QUICK_RANGE(allApis(0xf9), lastApi(0xea, 30), "invoke-virtual-quick/range", Format.TODO::new, Opcode.ODEX_ONLY),
+    INVOKE_SUPER_QUICK(onlyDalvik(allApis(0xfa)), "invoke-super-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+    INVOKE_SUPER_QUICK_RANGE(onlyDalvik(allApis(0xfb)), "invoke-super-quick/range", Format.TODO::new, Opcode.ODEX_ONLY),
+
+    THROW_VERIFICATION_ERROR(onlyDalvik(firstApi(0xed, 5)), "throw-verification-error", Format.TODO::new, Opcode.ODEX_ONLY),
+
+    BREAKPOINT(onlyDalvik(firstApi(0xec, 8)), "breakpoint", Format.TODO::new, Opcode.ODEX_ONLY),
+    EXECUTE_INLINE_RANGE(onlyDalvik(firstApi(0xef, 8)), "execute-inline/range", Format.TODO::new, Opcode.ODEX_ONLY),
+
+    IGET_VOLATILE(onlyDalvik(firstApi(0xe3, 9)), "iget-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+    IPUT_VOLATILE(onlyDalvik(firstApi(0xe4, 9)), "iput-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+    SGET_VOLATILE(onlyDalvik(firstApi(0xe5, 9)), "sget-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+    SPUT_VOLATILE(onlyDalvik(firstApi(0xe6, 9)), "sput-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+
+    IGET_OBJECT_VOLATILE(onlyDalvik(firstApi(0xe7, 9)), "iget-object-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+
+    IGET_WIDE_VOLATILE(onlyDalvik(firstApi(0xe8, 9)), "iget-wide-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+    IPUT_WIDE_VOLATILE(onlyDalvik(firstApi(0xe9, 9)), "iput-wide-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+    SGET_WIDE_VOLATILE(onlyDalvik(firstApi(0xea, 9)), "sget-wide-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+    SPUT_WIDE_VOLATILE(onlyDalvik(firstApi(0xeb, 9)), "sput-wide-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+
+    IPUT_OBJECT_VOLATILE(onlyDalvik(firstApi(0xfc, 9)), "iput-object-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+    SGET_OBJECT_VOLATILE(onlyDalvik(firstApi(0xfd, 9)), "sget-object-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+    SPUT_OBJECT_VOLATILE(onlyDalvik(firstApi(0xfe, 9)), "sput-object-volatile", Format.TODO::new, Opcode.ODEX_ONLY),
+
+    RETURN_VOID_BARRIER(firstApi(0xf1, 11), lastApi(0x73, 22), "return-void-barrier", Format.Format10x::new, Opcode.ODEX_ONLY),
+
+    INVOKE_OBJECT_INIT_RANGE(onlyDalvik(firstApi(0xf0, 14)), "invoke-object-init/range", Format.TODO::new, Opcode.ODEX_ONLY),
+
+    RETURN_VOID_NO_BARRIER(onlyArt(betweenApi(0x73, 23, 30)), "return-void-no-barrier", Format.Format10x::new, Opcode.ODEX_ONLY),
+
+    IPUT_BOOLEAN_QUICK(onlyArt(betweenApi(0xeb, 23, 30)), "iput-boolean-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+    IPUT_BYTE_QUICK(onlyArt(betweenApi(0xec, 23, 30)), "iput-byte-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+    IPUT_CHAR_QUICK(onlyArt(betweenApi(0xed, 23, 30)), "iput-char-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+    IPUT_SHORT_QUICK(onlyArt(betweenApi(0xee, 23, 30)), "iput-short-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+    IGET_BOOLEAN_QUICK(onlyArt(betweenApi(0xef, 23, 30)), "iget-boolean-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+    IGET_BYTE_QUICK(onlyArt(betweenApi(0xf0, 23, 30)), "iget-byte-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+    IGET_CHAR_QUICK(onlyArt(betweenApi(0xf1, 23, 30)), "iget-char-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+    IGET_SHORT_QUICK(onlyArt(betweenApi(0xf2, 23, 30)), "iget-short-quick", Format.TODO::new, Opcode.ODEX_ONLY),
+
+    INVOKE_LAMBDA(onlyArt(betweenApi(0xf3, 24, 25)), "invoke-lambda", Format.Format25x::new, Opcode.ODEX_ONLY),
+    CAPTURE_VARIABLE(onlyArt(betweenApi(0xf5, 24, 25)), "capture-variable", Format.TODO::new, Opcode.ODEX_ONLY),
+    CREATE_LAMBDA(onlyArt(betweenApi(0xf6, 24, 25)), "create-lambda", Format.TODO::new, Opcode.ODEX_ONLY),
+    LIBERATE_LAMBDA(onlyArt(betweenApi(0xf7, 24, 25)), "liberate-lambda", Format.TODO::new, Opcode.ODEX_ONLY),
+    BOX_LAMBDA(onlyArt(betweenApi(0xf8, 24, 25)), "box-lambda", Format.TODO::new, Opcode.ODEX_ONLY),
+    UNBOX_LAMBDA(onlyArt(betweenApi(0xf9, 24, 25)), "unbox-lambda", Format.TODO::new, Opcode.ODEX_ONLY)*/;
 
     private static final int ODEX_ONLY = 1;
 
@@ -305,6 +362,10 @@ public enum Opcode {
         this.format = format.apply(this);
     }
 
+    Opcode(VersionConstraints forDalvik, VersionConstraints forArt, String name, Function<Opcode, Format> format, int flags) {
+        this(combine(onlyDalvik(forDalvik), onlyArt(forArt)), name, format, flags);
+    }
+
     public static SparseArray<Opcode> forOptions(DexOptions options) {
         SparseArray<Opcode> out = new SparseArray<>(values().length);
         for (Opcode op : values()) {
@@ -346,6 +407,35 @@ public enum Opcode {
         return options -> {
             options.requireOdexInstructions();
             return constraints.opcodeValue(options);
+        };
+    }
+
+    private static VersionConstraints onlyArt(VersionConstraints constraints) {
+        return options -> {
+            options.requireForArt();
+            return constraints.opcodeValue(options);
+        };
+    }
+
+    private static VersionConstraints onlyDalvik(VersionConstraints constraints) {
+        return options -> {
+            options.requireForDalvik();
+            return constraints.opcodeValue(options);
+        };
+    }
+
+    private static VersionConstraints combine(VersionConstraints first, VersionConstraints second) {
+        return options -> {
+            try {
+                return first.opcodeValue(options);
+            } catch (Throwable th1) {
+                try {
+                    return second.opcodeValue(options);
+                } catch (Throwable th2) {
+                    th2.addSuppressed(th1);
+                    throw th2;
+                }
+            }
         };
     }
 }

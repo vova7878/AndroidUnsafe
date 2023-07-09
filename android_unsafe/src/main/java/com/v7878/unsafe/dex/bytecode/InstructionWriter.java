@@ -4,6 +4,8 @@ import static com.v7878.unsafe.dex.bytecode.Format.PAYLOAD_ALIGNMENT;
 
 import com.v7878.unsafe.io.RandomOutput;
 
+import java.util.Objects;
+
 class InstructionWriter {
 
     public static int check_unsigned(int value, int width) {
@@ -235,11 +237,16 @@ class InstructionWriter {
 
     public static void write_array_payload(RandomOutput out, int opcode,
                                            int element_width, byte[] data) {
+        Objects.requireNonNull(data);
         if (!(element_width == 1 || element_width == 2 || element_width == 4 || element_width == 8)) {
             throw new IllegalStateException("unsupported element_width: " + element_width);
         }
         if (data.length % element_width != 0) {
             throw new IllegalStateException("data.length is not multiple of element_width: " + data.length);
+        }
+        int size = data.length / element_width;
+        if ((size & 0xffff) != size) {
+            throw new IllegalStateException("size is too big: " + size);
         }
         out.requireAlignment(PAYLOAD_ALIGNMENT);
         write_base(out, opcode);

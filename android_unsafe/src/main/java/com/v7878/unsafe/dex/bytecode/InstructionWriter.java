@@ -258,10 +258,6 @@ class InstructionWriter {
         if (data.length % element_width != 0) {
             throw new IllegalStateException("data.length is not multiple of element_width: " + data.length);
         }
-        int size = data.length / element_width;
-        if ((size & 0xffff) != size) {
-            throw new IllegalStateException("size is too big: " + size);
-        }
         out.requireAlignment(PAYLOAD_ALIGNMENT);
         write_base(out, opcode);
         out.writeShort(element_width);

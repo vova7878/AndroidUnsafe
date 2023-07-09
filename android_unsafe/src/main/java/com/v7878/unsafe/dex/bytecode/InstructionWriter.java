@@ -235,6 +235,20 @@ class InstructionWriter {
         out.writeShort((int) (BBBBBBBBBBBBBBBB >>> 48));
     }
 
+    public static void packed_switch_payload(RandomOutput out, int opcode,
+                                             int first_key, int[] targets) {
+        Objects.requireNonNull(targets);
+        int size = targets.length;
+        if ((size & 0xffff) != size) {
+            throw new IllegalStateException("size is too big: " + size);
+        }
+        out.requireAlignment(PAYLOAD_ALIGNMENT);
+        write_base(out, opcode);
+        out.writeShort(size);
+        out.writeInt(first_key);
+        out.writeIntArray(targets);
+    }
+
     public static void write_array_payload(RandomOutput out, int opcode,
                                            int element_width, byte[] data) {
         Objects.requireNonNull(data);

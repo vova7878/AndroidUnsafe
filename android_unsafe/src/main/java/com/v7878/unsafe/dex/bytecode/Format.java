@@ -1681,6 +1681,80 @@ public abstract class Format {
         }
     }
 
+    public static class PackedSwitchPayload extends Format {
+
+        public class Instance extends Instruction {
+
+            public final int first_key;
+            public final int[] targets;
+
+            Instance(int first_key, int[] targets) {
+                this.first_key = first_key;
+                this.targets = targets.clone();
+            }
+
+            @Override
+            public void write(WriteContext context, RandomOutput out) {
+                InstructionWriter.packed_switch_payload(out,
+                        opcode().opcodeValue(context.getOptions()),
+                        first_key, targets);
+            }
+
+            @Override
+            public Opcode opcode() {
+                return opcode;
+            }
+
+            @Override
+            public int units() {
+                return targets.length * 2 + 4;
+            }
+
+            @Override
+            public String toString() {
+                return opcode().opname() + " " + first_key + " " + Arrays.toString(targets);
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj instanceof Instance) {
+                    Instance iobj = (Instance) obj;
+                    return Objects.equals(opcode(), iobj.opcode())
+                            && first_key == iobj.first_key
+                            && Arrays.equals(targets, iobj.targets);
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(opcode(), first_key, Arrays.hashCode(targets));
+            }
+
+            @Override
+            public Instruction clone() {
+                return new Instance(first_key, targets);
+            }
+        }
+
+        PackedSwitchPayload(Opcode opcode) {
+            super(opcode, -1, true);
+        }
+
+        @Override
+        public Instruction read(RandomInput in, ReadContext context, int _00) {
+            in.requireAlignment(PAYLOAD_ALIGNMENT);
+            int size = in.readUnsignedShort();
+            int first_key = in.readInt();
+            int[] targets = in.readIntArray(size);
+            return make(first_key, targets);
+        }
+
+        public Instruction make(int first_key, int[] targets) {
+            return new Instance(first_key, targets);
+        }
+    }
+
     public static class ArrayPayload extends Format {
 
         public class Instance extends Instruction {

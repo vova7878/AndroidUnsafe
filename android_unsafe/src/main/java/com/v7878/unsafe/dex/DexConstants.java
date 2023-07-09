@@ -74,11 +74,11 @@ public class DexConstants {
     public static final int VISIBILITY_MAX = 0x02;
 
     public enum DexVersion {
-        V035(0, (byte) '0', (byte) '3', (byte) '5'),
+        V035(1, (byte) '0', (byte) '3', (byte) '5'),
         V037(24, (byte) '0', (byte) '3', (byte) '7'),
         V038(26, (byte) '0', (byte) '3', (byte) '8'),
         V039(28, (byte) '0', (byte) '3', (byte) '9'),
-        V040(34 /* ??? */, (byte) '0', (byte) '4', (byte) '0');
+        V040(34, (byte) '0', (byte) '4', (byte) '0');
         private final int minApi;
 
         private final byte first;

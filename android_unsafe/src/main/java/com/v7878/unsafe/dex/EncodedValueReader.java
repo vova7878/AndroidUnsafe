@@ -153,7 +153,7 @@ public class EncodedValueReader {
         int type_and_arg = peek(in, type);
         int arg = (type_and_arg & 0xe0) >> 5;
         int int_type = type_and_arg & 0x1f;
-        switch (EncodedValueType.values()[int_type]) {
+        switch (EncodedValueType.of(int_type)) {
             case BOOLEAN:
                 return readBoolean(arg);
             case BYTE:

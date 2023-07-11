@@ -50,6 +50,15 @@ public interface EncodedValue extends PublicCloneable {
             this.value = value;
             this.comparator = comparator;
         }
+
+        public static EncodedValueType of(int int_type) {
+            for (EncodedValueType type : values()) {
+                if (int_type == type.value) {
+                    return type;
+                }
+            }
+            throw new IllegalStateException("Unexpected type: " + Integer.toHexString(int_type));
+        }
     }
 
     default void collectData(DataCollector data) {

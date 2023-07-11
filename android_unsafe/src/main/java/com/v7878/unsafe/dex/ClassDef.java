@@ -2,9 +2,9 @@ package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.dex.DexConstants.NO_INDEX;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_ARRAY;
 
 import com.v7878.unsafe.dex.EncodedValue.ArrayValue;
+import com.v7878.unsafe.dex.EncodedValue.EncodedValueType;
 import com.v7878.unsafe.io.RandomInput;
 import com.v7878.unsafe.io.RandomOutput;
 
@@ -180,7 +180,7 @@ public class ClassDef implements PublicCloneable {
         if (static_values_off != 0) {
             RandomInput in2 = in.duplicate(static_values_off);
             static_values = (ArrayValue) EncodedValueReader
-                    .readValue(in2, context, VALUE_ARRAY);
+                    .readValue(in2, context, EncodedValueType.ARRAY);
         }
         ClassData class_data = null;
         if (class_data_off != 0) {

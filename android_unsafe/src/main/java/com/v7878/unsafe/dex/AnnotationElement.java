@@ -9,11 +9,14 @@ import java.util.Objects;
 public class AnnotationElement implements PublicCloneable {
 
     public static final Comparator<AnnotationElement> COMPARATOR = (a, b) -> {
-        if (a.equals(b)) {
-            return 0;
+        int out = StringId.COMPARATOR.compare(a.name, b.name);
+        if (out != 0) {
+            return out;
         }
 
-        return StringId.COMPARATOR.compare(a.name, b.name);
+        // a.name == b.name
+        throw new IllegalStateException(
+                "can`t compare annotation elements with same name: " + a + " " + b);
     };
 
     private String name;

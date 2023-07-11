@@ -1,30 +1,12 @@
 package com.v7878.unsafe.dex;
 
-import static com.v7878.unsafe.dex.DexConstants.VALUE_ANNOTATION;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_ARRAY;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_BOOLEAN;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_BYTE;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_CHAR;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_DOUBLE;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_ENUM;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_FIELD;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_FLOAT;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_INT;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_LONG;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_METHOD;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_METHOD_HANDLE;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_METHOD_TYPE;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_NULL;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_SHORT;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_STRING;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_TYPE;
-
 import com.v7878.unsafe.dex.EncodedValue.AnnotationValue;
 import com.v7878.unsafe.dex.EncodedValue.ArrayValue;
 import com.v7878.unsafe.dex.EncodedValue.BooleanValue;
 import com.v7878.unsafe.dex.EncodedValue.ByteValue;
 import com.v7878.unsafe.dex.EncodedValue.CharValue;
 import com.v7878.unsafe.dex.EncodedValue.DoubleValue;
+import com.v7878.unsafe.dex.EncodedValue.EncodedValueType;
 import com.v7878.unsafe.dex.EncodedValue.EnumValue;
 import com.v7878.unsafe.dex.EncodedValue.FieldValue;
 import com.v7878.unsafe.dex.EncodedValue.FloatValue;
@@ -39,15 +21,14 @@ import com.v7878.unsafe.dex.EncodedValue.StringValue;
 import com.v7878.unsafe.dex.EncodedValue.TypeValue;
 import com.v7878.unsafe.io.RandomInput;
 
+//TODO: move to EncodedValue
 public class EncodedValueReader {
 
-    private static final int MUST_READ = -1;
-
-    public static int peek(RandomInput in, int type) {
-        if (type == MUST_READ) {
+    public static int peek(RandomInput in, EncodedValueType type) {
+        if (type == null) {
             return in.readUnsignedByte();
         }
-        return type;
+        return type.value;
     }
 
     public static BooleanValue readBoolean(int arg) {
@@ -164,52 +145,53 @@ public class EncodedValueReader {
     }
 
     public static EncodedValue readValue(RandomInput in, ReadContext context) {
-        return readValue(in, context, MUST_READ);
+        return readValue(in, context, null);
     }
 
-    public static EncodedValue readValue(RandomInput in, ReadContext context, int type) {
-        type = peek(in, type);
-        int arg = (type & 0xe0) >> 5;
-        type = type & 0x1f;
-        switch (type) {
-            case VALUE_BOOLEAN:
+    public static EncodedValue readValue(
+            RandomInput in, ReadContext context, EncodedValueType type) {
+        int type_and_arg = peek(in, type);
+        int arg = (type_and_arg & 0xe0) >> 5;
+        int int_type = type_and_arg & 0x1f;
+        switch (EncodedValueType.values()[int_type]) {
+            case BOOLEAN:
                 return readBoolean(arg);
-            case VALUE_BYTE:
+            case BYTE:
                 return readByte(in, arg);
-            case VALUE_SHORT:
+            case SHORT:
                 return readShort(in, arg);
-            case VALUE_CHAR:
+            case CHAR:
                 return readChar(in, arg);
-            case VALUE_INT:
+            case INT:
                 return readInt(in, arg);
-            case VALUE_LONG:
+            case LONG:
                 return readLong(in, arg);
-            case VALUE_FLOAT:
+            case FLOAT:
                 return readFloat(in, arg);
-            case VALUE_DOUBLE:
+            case DOUBLE:
                 return readDouble(in, arg);
-            case VALUE_METHOD_TYPE:
+            case METHOD_TYPE:
                 return readMethodType(in, arg, context);
-            case VALUE_METHOD_HANDLE:
+            case METHOD_HANDLE:
                 return readMethodHandle(in, arg, context);
-            case VALUE_STRING:
+            case STRING:
                 return readString(in, arg, context);
-            case VALUE_TYPE:
+            case TYPE:
                 return readType(in, arg, context);
-            case VALUE_FIELD:
+            case FIELD:
                 return readField(in, arg, context);
-            case VALUE_ENUM:
+            case ENUM:
                 return readEnum(in, arg, context);
-            case VALUE_METHOD:
+            case METHOD:
                 return readMethod(in, arg, context);
-            case VALUE_ARRAY:
+            case ARRAY:
                 return readArray(in, context);
-            case VALUE_ANNOTATION:
+            case ANNOTATION:
                 return readAnnotation(in, context);
-            case VALUE_NULL:
+            case NULL:
                 return new NullValue();
             default:
-                throw new RuntimeException("Unexpected type: " + Integer.toHexString(type));
+                throw new RuntimeException("Unexpected type: " + Integer.toHexString(int_type));
         }
     }
 }

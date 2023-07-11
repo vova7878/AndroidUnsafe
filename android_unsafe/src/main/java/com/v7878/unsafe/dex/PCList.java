@@ -4,10 +4,28 @@ import com.v7878.unsafe.Checks;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Objects;
 
 public class PCList<T extends PublicCloneable>
         extends AbstractList<T> implements PublicCloneable {
+
+    public static <E extends PublicCloneable, L extends PCList<E>>
+    Comparator<L> getComparator(Comparator<E> cmp) {
+        Objects.requireNonNull(cmp);
+        return (a, b) -> {
+            int size = Math.min(a.size(), b.size());
+
+            for (int i = 0; i < size; i++) {
+                int out = cmp.compare(a.get(i), b.get(i));
+                if (out != 0) {
+                    return out;
+                }
+            }
+
+            return Integer.compare(a.size(), b.size());
+        };
+    }
 
     private final ArrayList<T> elements;
 

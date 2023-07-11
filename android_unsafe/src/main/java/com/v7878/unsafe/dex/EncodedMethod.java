@@ -13,22 +13,16 @@ import java.util.function.Consumer;
 
 public class EncodedMethod implements PublicCloneable {
 
-    public static Comparator<EncodedMethod> getComparator(WriteContext context) {
-        return (a, b) -> {
-            if (a.equals(b)) {
-                return 0;
-            }
+    public static final Comparator<EncodedMethod> COMPARATOR = (a, b) -> {
+        int out = MethodId.COMPARATOR.compare(a.method, b.method);
+        if (out != 0) {
+            return out;
+        }
 
-            int out = context.method_comparator()
-                    .compare(a.method, b.method);
-            if (out != 0) {
-                return out;
-            }
-
-            // a != b, but a.method == b.method
-            throw new IllegalStateException("can`t compare encoded methods " + a + " " + b);
-        };
-    }
+        // a.method == b.method
+        throw new IllegalStateException(
+                "can`t compare encoded methods with safe method id" + a + " " + b);
+    };
 
     private MethodId method;
     private int access_flags;
@@ -151,11 +145,11 @@ public class EncodedMethod implements PublicCloneable {
 
     public static void writeArray(WriteContext context, RandomOutput out,
                                   EncodedMethod[] encoded_methods) {
-        Arrays.sort(encoded_methods, context.encoded_method_comparator());
-        int fieldIndex = 0;
+        Arrays.sort(encoded_methods, COMPARATOR);
+        int index = 0;
         for (EncodedMethod tmp : encoded_methods) {
-            int diff = context.getMethodIndex(tmp.method) - fieldIndex;
-            fieldIndex += diff;
+            int diff = context.getMethodIndex(tmp.method) - index;
+            index += diff;
             out.writeULeb128(diff);
             tmp.write(context, out);
         }

@@ -11,28 +11,19 @@ public class FieldId extends FieldOrMethodId {
 
     public static final int SIZE = 0x08;
 
-    public static Comparator<FieldId> getComparator(WriteContext context) {
-        return (a, b) -> {
-            if (a.equals(b)) {
-                return 0;
-            }
+    public static final Comparator<FieldId> COMPARATOR = (a, b) -> {
+        int out = TypeId.COMPARATOR.compare(a.getDeclaringClass(), b.getDeclaringClass());
+        if (out != 0) {
+            return out;
+        }
 
-            int out = context.type_comparator()
-                    .compare(a.getDeclaringClass(), b.getDeclaringClass());
-            if (out != 0) {
-                return out;
-            }
+        out = StringId.COMPARATOR.compare(a.getName(), b.getName());
+        if (out != 0) {
+            return out;
+        }
 
-            out = StringId.COMPARATOR
-                    .compare(a.getName(), b.getName());
-            if (out != 0) {
-                return out;
-            }
-
-            return context.type_comparator()
-                    .compare(a.type, b.type);
-        };
-    }
+        return TypeId.COMPARATOR.compare(a.type, b.type);
+    };
 
     public static FieldId of(Field field) {
         Objects.requireNonNull(field, "trying to get FieldId of null");

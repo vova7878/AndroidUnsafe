@@ -119,6 +119,11 @@ public class DataFilter implements DataCollector {
     }
 
     @Override
+    public void fill(AnnotationElement value) {
+        value.collectData(this);
+    }
+
+    @Override
     public void fill(EncodedValue value) {
         value.collectData(this);
     }

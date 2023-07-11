@@ -13,28 +13,20 @@ public class MethodId extends FieldOrMethodId {
 
     public static final int SIZE = 0x08;
 
-    public static Comparator<MethodId> getComparator(WriteContext context) {
-        return (a, b) -> {
-            if (a.equals(b)) {
-                return 0;
-            }
+    public static final Comparator<MethodId> COMPARATOR = (a, b) -> {
+        int out = TypeId.COMPARATOR.compare(a.getDeclaringClass(), b.getDeclaringClass());
+        if (out != 0) {
+            return out;
+        }
 
-            int out = context.type_comparator()
-                    .compare(a.getDeclaringClass(), b.getDeclaringClass());
-            if (out != 0) {
-                return out;
-            }
+        out = StringId.COMPARATOR
+                .compare(a.getName(), b.getName());
+        if (out != 0) {
+            return out;
+        }
 
-            out = StringId.COMPARATOR
-                    .compare(a.getName(), b.getName());
-            if (out != 0) {
-                return out;
-            }
-
-            return context.proto_comparator()
-                    .compare(a.proto, b.proto);
-        };
-    }
+        return ProtoId.COMPARATOR.compare(a.proto, b.proto);
+    };
 
     private static String getName(Executable ex) {
         if (ex instanceof Constructor) {

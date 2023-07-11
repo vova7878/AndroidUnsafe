@@ -51,5 +51,7 @@ public interface DataCollector {
 
     void fill(EncodedAnnotation value);
 
+    void fill(AnnotationElement value);
+
     void fill(EncodedValue value);
 }

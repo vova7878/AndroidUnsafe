@@ -20,15 +20,8 @@ public class TypeId implements PublicCloneable {
 
     public static final int SIZE = 0x04;
 
-    public static Comparator<TypeId> getComparator(WriteContext context) {
-        return (a, b) -> {
-            if (a.equals(b)) {
-                return 0;
-            }
-            return Integer.compare(context.getStringIndex(a.descriptor),
-                    context.getStringIndex(b.descriptor));
-        };
-    }
+    public static final Comparator<TypeId> COMPARATOR =
+            (a, b) -> StringId.COMPARATOR.compare(a.descriptor, b.descriptor);
 
     public static TypeId of(String class_name) {
         Objects.requireNonNull(class_name, "trying to get TypeId of null");

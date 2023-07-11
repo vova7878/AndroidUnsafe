@@ -44,28 +44,27 @@ public interface EncodedValue extends PublicCloneable {
     EncodedValue clone();
 
     static EncodedValue defaultValue(TypeId type) {
-        String name = type.getDescriptor();
-        switch (name) {
-            case "V":
-                throw new IllegalArgumentException();
-            case "Z":
+        switch (type.getShorty()) {
+            case 'Z':
                 return new BooleanValue();
-            case "B":
+            case 'B':
                 return new ByteValue();
-            case "S":
+            case 'S':
                 return new ShortValue();
-            case "C":
+            case 'C':
                 return new CharValue();
-            case "I":
+            case 'I':
                 return new IntValue();
-            case "J":
+            case 'J':
                 return new LongValue();
-            case "F":
+            case 'F':
                 return new FloatValue();
-            case "D":
+            case 'D':
                 return new DoubleValue();
-            default:
+            case 'L':
                 return new NullValue();
+            default:
+                throw new IllegalArgumentException();
         }
     }
 
@@ -303,7 +302,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Boolean value() {
             return value;
         }
 
@@ -337,7 +336,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Byte value() {
             return value;
         }
 
@@ -371,7 +370,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Short value() {
             return value;
         }
 
@@ -405,7 +404,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Character value() {
             return value;
         }
 
@@ -439,7 +438,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Integer value() {
             return value;
         }
 
@@ -473,7 +472,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Long value() {
             return value;
         }
 
@@ -508,7 +507,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Float value() {
             return value;
         }
 
@@ -544,7 +543,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Double value() {
             return value;
         }
 
@@ -839,8 +838,7 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    class ArrayValue extends PCList<EncodedValue>
-            implements EncodedValue {
+    class ArrayValue extends PCList<EncodedValue> implements EncodedValue {
 
         public ArrayValue(EncodedValue... value) {
             super(value);
@@ -859,7 +857,7 @@ public interface EncodedValue extends PublicCloneable {
         @Override
         public void collectData(DataCollector data) {
             for (EncodedValue tmp : this) {
-                tmp.collectData(data);
+                data.fill(tmp);
             }
         }
 
@@ -917,7 +915,7 @@ public interface EncodedValue extends PublicCloneable {
 
         @Override
         public void collectData(DataCollector data) {
-            value.collectData(data);
+            data.fill(value);
         }
 
         @Override

@@ -3,79 +3,12 @@ package com.v7878.unsafe.dex;
 import com.v7878.unsafe.dex.EncodedValue.ArrayValue;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
 // Temporary object. Needed to write dex
 final class WriteContextImpl implements WriteContext {
-
-    public final Comparator<TypeId> type_comparator
-            = TypeId.getComparator(this);
-    public final Comparator<TypeList> type_list_comparator
-            = TypeList.getComparator(this);
-    public final Comparator<ProtoId> proto_comparator
-            = ProtoId.getComparator(this);
-    public final Comparator<FieldId> field_comparator
-            = FieldId.getComparator(this);
-    public final Comparator<MethodId> method_comparator
-            = MethodId.getComparator(this);
-    public final Comparator<CallSiteId> call_sites_comparator
-            = CallSiteId.getComparator(this);
-    public final Comparator<MethodHandleItem> method_handle_comparator
-            = MethodHandleItem.getComparator(this);
-    public final Comparator<AnnotationItem> annotation_comparator
-            = AnnotationItem.getComparator(this);
-    public final Comparator<EncodedField> encoded_field_comparator
-            = EncodedField.getComparator(this);
-    public final Comparator<EncodedMethod> encoded_method_comparator
-            = EncodedMethod.getComparator(this);
-
-    @Override
-    public Comparator<TypeId> type_comparator() {
-        return type_comparator;
-    }
-
-    @Override
-    public Comparator<TypeList> type_list_comparator() {
-        return type_list_comparator;
-    }
-
-    @Override
-    public Comparator<ProtoId> proto_comparator() {
-        return proto_comparator;
-    }
-
-    @Override
-    public Comparator<FieldId> field_comparator() {
-        return field_comparator;
-    }
-
-    @Override
-    public Comparator<MethodId> method_comparator() {
-        return method_comparator;
-    }
-
-    @Override
-    public Comparator<MethodHandleItem> method_handle_comparator() {
-        return method_handle_comparator;
-    }
-
-    @Override
-    public Comparator<AnnotationItem> annotation_comparator() {
-        return annotation_comparator;
-    }
-
-    @Override
-    public Comparator<EncodedField> encoded_field_comparator() {
-        return encoded_field_comparator;
-    }
-
-    @Override
-    public Comparator<EncodedMethod> encoded_method_comparator() {
-        return encoded_method_comparator;
-    }
 
     private final String[] strings;
     private final TypeId[] types;
@@ -102,17 +35,17 @@ final class WriteContextImpl implements WriteContext {
         strings = data.getStrings();
         Arrays.sort(strings, StringId.COMPARATOR);
         types = data.getTypes();
-        Arrays.sort(types, type_comparator);
+        Arrays.sort(types, TypeId.COMPARATOR);
         protos = data.getProtos();
-        Arrays.sort(protos, proto_comparator);
+        Arrays.sort(protos, ProtoId.COMPARATOR);
         fields = data.getFields();
-        Arrays.sort(fields, field_comparator);
+        Arrays.sort(fields, FieldId.COMPARATOR);
         methods = data.getMethods();
-        Arrays.sort(methods, method_comparator);
+        Arrays.sort(methods, MethodId.COMPARATOR);
         call_sites = data.getCallSites();
-        Arrays.sort(call_sites, call_sites_comparator);
+        Arrays.sort(call_sites, CallSiteId.COMPARATOR);
         method_handles = data.getMethodHandles();
-        Arrays.sort(method_handles, method_handle_comparator);
+        Arrays.sort(method_handles, MethodHandleItem.COMPARATOR);
 
         class_defs = data.getClassDefs();
 
@@ -239,7 +172,7 @@ final class WriteContextImpl implements WriteContext {
 
     @Override
     public int getTypeIndex(TypeId value) {
-        int out = Arrays.binarySearch(types, value, type_comparator);
+        int out = Arrays.binarySearch(types, value, TypeId.COMPARATOR);
         if (out < 0) {
             throw new IllegalArgumentException(
                     "unable to find type \"" + value + "\"");
@@ -249,7 +182,7 @@ final class WriteContextImpl implements WriteContext {
 
     @Override
     public int getProtoIndex(ProtoId value) {
-        int out = Arrays.binarySearch(protos, value, proto_comparator);
+        int out = Arrays.binarySearch(protos, value, ProtoId.COMPARATOR);
         if (out < 0) {
             throw new IllegalArgumentException(
                     "unable to find proto \"" + value + "\"");
@@ -259,7 +192,7 @@ final class WriteContextImpl implements WriteContext {
 
     @Override
     public int getFieldIndex(FieldId value) {
-        int out = Arrays.binarySearch(fields, value, field_comparator);
+        int out = Arrays.binarySearch(fields, value, FieldId.COMPARATOR);
         if (out < 0) {
             throw new IllegalArgumentException(
                     "unable to find field \"" + value + "\"");
@@ -269,7 +202,7 @@ final class WriteContextImpl implements WriteContext {
 
     @Override
     public int getMethodIndex(MethodId value) {
-        int out = Arrays.binarySearch(methods, value, method_comparator);
+        int out = Arrays.binarySearch(methods, value, MethodId.COMPARATOR);
         if (out < 0) {
             throw new IllegalArgumentException(
                     "unable to find method \"" + value + "\"");
@@ -279,7 +212,7 @@ final class WriteContextImpl implements WriteContext {
 
     @Override
     public int getCallSiteIndex(CallSiteId value) {
-        int out = Arrays.binarySearch(call_sites, value, call_sites_comparator);
+        int out = Arrays.binarySearch(call_sites, value, CallSiteId.COMPARATOR);
         if (out < 0) {
             throw new IllegalArgumentException(
                     "unable to find method handle \"" + value + "\"");
@@ -289,7 +222,7 @@ final class WriteContextImpl implements WriteContext {
 
     @Override
     public int getMethodHandleIndex(MethodHandleItem value) {
-        int out = Arrays.binarySearch(method_handles, value, method_handle_comparator);
+        int out = Arrays.binarySearch(method_handles, value, MethodHandleItem.COMPARATOR);
         if (out < 0) {
             throw new IllegalArgumentException(
                     "unable to find method handle \"" + value + "\"");

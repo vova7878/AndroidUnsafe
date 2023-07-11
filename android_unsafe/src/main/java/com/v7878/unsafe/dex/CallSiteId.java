@@ -13,15 +13,14 @@ public class CallSiteId implements PublicCloneable {
 
     public static final int SIZE = 0x04;
 
-    public static Comparator<CallSiteId> getComparator(WriteContext context) {
-        return (a, b) -> {
-            if (a.equals(b)) {
-                return 0;
-            }
+    public static final Comparator<CallSiteId> COMPARATOR = (a, b) -> {
+        if (a.equals(b)) {
+            return 0;
+        }
 
-            //FIXME
-        };
-    }
+        //FIXME
+        return 0;
+    };
 
     private ArrayValue value;
 

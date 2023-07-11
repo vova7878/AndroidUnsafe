@@ -13,22 +13,16 @@ import java.util.Objects;
 
 public class EncodedField implements PublicCloneable {
 
-    public static Comparator<EncodedField> getComparator(WriteContext context) {
-        return (a, b) -> {
-            if (a.equals(b)) {
-                return 0;
-            }
+    public static final Comparator<EncodedField> COMPARATOR = (a, b) -> {
+        int out = FieldId.COMPARATOR.compare(a.field, b.field);
+        if (out != 0) {
+            return out;
+        }
 
-            int out = context.field_comparator()
-                    .compare(a.field, b.field);
-            if (out != 0) {
-                return out;
-            }
-
-            // a != b, but a.field == b.field
-            throw new IllegalStateException("can`t compare encoded fields " + a + " " + b);
-        };
-    }
+        // a.field == b.field
+        throw new IllegalStateException(
+                "can`t compare encoded fields with same field id" + a + " " + b);
+    };
 
     private FieldId field;
     private int access_flags;
@@ -96,10 +90,10 @@ public class EncodedField implements PublicCloneable {
                                                  ReadContext context, int size,
                                                  Map<FieldId, AnnotationSet> annotated_fields) {
         PCList<EncodedField> out = PCList.empty();
-        int fieldIndex = 0;
+        int index = 0;
         for (int i = 0; i < size; i++) {
-            fieldIndex += in.readULeb128();
-            out.add(read(in, context.field(fieldIndex), annotated_fields));
+            index += in.readULeb128();
+            out.add(read(in, context.field(index), annotated_fields));
         }
         return out;
     }
@@ -134,7 +128,7 @@ public class EncodedField implements PublicCloneable {
     public static void writeArray(boolean static_fields,
                                   WriteContext context, RandomOutput out,
                                   EncodedField[] encoded_fields) {
-        Arrays.sort(encoded_fields, context.encoded_field_comparator());
+        Arrays.sort(encoded_fields, COMPARATOR);
         int fieldIndex = 0;
         for (EncodedField tmp : encoded_fields) {
             check(static_fields, tmp);

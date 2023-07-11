@@ -53,7 +53,7 @@ public class EncodedAnnotation implements PublicCloneable {
     public void collectData(DataCollector data) {
         data.add(type);
         for (AnnotationElement tmp : elements) {
-            tmp.collectData(data);
+            data.fill(tmp);
         }
     }
 

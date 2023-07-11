@@ -14,22 +14,14 @@ public class ProtoId implements PublicCloneable {
 
     public static final int SIZE = 0x0c;
 
-    public static Comparator<ProtoId> getComparator(WriteContext context) {
-        return (a, b) -> {
-            if (a.equals(b)) {
-                return 0;
-            }
+    public static final Comparator<ProtoId> COMPARATOR = (a, b) -> {
+        int out = TypeId.COMPARATOR.compare(a.return_type, b.return_type);
+        if (out != 0) {
+            return out;
+        }
 
-            int out = context.type_comparator()
-                    .compare(a.return_type, b.return_type);
-            if (out != 0) {
-                return out;
-            }
-
-            return context.type_list_comparator()
-                    .compare(a.parameters, b.parameters);
-        };
-    }
+        return TypeList.COMPARATOR.compare(a.parameters, b.parameters);
+    };
 
     public static ProtoId of(Executable ex) {
         Objects.requireNonNull(ex, "trying to get ProtoId of null");

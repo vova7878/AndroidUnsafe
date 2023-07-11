@@ -15,29 +15,21 @@ public class MethodHandleItem implements PublicCloneable {
 
     public static final int SIZE = 0x08;
 
-    public static Comparator<MethodHandleItem> getComparator(WriteContext context) {
-        return (a, b) -> {
-            if (a.equals(b)) {
-                return 0;
-            }
+    public static final Comparator<MethodHandleItem> COMPARATOR = (a, b) -> {
+        int out = Integer.compare(a.type, b.type);
+        if (out != 0) {
+            return out;
+        }
 
-            int out = Integer.compare(a.type, b.type);
-            if (out != 0) {
-                return out;
-            }
-
-            // now a.type == b.type
-            if (isMethodType(a.type)) {
-                return context.method_comparator()
-                        .compare((MethodId) a.field_or_method,
-                                (MethodId) b.field_or_method);
-            } else {
-                return context.field_comparator()
-                        .compare((FieldId) a.field_or_method,
-                                (FieldId) b.field_or_method);
-            }
-        };
-    }
+        // now a.type == b.type
+        if (isMethodType(a.type)) {
+            return MethodId.COMPARATOR.compare((MethodId) a.field_or_method,
+                    (MethodId) b.field_or_method);
+        } else {
+            return FieldId.COMPARATOR.compare((FieldId) a.field_or_method,
+                    (FieldId) b.field_or_method);
+        }
+    };
 
     private int type;
     private FieldOrMethodId field_or_method;

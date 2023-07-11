@@ -1,5 +1,6 @@
 package com.v7878.unsafe.dex;
 
+import com.v7878.unsafe.dex.EncodedValue.ArrayValue;
 import com.v7878.unsafe.dex.bytecode.Instruction;
 
 public class DataFilter implements DataCollector {
@@ -73,16 +74,12 @@ public class DataFilter implements DataCollector {
     }
 
     @Override
-    public void add(EncodedValue.ArrayValue value) {
-    }
-
-    @Override
-    public void add(CodeItem value) {
+    public void add(ArrayValue value) {
         value.collectData(this);
     }
 
     @Override
-    public void fill(EncodedValue.ArrayValue value) {
+    public void add(CodeItem value) {
         value.collectData(this);
     }
 

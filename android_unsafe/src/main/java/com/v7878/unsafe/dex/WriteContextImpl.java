@@ -21,6 +21,8 @@ final class WriteContextImpl implements WriteContext {
             = FieldId.getComparator(this);
     public final Comparator<MethodId> method_comparator
             = MethodId.getComparator(this);
+    public final Comparator<CallSiteId> call_sites_comparator
+            = CallSiteId.getComparator(this);
     public final Comparator<MethodHandleItem> method_handle_comparator
             = MethodHandleItem.getComparator(this);
     public final Comparator<AnnotationItem> annotation_comparator
@@ -107,11 +109,12 @@ final class WriteContextImpl implements WriteContext {
         Arrays.sort(fields, field_comparator);
         methods = data.getMethods();
         Arrays.sort(methods, method_comparator);
-
-        class_defs = data.getClassDefs();
-
+        call_sites = data.getCallSites();
+        Arrays.sort(call_sites, call_sites_comparator);
         method_handles = data.getMethodHandles();
         Arrays.sort(method_handles, method_handle_comparator);
+
+        class_defs = data.getClassDefs();
 
         type_lists = new HashMap<>();
         annotations = new HashMap<>();
@@ -121,9 +124,6 @@ final class WriteContextImpl implements WriteContext {
         annotations_directories = new HashMap<>();
         array_values = new HashMap<>();
         code_items = new HashMap<>();
-
-        //TODO: sort
-        call_sites = data.getCallSites();
     }
 
     @Override
@@ -183,12 +183,16 @@ final class WriteContextImpl implements WriteContext {
         return Arrays.stream(methods);
     }
 
-    public Stream<ClassDef> classDefsStream() {
-        return Arrays.stream(class_defs);
+    public Stream<CallSiteId> callSitesStream() {
+        return Arrays.stream(call_sites);
     }
 
     public Stream<MethodHandleItem> methodHandlesStream() {
         return Arrays.stream(method_handles);
+    }
+
+    public Stream<ClassDef> classDefsStream() {
+        return Arrays.stream(class_defs);
     }
 
     public int getStringsCount() {
@@ -269,6 +273,16 @@ final class WriteContextImpl implements WriteContext {
         if (out < 0) {
             throw new IllegalArgumentException(
                     "unable to find method \"" + value + "\"");
+        }
+        return out;
+    }
+
+    @Override
+    public int getCallSiteIndex(CallSiteId value) {
+        int out = Arrays.binarySearch(call_sites, value, call_sites_comparator);
+        if (out < 0) {
+            throw new IllegalArgumentException(
+                    "unable to find method handle \"" + value + "\"");
         }
         return out;
     }

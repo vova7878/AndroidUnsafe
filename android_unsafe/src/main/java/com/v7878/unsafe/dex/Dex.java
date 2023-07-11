@@ -165,25 +165,25 @@ public class Dex extends PCList<ClassDef> {
         map.class_defs_size = context.getClassDefsCount();
         offset += map.class_defs_size * ClassDef.SIZE;
 
-        //TODO
-        /*map.call_site_ids_off = offset;
+        map.call_site_ids_off = offset;
         map.call_site_ids_size = context.getCallSitesCount();
-        offset += map.call_site_ids_size * CallSiteId.SIZE;*/
+        offset += map.call_site_ids_size * CallSiteId.SIZE;
 
         map.method_handles_off = offset;
         map.method_handles_size = context.getMethodHandlesCount();
         offset += map.method_handles_size * MethodHandleItem.SIZE;
 
         // writing
+        //TODO: move code to specific classes
         //TODO: all sections
         map.data_off = offset;
 
-        RandomOutput data_out = out.duplicate();
-
         map.string_data_items_off = offset;
         map.string_data_items_size = map.string_ids_size;
+
+        RandomOutput data_out = out.duplicate(offset);
+
         out.position(map.string_ids_off);
-        data_out.position(map.string_data_items_off);
         context.stringsStream().forEach((value) -> StringId.write(value, context, out, data_out));
         offset = (int) data_out.position();
 
@@ -327,6 +327,9 @@ public class Dex extends PCList<ClassDef> {
 
         out.position(map.class_defs_off);
         context.classDefsStream().forEach((value) -> value.write(context, out));
+
+        out.position(map.call_site_ids_off);
+        context.callSitesStream().forEach((value) -> value.write(context, out));
 
         out.position(map.method_handles_off);
         context.methodHandlesStream().forEach((value) -> value.write(context, out));

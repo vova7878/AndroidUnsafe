@@ -4,12 +4,24 @@ import static com.v7878.unsafe.dex.DexConstants.VALUE_ARRAY;
 
 import com.v7878.unsafe.dex.EncodedValue.ArrayValue;
 import com.v7878.unsafe.io.RandomInput;
+import com.v7878.unsafe.io.RandomOutput;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 public class CallSiteId implements PublicCloneable {
 
     public static final int SIZE = 0x04;
+
+    public static Comparator<CallSiteId> getComparator(WriteContext context) {
+        return (a, b) -> {
+            if (a.equals(b)) {
+                return 0;
+            }
+
+            //FIXME
+        };
+    }
 
     private ArrayValue value;
 
@@ -34,7 +46,11 @@ public class CallSiteId implements PublicCloneable {
     }
 
     public void collectData(DataCollector data) {
-        data.fill(value);
+        data.add(value);
+    }
+
+    public void write(WriteContext context, RandomOutput out) {
+        out.writeInt(context.getArrayValueOffset(value));
     }
 
     @Override

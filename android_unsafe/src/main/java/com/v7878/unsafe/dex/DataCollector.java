@@ -37,8 +37,6 @@ public interface DataCollector {
 
     void add(CodeItem value);
 
-    void fill(ArrayValue value);
-
     void fill(CatchHandlerElement value);
 
     void fill(CatchHandler value);

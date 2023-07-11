@@ -157,9 +157,7 @@ public enum ReferenceType {
 
         @Override
         public int refToIndex(WriteContext context, Object ref) {
-            //TODO
-            //return context.getCallSiteIndex(verify(ref));
-            throw new UnsupportedOperationException("not implemented yet");
+            return context.getCallSiteIndex(verify(ref));
         }
 
         @Override

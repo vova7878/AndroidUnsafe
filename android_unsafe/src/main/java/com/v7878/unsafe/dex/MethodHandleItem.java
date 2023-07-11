@@ -77,6 +77,14 @@ public class MethodHandleItem implements PublicCloneable {
         return new MethodHandleItem(type, field_or_method);
     }
 
+    public void collectData(DataCollector data) {
+        if (isMethodType(type)) {
+            data.add((MethodId) field_or_method);
+        } else {
+            data.add((FieldId) field_or_method);
+        }
+    }
+
     public void write(WriteContext context, RandomOutput out) {
         out.writeShort(type);
         out.writeShort(0);
@@ -84,14 +92,6 @@ public class MethodHandleItem implements PublicCloneable {
                 ? context.getMethodIndex((MethodId) field_or_method)
                 : context.getFieldIndex((FieldId) field_or_method));
         out.writeShort(0);
-    }
-
-    public void collectData(DataCollector data) {
-        if (isMethodType(type)) {
-            data.add((MethodId) field_or_method);
-        } else {
-            data.add((FieldId) field_or_method);
-        }
     }
 
     public static boolean isMethodType(int type) {

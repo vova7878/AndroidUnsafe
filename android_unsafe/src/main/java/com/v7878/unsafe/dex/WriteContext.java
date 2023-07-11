@@ -35,6 +35,8 @@ public interface WriteContext {
 
     int getMethodIndex(MethodId value);
 
+    int getCallSiteIndex(CallSiteId value);
+
     int getMethodHandleIndex(MethodHandleItem value);
 
     int getTypeListOffset(TypeList value);

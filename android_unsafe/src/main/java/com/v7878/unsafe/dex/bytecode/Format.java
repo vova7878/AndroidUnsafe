@@ -1910,7 +1910,7 @@ public abstract class Format {
                 throw new IllegalStateException("negative size: " + size);
             }
             byte[] data = in.readByteArray(size * element_width);
-            if ((size & 1) != 0) {
+            if ((data.length & 1) != 0) {
                 in.readByte(); // padding
             }
             return make(element_width, data);

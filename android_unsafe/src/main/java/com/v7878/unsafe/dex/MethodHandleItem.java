@@ -1,9 +1,6 @@
 package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.dex.DexConstants.METHOD_HANDLE_TYPE_INVOKE_STATIC;
-import static com.v7878.unsafe.dex.DexConstants.METHOD_HANDLE_TYPE_MAX;
-import static com.v7878.unsafe.dex.DexConstants.METHOD_HANDLE_TYPE_MIN;
 
 import com.v7878.unsafe.io.RandomInput;
 import com.v7878.unsafe.io.RandomOutput;
@@ -16,13 +13,13 @@ public class MethodHandleItem implements PublicCloneable {
     public static final int SIZE = 0x08;
 
     public static final Comparator<MethodHandleItem> COMPARATOR = (a, b) -> {
-        int out = Integer.compare(a.type, b.type);
+        int out = Integer.compare(a.type.value, b.type.value);
         if (out != 0) {
             return out;
         }
 
         // now a.type == b.type
-        if (isMethodType(a.type)) {
+        if (a.type.isMethodAccess()) {
             return MethodId.COMPARATOR.compare((MethodId) a.field_or_method,
                     (MethodId) b.field_or_method);
         } else {
@@ -31,21 +28,58 @@ public class MethodHandleItem implements PublicCloneable {
         }
     };
 
-    private int type;
+    public enum MethodHandleType {
+        STATIC_PUT(0x00, false),
+        STATIC_GET(0x01, false),
+        INSTANCE_PUT(0x02, false),
+        INSTANCE_GET(0x03, false),
+        INVOKE_STATIC(0x04, true),
+        INVOKE_INSTANCE(0x05, true),
+        INVOKE_CONSTRUCTOR(0x06, true),
+        INVOKE_DIRECT(0x07, true),
+        INVOKE_INTERFACE(0x08, true);
+
+        private final int value;
+        private final boolean isMethod;
+
+        MethodHandleType(int value, boolean isMethod) {
+            this.value = value;
+            this.isMethod = isMethod;
+        }
+
+        public boolean isMethodAccess() {
+            return isMethod;
+        }
+
+        public boolean isFieldAccess() {
+            return !isMethod;
+        }
+
+        public static MethodHandleType of(int int_type) {
+            for (MethodHandleType type : values()) {
+                if (int_type == type.value) {
+                    return type;
+                }
+            }
+            throw new IllegalStateException("unknown method handle type: " + int_type);
+        }
+    }
+
+    private MethodHandleType type;
     private FieldOrMethodId field_or_method;
 
-    public MethodHandleItem(int type, FieldOrMethodId field_or_method) {
+    public MethodHandleItem(MethodHandleType type, FieldOrMethodId field_or_method) {
         setType(type);
         setFieldOrMethod(field_or_method);
     }
 
-    public final void setType(int type) {
-        assert_(type >= METHOD_HANDLE_TYPE_MIN && type <= METHOD_HANDLE_TYPE_MAX,
-                IllegalArgumentException::new, "illegal method handle type: " + type);
+    public final void setType(MethodHandleType type) {
+        assert_(type != null, IllegalArgumentException::new,
+                "method handle type can`n be null");
         this.type = type;
     }
 
-    public final int getType() {
+    public final MethodHandleType getType() {
         return type;
     }
 
@@ -59,18 +93,18 @@ public class MethodHandleItem implements PublicCloneable {
     }
 
     public static MethodHandleItem read(RandomInput in, ReadContext context) {
-        int type = in.readUnsignedShort();
+        MethodHandleType type = MethodHandleType.of(in.readUnsignedShort());
         in.addPosition(2); //unused
         int field_or_method_id = in.readUnsignedShort();
         in.addPosition(2); //unused
-        FieldOrMethodId field_or_method = isMethodType(type)
+        FieldOrMethodId field_or_method = type.isMethodAccess()
                 ? context.method(field_or_method_id)
                 : context.field(field_or_method_id);
         return new MethodHandleItem(type, field_or_method);
     }
 
     public void collectData(DataCollector data) {
-        if (isMethodType(type)) {
+        if (type.isMethodAccess()) {
             data.add((MethodId) field_or_method);
         } else {
             data.add((FieldId) field_or_method);
@@ -78,16 +112,12 @@ public class MethodHandleItem implements PublicCloneable {
     }
 
     public void write(WriteContext context, RandomOutput out) {
-        out.writeShort(type);
+        out.writeShort(type.value);
         out.writeShort(0);
-        out.writeShort(isMethodType(type)
+        out.writeShort(type.isMethodAccess()
                 ? context.getMethodIndex((MethodId) field_or_method)
                 : context.getFieldIndex((FieldId) field_or_method));
         out.writeShort(0);
-    }
-
-    public static boolean isMethodType(int type) {
-        return type >= METHOD_HANDLE_TYPE_INVOKE_STATIC;
     }
 
     @Override

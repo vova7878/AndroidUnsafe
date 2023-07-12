@@ -1,10 +1,6 @@
 package com.v7878.unsafe.dex;
 
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.dex.DexConstants.VISIBILITY_BUILD;
-import static com.v7878.unsafe.dex.DexConstants.VISIBILITY_MAX;
-import static com.v7878.unsafe.dex.DexConstants.VISIBILITY_MIN;
-import static com.v7878.unsafe.dex.DexConstants.VISIBILITY_SYSTEM;
 
 import com.v7878.unsafe.io.RandomInput;
 import com.v7878.unsafe.io.RandomOutput;
@@ -25,87 +21,107 @@ public final class AnnotationItem implements PublicCloneable {
                 "can`t compare annotations of the same type: " + a + " " + b);
     };
 
+    public enum AnnotationVisibility {
+        BUILD(0x00),
+        RUNTIME(0x01),
+        SYSTEM(0x02);
+
+        private final int value;
+
+        AnnotationVisibility(int value) {
+            this.value = value;
+        }
+
+        public static AnnotationVisibility of(int int_value) {
+            for (AnnotationVisibility type : values()) {
+                if (int_value == type.value) {
+                    return type;
+                }
+            }
+            throw new IllegalStateException("unknown annotation visibility: " + int_value);
+        }
+    }
+
     public static AnnotationItem FastNative() {
-        return new AnnotationItem(VISIBILITY_BUILD, TypeId.of(
+        return new AnnotationItem(AnnotationVisibility.BUILD, TypeId.of(
                 "dalvik.annotation.optimization.FastNative"));
     }
 
     public static AnnotationItem CriticalNative() {
-        return new AnnotationItem(VISIBILITY_BUILD, TypeId.of(
+        return new AnnotationItem(AnnotationVisibility.BUILD, TypeId.of(
                 "dalvik.annotation.optimization.CriticalNative"));
     }
 
     public static AnnotationItem AnnotationDefault(EncodedAnnotation annotation) {
-        return new AnnotationItem(VISIBILITY_SYSTEM, TypeId.of(
+        return new AnnotationItem(AnnotationVisibility.SYSTEM, TypeId.of(
                 "dalvik.annotation.AnnotationDefault"),
                 new AnnotationElement("value", EncodedValue.of(annotation)));
     }
 
     public static AnnotationItem EnclosingClass(TypeId clazz) {
-        return new AnnotationItem(VISIBILITY_SYSTEM, TypeId.of(
+        return new AnnotationItem(AnnotationVisibility.SYSTEM, TypeId.of(
                 "dalvik.annotation.EnclosingClass"),
                 new AnnotationElement("value", EncodedValue.of(clazz)));
     }
 
     public static AnnotationItem EnclosingMethod(MethodId method) {
-        return new AnnotationItem(VISIBILITY_SYSTEM, TypeId.of(
+        return new AnnotationItem(AnnotationVisibility.SYSTEM, TypeId.of(
                 "dalvik.annotation.EnclosingMethod"),
                 new AnnotationElement("value", EncodedValue.of(method)));
     }
 
     public static AnnotationItem InnerClass(String name, int access_flags) {
-        return new AnnotationItem(VISIBILITY_SYSTEM, TypeId.of(
+        return new AnnotationItem(AnnotationVisibility.SYSTEM, TypeId.of(
                 "dalvik.annotation.InnerClass"),
                 new AnnotationElement("name", EncodedValue.of(name)),
                 new AnnotationElement("accessFlags", EncodedValue.of(access_flags)));
     }
 
     public static AnnotationItem MemberClasses(TypeId... classes) {
-        return new AnnotationItem(VISIBILITY_SYSTEM, TypeId.of(
+        return new AnnotationItem(AnnotationVisibility.SYSTEM, TypeId.of(
                 "dalvik.annotation.MemberClasses"), new AnnotationElement(
                 "value", EncodedValue.of(classes)));
     }
 
     public static AnnotationItem MethodParameters(String[] names, int[] access_flags) {
-        return new AnnotationItem(VISIBILITY_SYSTEM, TypeId.of(
+        return new AnnotationItem(AnnotationVisibility.SYSTEM, TypeId.of(
                 "dalvik.annotation.MethodParameters"),
                 new AnnotationElement("names", EncodedValue.of(names)),
                 new AnnotationElement("accessFlags", EncodedValue.of(access_flags)));
     }
 
     public static AnnotationItem Signature(String... value) {
-        return new AnnotationItem(VISIBILITY_SYSTEM, TypeId.of(
+        return new AnnotationItem(AnnotationVisibility.SYSTEM, TypeId.of(
                 "dalvik.annotation.Signature"), new AnnotationElement(
                 "value", EncodedValue.of(value)));
     }
 
     public static AnnotationItem Throws(TypeId... exceptions) {
-        return new AnnotationItem(VISIBILITY_SYSTEM, TypeId.of(
+        return new AnnotationItem(AnnotationVisibility.SYSTEM, TypeId.of(
                 "dalvik.annotation.Throws"), new AnnotationElement(
                 "value", EncodedValue.of(exceptions)));
     }
 
-    private int visibility;
+    private AnnotationVisibility visibility;
     private EncodedAnnotation annotation;
 
-    public AnnotationItem(int visibility, EncodedAnnotation annotation) {
+    public AnnotationItem(AnnotationVisibility visibility, EncodedAnnotation annotation) {
         setVisibility(visibility);
         setAnnotation(annotation);
     }
 
-    public AnnotationItem(int visibility, TypeId type, AnnotationElement... elements) {
+    public AnnotationItem(AnnotationVisibility visibility, TypeId type, AnnotationElement... elements) {
         setVisibility(visibility);
         setAnnotation(new EncodedAnnotation(type, elements));
     }
 
-    public void setVisibility(int visibility) {
-        assert_(visibility >= VISIBILITY_MIN && visibility <= VISIBILITY_MAX,
-                IllegalArgumentException::new,
-                "illegal annotation visibility: " + visibility);
+    public void setVisibility(AnnotationVisibility visibility) {
+        assert_(visibility != null, IllegalArgumentException::new,
+                "annotation visibility can`t be null");
         this.visibility = visibility;
     }
 
-    public int getVisibility() {
+    public AnnotationVisibility getVisibility() {
         return visibility;
     }
 
@@ -119,7 +135,7 @@ public final class AnnotationItem implements PublicCloneable {
     }
 
     public static AnnotationItem read(RandomInput in, ReadContext context) {
-        return new AnnotationItem(in.readUnsignedByte(),
+        return new AnnotationItem(AnnotationVisibility.of(in.readUnsignedByte()),
                 EncodedAnnotation.read(in, context));
     }
 
@@ -128,7 +144,7 @@ public final class AnnotationItem implements PublicCloneable {
     }
 
     public void write(WriteContext context, RandomOutput out) {
-        out.writeByte(visibility);
+        out.writeByte(visibility.value);
         annotation.write(context, out);
     }
 

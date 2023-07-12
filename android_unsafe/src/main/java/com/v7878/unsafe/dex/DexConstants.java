@@ -5,21 +5,6 @@ public class DexConstants {
     public static final int ENDIAN_CONSTANT = 0x12345678;
     public static final int NO_INDEX = -1;
 
-    //TODO: enum
-    //method_handle_item
-    public static final int METHOD_HANDLE_TYPE_STATIC_PUT = 0x00;
-    public static final int METHOD_HANDLE_TYPE_STATIC_GET = 0x01;
-    public static final int METHOD_HANDLE_TYPE_INSTANCE_PUT = 0x02;
-    public static final int METHOD_HANDLE_TYPE_INSTANCE_GET = 0x03;
-    public static final int METHOD_HANDLE_TYPE_INVOKE_STATIC = 0x04;
-    public static final int METHOD_HANDLE_TYPE_INVOKE_INSTANCE = 0x05;
-    public static final int METHOD_HANDLE_TYPE_INVOKE_CONSTRUCTOR = 0x06;
-    public static final int METHOD_HANDLE_TYPE_INVOKE_DIRECT = 0x07;
-    public static final int METHOD_HANDLE_TYPE_INVOKE_INTERFACE = 0x08;
-
-    public static final int METHOD_HANDLE_TYPE_MIN = 0x00;
-    public static final int METHOD_HANDLE_TYPE_MAX = 0x08;
-
     //map_list
     public static final int TYPE_HEADER_ITEM = 0x0000;
     public static final int TYPE_STRING_ID_ITEM = 0x0001;
@@ -44,15 +29,6 @@ public class DexConstants {
     public static final int TYPE_ANNOTATIONS_DIRECTORY_ITEM = 0x2006;
     //TODO?
     public static final int TYPE_HIDDENAPI_CLASS_DATA_ITEM = 0xF000;
-
-    //TODO: enum
-    //annotation_item
-    public static final int VISIBILITY_BUILD = 0x00;
-    public static final int VISIBILITY_RUNTIME = 0x01;
-    public static final int VISIBILITY_SYSTEM = 0x02;
-
-    public static final int VISIBILITY_MIN = 0x00;
-    public static final int VISIBILITY_MAX = 0x02;
 
     public enum DexVersion {
         V035(1, (byte) '0', (byte) '3', (byte) '5'),

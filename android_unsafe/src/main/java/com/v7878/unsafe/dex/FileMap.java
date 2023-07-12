@@ -125,8 +125,14 @@ class FileMap {
     public static FileMap read(RandomInput in, DexOptions options) {
         FileMap out = new FileMap();
         byte[] magic = in.readByteArray(8);
-        assert_(magic[0] == 'd' && magic[1] == 'e' && magic[2] == 'x' && magic[3] == '\n' && magic[7] == '\0',
-                IllegalArgumentException::new, "invalid magic: " + Arrays.toString(magic));
+        if (magic[0] == 'd' && magic[1] == 'e' && magic[2] == 'x' && magic[3] == '\n' && magic[7] == '\0') {
+            // ok, regular dex file
+        } else if (magic[0] == 'c' && magic[1] == 'd' && magic[2] == 'e' && magic[3] == 'x' && magic[7] == '\0') {
+            //TODO: cdex reading
+            throw new UnsupportedOperationException("cdex reading unsupported yet");
+        } else {
+            throw new IllegalStateException("invalid magic: " + Arrays.toString(magic));
+        }
         DexVersion version = DexVersion.fromBytes(magic[4], magic[5], magic[6]);
         options.requireMinApi(version.getMinApi());
         in.addPosition(4); //checksum

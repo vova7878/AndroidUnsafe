@@ -1,5 +1,6 @@
 package com.v7878.unsafe.function;
 
+import com.v7878.unsafe.AndroidUnsafe6.VMStack;
 import com.v7878.unsafe.memory.Addressable;
 import com.v7878.unsafe.memory.Pointer;
 
@@ -55,7 +56,7 @@ public interface SymbolLookup extends Closeable {
         return NativeLibrary.loadLibrary(loader, libname);
     }
 
-    //TODO: get caller class
-    /*static NativeLibrary loaderLookup(String libname) {
-    }*/
+    static NativeLibrary loaderLookup(String libname) {
+        return loaderLookup(VMStack.INSTANCE.getStackClass1().getClassLoader(), libname);
+    }
 }

@@ -4,6 +4,7 @@ import static com.v7878.unsafe.AndroidUnsafe.IS64BIT;
 import static com.v7878.unsafe.Utils.roundUpL;
 
 import com.v7878.unsafe.Checks;
+import com.v7878.unsafe.Utils;
 import com.v7878.unsafe.memory.Word;
 
 import java.util.Objects;
@@ -31,7 +32,11 @@ public interface RandomOutput extends AutoCloseable {
         }
     }
 
-    void skipBytes(long n);
+    default void writeIntArray(int[] ints) {
+        for (int value : ints) {
+            writeInt(value);
+        }
+    }
 
     default void writeBoolean(boolean value) {
         writeByte(value ? 1 : 0);
@@ -81,12 +86,14 @@ public interface RandomOutput extends AutoCloseable {
 
     long position();
 
-    void position(long new_position);
+    long position(long new_position);
+
+    default long addPosition(long delta) {
+        return position(position() + delta);
+    }
 
     default long alignPosition(long alignment) {
-        long new_position = roundUpL(position(), alignment);
-        position(new_position);
-        return new_position;
+        return position(roundUpL(position(), alignment));
     }
 
     default long alignPositionAndFillZeros(long alignment) {
@@ -95,14 +102,21 @@ public interface RandomOutput extends AutoCloseable {
         for (long i = 0; i < new_position - old_position; i++) {
             writeByte(0);
         }
-        return new_position;
+        return old_position;
+    }
+
+    default void requireAlignment(int alignment) {
+        long pos = position();
+        if (!Utils.isAlignedL(pos, alignment)) {
+            throw new IllegalStateException("position " + pos + " not aligned by " + alignment);
+        }
     }
 
     RandomOutput duplicate();
 
     default RandomOutput duplicate(long offset) {
         RandomOutput out = duplicate();
-        out.skipBytes(offset);
+        out.addPosition(offset);
         return out;
     }
 

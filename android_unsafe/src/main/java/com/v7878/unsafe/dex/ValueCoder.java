@@ -1,11 +1,13 @@
 package com.v7878.unsafe.dex;
 
+import com.v7878.unsafe.dex.EncodedValue.EncodedValueType;
 import com.v7878.unsafe.io.RandomInput;
 import com.v7878.unsafe.io.RandomOutput;
 
 public class ValueCoder {
 
-    public static void writeSignedIntegralValue(RandomOutput out, int type, long value) {
+    public static void writeSignedIntegralValue(
+            RandomOutput out, EncodedValueType type, long value) {
         /*
          * Figure out how many bits are needed to represent the value,
          * including a sign bit: The bit count is subtracted from 65
@@ -24,7 +26,7 @@ public class ValueCoder {
          * Write the header byte, which includes the type and
          * requiredBytes - 1.
          */
-        out.writeByte(type | ((requiredBytes - 1) << 5));
+        out.writeByte(type.value | ((requiredBytes - 1) << 5));
 
         // Write the value, per se.
         while (requiredBytes > 0) {
@@ -34,7 +36,8 @@ public class ValueCoder {
         }
     }
 
-    public static void writeUnsignedIntegralValue(RandomOutput out, int type, long value) {
+    public static void writeUnsignedIntegralValue(
+            RandomOutput out, EncodedValueType type, long value) {
         // Figure out how many bits are needed to represent the value.
         int requiredBits = 64 - Long.numberOfLeadingZeros(value);
         if (requiredBits == 0) {
@@ -48,7 +51,7 @@ public class ValueCoder {
          * Write the header byte, which includes the type and
          * requiredBytes - 1.
          */
-        out.writeByte(type | ((requiredBytes - 1) << 5));
+        out.writeByte(type.value | ((requiredBytes - 1) << 5));
 
         // Write the value, per se.
         while (requiredBytes > 0) {
@@ -58,7 +61,8 @@ public class ValueCoder {
         }
     }
 
-    public static void writeRightZeroExtendedValue(RandomOutput out, int type, long value) {
+    public static void writeRightZeroExtendedValue(
+            RandomOutput out, EncodedValueType type, long value) {
         // Figure out how many bits are needed to represent the value.
         int requiredBits = 64 - Long.numberOfTrailingZeros(value);
         if (requiredBits == 0) {
@@ -75,7 +79,7 @@ public class ValueCoder {
          * Write the header byte, which includes the type and
          * requiredBytes - 1.
          */
-        out.writeByte(type | ((requiredBytes - 1) << 5));
+        out.writeByte(type.value | ((requiredBytes - 1) << 5));
 
         // Write the value, per se.
         while (requiredBytes > 0) {

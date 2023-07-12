@@ -15,29 +15,21 @@ public class MethodHandleItem implements PublicCloneable {
 
     public static final int SIZE = 0x08;
 
-    public static Comparator<MethodHandleItem> getComparator(WriteContext context) {
-        return (a, b) -> {
-            if (a.equals(b)) {
-                return 0;
-            }
+    public static final Comparator<MethodHandleItem> COMPARATOR = (a, b) -> {
+        int out = Integer.compare(a.type, b.type);
+        if (out != 0) {
+            return out;
+        }
 
-            int out = Integer.compare(a.type, b.type);
-            if (out != 0) {
-                return out;
-            }
-
-            // now a.type == b.type
-            if (isMethodType(a.type)) {
-                return context.method_comparator()
-                        .compare((MethodId) a.field_or_method,
-                                (MethodId) b.field_or_method);
-            } else {
-                return context.field_comparator()
-                        .compare((FieldId) a.field_or_method,
-                                (FieldId) b.field_or_method);
-            }
-        };
-    }
+        // now a.type == b.type
+        if (isMethodType(a.type)) {
+            return MethodId.COMPARATOR.compare((MethodId) a.field_or_method,
+                    (MethodId) b.field_or_method);
+        } else {
+            return FieldId.COMPARATOR.compare((FieldId) a.field_or_method,
+                    (FieldId) b.field_or_method);
+        }
+    };
 
     private int type;
     private FieldOrMethodId field_or_method;
@@ -68,13 +60,21 @@ public class MethodHandleItem implements PublicCloneable {
 
     public static MethodHandleItem read(RandomInput in, ReadContext context) {
         int type = in.readUnsignedShort();
-        in.skipBytes(2); //unused
+        in.addPosition(2); //unused
         int field_or_method_id = in.readUnsignedShort();
-        in.skipBytes(2); //unused
+        in.addPosition(2); //unused
         FieldOrMethodId field_or_method = isMethodType(type)
                 ? context.method(field_or_method_id)
                 : context.field(field_or_method_id);
         return new MethodHandleItem(type, field_or_method);
+    }
+
+    public void collectData(DataCollector data) {
+        if (isMethodType(type)) {
+            data.add((MethodId) field_or_method);
+        } else {
+            data.add((FieldId) field_or_method);
+        }
     }
 
     public void write(WriteContext context, RandomOutput out) {
@@ -84,14 +84,6 @@ public class MethodHandleItem implements PublicCloneable {
                 ? context.getMethodIndex((MethodId) field_or_method)
                 : context.getFieldIndex((FieldId) field_or_method));
         out.writeShort(0);
-    }
-
-    public void collectData(DataCollector data) {
-        if (isMethodType(type)) {
-            data.add((MethodId) field_or_method);
-        } else {
-            data.add((FieldId) field_or_method);
-        }
     }
 
     public static boolean isMethodType(int type) {

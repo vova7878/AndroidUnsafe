@@ -4,10 +4,23 @@ import com.v7878.unsafe.io.RandomInput;
 import com.v7878.unsafe.io.RandomOutput;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class EncodedAnnotation implements PublicCloneable {
+
+    private static final Comparator<PCList<AnnotationElement>> AE_LIST_COMPARATOR
+            = PCList.getComparator(AnnotationElement.COMPARATOR);
+
+    public static final Comparator<EncodedAnnotation> COMPARATOR = (a, b) -> {
+        int out = TypeId.COMPARATOR.compare(a.type, b.type);
+        if (out != 0) {
+            return out;
+        }
+
+        return AE_LIST_COMPARATOR.compare(a.elements, b.elements);
+    };
 
     private TypeId type;
 
@@ -53,7 +66,7 @@ public class EncodedAnnotation implements PublicCloneable {
     public void collectData(DataCollector data) {
         data.add(type);
         for (AnnotationElement tmp : elements) {
-            tmp.collectData(data);
+            data.fill(tmp);
         }
     }
 

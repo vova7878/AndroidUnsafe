@@ -96,7 +96,7 @@ public class AnnotationsDirectory {
         out.writeInt(annotated_parameters.size());
 
         FieldId[] fields = annotated_fields.keySet().toArray(new FieldId[0]);
-        Arrays.sort(fields, context.field_comparator());
+        Arrays.sort(fields, FieldId.COMPARATOR);
         for (FieldId tmp : fields) {
             out.writeInt(context.getFieldIndex(tmp));
             out.writeInt(context.getAnnotationSetOffset(
@@ -104,7 +104,7 @@ public class AnnotationsDirectory {
         }
 
         MethodId[] methods = annotated_methods.keySet().toArray(new MethodId[0]);
-        Arrays.sort(methods, context.method_comparator());
+        Arrays.sort(methods, MethodId.COMPARATOR);
         for (MethodId tmp : methods) {
             out.writeInt(context.getMethodIndex(tmp));
             out.writeInt(context.getAnnotationSetOffset(
@@ -112,7 +112,7 @@ public class AnnotationsDirectory {
         }
 
         methods = annotated_parameters.keySet().toArray(new MethodId[0]);
-        Arrays.sort(methods, context.method_comparator());
+        Arrays.sort(methods, MethodId.COMPARATOR);
         for (MethodId tmp : methods) {
             out.writeInt(context.getMethodIndex(tmp));
             out.writeInt(context.getAnnotationSetListOffset(

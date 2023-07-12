@@ -1,15 +1,19 @@
 package com.v7878.unsafe.dex;
 
-import static com.v7878.unsafe.dex.DexConstants.VALUE_ARRAY;
-
 import com.v7878.unsafe.dex.EncodedValue.ArrayValue;
+import com.v7878.unsafe.dex.EncodedValue.EncodedValueType;
 import com.v7878.unsafe.io.RandomInput;
+import com.v7878.unsafe.io.RandomOutput;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 public class CallSiteId implements PublicCloneable {
 
     public static final int SIZE = 0x04;
+
+    public static final Comparator<CallSiteId> COMPARATOR =
+            (a, b) -> ArrayValue.COMPARATOR.compare(a.value, b.value);
 
     private ArrayValue value;
 
@@ -29,12 +33,16 @@ public class CallSiteId implements PublicCloneable {
     public static CallSiteId read(RandomInput in, ReadContext context) {
         RandomInput in2 = in.duplicate(in.readInt());
         ArrayValue value = (ArrayValue) EncodedValueReader
-                .readValue(in2, context, VALUE_ARRAY);
+                .readValue(in2, context, EncodedValueType.ARRAY);
         return new CallSiteId(value);
     }
 
     public void collectData(DataCollector data) {
-        data.fill(value);
+        data.add(value);
+    }
+
+    public void write(WriteContext context, RandomOutput out) {
+        out.writeInt(context.getArrayValueOffset(value));
     }
 
     @Override

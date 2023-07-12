@@ -34,6 +34,7 @@ import java.util.function.Supplier;
 import dalvik.system.DexFile;
 
 @DangerLevel(6)
+@SuppressWarnings("deprecation")
 public class AndroidUnsafe6 extends AndroidUnsafe5 {
 
     //TODO: set content
@@ -393,25 +394,21 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
         ClassDef clazz = new ClassDef(id);
         clazz.setSuperClass(TypeId.of(Object.class));
         clazz.setAccessFlags(Modifier.PUBLIC | Modifier.FINAL);
-        clazz.getClassData().getDirectMethods().add(
-                new EncodedMethod(
-                        new MethodId(id, new ProtoId(TypeId.of(word)), "NewGlobalRef"),
-                        Modifier.PRIVATE | Modifier.NATIVE,
-                        new AnnotationSet(
-                                AnnotationItem.FastNative()
-                        ), null, null
-                )
-        );
-        clazz.getClassData().getDirectMethods().add(
-                new EncodedMethod(
-                        new MethodId(id, new ProtoId(TypeId.V, TypeId.of(word),
-                                TypeId.of(word)), "DeleteGlobalRef"),
-                        Modifier.PRIVATE | Modifier.STATIC | Modifier.NATIVE,
-                        new AnnotationSet(
-                                AnnotationItem.CriticalNative()
-                        ), null, null
-                )
-        );
+        clazz.getClassData().getDirectMethods().add(new EncodedMethod(
+                new MethodId(id, new ProtoId(TypeId.of(word)), "NewGlobalRef"),
+                Modifier.PRIVATE | Modifier.NATIVE,
+                new AnnotationSet(
+                        AnnotationItem.FastNative()
+                ), null, null
+        ));
+        clazz.getClassData().getDirectMethods().add(new EncodedMethod(
+                new MethodId(id, new ProtoId(TypeId.V, TypeId.of(word),
+                        TypeId.of(word)), "DeleteGlobalRef"),
+                Modifier.PRIVATE | Modifier.STATIC | Modifier.NATIVE,
+                new AnnotationSet(
+                        AnnotationItem.CriticalNative()
+                ), null, null
+        ));
         DexFile dex = openDexFile(new Dex(clazz).compile());
         return loadClass(dex, name, AndroidUnsafe6.class.getClassLoader());
     });
@@ -471,6 +468,37 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
         @Override
         public void close() {
             DeleteGlobalRef(ref);
+        }
+    }
+
+    public interface VMStack {
+
+        VMStack INSTANCE = nothrows_run(() -> {
+            String name = VMStack.class.getName() + "$Impl";
+            TypeId id = TypeId.of(name);
+            ClassDef clazz = new ClassDef(id);
+            clazz.setSuperClass(TypeId.of(Object.class));
+            clazz.setAccessFlags(Modifier.PUBLIC | Modifier.FINAL);
+            clazz.getInterfaces().add(TypeId.of(VMStack.class));
+            clazz.getClassData().getVirtualMethods().add(new EncodedMethod(
+                    new MethodId(id, new ProtoId(TypeId.of(Class.class)), "getStackClass2"),
+                    Modifier.PUBLIC | Modifier.NATIVE,
+                    new AnnotationSet(
+                            AnnotationItem.FastNative()
+                    ), null, null
+            ));
+            DexFile dex = openDexFile(new Dex(clazz).compile());
+            Class<?> impl = loadClass(dex, name, VMStack.class.getClassLoader());
+            setExecutableData(getDeclaredMethod(impl, "getStackClass2"),
+                    getExecutableData(getDeclaredMethod(Class.forName(
+                            "dalvik.system.VMStack"), "getStackClass2")));
+            return (VMStack) allocateInstance(impl);
+        });
+
+        Class<?> getStackClass2();
+
+        default Class<?> getStackClass1() {
+            return getStackClass2();
         }
     }
 }

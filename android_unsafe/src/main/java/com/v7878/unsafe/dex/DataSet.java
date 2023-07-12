@@ -150,6 +150,7 @@ public class DataSet extends DataFilter {
 
     @Override
     public void add(ArrayValue value) {
+        super.add(value);
         array_values.add(value);
     }
 

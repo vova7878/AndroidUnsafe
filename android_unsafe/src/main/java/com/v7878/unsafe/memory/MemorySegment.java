@@ -80,7 +80,7 @@ public class MemorySegment implements Addressable {
             }
             String out = "%s[%s%s\n%s%s]";
             StringBuilder data = new StringBuilder();
-            layout.elements().forEach((pe) -> {
+            layout.elements().forEachOrdered((pe) -> {
                 data.append(new MemorySegment(
                         pointer.addOffset(pe.offset()),
                         pe.layout(), true)

@@ -1,6 +1,10 @@
 package com.v7878.unsafe.dex.bytecode;
 
+import static com.v7878.unsafe.dex.bytecode.Format.PAYLOAD_ALIGNMENT;
+
 import com.v7878.unsafe.io.RandomOutput;
+
+import java.util.Objects;
 
 class InstructionWriter {
 
@@ -19,15 +23,6 @@ class InstructionWriter {
                     + Integer.toHexString(value) + " for width " + width);
         }
         return value & (~0 >>> empty_width);
-    }
-
-    public static long check_signed64(long value, int width) {
-        int empty_width = 64 - width;
-        if (value << empty_width >> empty_width != value) {
-            throw new IllegalStateException("illegal instruction signed value "
-                    + Long.toHexString(value) + " for width " + width);
-        }
-        return value & (~0L >>> empty_width);
     }
 
     public static int check_hat32(int value, int width) {
@@ -56,6 +51,13 @@ class InstructionWriter {
         out.writeShort((arg << 8) | opcode);
     }
 
+    private static void write_base(RandomOutput out, int payload_opcode) {
+        if (payload_opcode >>> 16 != 0) {
+            throw new IllegalStateException("illegal payload_opcode: " + payload_opcode);
+        }
+        out.writeShort(payload_opcode);
+    }
+
     public static void write_10x(RandomOutput out, int opcode) {
         write_base(out, opcode, 0);
     }
@@ -82,6 +84,12 @@ class InstructionWriter {
         write_base(out, opcode, sAA);
     }
 
+    public static void write_20t(RandomOutput out, int opcode, int sAAAA) {
+        sAAAA = check_signed(sAAAA, 16);
+        write_base(out, opcode, 0);
+        out.writeShort(sAAAA);
+    }
+
     public static void write_22x_21c(RandomOutput out, int opcode, int AA, int BBBB) {
         AA = check_unsigned(AA, 8);
         BBBB = check_unsigned(BBBB, 16);
@@ -94,6 +102,20 @@ class InstructionWriter {
         sBBBB = check_signed(sBBBB, 16);
         write_base(out, opcode, AA);
         out.writeShort(sBBBB);
+    }
+
+    public static void write_21ih(RandomOutput out, int opcode, int AA, int BBBB0000) {
+        AA = check_unsigned(AA, 8);
+        int BBBB = check_hat32(BBBB0000, 16);
+        write_base(out, opcode, AA);
+        out.writeShort(BBBB);
+    }
+
+    public static void write_21lh(RandomOutput out, int opcode, int AA, long BBBB000000000000) {
+        AA = check_unsigned(AA, 8);
+        int BBBB = (int) check_hat64(BBBB000000000000, 16);
+        write_base(out, opcode, AA);
+        out.writeShort(BBBB);
     }
 
     public static void write_22c(RandomOutput out, int opcode, int A, int B, int cCCCC) {
@@ -191,29 +213,21 @@ class InstructionWriter {
         out.writeShort(HHHH);
     }
 
-    /*
-    public static void write_20t(RandomOutput out, int opcode, int sAAAA) {
-        sAAAA = check_signed(sAAAA, 16);
-        write_base(out, opcode, 0);
-        out.writeShort(sAAAA);
-    }
-
-    public static void write_21h32(RandomOutput out, int opcode, int AA, int BBBB0000) {
-        check_unsigned(AA, 8);
-        int BBBB = check_hat32(BBBB0000, 16);
+    public static void write_4rcc(RandomOutput out, int opcode,
+                                  int AA, int BBBB, int CCCC, int HHHH) {
+        AA = check_unsigned(AA, 8);
+        BBBB = check_unsigned(BBBB, 16);
+        CCCC = check_unsigned(CCCC, 16);
+        HHHH = check_unsigned(HHHH, 16);
         write_base(out, opcode, AA);
         out.writeShort(BBBB);
-    }
-
-    public static void write_21h64(RandomOutput out, int opcode, int AA, long BBBB000000000000) {
-        check_unsigned(AA, 8);
-        int BBBB = (int) check_hat64(BBBB000000000000, 16);
-        write_base(out, opcode, AA);
-        out.writeShort(BBBB);
+        out.writeShort(CCCC);
+        out.writeShort(HHHH);
     }
 
     public static void write_51l(RandomOutput out, int opcode, int AA, long BBBBBBBBBBBBBBBB) {
-        check_unsigned(AA, 8);
+        AA = check_unsigned(AA, 8);
+        // no need to check BBBBBBBBBBBBBBBB
         write_base(out, opcode, AA);
         out.writeShort((int) (BBBBBBBBBBBBBBBB & 0xffff));
         out.writeShort((int) ((BBBBBBBBBBBBBBBB >>> 16) & 0xffff));
@@ -221,10 +235,53 @@ class InstructionWriter {
         out.writeShort((int) (BBBBBBBBBBBBBBBB >>> 48));
     }
 
-    public static void write_fill_array_data_payload(RandomOutput out,
-                                                     int opcode, int element_width, byte[] data) {
-        //TODO
-        throw new UnsupportedOperationException("Not supported yet.");
+    public static void packed_switch_payload(RandomOutput out, int opcode,
+                                             int first_key, int[] targets) {
+        Objects.requireNonNull(targets);
+        int size = targets.length;
+        if ((size & 0xffff) != size) {
+            throw new IllegalStateException("size is too big: " + size);
+        }
+        out.requireAlignment(PAYLOAD_ALIGNMENT);
+        write_base(out, opcode);
+        out.writeShort(size);
+        out.writeInt(first_key);
+        out.writeIntArray(targets);
     }
-    */
+
+    public static void sparse_switch_payload(RandomOutput out, int opcode,
+                                             int[] keys, int[] targets) {
+        Objects.requireNonNull(keys);
+        Objects.requireNonNull(targets);
+        if (keys.length != targets.length) {
+            throw new IllegalStateException("keys.length(" + keys.length
+                    + ") != targets.length(" + targets.length + ")");
+        }
+        int size = keys.length;
+        if ((size & 0xffff) != size) {
+            throw new IllegalStateException("size is too big: " + size);
+        }
+        out.requireAlignment(PAYLOAD_ALIGNMENT);
+        write_base(out, opcode);
+        out.writeShort(size);
+        out.writeIntArray(keys);
+        out.writeIntArray(targets);
+    }
+
+    public static void write_array_payload(RandomOutput out, int opcode,
+                                           int element_width, byte[] data) {
+        Objects.requireNonNull(data);
+        if (!(element_width == 1 || element_width == 2 || element_width == 4 || element_width == 8)) {
+            throw new IllegalStateException("unsupported element_width: " + element_width);
+        }
+        if (data.length % element_width != 0) {
+            throw new IllegalStateException("data.length is not multiple of element_width: " + data.length);
+        }
+        out.requireAlignment(PAYLOAD_ALIGNMENT);
+        write_base(out, opcode);
+        out.writeShort(element_width);
+        out.writeInt(data.length / element_width);
+        out.writeByteArray(data);
+        out.alignPositionAndFillZeros(2); // unit size
+    }
 }

@@ -48,6 +48,7 @@ class VariadicType {
     }
 }
 
+@SuppressWarnings("deprecation")
 public class Transformers {
 
     @SuppressWarnings("unchecked")
@@ -249,7 +250,6 @@ public class Transformers {
                 .return_void()
         ));
 
-        //noinspection deprecation
         DexFile dex = openDexFile(new Dex(transformer_def, invoker_def).compile());
         setTrusted(dex);
 

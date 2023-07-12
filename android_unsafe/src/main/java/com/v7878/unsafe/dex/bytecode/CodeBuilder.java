@@ -25,6 +25,7 @@ import com.v7878.unsafe.dex.bytecode.Format.Format31i31t;
 import com.v7878.unsafe.dex.bytecode.Format.Format35c;
 import com.v7878.unsafe.dex.bytecode.Format.Format3rc;
 import com.v7878.unsafe.dex.bytecode.Format.Format45cc;
+import com.v7878.unsafe.dex.bytecode.Format.Format4rcc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -186,6 +187,13 @@ public final class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder add_raw(Instruction instruction) {
+        instructions.add(() -> instruction);
+        current_instruction++;
+        current_unit += instruction.units();
+        return this;
+    }
+
     public CodeBuilder nop() {
         add(Opcode.NOP.<Format10x>format().make());
         return this;
@@ -270,6 +278,12 @@ public final class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder check_cast(int ref_reg, TypeId value) {
+        add(Opcode.CHECK_CAST.<Format21c>format().make(
+                check_reg(ref_reg, 8), value));
+        return this;
+    }
+
     private CodeBuilder goto_(Object label) {
         int start_unit = current_unit;
         add(Opcode.GOTO.<Format10t>format(), format -> {
@@ -329,6 +343,21 @@ public final class CodeBuilder {
         return if_test(test, first_reg_to_test, second_reg_to_test, (Object) label);
     }
 
+    public CodeBuilder if_test_else(Test test, int first_reg_to_test, int second_reg_to_test,
+                                    Consumer<CodeBuilder> true_branch, Consumer<CodeBuilder> false_branch) {
+        InternalLabel true_ = new InternalLabel();
+        InternalLabel end = new InternalLabel();
+
+        if_test(test, first_reg_to_test, second_reg_to_test, true_);
+        false_branch.accept(this);
+        goto_32(end);
+        putLabel(true_);
+        true_branch.accept(this);
+        putLabel(end);
+
+        return this;
+    }
+
     private CodeBuilder if_testz(Test test, int reg_to_test, Object label) {
         int start_unit = current_unit;
         add(test.testz.<Format21t21s>format(), format -> {
@@ -341,6 +370,21 @@ public final class CodeBuilder {
 
     public CodeBuilder if_testz(Test test, int reg_to_test, String label) {
         return if_testz(test, reg_to_test, (Object) label);
+    }
+
+    public CodeBuilder if_testz_else(Test test, int reg_to_test, Consumer<CodeBuilder> true_branch,
+                                     Consumer<CodeBuilder> false_branch) {
+        InternalLabel true_ = new InternalLabel();
+        InternalLabel end = new InternalLabel();
+
+        if_testz(test, reg_to_test, true_);
+        false_branch.accept(this);
+        goto_32(end);
+        putLabel(true_);
+        true_branch.accept(this);
+        putLabel(end);
+
+        return this;
     }
 
     public enum Op {
@@ -370,7 +414,7 @@ public final class CodeBuilder {
         }
     }
 
-    public CodeBuilder iop(Op op, int value_reg_or_pair, int array_reg, int index_reg) {
+    public CodeBuilder aop(Op op, int value_reg_or_pair, int array_reg, int index_reg) {
         add(op.aop.<Format23x>format().make(
                 check_reg_or_pair(value_reg_or_pair, 8, op.isWide),
                 check_reg(array_reg, 8), check_reg(index_reg, 8)));
@@ -477,7 +521,7 @@ public final class CodeBuilder {
         return this;
     }
 
-    public enum UnOp {
+    public enum RawUnOp {
         NEG_INT(Opcode.NEG_INT, false, false),
         NOT_INT(Opcode.NOT_INT, false, false),
         NEG_LONG(Opcode.NEG_LONG, true, true),
@@ -508,17 +552,82 @@ public final class CodeBuilder {
         private final Opcode opcode;
         private final boolean isDstWide, isSrcWide;
 
-        UnOp(Opcode opcode, boolean isDstWide, boolean isSrcWide) {
+        RawUnOp(Opcode opcode, boolean isDstWide, boolean isSrcWide) {
             this.opcode = opcode;
             this.isDstWide = isDstWide;
             this.isSrcWide = isSrcWide;
         }
     }
 
-    public CodeBuilder unop(UnOp op, int dsr_reg_or_pair, int src_reg_or_pair) {
+    public CodeBuilder raw_unop(RawUnOp op, int dsr_reg_or_pair, int src_reg_or_pair) {
         add(op.opcode.<Format12x>format().make(
                 check_reg_or_pair(dsr_reg_or_pair, 4, op.isDstWide),
                 check_reg_or_pair(src_reg_or_pair, 4, op.isSrcWide)));
+        return this;
+    }
+
+    public enum RawBinOp {
+        ADD_INT(Opcode.ADD_INT, Opcode.ADD_INT_2ADDR, false, false),
+        SUB_INT(Opcode.SUB_INT, Opcode.SUB_INT_2ADDR, false, false),
+        MUL_INT(Opcode.MUL_INT, Opcode.MUL_INT_2ADDR, false, false),
+        DIV_INT(Opcode.DIV_INT, Opcode.DIV_INT_2ADDR, false, false),
+        REM_INT(Opcode.REM_INT, Opcode.REM_INT_2ADDR, false, false),
+        AND_INT(Opcode.AND_INT, Opcode.AND_INT_2ADDR, false, false),
+        OR_INT(Opcode.OR_INT, Opcode.OR_INT_2ADDR, false, false),
+        XOR_INT(Opcode.XOR_INT, Opcode.XOR_INT_2ADDR, false, false),
+        SHL_INT(Opcode.SHL_INT, Opcode.SHL_INT_2ADDR, false, false),
+        SHR_INT(Opcode.SHR_INT, Opcode.SHR_INT_2ADDR, false, false),
+        USHR_INT(Opcode.USHR_INT, Opcode.USHR_INT_2ADDR, false, false),
+
+        ADD_LONG(Opcode.ADD_LONG, Opcode.ADD_LONG_2ADDR, true, true),
+        SUB_LONG(Opcode.SUB_LONG, Opcode.SUB_LONG_2ADDR, true, true),
+        MUL_LONG(Opcode.MUL_LONG, Opcode.MUL_LONG_2ADDR, true, true),
+        DIV_LONG(Opcode.DIV_LONG, Opcode.DIV_LONG_2ADDR, true, true),
+        REM_LONG(Opcode.REM_LONG, Opcode.REM_LONG_2ADDR, true, true),
+        AND_LONG(Opcode.AND_LONG, Opcode.AND_LONG_2ADDR, true, true),
+        OR_LONG(Opcode.OR_LONG, Opcode.OR_LONG_2ADDR, true, true),
+        XOR_LONG(Opcode.XOR_LONG, Opcode.XOR_LONG_2ADDR, true, true),
+        SHL_LONG(Opcode.SHL_LONG, Opcode.SHL_LONG_2ADDR, true, false),
+        SHR_LONG(Opcode.SHR_LONG, Opcode.SHR_LONG_2ADDR, true, false),
+        USHR_LONG(Opcode.USHR_LONG, Opcode.USHR_LONG_2ADDR, true, false),
+
+        ADD_FLOAT(Opcode.ADD_FLOAT, Opcode.ADD_FLOAT_2ADDR, false, false),
+        SUB_FLOAT(Opcode.SUB_FLOAT, Opcode.SUB_FLOAT_2ADDR, false, false),
+        MUL_FLOAT(Opcode.MUL_FLOAT, Opcode.MUL_FLOAT_2ADDR, false, false),
+        DIV_FLOAT(Opcode.DIV_FLOAT, Opcode.DIV_FLOAT_2ADDR, false, false),
+        REM_FLOAT(Opcode.REM_FLOAT, Opcode.REM_FLOAT_2ADDR, false, false),
+
+        ADD_DOUBLE(Opcode.ADD_DOUBLE, Opcode.ADD_DOUBLE_2ADDR, true, true),
+        SUB_DOUBLE(Opcode.SUB_DOUBLE, Opcode.SUB_DOUBLE_2ADDR, true, true),
+        MUL_DOUBLE(Opcode.MUL_DOUBLE, Opcode.MUL_DOUBLE_2ADDR, true, true),
+        DIV_DOUBLE(Opcode.DIV_DOUBLE, Opcode.DIV_DOUBLE_2ADDR, true, true),
+        REM_DOUBLE(Opcode.REM_DOUBLE, Opcode.REM_DOUBLE_2ADDR, true, true);
+
+        private final Opcode regular, _2addr;
+        private final boolean isDstAndSrc1Wide, isSrc2Wide;
+
+        RawBinOp(Opcode regular, Opcode _2addr, boolean isDstAndSrc1Wide, boolean isSrc2Wide) {
+            this.regular = regular;
+            this._2addr = _2addr;
+            this.isDstAndSrc1Wide = isDstAndSrc1Wide;
+            this.isSrc2Wide = isSrc2Wide;
+        }
+    }
+
+    public CodeBuilder raw_binop(RawBinOp op, int dsr_reg_or_pair,
+                                 int first_src_reg_or_pair, int second_src_reg_or_pair) {
+        add(op.regular.<Format23x>format().make(
+                check_reg_or_pair(dsr_reg_or_pair, 8, op.isDstAndSrc1Wide),
+                check_reg_or_pair(first_src_reg_or_pair, 8, op.isDstAndSrc1Wide),
+                check_reg_or_pair(second_src_reg_or_pair, 8, op.isSrc2Wide)));
+        return this;
+    }
+
+    public CodeBuilder raw_binop_2addr(RawBinOp op, int dst_and_first_src_reg_or_pair,
+                                       int second_src_reg_or_pair) {
+        add(op.regular.<Format12x>format().make(
+                check_reg_or_pair(dst_and_first_src_reg_or_pair, 4, op.isDstAndSrc1Wide),
+                check_reg_or_pair(second_src_reg_or_pair, 4, op.isDstAndSrc1Wide)));
         return this;
     }
 
@@ -563,6 +672,15 @@ public final class CodeBuilder {
     public CodeBuilder invoke_polymorphic(MethodId method, ProtoId proto) {
         return invoke_polymorphic(method, proto, 0, 0,
                 0, 0, 0, 0);
+    }
+
+    public CodeBuilder invoke_polymorphic_range(
+            MethodId method, ProtoId proto, int arg_count, int first_arg_reg) {
+        check_reg_range(first_arg_reg, 16, arg_count, 8);
+        add(Opcode.INVOKE_POLYMORPHIC_RANGE.<Format4rcc>format()
+                .make(arg_count, method, first_arg_reg, proto));
+        add_outs(arg_count);
+        return this;
     }
 
     public CodeBuilder const_method_handle(int dst_reg, MethodHandleItem value) {

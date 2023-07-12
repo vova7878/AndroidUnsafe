@@ -14,22 +14,16 @@ import java.util.Objects;
 
 public final class AnnotationItem implements PublicCloneable {
 
-    public static Comparator<AnnotationItem> getComparator(WriteContext context) {
-        return (a, b) -> {
-            if (a.equals(b)) {
-                return 0;
-            }
+    public static final Comparator<AnnotationItem> COMPARATOR = (a, b) -> {
+        int out = TypeId.COMPARATOR.compare(a.annotation.getType(), b.annotation.getType());
+        if (out != 0) {
+            return out;
+        }
 
-            int out = context.type_comparator()
-                    .compare(a.annotation.getType(), b.annotation.getType());
-            if (out != 0) {
-                return out;
-            }
-
-            // a != b, but a.type == b.type
-            throw new IllegalStateException("can`t compare annotations " + a + " " + b);
-        };
-    }
+        // a.type == b.type
+        throw new IllegalStateException(
+                "can`t compare annotations of the same type: " + a + " " + b);
+    };
 
     public static AnnotationItem FastNative() {
         return new AnnotationItem(VISIBILITY_BUILD, TypeId.of(

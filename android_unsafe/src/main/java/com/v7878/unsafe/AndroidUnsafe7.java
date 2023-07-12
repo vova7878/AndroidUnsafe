@@ -16,7 +16,6 @@ import com.v7878.unsafe.dex.EncodedMethod;
 import com.v7878.unsafe.dex.MethodId;
 import com.v7878.unsafe.dex.ProtoId;
 import com.v7878.unsafe.dex.TypeId;
-import com.v7878.unsafe.function.LibArt;
 import com.v7878.unsafe.function.SymbolLookup;
 import com.v7878.unsafe.memory.Pointer;
 import com.v7878.unsafe.memory.Word;
@@ -28,6 +27,7 @@ import java.util.function.Supplier;
 import dalvik.system.DexFile;
 
 @DangerLevel(7)
+@SuppressWarnings("deprecation")
 public class AndroidUnsafe7 extends AndroidUnsafe6 {
     public enum ClassStatus {
         NotReady,  // Zero-initialized Class object starts in this state.
@@ -139,7 +139,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         setRawClassStatus(clazz, status.value);
     }
 
-    private interface LocalRefUtils {
+    private interface LocalRefUtilsI {
         default long NewLocalRef64(long env, Object obj) {
             throw new AssertionError();
         }
@@ -181,18 +181,18 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         }
     }
 
-    private static final Supplier<LocalRefUtils> localRefUtils = runOnce(() -> {
+    private static final Supplier<LocalRefUtilsI> localRefUtils = runOnce(() -> {
         //TODO: what if kPoisonReferences == true?
         //make sure reinterpret_cast<int>(obj) == addressof(obj)
         assert_(!kPoisonReferences.get(), AssertionError::new);
 
         Class<?> word = IS64BIT ? long.class : int.class;
         TypeId word_id = TypeId.of(word);
-        String name = AndroidUnsafe7.class.getName() + "LocalRefUtils";
+        String name = AndroidUnsafe7.class.getName() + "$LocalRefUtils";
         TypeId id = TypeId.of(name);
         ClassDef clazz = new ClassDef(id);
         clazz.setSuperClass(TypeId.of(Object.class));
-        clazz.getInterfaces().add(TypeId.of(LocalRefUtils.class));
+        clazz.getInterfaces().add(TypeId.of(LocalRefUtilsI.class));
         clazz.setAccessFlags(Modifier.PUBLIC | Modifier.FINAL);
 
         MethodId nlr_id = new MethodId(id, new ProtoId(word_id, word_id, word_id), "NewLocalRef");
@@ -284,14 +284,13 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                 new AnnotationSet(AnnotationItem.FastNative()), null, null
         ));
 
-        //noinspection deprecation
         DexFile dex = openDexFile(new Dex(clazz).compile());
         Class<?> utils = loadClass(dex, name, AndroidUnsafe7.class.getClassLoader());
         setClassStatus(utils, ClassStatus.Verified);
 
         Method[] methods = getDeclaredMethods(utils);
 
-        try (SymbolLookup art = LibArt.open()) {
+        try (SymbolLookup art = SymbolLookup.defaultLookup()) {
             Pointer nlr = art.lookup("_ZN3art9JNIEnvExt11NewLocalRefEPNS_6mirror6ObjectE");
             setExecutableData(searchMethod(methods, "NewLocalRef", word, word), nlr);
 
@@ -315,11 +314,11 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         replaceExecutableAccessModifier(getDeclaredMethod(AndroidUnsafe7.class,
                 "refToObjectHelper", word), AccessModifier.PUBLIC);
 
-        return (LocalRefUtils) allocateInstance(utils);
+        return (LocalRefUtilsI) allocateInstance(utils);
     });
 
     public static Word NewLocalRef(Object obj) {
-        LocalRefUtils utils = localRefUtils.get();
+        LocalRefUtilsI utils = localRefUtils.get();
         Pointer env = getCurrentEnvPtr();
         if (IS64BIT) {
             return new Word(utils.NewLocalRef64(env.getRawAddress(), obj));
@@ -329,7 +328,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
     }
 
     public static void DeleteLocalRef(Word ref) {
-        LocalRefUtils utils = localRefUtils.get();
+        LocalRefUtilsI utils = localRefUtils.get();
         Pointer env = getCurrentEnvPtr();
         if (IS64BIT) {
             utils.DeleteLocalRef64(env.getRawAddress(), ref.longValue());
@@ -340,7 +339,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
 
     public static void PushLocalFrame(int capacity) {
         //TODO: capacity checks
-        LocalRefUtils utils = localRefUtils.get();
+        LocalRefUtilsI utils = localRefUtils.get();
         Pointer env = getCurrentEnvPtr();
         if (IS64BIT) {
             utils.PushLocalFrame64(env.getRawAddress(), capacity);
@@ -350,7 +349,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
     }
 
     public static void PopLocalFrame() {
-        LocalRefUtils utils = localRefUtils.get();
+        LocalRefUtilsI utils = localRefUtils.get();
         Pointer env = getCurrentEnvPtr();
         if (IS64BIT) {
             utils.PopLocalFrame64(env.getRawAddress());

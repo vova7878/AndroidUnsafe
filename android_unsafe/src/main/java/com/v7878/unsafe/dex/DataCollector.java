@@ -37,8 +37,6 @@ public interface DataCollector {
 
     void add(CodeItem value);
 
-    void fill(ArrayValue value);
-
     void fill(CatchHandlerElement value);
 
     void fill(CatchHandler value);
@@ -52,6 +50,8 @@ public interface DataCollector {
     void fill(EncodedMethod value);
 
     void fill(EncodedAnnotation value);
+
+    void fill(AnnotationElement value);
 
     void fill(EncodedValue value);
 }

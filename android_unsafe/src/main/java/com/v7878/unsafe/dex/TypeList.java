@@ -11,28 +11,8 @@ public class TypeList extends PCList<TypeId> {
 
     public static final int ALIGNMENT = 4;
 
-    public static Comparator<TypeList> getComparator(WriteContext context) {
-        return (a, b) -> {
-            if (a == b) {
-                return 0;
-            }
-
-            int size = Math.min(a.size(), b.size());
-
-            for (int i = 0; i < size; i++) {
-                TypeId a_type = a.get(i);
-                TypeId b_type = b.get(i);
-
-                int out = context.type_comparator().compare(a_type, b_type);
-
-                if (out != 0) {
-                    return out;
-                }
-            }
-
-            return Integer.compare(a.size(), b.size());
-        };
-    }
+    public static final Comparator<TypeList> COMPARATOR
+            = PCList.getComparator(TypeId.COMPARATOR);
 
     public TypeList(TypeId... types) {
         super(types);

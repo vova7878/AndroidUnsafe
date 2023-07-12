@@ -4,24 +4,45 @@ import static com.v7878.unsafe.Utils.getSdkInt;
 
 //TODO: split into Read and Write Options
 public class DexOptions {
-    private final int targetApi;
-    private final boolean includesOdexInstructions;
+    private static final int MIN_TARGET_API = 1;
+    private static final int MAX_TARGET_API = 34;
+    private static final int FIRST_ART_TARGET = 19;
+    private static final int LAST_DALVIK_TARGET = 20; // TODO: ?
 
-    public DexOptions(int targetApi, boolean includesOdexInstructions) {
+    private final int targetApi;
+    private final boolean targetArt;
+    private final boolean includeOdexInstructions;
+
+    public DexOptions(int targetApi, boolean targetArt, boolean includeOdexInstructions) {
+        if (targetApi < MIN_TARGET_API || targetApi > MAX_TARGET_API) {
+            throw new IllegalArgumentException("unsupported target api: " + targetApi);
+        }
         this.targetApi = targetApi;
-        this.includesOdexInstructions = includesOdexInstructions;
+        if ((targetArt && targetApi < FIRST_ART_TARGET) || (!targetArt && targetApi > LAST_DALVIK_TARGET)) {
+            throw new IllegalArgumentException("unsupported " + targetArt + " targetArt option with targetApi: " + targetApi);
+        }
+        this.targetArt = targetArt;
+        this.includeOdexInstructions = includeOdexInstructions;
     }
 
     public int getTargetApi() {
         return targetApi;
     }
 
-    public boolean includesOdexInstructions() {
-        return includesOdexInstructions;
+    public boolean isTargetForArt() {
+        return targetArt;
+    }
+
+    public boolean isTargetForDalvik() {
+        return !targetArt;
+    }
+
+    public boolean includeOdexInstructions() {
+        return includeOdexInstructions;
     }
 
     public static DexOptions defaultOptions() {
-        return new DexOptions(getSdkInt(), false);
+        return new DexOptions(getSdkInt(), true, false);
     }
 
     public void requireMinApi(int minApi) {
@@ -38,8 +59,22 @@ public class DexOptions {
         }
     }
 
+    public void requireForArt() {
+        if (!targetArt) {
+            //TODO: message
+            throw new IllegalArgumentException();
+        }
+    }
+
+    public void requireForDalvik() {
+        if (targetArt) {
+            //TODO: message
+            throw new IllegalArgumentException();
+        }
+    }
+
     public void requireOdexInstructions() {
-        if (!includesOdexInstructions) {
+        if (!includeOdexInstructions) {
             //TODO: message
             throw new IllegalArgumentException();
         }

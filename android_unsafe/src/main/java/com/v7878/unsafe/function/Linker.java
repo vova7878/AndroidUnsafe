@@ -57,6 +57,7 @@ import dalvik.system.DexFile;
 class Test {
 }
 
+@SuppressWarnings("deprecation")
 public class Linker {
 
     private static final SoftReferenceCache<Pair<Pointer, FunctionDescriptor>, Class<?>>
@@ -205,7 +206,6 @@ public class Linker {
                 new FieldId(stub_id, TypeId.of(MethodHandle.class), "handler"),
                 Modifier.PUBLIC | Modifier.STATIC, null
         ));
-        //noinspection deprecation
         DexFile dex = openDexFile(new Dex(clazz).compile());
         Class<?> stub = loadClass(dex, stub_name, getStubClassLoader());
         Method function = getDeclaredMethod(stub, "function",

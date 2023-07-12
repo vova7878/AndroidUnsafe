@@ -44,6 +44,7 @@ public class MUTF8 {
         return result;
     }
 
+    //TODO: delete?
     private static int countBytes(String s, boolean shortLength) {
         int result = 0;
         final int length = s.length();
@@ -81,7 +82,7 @@ public class MUTF8 {
     }
 
     public static void writeMUTF8(RandomOutput out, String s) {
-        out.writeULeb128(countBytes(s, true));
+        out.writeULeb128(s.length());
         encode(out, s);
         out.writeByte(0);
     }

@@ -4,6 +4,7 @@ import static com.v7878.unsafe.AndroidUnsafe.IS64BIT;
 import static com.v7878.unsafe.Utils.roundUpL;
 
 import com.v7878.unsafe.Checks;
+import com.v7878.unsafe.Utils;
 import com.v7878.unsafe.memory.Word;
 
 import java.util.Objects;
@@ -39,7 +40,13 @@ public interface RandomInput extends AutoCloseable {
         return result;
     }
 
-    void skipBytes(long n);
+    default int[] readIntArray(int length) {
+        int[] result = new int[length];
+        for (int i = 0; i < length; i++) {
+            result[i] = readInt();
+        }
+        return result;
+    }
 
     default boolean readBoolean() {
         return readByte() != 0;
@@ -93,19 +100,28 @@ public interface RandomInput extends AutoCloseable {
 
     long position();
 
-    void position(long new_position);
+    long position(long new_position);
+
+    default long addPosition(long delta) {
+        return position(position() + delta);
+    }
 
     default long alignPosition(long alignment) {
-        long new_position = roundUpL(position(), alignment);
-        position(new_position);
-        return new_position;
+        return position(roundUpL(position(), alignment));
+    }
+
+    default void requireAlignment(int alignment) {
+        long pos = position();
+        if (!Utils.isAlignedL(pos, alignment)) {
+            throw new IllegalStateException("position " + pos + " not aligned by " + alignment);
+        }
     }
 
     RandomInput duplicate();
 
     default RandomInput duplicate(long offset) {
         RandomInput out = duplicate();
-        out.skipBytes(offset);
+        out.addPosition(offset);
         return out;
     }
 

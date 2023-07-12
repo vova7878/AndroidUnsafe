@@ -1,23 +1,6 @@
 package com.v7878.unsafe.dex;
 
-import static com.v7878.unsafe.dex.DexConstants.VALUE_ANNOTATION;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_ARRAY;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_BOOLEAN;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_BYTE;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_CHAR;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_DOUBLE;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_ENUM;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_FIELD;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_FLOAT;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_INT;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_LONG;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_METHOD;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_METHOD_HANDLE;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_METHOD_TYPE;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_NULL;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_SHORT;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_STRING;
-import static com.v7878.unsafe.dex.DexConstants.VALUE_TYPE;
+import static com.v7878.unsafe.Utils.assert_;
 
 import com.v7878.unsafe.io.RandomOutput;
 
@@ -25,47 +8,95 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
+import java.util.Comparator;
 import java.util.Objects;
 
 public interface EncodedValue extends PublicCloneable {
 
-    boolean isDefault();
+    Comparator<EncodedValue> COMPARATOR = (a, b) -> {
+        EncodedValueType type;
+        if ((type = a.type()) != b.type()) {
+            return a.type().value - b.type().value;
+        }
 
-    int type();
+        //noinspection unchecked
+        return ((Comparator<EncodedValue>) type.comparator).compare(a, b);
+    };
 
-    Object value();
+    enum EncodedValueType {
+        BYTE(0x00, ByteValue.COMPARATOR),
+        SHORT(0x02, ShortValue.COMPARATOR),
+        CHAR(0x03, CharValue.COMPARATOR),
+        INT(0x04, IntValue.COMPARATOR),
+        LONG(0x06, LongValue.COMPARATOR),
+        FLOAT(0x10, FloatValue.COMPARATOR),
+        DOUBLE(0x11, DoubleValue.COMPARATOR),
+        METHOD_TYPE(0x15, MethodTypeValue.COMPARATOR),
+        METHOD_HANDLE(0x16, MethodHandleValue.COMPARATOR),
+        STRING(0x17, StringValue.COMPARATOR),
+        TYPE(0x18, TypeValue.COMPARATOR),
+        FIELD(0x19, FieldValue.COMPARATOR),
+        METHOD(0x1a, MethodValue.COMPARATOR),
+        ENUM(0x1b, EnumValue.COMPARATOR),
+        ARRAY(0x1c, ArrayValue.COMPARATOR),
+        ANNOTATION(0x1d, AnnotationValue.COMPARATOR),
+        NULL(0x1e, NullValue.COMPARATOR),
+        BOOLEAN(0x1f, BooleanValue.COMPARATOR);
+
+        public final int value;
+        public final Comparator<?> comparator;
+
+        EncodedValueType(int value, Comparator<?> comparator) {
+            this.value = value;
+            this.comparator = comparator;
+        }
+
+        public static EncodedValueType of(int int_type) {
+            for (EncodedValueType type : values()) {
+                if (int_type == type.value) {
+                    return type;
+                }
+            }
+            throw new IllegalStateException("Unexpected type: " + Integer.toHexString(int_type));
+        }
+    }
 
     default void collectData(DataCollector data) {
     }
 
     void write(WriteContext context, RandomOutput out);
 
+    boolean isDefault();
+
+    EncodedValueType type();
+
+    Object value();
+
     @Override
     EncodedValue clone();
 
     static EncodedValue defaultValue(TypeId type) {
-        String name = type.getDescriptor();
-        switch (name) {
-            case "V":
-                throw new IllegalArgumentException();
-            case "Z":
+        switch (type.getShorty()) {
+            case 'Z':
                 return new BooleanValue();
-            case "B":
+            case 'B':
                 return new ByteValue();
-            case "S":
+            case 'S':
                 return new ShortValue();
-            case "C":
+            case 'C':
                 return new CharValue();
-            case "I":
+            case 'I':
                 return new IntValue();
-            case "J":
+            case 'J':
                 return new LongValue();
-            case "F":
+            case 'F':
                 return new FloatValue();
-            case "D":
+            case 'D':
                 return new DoubleValue();
-            default:
+            case 'L':
                 return new NullValue();
+            default:
+                throw new IllegalArgumentException();
         }
     }
 
@@ -239,14 +270,15 @@ public interface EncodedValue extends PublicCloneable {
 
     abstract class SimpleValue implements EncodedValue {
 
-        private final int type;
+        private final EncodedValueType type;
 
-        public SimpleValue(int type) {
+        public SimpleValue(EncodedValueType type) {
+            assert_(type != null, AssertionError::new);
             this.type = type;
         }
 
         @Override
-        public int type() {
+        public EncodedValueType type() {
             return type;
         }
 
@@ -281,10 +313,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class BooleanValue extends SimpleValue {
 
+        public static final Comparator<BooleanValue> COMPARATOR =
+                (a, b) -> Boolean.compare(a.value, b.value);
+
         public boolean value;
 
         public BooleanValue() {
-            super(VALUE_BOOLEAN);
+            super(EncodedValueType.BOOLEAN);
         }
 
         public BooleanValue(boolean value) {
@@ -294,7 +329,7 @@ public interface EncodedValue extends PublicCloneable {
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            out.writeByte(type() | ((value ? 1 : 0) << 5));
+            out.writeByte(type().value | ((value ? 1 : 0) << 5));
         }
 
         @Override
@@ -303,7 +338,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Boolean value() {
             return value;
         }
 
@@ -315,10 +350,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class ByteValue extends SimpleValue {
 
+        public static final Comparator<ByteValue> COMPARATOR =
+                (a, b) -> Byte.compare(a.value, b.value);
+
         public byte value;
 
         public ByteValue() {
-            super(VALUE_BYTE);
+            super(EncodedValueType.BYTE);
         }
 
         public ByteValue(byte value) {
@@ -337,7 +375,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Byte value() {
             return value;
         }
 
@@ -349,10 +387,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class ShortValue extends SimpleValue {
 
+        public static final Comparator<ShortValue> COMPARATOR =
+                (a, b) -> Short.compare(a.value, b.value);
+
         public short value;
 
         public ShortValue() {
-            super(VALUE_SHORT);
+            super(EncodedValueType.SHORT);
         }
 
         public ShortValue(short value) {
@@ -371,7 +412,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Short value() {
             return value;
         }
 
@@ -383,10 +424,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class CharValue extends SimpleValue {
 
+        public static final Comparator<CharValue> COMPARATOR =
+                (a, b) -> Character.compare(a.value, b.value);
+
         public char value;
 
         public CharValue() {
-            super(VALUE_CHAR);
+            super(EncodedValueType.CHAR);
         }
 
         public CharValue(char value) {
@@ -405,7 +449,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Character value() {
             return value;
         }
 
@@ -417,10 +461,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class IntValue extends SimpleValue {
 
+        public static final Comparator<IntValue> COMPARATOR =
+                (a, b) -> Integer.compare(a.value, b.value);
+
         public int value;
 
         public IntValue() {
-            super(VALUE_INT);
+            super(EncodedValueType.INT);
         }
 
         public IntValue(int value) {
@@ -439,7 +486,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Integer value() {
             return value;
         }
 
@@ -451,10 +498,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class LongValue extends SimpleValue {
 
+        public static final Comparator<LongValue> COMPARATOR =
+                (a, b) -> Long.compare(a.value, b.value);
+
         public long value;
 
         public LongValue() {
-            super(VALUE_LONG);
+            super(EncodedValueType.LONG);
         }
 
         public LongValue(long value) {
@@ -473,7 +523,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Long value() {
             return value;
         }
 
@@ -485,10 +535,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class FloatValue extends SimpleValue {
 
+        public static final Comparator<FloatValue> COMPARATOR =
+                (a, b) -> Float.compare(a.value, b.value);
+
         public float value;
 
         public FloatValue() {
-            super(VALUE_FLOAT);
+            super(EncodedValueType.FLOAT);
         }
 
         public FloatValue(float value) {
@@ -508,7 +561,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Float value() {
             return value;
         }
 
@@ -520,10 +573,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class DoubleValue extends SimpleValue {
 
+        public static final Comparator<DoubleValue> COMPARATOR =
+                (a, b) -> Double.compare(a.value, b.value);
+
         public double value;
 
         public DoubleValue() {
-            super(VALUE_DOUBLE);
+            super(EncodedValueType.DOUBLE);
         }
 
         public DoubleValue(double value) {
@@ -544,7 +600,7 @@ public interface EncodedValue extends PublicCloneable {
         }
 
         @Override
-        public Object value() {
+        public Double value() {
             return value;
         }
 
@@ -556,13 +612,15 @@ public interface EncodedValue extends PublicCloneable {
 
     class NullValue extends SimpleValue {
 
+        public static final Comparator<NullValue> COMPARATOR = (a, b) -> 0;
+
         public NullValue() {
-            super(VALUE_NULL);
+            super(EncodedValueType.NULL);
         }
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            out.writeByte(type());
+            out.writeByte(type().value);
         }
 
         @Override
@@ -588,10 +646,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class MethodTypeValue extends SimpleValue {
 
+        public static final Comparator<MethodTypeValue> COMPARATOR =
+                (a, b) -> ProtoId.COMPARATOR.compare(a.value, b.value);
+
         private ProtoId value;
 
         public MethodTypeValue(ProtoId value) {
-            super(VALUE_METHOD_TYPE);
+            super(EncodedValueType.METHOD_TYPE);
             setValue(value);
         }
 
@@ -625,10 +686,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class MethodHandleValue extends SimpleValue {
 
+        public static final Comparator<MethodHandleValue> COMPARATOR =
+                (a, b) -> MethodHandleItem.COMPARATOR.compare(a.value, b.value);
+
         private MethodHandleItem value;
 
         public MethodHandleValue(MethodHandleItem value) {
-            super(VALUE_METHOD_HANDLE);
+            super(EncodedValueType.METHOD_HANDLE);
             setValue(value);
         }
 
@@ -661,10 +725,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class StringValue extends SimpleValue {
 
+        public static final Comparator<StringValue> COMPARATOR =
+                (a, b) -> StringId.COMPARATOR.compare(a.value, b.value);
+
         private String value;
 
         public StringValue(String value) {
-            super(VALUE_STRING);
+            super(EncodedValueType.STRING);
             setValue(value);
         }
 
@@ -697,10 +764,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class TypeValue extends SimpleValue {
 
+        public static final Comparator<TypeValue> COMPARATOR =
+                (a, b) -> TypeId.COMPARATOR.compare(a.value, b.value);
+
         private TypeId value;
 
         public TypeValue(TypeId value) {
-            super(VALUE_TYPE);
+            super(EncodedValueType.TYPE);
             setValue(value);
         }
 
@@ -733,10 +803,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class FieldValue extends SimpleValue {
 
+        public static final Comparator<FieldValue> COMPARATOR =
+                (a, b) -> FieldId.COMPARATOR.compare(a.value, b.value);
+
         private FieldId value;
 
         public FieldValue(FieldId value) {
-            super(VALUE_FIELD);
+            super(EncodedValueType.FIELD);
             setValue(value);
         }
 
@@ -769,10 +842,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class MethodValue extends SimpleValue {
 
+        public static final Comparator<MethodValue> COMPARATOR =
+                (a, b) -> MethodId.COMPARATOR.compare(a.value, b.value);
+
         private MethodId value;
 
         public MethodValue(MethodId value) {
-            super(VALUE_METHOD);
+            super(EncodedValueType.METHOD);
             setValue(value);
         }
 
@@ -805,10 +881,13 @@ public interface EncodedValue extends PublicCloneable {
 
     class EnumValue extends SimpleValue {
 
+        public static final Comparator<EnumValue> COMPARATOR =
+                (a, b) -> FieldId.COMPARATOR.compare(a.value, b.value);
+
         private FieldId value;
 
         public EnumValue(FieldId value) {
-            super(VALUE_ENUM);
+            super(EncodedValueType.ENUM);
             setValue(value);
         }
 
@@ -839,16 +918,18 @@ public interface EncodedValue extends PublicCloneable {
         }
     }
 
-    class ArrayValue extends PCList<EncodedValue>
-            implements EncodedValue {
+    class ArrayValue extends PCList<EncodedValue> implements EncodedValue {
+
+        public static final Comparator<ArrayValue> COMPARATOR
+                = PCList.getComparator(EncodedValue.COMPARATOR);
 
         public ArrayValue(EncodedValue... value) {
             super(value);
         }
 
         @Override
-        public int type() {
-            return VALUE_ARRAY;
+        public EncodedValueType type() {
+            return EncodedValueType.ARRAY;
         }
 
         @Override
@@ -859,13 +940,13 @@ public interface EncodedValue extends PublicCloneable {
         @Override
         public void collectData(DataCollector data) {
             for (EncodedValue tmp : this) {
-                tmp.collectData(data);
+                data.fill(tmp);
             }
         }
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            out.writeByte(type());
+            out.writeByte(type().value);
             writeData(context, out);
         }
 
@@ -908,21 +989,24 @@ public interface EncodedValue extends PublicCloneable {
 
     class AnnotationValue extends SimpleValue {
 
+        public static final Comparator<AnnotationValue> COMPARATOR =
+                (a, b) -> EncodedAnnotation.COMPARATOR.compare(a.value, b.value);
+
         private EncodedAnnotation value;
 
         public AnnotationValue(EncodedAnnotation value) {
-            super(VALUE_ANNOTATION);
+            super(EncodedValueType.ANNOTATION);
             setValue(value);
         }
 
         @Override
         public void collectData(DataCollector data) {
-            value.collectData(data);
+            data.fill(value);
         }
 
         @Override
         public void write(WriteContext context, RandomOutput out) {
-            out.writeByte(type());
+            out.writeByte(type().value);
             value.write(context, out);
         }
 

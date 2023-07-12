@@ -184,7 +184,7 @@ public class Dex extends PCList<ClassDef> {
         RandomOutput data_out = out.duplicate(offset);
 
         out.position(map.string_ids_off);
-        context.stringsStream().forEach((value) -> StringId.write(value, context, out, data_out));
+        context.stringsStream().forEachOrdered(value -> StringId.write(value, context, out, data_out));
         offset = (int) data_out.position();
 
         //TODO: use align methods?
@@ -314,25 +314,25 @@ public class Dex extends PCList<ClassDef> {
         int file_size = offset;
 
         out.position(map.type_ids_off);
-        context.typesStream().forEach((value) -> value.write(context, out));
+        context.typesStream().forEachOrdered((value) -> value.write(context, out));
 
         out.position(map.field_ids_off);
-        context.fieldsStream().forEach((value) -> value.write(context, out));
+        context.fieldsStream().forEachOrdered((value) -> value.write(context, out));
 
         out.position(map.proto_ids_off);
-        context.protosStream().forEach((value) -> value.write(context, out));
+        context.protosStream().forEachOrdered((value) -> value.write(context, out));
 
         out.position(map.method_ids_off);
-        context.methodsStream().forEach((value) -> value.write(context, out));
+        context.methodsStream().forEachOrdered((value) -> value.write(context, out));
 
         out.position(map.class_defs_off);
-        context.classDefsStream().forEach((value) -> value.write(context, out));
+        context.classDefsStream().forEachOrdered((value) -> value.write(context, out));
 
         out.position(map.call_site_ids_off);
-        context.callSitesStream().forEach((value) -> value.write(context, out));
+        context.callSitesStream().forEachOrdered((value) -> value.write(context, out));
 
         out.position(map.method_handles_off);
-        context.methodHandlesStream().forEach((value) -> value.write(context, out));
+        context.methodHandlesStream().forEachOrdered((value) -> value.write(context, out));
 
         map.writeHeader(out, options, file_size);
     }

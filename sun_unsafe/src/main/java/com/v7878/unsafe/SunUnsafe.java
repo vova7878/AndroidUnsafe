@@ -263,6 +263,46 @@ public class SunUnsafe {
         unsafe.copyMemory(srcAddr, dstAddr, bytes);
     }
 
+    public static int getAndAddInt(Object obj, long offset, int delta) {
+        int v;
+        do {
+            v = getIntVolatile(obj, offset);
+        } while (!compareAndSwapInt(obj, offset, v, v + delta));
+        return v;
+    }
+
+    public static long getAndAddLong(Object obj, long offset, long delta) {
+        long v;
+        do {
+            v = getLongVolatile(obj, offset);
+        } while (!compareAndSwapLong(obj, offset, v, v + delta));
+        return v;
+    }
+
+    public static int getAndSetInt(Object obj, long offset, int newValue) {
+        int v;
+        do {
+            v = getIntVolatile(obj, offset);
+        } while (!compareAndSwapInt(obj, offset, v, newValue));
+        return v;
+    }
+
+    public static long getAndSetLong(Object obj, long offset, long newValue) {
+        long v;
+        do {
+            v = getLongVolatile(obj, offset);
+        } while (!compareAndSwapLong(obj, offset, v, newValue));
+        return v;
+    }
+
+    public static Object getAndSetObject(Object obj, long offset, Object newValue) {
+        Object v;
+        do {
+            v = getObjectVolatile(obj, offset);
+        } while (!compareAndSwapObject(obj, offset, v, newValue));
+        return v;
+    }
+
     public static void loadFence() {
         unsafe.loadFence();
     }
@@ -274,24 +314,4 @@ public class SunUnsafe {
     public static void fullFence() {
         unsafe.fullFence();
     }
-
-    /*public static final int getAndAddInt(Object o, long offset, int delta) {
-        return unsafe.getAndAddInt(o, offset, delta);
-    }
-
-    public static final long getAndAddLong(Object o, long offset, long delta) {
-        return unsafe.getAndAddLong(o, offset, delta);
-    }
-
-    public static final int getAndSetInt(Object o, long offset, int newValue) {
-        return unsafe.getAndSetInt(o, offset, newValue);
-    }
-
-    public static final long getAndSetLong(Object o, long offset, long newValue) {
-        return unsafe.getAndSetLong(o, offset, newValue);
-    }
-
-    public static final Object getAndSetObject(Object o, long offset, Object newValue) {
-        return unsafe.getAndSetObject(o, offset, newValue);
-    }*/
 }

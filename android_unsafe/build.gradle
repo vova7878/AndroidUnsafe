@@ -27,6 +27,6 @@ android {
 
 dependencies {
     implementation files('libs/Thrower.jar')
-    implementation project(path: ':sun_unsafe')
+    implementation 'com.github.vova7878:SunUnsafeWrapper:v0.0.1'
     compileOnly 'androidx.annotation:annotation:+'
 }

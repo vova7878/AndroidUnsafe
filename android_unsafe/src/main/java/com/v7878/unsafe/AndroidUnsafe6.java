@@ -1,7 +1,7 @@
 package com.v7878.unsafe;
 
+import static com.v7878.Version.CORRECT_SDK_INT;
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.nothrows_run;
 import static com.v7878.unsafe.Utils.runOnce;
 import static com.v7878.unsafe.memory.LayoutPath.PathElement.groupElement;
@@ -281,7 +281,7 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
 
     public static final long env_offset = nothrows_run(() -> {
         long tmp;
-        switch (getSdkInt()) {
+        switch (CORRECT_SDK_INT) {
             case 34: // android 14
                 tmp = 21 * 4; // tls32_
                 tmp += 4; // padding
@@ -328,7 +328,7 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
                 tmp += 7 * ADDRESS.size(); // tlsPtr_
                 return tmp;
             default:
-                throw new IllegalStateException("unsupported sdk: " + getSdkInt());
+                throw new IllegalStateException("unsupported sdk: " + CORRECT_SDK_INT);
         }
     });
 

@@ -1,7 +1,7 @@
 package com.v7878.unsafe;
 
+import static com.v7878.Version.CORRECT_SDK_INT;
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.runOnce;
 import static com.v7878.unsafe.Utils.searchMethod;
 import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
@@ -47,7 +47,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         Initialized;  // Ready to go.
 
         static {
-            switch (getSdkInt()) {
+            switch (CORRECT_SDK_INT) {
                 case 34: // android 14
                 case 33: // android 13
                 case 32: // android 12L
@@ -100,7 +100,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
                     Initialized.value = 10;
                     break;
                 default:
-                    throw new IllegalStateException("unsupported sdk: " + getSdkInt());
+                    throw new IllegalStateException("unsupported sdk: " + CORRECT_SDK_INT);
             }
         }
 
@@ -113,7 +113,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
 
     public static int getRawClassStatus(Class<?> clazz) {
         ClassMirror[] mirror = arrayCast(ClassMirror.class, clazz);
-        return getSdkInt() <= 27 ? mirror[0].status : (mirror[0].status >>> 32 - 4);
+        return CORRECT_SDK_INT <= 27 ? mirror[0].status : (mirror[0].status >>> 32 - 4);
     }
 
     public static ClassStatus getClassStatus(Class<?> clazz) {
@@ -129,7 +129,7 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
     @DangerLevel(DangerLevel.VERY_CAREFUL)
     public static void setRawClassStatus(Class<?> clazz, int status) {
         ClassMirror[] mirror = arrayCast(ClassMirror.class, clazz);
-        if (getSdkInt() <= 27) {
+        if (CORRECT_SDK_INT <= 27) {
             mirror[0].status = status;
         } else {
             mirror[0].status = (mirror[0].status & ~0 >>> 4) | (status << 32 - 4);

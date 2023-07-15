@@ -1,10 +1,10 @@
 package com.v7878.unsafe;
 
+import static com.v7878.Version.CORRECT_SDK_INT;
 import static com.v7878.unsafe.AndroidUnsafe5.AccessModifier.PRIVATE;
 import static com.v7878.unsafe.AndroidUnsafe5.AccessModifier.PROTECTED;
 import static com.v7878.unsafe.AndroidUnsafe5.AccessModifier.PUBLIC;
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.nothrows_run;
 import static com.v7878.unsafe.Utils.runOnce;
 import static com.v7878.unsafe.memory.LayoutPath.PathElement.groupElement;
@@ -219,7 +219,7 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
     );
 
     public static final GroupLayout DEXFILE_LAYOUT = nothrows_run(() -> {
-        switch (getSdkInt()) {
+        switch (CORRECT_SDK_INT) {
             case 34: // android 14
                 return dex_file_14_layout;
             case 33: // android 13
@@ -234,12 +234,12 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
             case 26: // android 8
                 return dex_file_8xx_layout;
             default:
-                throw new IllegalStateException("unsupported sdk: " + getSdkInt());
+                throw new IllegalStateException("unsupported sdk: " + CORRECT_SDK_INT);
         }
     });
 
     public static final GroupLayout ARTMETHOD_LAYOUT = nothrows_run(() -> {
-        switch (getSdkInt()) {
+        switch (CORRECT_SDK_INT) {
             case 34: // android 14
             case 33: // android 13
             case 32: // android 12L
@@ -254,7 +254,7 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
             case 26: // android 8
                 return art_method_8xx_layout;
             default:
-                throw new IllegalStateException("unsupported sdk: " + getSdkInt());
+                throw new IllegalStateException("unsupported sdk: " + CORRECT_SDK_INT);
         }
     });
 
@@ -292,26 +292,26 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
     }
 
     private static final Supplier<Constructor<DexFile>> dex_constructor = runOnce(() -> {
-        if (getSdkInt() >= 26 && getSdkInt() <= 28) {
+        if (CORRECT_SDK_INT >= 26 && CORRECT_SDK_INT <= 28) {
             return getDeclaredConstructor(DexFile.class, ByteBuffer.class);
         }
-        if (getSdkInt() >= 29 && getSdkInt() <= 34) {
+        if (CORRECT_SDK_INT >= 29 && CORRECT_SDK_INT <= 34) {
             Class<?> dex_path_list_elements = nothrows_run(
                     () -> Class.forName("[Ldalvik.system.DexPathList$Element;"));
             return getDeclaredConstructor(DexFile.class, ByteBuffer[].class,
                     ClassLoader.class, dex_path_list_elements);
         }
-        throw new IllegalStateException("unsupported sdk: " + getSdkInt());
+        throw new IllegalStateException("unsupported sdk: " + CORRECT_SDK_INT);
     });
 
     public static DexFile openDexFile(ByteBuffer data) {
-        if (getSdkInt() >= 26 && getSdkInt() <= 28) {
+        if (CORRECT_SDK_INT >= 26 && CORRECT_SDK_INT <= 28) {
             return nothrows_run(() -> dex_constructor.get().newInstance(data));
-        } else if (getSdkInt() >= 29 && getSdkInt() <= 34) {
+        } else if (CORRECT_SDK_INT >= 29 && CORRECT_SDK_INT <= 34) {
             return nothrows_run(() -> dex_constructor.get().newInstance(
                     new ByteBuffer[]{data}, null, null));
         } else {
-            throw new IllegalStateException("unsupported sdk: " + getSdkInt());
+            throw new IllegalStateException("unsupported sdk: " + CORRECT_SDK_INT);
         }
     }
 
@@ -328,34 +328,34 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
     }
 
     public static void setTrusted(Addressable dexfile) {
-        if (getSdkInt() >= 26 && getSdkInt() <= 27) {
+        if (CORRECT_SDK_INT >= 26 && CORRECT_SDK_INT <= 27) {
             return;
         }
-        if (getSdkInt() == 28) {
+        if (CORRECT_SDK_INT == 28) {
             DEXFILE_LAYOUT.bind(dexfile).select(groupElement("is_platform_dex_"))
                     .put(JAVA_BOOLEAN, 0, true);
             return;
         }
-        if (getSdkInt() >= 29 && getSdkInt() <= 34) {
+        if (CORRECT_SDK_INT >= 29 && CORRECT_SDK_INT <= 34) {
             DEXFILE_LAYOUT.bind(dexfile).select(groupElement("hiddenapi_domain_"))
                     .put(JAVA_BYTE, 0, /*kCorePlatform*/ (byte) 0);
             return;
         }
-        throw new IllegalStateException("unsupported sdk: " + getSdkInt());
+        throw new IllegalStateException("unsupported sdk: " + CORRECT_SDK_INT);
     }
 
     public static void setTrusted(DexFile dex) {
-        if (getSdkInt() >= 26 && getSdkInt() <= 27) {
+        if (CORRECT_SDK_INT >= 26 && CORRECT_SDK_INT <= 27) {
             return;
         }
-        if (getSdkInt() >= 28 && getSdkInt() <= 34) {
+        if (CORRECT_SDK_INT >= 28 && CORRECT_SDK_INT <= 34) {
             long[] cookie = getCookie(dex);
             for (int i = 1; i < cookie.length; i++) {
                 setTrusted(new Pointer(cookie[i]));
             }
             return;
         }
-        throw new IllegalStateException("unsupported sdk: " + getSdkInt());
+        throw new IllegalStateException("unsupported sdk: " + CORRECT_SDK_INT);
     }
 
     private static final Supplier<MethodHandle> loadClassBinaryName = runOnce(

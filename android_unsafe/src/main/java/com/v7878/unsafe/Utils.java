@@ -1,7 +1,5 @@
 package com.v7878.unsafe;
 
-import android.os.Build;
-
 import com.v7878.Thrower;
 
 import java.lang.reflect.Constructor;
@@ -15,10 +13,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Utils {
-
-    public static int getSdkInt() {
-        return Build.VERSION.SDK_INT + (Build.VERSION.PREVIEW_SDK_INT == 0 ? 0 : 1);
-    }
 
     public static boolean arrayContentsEq(Object[] a1, Object[] a2) {
         if (a1 == null) {

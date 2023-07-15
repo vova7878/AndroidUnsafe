@@ -1,6 +1,6 @@
 package com.v7878.unsafe.dex;
 
-import static com.v7878.unsafe.Utils.getSdkInt;
+import static com.v7878.Version.CORRECT_SDK_INT;
 
 //TODO: split into Read and Write Options
 public class DexOptions {
@@ -42,7 +42,7 @@ public class DexOptions {
     }
 
     public static DexOptions defaultOptions() {
-        return new DexOptions(getSdkInt(), true, false);
+        return new DexOptions(CORRECT_SDK_INT, true, false);
     }
 
     public void requireMinApi(int minApi) {

@@ -24,6 +24,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.function.Supplier;
 
+import dalvik.annotation.optimization.CriticalNative;
+import dalvik.annotation.optimization.FastNative;
 import dalvik.system.DexFile;
 
 @DangerLevel(7)
@@ -139,68 +141,94 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         setRawClassStatus(clazz, status.value);
     }
 
-    private interface LocalRefUtilsI {
-        default long NewLocalRef64(long env, Object obj) {
-            throw new AssertionError();
+    @Keep
+    private abstract static class LocalRefUtils {
+
+        static {
+            Class<?> word = IS64BIT ? long.class : int.class;
+            String suffix = IS64BIT ? "64" : "32";
+
+            Method[] methods = getDeclaredMethods(LocalRefUtils.class);
+
+            try (SymbolLookup art = SymbolLookup.defaultLookup()) {
+                Pointer dlr = art.lookup("_ZN3art9JNIEnvExt14DeleteLocalRefEP8_jobject");
+                setExecutableData(searchMethod(methods, "DeleteLocalRef" + suffix, word, word), dlr);
+
+                Pointer push = art.lookup("_ZN3art9JNIEnvExt9PushFrameEi");
+                setExecutableData(searchMethod(methods, "PushLocalFrame" + suffix, word, int.class), push);
+
+                Pointer pop = art.lookup("_ZN3art9JNIEnvExt8PopFrameEv");
+                setExecutableData(searchMethod(methods, "PopLocalFrame" + suffix, word), pop);
+            }
+
+            Method put = getDeclaredMethod(SunUnsafe.getUnsafeClass(), "putObject",
+                    Object.class, long.class, Object.class);
+            assert_(Modifier.isNative(put.getModifiers()), AssertionError::new);
+            setExecutableData(searchMethod(methods, "putRef" + suffix,
+                    Object.class, long.class, word), getExecutableData(put));
         }
 
-        default int NewLocalRef32(int env, Object obj) {
-            throw new AssertionError();
-        }
+        abstract long NewLocalRef64(long env, Object obj);
 
-        default void DeleteLocalRef64(long env, long ref) {
-            throw new AssertionError();
-        }
+        abstract int NewLocalRef32(int env, Object obj);
 
-        default void DeleteLocalRef32(int env, int ref) {
-            throw new AssertionError();
-        }
+        @SuppressWarnings("JavaJniMissingFunction")
+        @CriticalNative
+        private static native void DeleteLocalRef64(long env, long ref);
 
-        default void PushLocalFrame64(long env, int capacity) {
-            throw new AssertionError();
-        }
+        @SuppressWarnings("JavaJniMissingFunction")
+        @CriticalNative
+        private static native void DeleteLocalRef32(int env, int ref);
 
-        default void PushLocalFrame32(int env, int capacity) {
-            throw new AssertionError();
-        }
 
-        default void PopLocalFrame64(long env) {
-            throw new AssertionError();
-        }
+        @SuppressWarnings("JavaJniMissingFunction")
+        @CriticalNative
+        private static native void PushLocalFrame64(long env, int capacity);
 
-        default void PopLocalFrame32(int env) {
-            throw new AssertionError();
-        }
 
-        default void putRef64(Object obj, long offset, long ref) {
-            throw new AssertionError();
-        }
+        @SuppressWarnings("JavaJniMissingFunction")
+        @CriticalNative
+        private static native void PushLocalFrame32(int env, int capacity);
 
-        default void putRef32(Object obj, long offset, int ref) {
-            throw new AssertionError();
-        }
+
+        @SuppressWarnings("JavaJniMissingFunction")
+        @CriticalNative
+        private static native void PopLocalFrame64(long env);
+
+
+        @SuppressWarnings("JavaJniMissingFunction")
+        @CriticalNative
+        private static native void PopLocalFrame32(int env);
+
+
+        @SuppressWarnings("JavaJniMissingFunction")
+        @FastNative
+        private static native void putRef64(Object obj, long offset, long ref);
+
+
+        @SuppressWarnings("JavaJniMissingFunction")
+        @FastNative
+        private static native void putRef32(Object obj, long offset, int ref);
     }
 
-    private static final Supplier<LocalRefUtilsI> localRefUtils = runOnce(() -> {
+    private static final Supplier<LocalRefUtils> localRefUtils = runOnce(() -> {
         //TODO: what if kPoisonReferences == true?
         //make sure reinterpret_cast<int>(obj) == addressof(obj)
         assert_(!kPoisonReferences.get(), AssertionError::new);
 
         Class<?> word = IS64BIT ? long.class : int.class;
         TypeId word_id = TypeId.of(word);
-        String name = AndroidUnsafe7.class.getName() + "$LocalRefUtils";
+
+        String name = AndroidUnsafe7.class.getName() + "$LocalRefUtils$Impl";
         TypeId id = TypeId.of(name);
         ClassDef clazz = new ClassDef(id);
-        clazz.setSuperClass(TypeId.of(Object.class));
-        clazz.getInterfaces().add(TypeId.of(LocalRefUtilsI.class));
+        clazz.setSuperClass(TypeId.of(LocalRefUtils.class));
         clazz.setAccessFlags(Modifier.PUBLIC | Modifier.FINAL);
 
-        MethodId nlr_id = new MethodId(id, new ProtoId(word_id, word_id, word_id), "NewLocalRef");
+        MethodId nlr_id = new MethodId(id, new ProtoId(word_id, word_id, word_id), "SNewLocalRef");
         clazz.getClassData().getDirectMethods().add(new EncodedMethod(
                 nlr_id, Modifier.PUBLIC | Modifier.STATIC | Modifier.NATIVE,
-                new AnnotationSet(
-                        AnnotationItem.CriticalNative()
-                ), null, null
+                new AnnotationSet(AnnotationItem.CriticalNative()), null, null
         ));
 
         //it's broken: object is cast to pointer
@@ -226,99 +254,24 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
             ));
         }
 
-        MethodId dlr_id = new MethodId(id, new ProtoId(TypeId.V, word_id, word_id), "DeleteLocalRef");
-        clazz.getClassData().getDirectMethods().add(new EncodedMethod(
-                dlr_id, Modifier.PUBLIC | Modifier.STATIC | Modifier.NATIVE,
-                new AnnotationSet(
-                        AnnotationItem.CriticalNative()
-                ), null, null
-        ));
-
-        clazz.getClassData().getVirtualMethods().add(new EncodedMethod(
-                new MethodId(id, new ProtoId(TypeId.V, word_id, word_id),
-                        IS64BIT ? "DeleteLocalRef64" : "DeleteLocalRef32"),
-                Modifier.PUBLIC).withCode(0, b -> (IS64BIT ?
-                b.invoke(STATIC, dlr_id, b.p(0), b.p(1), b.p(2), b.p(3)) :
-                b.invoke(STATIC, dlr_id, b.p(0), b.p(1)))
-                .return_void()
-        ));
-
-        MethodId push_id = new MethodId(id, new ProtoId(TypeId.V, word_id, TypeId.I), "PushLocalFrame");
-        clazz.getClassData().getDirectMethods().add(new EncodedMethod(
-                push_id, Modifier.PUBLIC | Modifier.STATIC | Modifier.NATIVE,
-                new AnnotationSet(
-                        AnnotationItem.CriticalNative()
-                ), null, null
-        ));
-
-        clazz.getClassData().getVirtualMethods().add(new EncodedMethod(
-                new MethodId(id, new ProtoId(TypeId.V, word_id, TypeId.I),
-                        IS64BIT ? "PushLocalFrame64" : "PushLocalFrame32"),
-                Modifier.PUBLIC).withCode(0, b -> (IS64BIT ?
-                b.invoke(STATIC, push_id, b.p(0), b.p(1), b.p(2)) :
-                b.invoke(STATIC, push_id, b.p(0), b.p(1)))
-                .return_void()
-        ));
-
-        MethodId pop_id = new MethodId(id, new ProtoId(TypeId.V, word_id), "PopLocalFrame");
-        clazz.getClassData().getDirectMethods().add(new EncodedMethod(
-                pop_id, Modifier.PUBLIC | Modifier.STATIC | Modifier.NATIVE,
-                new AnnotationSet(
-                        AnnotationItem.CriticalNative()
-                ), null, null
-        ));
-
-        clazz.getClassData().getVirtualMethods().add(new EncodedMethod(
-                new MethodId(id, new ProtoId(TypeId.V, word_id),
-                        IS64BIT ? "PopLocalFrame64" : "PopLocalFrame32"),
-                Modifier.PUBLIC).withCode(0, b -> (IS64BIT ?
-                b.invoke(STATIC, pop_id, b.p(0), b.p(1)) :
-                b.invoke(STATIC, pop_id, b.p(0)))
-                .return_void()
-        ));
-
-        clazz.getClassData().getVirtualMethods().add(new EncodedMethod(
-                new MethodId(id, new ProtoId(TypeId.V, TypeId.of(Object.class),
-                        TypeId.J, word_id), IS64BIT ? "putRef64" : "putRef32"),
-                Modifier.PUBLIC | Modifier.FINAL | Modifier.NATIVE,
-                new AnnotationSet(AnnotationItem.FastNative()), null, null
-        ));
-
         DexFile dex = openDexFile(new Dex(clazz).compile());
         Class<?> utils = loadClass(dex, name, AndroidUnsafe7.class.getClassLoader());
         setClassStatus(utils, ClassStatus.Verified);
 
-        Method[] methods = getDeclaredMethods(utils);
-
         try (SymbolLookup art = SymbolLookup.defaultLookup()) {
             Pointer nlr = art.lookup("_ZN3art9JNIEnvExt11NewLocalRefEPNS_6mirror6ObjectE");
-            setExecutableData(searchMethod(methods, "NewLocalRef", word, word), nlr);
-
-            Pointer dlr = art.lookup("_ZN3art9JNIEnvExt14DeleteLocalRefEP8_jobject");
-            setExecutableData(searchMethod(methods, "DeleteLocalRef", word, word), dlr);
-
-            Pointer push = art.lookup("_ZN3art9JNIEnvExt9PushFrameEi");
-            setExecutableData(searchMethod(methods, "PushLocalFrame", word, int.class), push);
-
-            Pointer pop = art.lookup("_ZN3art9JNIEnvExt8PopFrameEv");
-            setExecutableData(searchMethod(methods, "PopLocalFrame", word), pop);
+            setExecutableData(getDeclaredMethod(utils, "SNewLocalRef", word, word), nlr);
         }
-
-        Method put = getDeclaredMethod(SunUnsafe.getUnsafeClass(), "putObject",
-                Object.class, long.class, Object.class);
-        assert_(Modifier.isNative(put.getModifiers()), AssertionError::new);
-        setExecutableData(searchMethod(methods, IS64BIT ? "putRef64" : "putRef32",
-                Object.class, long.class, word), getExecutableData(put));
 
         // make right helper public
         replaceExecutableAccessModifier(getDeclaredMethod(AndroidUnsafe7.class,
                 "refToObjectHelper", word), AccessModifier.PUBLIC);
 
-        return (LocalRefUtilsI) allocateInstance(utils);
+        return (LocalRefUtils) allocateInstance(utils);
     });
 
     public static Word NewLocalRef(Object obj) {
-        LocalRefUtilsI utils = localRefUtils.get();
+        LocalRefUtils utils = localRefUtils.get();
         Pointer env = getCurrentEnvPtr();
         if (IS64BIT) {
             return new Word(utils.NewLocalRef64(env.getRawAddress(), obj));
@@ -328,33 +281,30 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
     }
 
     public static void DeleteLocalRef(Word ref) {
-        LocalRefUtilsI utils = localRefUtils.get();
         Pointer env = getCurrentEnvPtr();
         if (IS64BIT) {
-            utils.DeleteLocalRef64(env.getRawAddress(), ref.longValue());
+            LocalRefUtils.DeleteLocalRef64(env.getRawAddress(), ref.longValue());
         } else {
-            utils.DeleteLocalRef32((int) env.getRawAddress(), ref.intValue());
+            LocalRefUtils.DeleteLocalRef32((int) env.getRawAddress(), ref.intValue());
         }
     }
 
     public static void PushLocalFrame(int capacity) {
         //TODO: capacity checks
-        LocalRefUtilsI utils = localRefUtils.get();
         Pointer env = getCurrentEnvPtr();
         if (IS64BIT) {
-            utils.PushLocalFrame64(env.getRawAddress(), capacity);
+            LocalRefUtils.PushLocalFrame64(env.getRawAddress(), capacity);
         } else {
-            utils.PushLocalFrame32((int) env.getRawAddress(), capacity);
+            LocalRefUtils.PushLocalFrame32((int) env.getRawAddress(), capacity);
         }
     }
 
     public static void PopLocalFrame() {
-        LocalRefUtilsI utils = localRefUtils.get();
         Pointer env = getCurrentEnvPtr();
         if (IS64BIT) {
-            utils.PopLocalFrame64(env.getRawAddress());
+            LocalRefUtils.PopLocalFrame64(env.getRawAddress());
         } else {
-            utils.PopLocalFrame32((int) env.getRawAddress());
+            LocalRefUtils.PopLocalFrame32((int) env.getRawAddress());
         }
     }
 
@@ -362,9 +312,9 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
         Object[] arr = new Object[1];
         final long offset = ARRAY_OBJECT_BASE_OFFSET;
         if (IS64BIT) {
-            localRefUtils.get().putRef64(arr, offset, ref.longValue());
+            LocalRefUtils.putRef64(arr, offset, ref.longValue());
         } else {
-            localRefUtils.get().putRef32(arr, offset, ref.intValue());
+            LocalRefUtils.putRef32(arr, offset, ref.intValue());
         }
         return arr[0];
     }
@@ -372,14 +322,14 @@ public class AndroidUnsafe7 extends AndroidUnsafe6 {
     @Keep
     private static Object refToObjectHelper(long ref) {
         Object[] arr = new Object[1];
-        localRefUtils.get().putRef64(arr, ARRAY_OBJECT_BASE_OFFSET, ref);
+        LocalRefUtils.putRef64(arr, ARRAY_OBJECT_BASE_OFFSET, ref);
         return arr[0];
     }
 
     @Keep
     private static Object refToObjectHelper(int ref) {
         Object[] arr = new Object[1];
-        localRefUtils.get().putRef32(arr, ARRAY_OBJECT_BASE_OFFSET, ref);
+        LocalRefUtils.putRef32(arr, ARRAY_OBJECT_BASE_OFFSET, ref);
         return arr[0];
     }
 

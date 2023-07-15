@@ -1,5 +1,6 @@
 package com.v7878.unsafe.function;
 
+import static com.v7878.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
 import static com.v7878.unsafe.AndroidUnsafe3.unreflect;
 import static com.v7878.unsafe.AndroidUnsafe5.IS64BIT;
 import static com.v7878.unsafe.AndroidUnsafe5.classSizeField;
@@ -13,7 +14,6 @@ import static com.v7878.unsafe.AndroidUnsafe5.setExecutableData;
 import static com.v7878.unsafe.AndroidUnsafe5.staticFieldOffset;
 import static com.v7878.unsafe.AndroidUnsafe7.NewLocalRef;
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
 import static com.v7878.unsafe.methodhandle.Transformers.invokeExactWithFrameNoChecks;
 import static com.v7878.unsafe.methodhandle.Transformers.makeTransformer;
 
@@ -21,19 +21,18 @@ import android.util.Pair;
 
 import androidx.annotation.Keep;
 
+import com.v7878.dex.AnnotationItem;
+import com.v7878.dex.AnnotationSet;
+import com.v7878.dex.ClassDef;
+import com.v7878.dex.Dex;
+import com.v7878.dex.EncodedField;
+import com.v7878.dex.EncodedMethod;
+import com.v7878.dex.FieldId;
+import com.v7878.dex.MethodId;
+import com.v7878.dex.ProtoId;
+import com.v7878.dex.TypeId;
 import com.v7878.unsafe.AndroidUnsafe7;
 import com.v7878.unsafe.AndroidUnsafe7.LocalFrame;
-import com.v7878.unsafe.dex.AnnotationItem;
-import com.v7878.unsafe.dex.AnnotationSet;
-import com.v7878.unsafe.dex.ClassDef;
-import com.v7878.unsafe.dex.Dex;
-import com.v7878.unsafe.dex.EncodedField;
-import com.v7878.unsafe.dex.EncodedMethod;
-import com.v7878.unsafe.dex.FieldId;
-import com.v7878.unsafe.dex.MethodId;
-import com.v7878.unsafe.dex.ProtoId;
-import com.v7878.unsafe.dex.TypeId;
-import com.v7878.unsafe.dex.modifications.Modifications.EmptyClassLoader;
 import com.v7878.unsafe.memory.Addressable;
 import com.v7878.unsafe.memory.Bindable;
 import com.v7878.unsafe.memory.Layout;
@@ -43,6 +42,7 @@ import com.v7878.unsafe.memory.Word;
 import com.v7878.unsafe.methodhandle.EmulatedStackFrame;
 import com.v7878.unsafe.methodhandle.EmulatedStackFrame.StackFrameAccessor;
 import com.v7878.unsafe.methodhandle.Transformers.TransformerI;
+import com.v7878.unsafe.modifications.Modifications.EmptyClassLoader;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;

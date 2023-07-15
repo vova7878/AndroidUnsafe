@@ -1,6 +1,11 @@
 package com.v7878.unsafe.methodhandle;
 
 import static com.v7878.Version.CORRECT_SDK_INT;
+import static com.v7878.dex.bytecode.CodeBuilder.InvokeKind.DIRECT;
+import static com.v7878.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
+import static com.v7878.dex.bytecode.CodeBuilder.InvokeKind.VIRTUAL;
+import static com.v7878.dex.bytecode.CodeBuilder.Op.GET_OBJECT;
+import static com.v7878.dex.bytecode.CodeBuilder.Op.PUT_OBJECT;
 import static com.v7878.unsafe.AndroidUnsafe3.ClassMirror;
 import static com.v7878.unsafe.AndroidUnsafe3.arrayCast;
 import static com.v7878.unsafe.AndroidUnsafe3.unreflectDirect;
@@ -12,25 +17,20 @@ import static com.v7878.unsafe.AndroidUnsafe5.replaceExecutableAccessModifier;
 import static com.v7878.unsafe.AndroidUnsafe5.setTrusted;
 import static com.v7878.unsafe.AndroidUnsafe7.setClassStatus;
 import static com.v7878.unsafe.Utils.nothrows_run;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.DIRECT;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.VIRTUAL;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.Op.GET_OBJECT;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.Op.PUT_OBJECT;
 
 import androidx.annotation.Keep;
 
+import com.v7878.dex.ClassDef;
+import com.v7878.dex.Dex;
+import com.v7878.dex.EncodedField;
+import com.v7878.dex.EncodedMethod;
+import com.v7878.dex.FieldId;
+import com.v7878.dex.MethodId;
+import com.v7878.dex.ProtoId;
+import com.v7878.dex.TypeId;
 import com.v7878.unsafe.AndroidUnsafe3.MethodHandleMirror;
 import com.v7878.unsafe.AndroidUnsafe5.AccessModifier;
 import com.v7878.unsafe.AndroidUnsafe7.ClassStatus;
-import com.v7878.unsafe.dex.ClassDef;
-import com.v7878.unsafe.dex.Dex;
-import com.v7878.unsafe.dex.EncodedField;
-import com.v7878.unsafe.dex.EncodedMethod;
-import com.v7878.unsafe.dex.FieldId;
-import com.v7878.unsafe.dex.MethodId;
-import com.v7878.unsafe.dex.ProtoId;
-import com.v7878.unsafe.dex.TypeId;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;

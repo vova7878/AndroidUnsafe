@@ -1,21 +1,21 @@
 package com.v7878.unsafe;
 
 import static com.v7878.Version.CORRECT_SDK_INT;
+import static com.v7878.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.runOnce;
 import static com.v7878.unsafe.Utils.searchMethod;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
 
 import androidx.annotation.Keep;
 
-import com.v7878.unsafe.dex.AnnotationItem;
-import com.v7878.unsafe.dex.AnnotationSet;
-import com.v7878.unsafe.dex.ClassDef;
-import com.v7878.unsafe.dex.Dex;
-import com.v7878.unsafe.dex.EncodedMethod;
-import com.v7878.unsafe.dex.MethodId;
-import com.v7878.unsafe.dex.ProtoId;
-import com.v7878.unsafe.dex.TypeId;
+import com.v7878.dex.AnnotationItem;
+import com.v7878.dex.AnnotationSet;
+import com.v7878.dex.ClassDef;
+import com.v7878.dex.Dex;
+import com.v7878.dex.EncodedMethod;
+import com.v7878.dex.MethodId;
+import com.v7878.dex.ProtoId;
+import com.v7878.dex.TypeId;
 import com.v7878.unsafe.function.SymbolLookup;
 import com.v7878.unsafe.memory.Pointer;
 import com.v7878.unsafe.memory.Word;

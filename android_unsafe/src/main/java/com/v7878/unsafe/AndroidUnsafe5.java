@@ -1,6 +1,6 @@
 package com.v7878.unsafe;
 
-import static com.v7878.Version.CORRECT_SDK_INT;
+import static com.v7878.misc.Version.CORRECT_SDK_INT;
 import static com.v7878.unsafe.AndroidUnsafe5.AccessModifier.PRIVATE;
 import static com.v7878.unsafe.AndroidUnsafe5.AccessModifier.PROTECTED;
 import static com.v7878.unsafe.AndroidUnsafe5.AccessModifier.PUBLIC;

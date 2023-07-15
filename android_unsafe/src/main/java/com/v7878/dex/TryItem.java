@@ -6,7 +6,7 @@ import android.util.SparseArray;
 
 import com.v7878.dex.io.RandomInput;
 import com.v7878.dex.io.RandomOutput;
-import com.v7878.unsafe.Checks;
+import com.v7878.misc.Checks;
 
 import java.util.Map;
 import java.util.Objects;

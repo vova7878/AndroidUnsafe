@@ -1,14 +1,14 @@
 package com.v7878.dex;
 
+import static com.v7878.misc.Math.roundUpL;
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.Utils.roundUpL;
 
 import android.util.SparseArray;
 
 import com.v7878.dex.bytecode.Instruction;
 import com.v7878.dex.io.RandomInput;
 import com.v7878.dex.io.RandomOutput;
-import com.v7878.unsafe.Checks;
+import com.v7878.misc.Checks;
 
 import java.util.HashMap;
 import java.util.Objects;

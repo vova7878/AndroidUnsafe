@@ -1,4 +1,4 @@
-package com.v7878;
+package com.v7878.misc;
 
 import android.os.Build;
 

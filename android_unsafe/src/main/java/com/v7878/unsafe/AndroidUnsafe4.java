@@ -1,9 +1,9 @@
 package com.v7878.unsafe;
 
+import static com.v7878.misc.Math.isSigned32Bit;
+import static com.v7878.misc.Math.roundUp;
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.Utils.isSigned32Bit;
 import static com.v7878.unsafe.Utils.nothrows_run;
-import static com.v7878.unsafe.Utils.roundUp;
 import static com.v7878.unsafe.Utils.runOnce;
 
 import androidx.annotation.Keep;

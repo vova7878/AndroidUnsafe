@@ -1,6 +1,6 @@
 package com.v7878.dex;
 
-import com.v7878.unsafe.Checks;
+import com.v7878.misc.Checks;
 
 import java.util.AbstractList;
 import java.util.ArrayList;

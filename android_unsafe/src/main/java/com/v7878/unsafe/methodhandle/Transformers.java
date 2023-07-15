@@ -1,11 +1,11 @@
 package com.v7878.unsafe.methodhandle;
 
-import static com.v7878.Version.CORRECT_SDK_INT;
 import static com.v7878.dex.bytecode.CodeBuilder.InvokeKind.DIRECT;
 import static com.v7878.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
 import static com.v7878.dex.bytecode.CodeBuilder.InvokeKind.VIRTUAL;
 import static com.v7878.dex.bytecode.CodeBuilder.Op.GET_OBJECT;
 import static com.v7878.dex.bytecode.CodeBuilder.Op.PUT_OBJECT;
+import static com.v7878.misc.Version.CORRECT_SDK_INT;
 import static com.v7878.unsafe.AndroidUnsafe3.ClassMirror;
 import static com.v7878.unsafe.AndroidUnsafe3.arrayCast;
 import static com.v7878.unsafe.AndroidUnsafe3.unreflectDirect;

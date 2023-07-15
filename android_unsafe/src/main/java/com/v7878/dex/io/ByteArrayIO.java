@@ -10,7 +10,7 @@ import static com.v7878.unsafe.AndroidUnsafe2.putIntUnaligned;
 import static com.v7878.unsafe.AndroidUnsafe2.putLongUnaligned;
 import static com.v7878.unsafe.AndroidUnsafe2.putShortUnaligned;
 
-import com.v7878.unsafe.Checks;
+import com.v7878.misc.Checks;
 
 import java.util.Arrays;
 

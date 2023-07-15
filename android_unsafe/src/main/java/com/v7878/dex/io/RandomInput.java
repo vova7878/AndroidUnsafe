@@ -1,10 +1,10 @@
 package com.v7878.dex.io;
 
+import static com.v7878.misc.Math.isAlignedL;
+import static com.v7878.misc.Math.roundUpL;
 import static com.v7878.unsafe.AndroidUnsafe.IS64BIT;
-import static com.v7878.unsafe.Utils.roundUpL;
 
-import com.v7878.unsafe.Checks;
-import com.v7878.unsafe.Utils;
+import com.v7878.misc.Checks;
 import com.v7878.unsafe.memory.Word;
 
 import java.util.Objects;
@@ -112,7 +112,7 @@ public interface RandomInput extends AutoCloseable {
 
     default void requireAlignment(int alignment) {
         long pos = position();
-        if (!Utils.isAlignedL(pos, alignment)) {
+        if (!isAlignedL(pos, alignment)) {
             throw new IllegalStateException("position " + pos + " not aligned by " + alignment);
         }
     }

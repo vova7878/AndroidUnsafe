@@ -1,7 +1,7 @@
 package com.v7878.unsafe;
 
-import static com.v7878.Version.CORRECT_SDK_INT;
 import static com.v7878.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
+import static com.v7878.misc.Version.CORRECT_SDK_INT;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.runOnce;
 import static com.v7878.unsafe.Utils.searchMethod;

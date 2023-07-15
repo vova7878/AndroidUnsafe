@@ -1,5 +1,7 @@
 package com.v7878.unsafe.memory;
 
+import static com.v7878.misc.Math.isPowerOfTwo;
+import static com.v7878.misc.Math.roundUpUL;
 import static com.v7878.unsafe.AndroidUnsafe4.ARRAY_BYTE_BASE_OFFSET;
 import static com.v7878.unsafe.AndroidUnsafe4.IS64BIT;
 import static com.v7878.unsafe.AndroidUnsafe4.OBJECT_ALIGNMENT_SHIFT;
@@ -30,11 +32,9 @@ import static com.v7878.unsafe.AndroidUnsafe4.putObject;
 import static com.v7878.unsafe.AndroidUnsafe4.putObjectRaw;
 import static com.v7878.unsafe.AndroidUnsafe4.putShortUnaligned;
 import static com.v7878.unsafe.AndroidUnsafe4.putWordUnaligned;
-import static com.v7878.unsafe.Checks.checkNativeAddress;
-import static com.v7878.unsafe.Checks.checkOffset;
+import static com.v7878.unsafe.MemoryChecks.checkNativeAddress;
+import static com.v7878.unsafe.MemoryChecks.checkOffset;
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.Utils.isPowerOfTwo;
-import static com.v7878.unsafe.Utils.roundUpUL;
 import static com.v7878.unsafe.memory.ValueLayout.JAVA_BYTE;
 
 import java.nio.charset.Charset;

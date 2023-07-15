@@ -1,6 +1,6 @@
 package com.v7878.unsafe.modifications;
 
-import static com.v7878.Version.CORRECT_SDK_INT;
+import static com.v7878.misc.Version.CORRECT_SDK_INT;
 import static com.v7878.unsafe.AndroidUnsafe5.DEXFILE_LAYOUT;
 import static com.v7878.unsafe.AndroidUnsafe5.arrayCast;
 import static com.v7878.unsafe.AndroidUnsafe5.getDexFile;

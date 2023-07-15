@@ -1,8 +1,7 @@
 package com.v7878.dex.io;
 
-import static com.v7878.unsafe.Utils.roundUpL;
-
-import com.v7878.unsafe.Utils;
+import static com.v7878.misc.Math.isAlignedL;
+import static com.v7878.misc.Math.roundUpL;
 
 public interface RandomIO extends RandomInput, RandomOutput {
 
@@ -16,7 +15,7 @@ public interface RandomIO extends RandomInput, RandomOutput {
 
     default void requireAlignment(int alignment) {
         long pos = position();
-        if (!Utils.isAlignedL(pos, alignment)) {
+        if (!isAlignedL(pos, alignment)) {
             throw new IllegalStateException("position " + pos + " not aligned by " + alignment);
         }
     }

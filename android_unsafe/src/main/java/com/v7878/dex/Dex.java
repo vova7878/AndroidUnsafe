@@ -1,14 +1,14 @@
 package com.v7878.dex;
 
+import static com.v7878.misc.Math.roundUp;
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.Utils.roundUp;
 
 import com.v7878.dex.EncodedValue.ArrayValue;
 import com.v7878.dex.io.ByteArrayIO;
 import com.v7878.dex.io.RandomIO;
 import com.v7878.dex.io.RandomInput;
 import com.v7878.dex.io.RandomOutput;
-import com.v7878.unsafe.Checks;
+import com.v7878.misc.Checks;
 
 import java.util.Map;
 import java.util.Objects;

@@ -1,5 +1,10 @@
 package com.v7878.unsafe.memory;
 
+import static com.v7878.misc.Math.is32Bit;
+import static com.v7878.misc.Math.isAlignedL;
+import static com.v7878.misc.Math.isPowerOfTwoUL;
+import static com.v7878.misc.Math.log2;
+import static com.v7878.misc.Math.roundUpL;
 import static com.v7878.unsafe.AndroidUnsafe4.ADDRESS_SIZE;
 import static com.v7878.unsafe.AndroidUnsafe4.IS64BIT;
 import static com.v7878.unsafe.AndroidUnsafe4.OBJECT_ALIGNMENT_SHIFT;
@@ -12,13 +17,8 @@ import static com.v7878.unsafe.AndroidUnsafe4.getInstanceFields;
 import static com.v7878.unsafe.AndroidUnsafe4.isCompressedString;
 import static com.v7878.unsafe.AndroidUnsafe4.objectSizeField;
 import static com.v7878.unsafe.AndroidUnsafe4.shouldHaveEmbeddedVTableAndImt;
-import static com.v7878.unsafe.Checks.checkSize;
+import static com.v7878.unsafe.MemoryChecks.checkSize;
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.Utils.is32Bit;
-import static com.v7878.unsafe.Utils.isAlignedL;
-import static com.v7878.unsafe.Utils.isPowerOfTwoUL;
-import static com.v7878.unsafe.Utils.log2;
-import static com.v7878.unsafe.Utils.roundUpL;
 
 import com.v7878.unsafe.AndroidUnsafe3;
 import com.v7878.unsafe.memory.LayoutPath.PathElement;

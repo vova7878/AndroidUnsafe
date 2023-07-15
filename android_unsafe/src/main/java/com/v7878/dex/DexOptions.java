@@ -1,6 +1,6 @@
 package com.v7878.dex;
 
-import static com.v7878.Version.CORRECT_SDK_INT;
+import static com.v7878.misc.Version.CORRECT_SDK_INT;
 
 //TODO: split into Read and Write Options
 public class DexOptions {

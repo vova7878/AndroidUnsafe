@@ -25,7 +25,7 @@ import com.v7878.dex.bytecode.Format.Format35c;
 import com.v7878.dex.bytecode.Format.Format3rc;
 import com.v7878.dex.bytecode.Format.Format45cc;
 import com.v7878.dex.bytecode.Format.Format4rcc;
-import com.v7878.unsafe.Checks;
+import com.v7878.misc.Checks;
 
 import java.util.ArrayList;
 import java.util.HashMap;

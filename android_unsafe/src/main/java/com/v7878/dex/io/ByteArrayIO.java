@@ -11,10 +11,9 @@ class ModifiableArray {
 
     private byte[] data;
     private int data_size;
-    private int grow_factor;
+    private int grow_factor = DEFAULT_GROW_FACTOR;
 
     ModifiableArray(int size) {
-        this.grow_factor = DEFAULT_GROW_FACTOR;
         this.data = new byte[size];
         this.data_size = 0;
     }
@@ -84,12 +83,14 @@ public class ByteArrayIO implements RandomIO {
 
     @Override
     public void writeByte(int value) {
-        arr.data()[(int) addPosition(1)] = (byte) value;
+        int index = (int) addPosition(1);
+        arr.data()[index] = (byte) value;
     }
 
     @Override
     public byte readByte() {
-        return arr.data()[(int) addPosition(1)];
+        int index = (int) addPosition(1);
+        return arr.data()[index];
     }
 
     public byte[] toByteArray() {

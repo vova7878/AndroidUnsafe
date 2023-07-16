@@ -1,10 +1,10 @@
 package com.v7878.unsafe.memory;
 
+import static com.v7878.misc.Math.minUL;
 import static com.v7878.unsafe.AndroidUnsafe4.ARRAY_BYTE_BASE_OFFSET;
 import static com.v7878.unsafe.AndroidUnsafe4.copyMemory;
 import static com.v7878.unsafe.AndroidUnsafe4.newNonMovableArrayVM;
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.Utils.minUL;
 import static com.v7878.unsafe.Utils.toHexString;
 import static com.v7878.unsafe.memory.ValueLayout.JAVA_BYTE;
 

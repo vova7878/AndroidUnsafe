@@ -1,7 +1,7 @@
 package com.v7878.unsafe;
 
+import static com.v7878.misc.Version.CORRECT_SDK_INT;
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.nothrows_run;
 import static com.v7878.unsafe.Utils.runOnce;
 import static com.v7878.unsafe.memory.LayoutPath.PathElement.groupElement;
@@ -9,14 +9,8 @@ import static com.v7878.unsafe.memory.ValueLayout.ADDRESS;
 import static com.v7878.unsafe.memory.ValueLayout.JAVA_INT;
 import static com.v7878.unsafe.memory.ValueLayout.structLayout;
 
-import com.v7878.unsafe.dex.AnnotationItem;
-import com.v7878.unsafe.dex.AnnotationSet;
-import com.v7878.unsafe.dex.ClassDef;
-import com.v7878.unsafe.dex.Dex;
-import com.v7878.unsafe.dex.EncodedMethod;
-import com.v7878.unsafe.dex.MethodId;
-import com.v7878.unsafe.dex.ProtoId;
-import com.v7878.unsafe.dex.TypeId;
+import androidx.annotation.Keep;
+
 import com.v7878.unsafe.function.FunctionDescriptor;
 import com.v7878.unsafe.memory.GroupLayout;
 import com.v7878.unsafe.memory.MemorySegment;
@@ -27,14 +21,13 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import dalvik.system.DexFile;
+import dalvik.annotation.optimization.CriticalNative;
+import dalvik.annotation.optimization.FastNative;
 
 @DangerLevel(6)
-@SuppressWarnings("deprecation")
 public class AndroidUnsafe6 extends AndroidUnsafe5 {
 
     //TODO: set content
@@ -288,7 +281,7 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
 
     public static final long env_offset = nothrows_run(() -> {
         long tmp;
-        switch (getSdkInt()) {
+        switch (CORRECT_SDK_INT) {
             case 34: // android 14
                 tmp = 21 * 4; // tls32_
                 tmp += 4; // padding
@@ -335,7 +328,7 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
                 tmp += 7 * ADDRESS.size(); // tlsPtr_
                 return tmp;
             default:
-                throw new IllegalStateException("unsupported sdk: " + getSdkInt());
+                throw new IllegalStateException("unsupported sdk: " + CORRECT_SDK_INT);
         }
     });
 
@@ -387,36 +380,30 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
         return jni_invoke_interface.bind(getJavaVMPtr().get(ADDRESS));
     }
 
-    private static final Supplier<Class<?>> refUtils = runOnce(() -> {
-        Class<?> word = IS64BIT ? long.class : int.class;
-        String name = AndroidUnsafe6.class.getName() + "$RefUtils";
-        TypeId id = TypeId.of(name);
-        ClassDef clazz = new ClassDef(id);
-        clazz.setSuperClass(TypeId.of(Object.class));
-        clazz.setAccessFlags(Modifier.PUBLIC | Modifier.FINAL);
-        clazz.getClassData().getDirectMethods().add(new EncodedMethod(
-                new MethodId(id, new ProtoId(TypeId.of(word)), "NewGlobalRef"),
-                Modifier.PRIVATE | Modifier.NATIVE,
-                new AnnotationSet(
-                        AnnotationItem.FastNative()
-                ), null, null
-        ));
-        clazz.getClassData().getDirectMethods().add(new EncodedMethod(
-                new MethodId(id, new ProtoId(TypeId.V, TypeId.of(word),
-                        TypeId.of(word)), "DeleteGlobalRef"),
-                Modifier.PRIVATE | Modifier.STATIC | Modifier.NATIVE,
-                new AnnotationSet(
-                        AnnotationItem.CriticalNative()
-                ), null, null
-        ));
-        DexFile dex = openDexFile(new Dex(clazz).compile());
-        return loadClass(dex, name, AndroidUnsafe6.class.getClassLoader());
-    });
+    @Keep
+    private static class RefUtils {
+        @SuppressWarnings("JavaJniMissingFunction")
+        @FastNative
+        private native int NewGlobalRef32();
+
+        @SuppressWarnings("JavaJniMissingFunction")
+        @FastNative
+        private native long NewGlobalRef64();
+
+        @SuppressWarnings("JavaJniMissingFunction")
+        @CriticalNative
+        private static native void DeleteGlobalRef32(int env, int ref);
+
+        @SuppressWarnings("JavaJniMissingFunction")
+        @CriticalNative
+        private static native void DeleteGlobalRef64(long env, long ref);
+    }
 
     private static final Supplier<MethodHandle> newGlobalRef = runOnce(() -> {
         Class<?> word = IS64BIT ? long.class : int.class;
+        String suffix = IS64BIT ? "64" : "32";
 
-        Method m = getDeclaredMethod(refUtils.get(), "NewGlobalRef");
+        Method m = getDeclaredMethod(RefUtils.class, "NewGlobalRef" + suffix);
         setExecutableData(m, getCurrentJNINativeInterface()
                 .select(groupElement("NewGlobalRef")).get(ADDRESS, 0));
         MethodHandle out = unreflectDirect(m);
@@ -428,13 +415,22 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
     });
 
     public static Word NewGlobalRef(Object obj) {
-        return nothrows_run(() -> new Word((long) newGlobalRef.get().invoke(obj)));
+        return nothrows_run(() -> {
+            MethodHandle f = newGlobalRef.get();
+            if (IS64BIT) {
+                return new Word((long) f.invokeExact(obj));
+            } else {
+                return new Word((int) f.invokeExact(obj));
+            }
+        });
     }
 
     private static final Supplier<MethodHandle> deleteGlobalRef = runOnce(() -> {
         Class<?> word = IS64BIT ? long.class : int.class;
+        String suffix = IS64BIT ? "64" : "32";
 
-        Method m = getDeclaredMethod(refUtils.get(), "DeleteGlobalRef", word, word);
+        Method m = getDeclaredMethod(RefUtils.class,
+                "DeleteGlobalRef" + suffix, word, word);
         setExecutableData(m, getCurrentJNINativeInterface()
                 .select(groupElement("DeleteGlobalRef")).get(ADDRESS, 0));
 
@@ -446,9 +442,9 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
             MethodHandle f = deleteGlobalRef.get();
             long env = getCurrentEnvPtr().getRawAddress();
             if (IS64BIT) {
-                f.invoke(env, ref.longValue());
+                f.invokeExact(env, ref.longValue());
             } else {
-                f.invoke((int) env, ref.intValue());
+                f.invokeExact((int) env, ref.intValue());
             }
         });
     }
@@ -471,33 +467,18 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
         }
     }
 
-    public interface VMStack {
-
-        VMStack INSTANCE = nothrows_run(() -> {
-            String name = VMStack.class.getName() + "$Impl";
-            TypeId id = TypeId.of(name);
-            ClassDef clazz = new ClassDef(id);
-            clazz.setSuperClass(TypeId.of(Object.class));
-            clazz.setAccessFlags(Modifier.PUBLIC | Modifier.FINAL);
-            clazz.getInterfaces().add(TypeId.of(VMStack.class));
-            clazz.getClassData().getVirtualMethods().add(new EncodedMethod(
-                    new MethodId(id, new ProtoId(TypeId.of(Class.class)), "getStackClass2"),
-                    Modifier.PUBLIC | Modifier.NATIVE,
-                    new AnnotationSet(
-                            AnnotationItem.FastNative()
-                    ), null, null
-            ));
-            DexFile dex = openDexFile(new Dex(clazz).compile());
-            Class<?> impl = loadClass(dex, name, VMStack.class.getClassLoader());
-            setExecutableData(getDeclaredMethod(impl, "getStackClass2"),
+    public static class VMStack {
+        static {
+            nothrows_run(() -> setExecutableData(
+                    getDeclaredMethod(VMStack.class, "getStackClass2"),
                     getExecutableData(getDeclaredMethod(Class.forName(
-                            "dalvik.system.VMStack"), "getStackClass2")));
-            return (VMStack) allocateInstance(impl);
-        });
+                            "dalvik.system.VMStack"), "getStackClass2"))));
+        }
 
-        Class<?> getStackClass2();
+        @SuppressWarnings("JavaJniMissingFunction")
+        public static native Class<?> getStackClass2();
 
-        default Class<?> getStackClass1() {
+        public static Class<?> getStackClass1() {
             return getStackClass2();
         }
     }

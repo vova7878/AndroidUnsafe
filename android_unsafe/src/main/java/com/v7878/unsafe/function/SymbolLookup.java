@@ -57,6 +57,6 @@ public interface SymbolLookup extends Closeable {
     }
 
     static NativeLibrary loaderLookup(String libname) {
-        return loaderLookup(VMStack.INSTANCE.getStackClass1().getClassLoader(), libname);
+        return loaderLookup(VMStack.getStackClass1().getClassLoader(), libname);
     }
 }

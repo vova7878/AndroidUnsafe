@@ -1,17 +1,16 @@
-package com.v7878.unsafe.dex.modifications;
+package com.v7878.unsafe.modifications;
 
+import static com.v7878.misc.Version.CORRECT_SDK_INT;
 import static com.v7878.unsafe.AndroidUnsafe5.DEXFILE_LAYOUT;
 import static com.v7878.unsafe.AndroidUnsafe5.arrayCast;
 import static com.v7878.unsafe.AndroidUnsafe5.getDexFile;
-import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.memory.LayoutPath.PathElement.groupElement;
 import static com.v7878.unsafe.memory.ValueLayout.ADDRESS;
 import static com.v7878.unsafe.memory.ValueLayout.WORD;
 
+import com.v7878.dex.Dex;
+import com.v7878.dex.DexOptions;
 import com.v7878.unsafe.AndroidUnsafe3.ClassMirror;
-import com.v7878.unsafe.dex.Dex;
-import com.v7878.unsafe.dex.DexOptions;
-import com.v7878.unsafe.io.MemoryInput;
 import com.v7878.unsafe.memory.Layout;
 import com.v7878.unsafe.memory.MemorySegment;
 import com.v7878.unsafe.memory.Pointer;
@@ -42,7 +41,7 @@ public class Modifications {
                 .get(WORD, 0).longValue();
 
         return Dex.read(new MemoryInput(Layout.rawLayout(size).bind(data)),
-                new DexOptions(getSdkInt(), true, true), dex_ids);
+                new DexOptions(CORRECT_SDK_INT, true, true), dex_ids);
     }
 
     public static class EmptyClassLoader extends ClassLoader {

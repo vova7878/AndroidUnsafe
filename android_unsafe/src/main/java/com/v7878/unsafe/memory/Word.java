@@ -1,9 +1,8 @@
 package com.v7878.unsafe.memory;
 
+import static com.v7878.misc.Math.isSigned32Bit;
 import static com.v7878.unsafe.AndroidUnsafe.IS64BIT;
-import static com.v7878.unsafe.Checks.checkNativeAddress;
-
-import com.v7878.unsafe.Utils;
+import static com.v7878.unsafe.MemoryChecks.checkNativeAddress;
 
 public final class Word extends Number {
 
@@ -26,7 +25,7 @@ public final class Word extends Number {
     }
 
     public boolean is32BitOnly() {
-        return Utils.isSigned32Bit(value);
+        return isSigned32Bit(value);
     }
 
     @Override

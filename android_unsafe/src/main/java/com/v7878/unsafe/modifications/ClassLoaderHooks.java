@@ -1,4 +1,4 @@
-package com.v7878.unsafe.dex.modifications;
+package com.v7878.unsafe.modifications;
 
 import static com.v7878.unsafe.AndroidUnsafe.fullFence;
 import static com.v7878.unsafe.AndroidUnsafe3.arrayCast;
@@ -8,28 +8,24 @@ import static com.v7878.unsafe.AndroidUnsafe4.objectSizeField;
 import static com.v7878.unsafe.AndroidUnsafe4.setObjectClass;
 import static com.v7878.unsafe.AndroidUnsafe5.getExecutableAccessFlags;
 import static com.v7878.unsafe.AndroidUnsafe5.loadClass;
-import static com.v7878.unsafe.AndroidUnsafe5.openDexFile;
 import static com.v7878.unsafe.AndroidUnsafe5.replaceExecutableAccessModifier;
 import static com.v7878.unsafe.AndroidUnsafe5.setExecutableAccessFlags;
 import static com.v7878.unsafe.AndroidUnsafe5.setTrusted;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.nothrows_run;
 import static com.v7878.unsafe.Utils.searchMethod;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.INTERFACE;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.SUPER;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.Op.GET_OBJECT;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.Test.EQ;
 
+import com.v7878.dex.ClassDef;
+import com.v7878.dex.Dex;
+import com.v7878.dex.EncodedField;
+import com.v7878.dex.EncodedMethod;
+import com.v7878.dex.FieldId;
+import com.v7878.dex.MethodId;
+import com.v7878.dex.ProtoId;
+import com.v7878.dex.TypeId;
+import com.v7878.dex.bytecode.CodeBuilder;
 import com.v7878.unsafe.AndroidUnsafe3.ClassMirror;
 import com.v7878.unsafe.AndroidUnsafe5;
-import com.v7878.unsafe.dex.ClassDef;
-import com.v7878.unsafe.dex.Dex;
-import com.v7878.unsafe.dex.EncodedField;
-import com.v7878.unsafe.dex.EncodedMethod;
-import com.v7878.unsafe.dex.FieldId;
-import com.v7878.unsafe.dex.MethodId;
-import com.v7878.unsafe.dex.ProtoId;
-import com.v7878.unsafe.dex.TypeId;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -93,22 +89,22 @@ public class ClassLoaderHooks {
                     new MethodId(hook_id, new ProtoId(TypeId.of(Class.class),
                             TypeId.of(String.class)), "findClass"),
                     Modifier.PUBLIC).withCode(1, b -> b
-                    .sop(GET_OBJECT, b.l(0), impl_f_id)
-                    .invoke(INTERFACE, new MethodId(TypeId.of(BiFunction.class), new ProtoId(
+                    .sop(CodeBuilder.Op.GET_OBJECT, b.l(0), impl_f_id)
+                    .invoke(CodeBuilder.InvokeKind.INTERFACE, new MethodId(TypeId.of(BiFunction.class), new ProtoId(
                                     TypeId.of(Object.class), TypeId.of(Object.class),
                                     TypeId.of(Object.class)), "apply"),
                             b.l(0), b.this_(), b.p(0))
                     .move_result_object(b.l(0))
                     .check_cast(b.l(0), TypeId.of(Class.class))
-                    .if_testz(EQ, b.l(0), ":null")
+                    .if_testz(CodeBuilder.Test.EQ, b.l(0), ":null")
                     .return_object(b.l(0))
                     .label(":null")
-                    .invoke(SUPER, MethodId.of(fc), b.this_(), b.p(0))
+                    .invoke(CodeBuilder.InvokeKind.SUPER, MethodId.of(fc), b.this_(), b.p(0))
                     .move_result_object(b.l(0))
                     .return_object(b.l(0))
             ));
 
-            DexFile dex = openDexFile(new Dex(hook_clazz).compile());
+            DexFile dex = AndroidUnsafe5.openDexFile(new Dex(hook_clazz).compile());
             setTrusted(dex);
             Class<?> hook = loadClass(dex, hook_name, lc.getClassLoader());
             Field impl_f = getDeclaredField(hook, "impl");

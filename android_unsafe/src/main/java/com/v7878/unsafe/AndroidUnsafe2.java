@@ -1,24 +1,13 @@
 package com.v7878.unsafe;
 
-import static com.v7878.unsafe.Utils.toUnsignedInt;
-import static com.v7878.unsafe.Utils.toUnsignedLong;
+import static com.v7878.misc.Math.convEndian;
+import static com.v7878.misc.Math.toUnsignedInt;
+import static com.v7878.misc.Math.toUnsignedLong;
 
 import java.nio.ByteOrder;
 
 @DangerLevel(2)
 public class AndroidUnsafe2 extends AndroidUnsafe {
-
-    private static short convEndian(short value, ByteOrder order) {
-        return ByteOrder.nativeOrder().equals(order) ? value : Short.reverseBytes(value);
-    }
-
-    private static int convEndian(int value, ByteOrder order) {
-        return ByteOrder.nativeOrder().equals(order) ? value : Integer.reverseBytes(value);
-    }
-
-    private static long convEndian(long value, ByteOrder order) {
-        return ByteOrder.nativeOrder().equals(order) ? value : Long.reverseBytes(value);
-    }
 
     private static int pickPos(int top, int pos) {
         return isBigEndian() ? top - pos : pos;

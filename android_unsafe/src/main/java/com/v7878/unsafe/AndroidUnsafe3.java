@@ -1,5 +1,6 @@
 package com.v7878.unsafe;
 
+import static com.v7878.misc.Version.CORRECT_SDK_INT;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.nothrows_run;
 import static com.v7878.unsafe.Utils.searchConstructor;
@@ -31,8 +32,8 @@ public class AndroidUnsafe3 extends AndroidUnsafe2 {
 
     static {
         // SDK version checks
-        assert_(Utils.getSdkInt() >= Build.VERSION_CODES.O, IllegalStateException::new);
-        assert_(Utils.getSdkInt() <= 34, IllegalStateException::new);
+        assert_(CORRECT_SDK_INT >= Build.VERSION_CODES.O, IllegalStateException::new);
+        assert_(CORRECT_SDK_INT <= 34, IllegalStateException::new);
     }
 
     @Keep

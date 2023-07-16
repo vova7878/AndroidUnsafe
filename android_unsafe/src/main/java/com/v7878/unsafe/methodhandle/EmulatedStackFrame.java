@@ -10,8 +10,8 @@ import static com.v7878.unsafe.Utils.toHexString;
 
 import androidx.annotation.Keep;
 
+import com.v7878.dex.TypeId;
 import com.v7878.unsafe.DangerLevel;
-import com.v7878.unsafe.dex.TypeId;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;

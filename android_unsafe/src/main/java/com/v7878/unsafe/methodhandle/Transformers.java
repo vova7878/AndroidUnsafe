@@ -1,5 +1,11 @@
 package com.v7878.unsafe.methodhandle;
 
+import static com.v7878.dex.bytecode.CodeBuilder.InvokeKind.DIRECT;
+import static com.v7878.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
+import static com.v7878.dex.bytecode.CodeBuilder.InvokeKind.VIRTUAL;
+import static com.v7878.dex.bytecode.CodeBuilder.Op.GET_OBJECT;
+import static com.v7878.dex.bytecode.CodeBuilder.Op.PUT_OBJECT;
+import static com.v7878.misc.Version.CORRECT_SDK_INT;
 import static com.v7878.unsafe.AndroidUnsafe3.ClassMirror;
 import static com.v7878.unsafe.AndroidUnsafe3.arrayCast;
 import static com.v7878.unsafe.AndroidUnsafe3.unreflectDirect;
@@ -10,27 +16,21 @@ import static com.v7878.unsafe.AndroidUnsafe5.openDexFile;
 import static com.v7878.unsafe.AndroidUnsafe5.replaceExecutableAccessModifier;
 import static com.v7878.unsafe.AndroidUnsafe5.setTrusted;
 import static com.v7878.unsafe.AndroidUnsafe7.setClassStatus;
-import static com.v7878.unsafe.Utils.getSdkInt;
 import static com.v7878.unsafe.Utils.nothrows_run;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.DIRECT;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.STATIC;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.InvokeKind.VIRTUAL;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.Op.GET_OBJECT;
-import static com.v7878.unsafe.dex.bytecode.CodeBuilder.Op.PUT_OBJECT;
 
 import androidx.annotation.Keep;
 
+import com.v7878.dex.ClassDef;
+import com.v7878.dex.Dex;
+import com.v7878.dex.EncodedField;
+import com.v7878.dex.EncodedMethod;
+import com.v7878.dex.FieldId;
+import com.v7878.dex.MethodId;
+import com.v7878.dex.ProtoId;
+import com.v7878.dex.TypeId;
 import com.v7878.unsafe.AndroidUnsafe3.MethodHandleMirror;
 import com.v7878.unsafe.AndroidUnsafe5.AccessModifier;
 import com.v7878.unsafe.AndroidUnsafe7.ClassStatus;
-import com.v7878.unsafe.dex.ClassDef;
-import com.v7878.unsafe.dex.Dex;
-import com.v7878.unsafe.dex.EncodedField;
-import com.v7878.unsafe.dex.EncodedMethod;
-import com.v7878.unsafe.dex.FieldId;
-import com.v7878.unsafe.dex.MethodId;
-import com.v7878.unsafe.dex.ProtoId;
-import com.v7878.unsafe.dex.TypeId;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
@@ -218,7 +218,7 @@ public class Transformers {
                 new MethodId(invoker_id, new ProtoId(TypeId.V, mh, TypeId.of(Object.class)),
                         "invokeExactWithFrame"), Modifier.PUBLIC).withCode(0, b -> {
             //b.check_cast(b.p(1), esf) // verified
-            if (getSdkInt() <= 32) {
+            if (CORRECT_SDK_INT <= 32) {
                 //handle.invoke((dalvik.system.EmulatedStackFrame) stack);
                 b.invoke_polymorphic(new MethodId(mh, new ProtoId(TypeId.of(Object.class),
                                 TypeId.of(Object[].class)), "invoke"),
@@ -290,7 +290,7 @@ public class Transformers {
     private static MethodHandle makeTransformer(
             MethodType fixed, TransformerImpl impl, boolean variadic) {
         MethodHandle out = nothrows_run(() -> transformer_constructor.newInstance(fixed, impl));
-        if (variadic && getSdkInt() < 33) {
+        if (variadic && CORRECT_SDK_INT < 33) {
             //TODO: safer way
             MethodHandleMirror[] m = arrayCast(MethodHandleMirror.class, out);
             m[0].handleKind = /*INVOKE_CALLSITE_TRANSFORM*/ 6;
@@ -628,7 +628,7 @@ public class Transformers {
                 if (full_variadic) {
                     callback.transform(thiz, stackFrame);
                 } else {
-                    if (getSdkInt() <= 32) {
+                    if (CORRECT_SDK_INT <= 32) {
                         invokeExactWithFrameNoChecks(asType(thiz, stackFrame.type()), stackFrame);
                     } else {
                         //TODO: maybe check?
@@ -660,7 +660,7 @@ public class Transformers {
                         return thiz;
                     }
                     MethodType specified = specify(thiz.type(), varargs, newType, false);
-                    if (getSdkInt() >= 33 && !hasVariadicType(newType)) {
+                    if (CORRECT_SDK_INT >= 33 && !hasVariadicType(newType)) {
                         return (MethodHandle) nothrows_run(() -> directAsType.invoke(thiz, newType));
                     }
                     //TODO

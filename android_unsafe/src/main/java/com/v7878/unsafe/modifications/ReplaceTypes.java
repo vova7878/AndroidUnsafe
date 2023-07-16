@@ -1,7 +1,7 @@
-package com.v7878.unsafe.dex.modifications;
+package com.v7878.unsafe.modifications;
 
-import com.v7878.unsafe.dex.DataFilter;
-import com.v7878.unsafe.dex.TypeId;
+import com.v7878.dex.DataFilter;
+import com.v7878.dex.TypeId;
 
 import java.util.HashMap;
 import java.util.Objects;

@@ -1,6 +1,7 @@
-package com.v7878.unsafe.io;
+package com.v7878.unsafe.modifications;
 
-import com.v7878.unsafe.Checks;
+import com.v7878.dex.io.RandomInput;
+import com.v7878.misc.Checks;
 import com.v7878.unsafe.memory.MemorySegment;
 import com.v7878.unsafe.memory.ValueLayout;
 

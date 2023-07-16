@@ -1,9 +1,9 @@
 package com.v7878.unsafe.memory;
 
+import static com.v7878.misc.Math.log2;
 import static com.v7878.unsafe.AndroidUnsafe4.ADDRESS_SIZE;
 import static com.v7878.unsafe.AndroidUnsafe4.OBJECT_FIELD_SIZE_SHIFT;
 import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.Utils.log2;
 
 import java.nio.ByteOrder;
 import java.util.Objects;

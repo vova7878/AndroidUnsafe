@@ -1,7 +1,5 @@
 package com.v7878.dex;
 
-import static com.v7878.unsafe.Utils.assert_;
-
 import com.v7878.dex.io.RandomInput;
 import com.v7878.dex.io.RandomOutput;
 
@@ -27,8 +25,9 @@ public class CatchHandlerElement implements PublicCloneable {
     }
 
     public final void setAddress(int address) {
-        assert_(address >= 0, IllegalArgumentException::new,
-                "instruction address can`t be negative");
+        if (address < 0) {
+            throw new IllegalArgumentException("instruction address can`t be negative");
+        }
         this.address = address;
     }
 

@@ -1,7 +1,6 @@
 package com.v7878.dex;
 
 import static com.v7878.misc.Math.roundUp;
-import static com.v7878.unsafe.Utils.assert_;
 
 import com.v7878.dex.EncodedValue.ArrayValue;
 import com.v7878.dex.io.ByteArrayIO;
@@ -130,7 +129,10 @@ public class Dex extends PCList<ClassDef> {
     }
 
     public void write(RandomIO out, DexOptions options) {
-        assert_(out.position() == 0, IllegalArgumentException::new);
+        //TODO: substream
+        if (out.position() != 0) {
+            throw new IllegalArgumentException("out.position() != 0");
+        }
 
         DataSet data = new DataSet();
         collectData(data);

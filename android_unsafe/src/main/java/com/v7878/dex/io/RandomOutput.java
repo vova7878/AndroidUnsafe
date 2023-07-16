@@ -2,10 +2,8 @@ package com.v7878.dex.io;
 
 import static com.v7878.misc.Math.isAlignedL;
 import static com.v7878.misc.Math.roundUpL;
-import static com.v7878.unsafe.AndroidUnsafe.IS64BIT;
 
 import com.v7878.misc.Checks;
-import com.v7878.unsafe.memory.Word;
 
 import java.util.Objects;
 
@@ -60,14 +58,6 @@ public interface RandomOutput extends AutoCloseable {
 
     default void writeDouble(double value) {
         writeLong(Double.doubleToRawLongBits(value));
-    }
-
-    default void writeWord(Word value) {
-        if (IS64BIT) {
-            writeLong(value.longValue());
-        } else {
-            writeInt(value.intValue());
-        }
     }
 
     default void writeULeb128(int value) {

@@ -1,7 +1,5 @@
 package com.v7878.dex;
 
-import static com.v7878.unsafe.Utils.assert_;
-
 import com.v7878.dex.io.RandomInput;
 import com.v7878.dex.io.RandomOutput;
 
@@ -113,15 +111,19 @@ public class EncodedField implements PublicCloneable {
     }
 
     private static void check(boolean static_fields, EncodedField encoded_field) {
+        //TODO: improve messages
         if (static_fields) {
-            assert_((encoded_field.access_flags & Modifier.STATIC) != 0,
-                    IllegalStateException::new, "field must be static");
+            if ((encoded_field.access_flags & Modifier.STATIC) == 0) {
+                throw new IllegalStateException("field must be static");
+            }
         } else {
-            assert_((encoded_field.access_flags & Modifier.STATIC) == 0,
-                    IllegalStateException::new, "field must not be static");
+            if ((encoded_field.access_flags & Modifier.STATIC) != 0) {
+                throw new IllegalStateException("field must not be static");
+            }
             EncodedValue tmp = encoded_field.getValue();
-            assert_(tmp.isDefault(), IllegalStateException::new,
-                    "instance field can`t have value: " + tmp);
+            if (!tmp.isDefault()) {
+                throw new IllegalStateException("instance field can`t have not default value: " + tmp);
+            }
         }
     }
 

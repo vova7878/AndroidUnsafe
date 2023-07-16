@@ -1,7 +1,5 @@
 package com.v7878.dex;
 
-import static com.v7878.unsafe.Utils.assert_;
-
 import com.v7878.dex.io.RandomInput;
 import com.v7878.dex.io.RandomOutput;
 
@@ -39,7 +37,7 @@ public class ClassDef implements PublicCloneable {
     // TODO: cycle test
     public static ClassDef[] sort(List<ClassDef> class_defs) {
         Map<TypeId, ClassDef> map = new HashMap<>();
-        class_defs.stream().forEachOrdered((value) -> {
+        class_defs.forEach((value) -> {
             if (map.putIfAbsent(value.clazz, value) != null) {
                 throw new IllegalStateException(
                         "class defs contain duplicates: " + value.clazz);
@@ -49,10 +47,12 @@ public class ClassDef implements PublicCloneable {
         Set<ClassDef> added = new HashSet<>();
         ArrayList<ClassDef> out = new ArrayList<>(class_defs.size());
 
-        class_defs.stream().forEachOrdered(value -> add(map, added, out, value.clazz));
+        class_defs.forEach(value -> add(map, added, out, value.clazz));
 
-        assert_(out.size() == class_defs.size(), IllegalStateException::new,
-                "sorted.length(" + out.size() + ") != input.length(" + class_defs.size() + ")");
+        if (out.size() != class_defs.size()) {
+            throw new IllegalStateException("sorted.length(" +
+                    out.size() + ") != input.length(" + class_defs.size() + ")");
+        }
         return out.toArray(new ClassDef[0]);
     }
 

@@ -1,7 +1,5 @@
 package com.v7878.dex;
 
-import static com.v7878.unsafe.Utils.assert_;
-
 import com.v7878.dex.io.RandomInput;
 import com.v7878.dex.io.RandomOutput;
 
@@ -29,9 +27,9 @@ public class CatchHandler implements PublicCloneable {
     }
 
     public final void setCatchAllAddress(Integer catch_all_addr) {
-        assert_(catch_all_addr == null || catch_all_addr >= 0,
-                IllegalArgumentException::new,
-                "instruction address can`t be negative");
+        if (catch_all_addr != null && catch_all_addr < 0) {
+            throw new IllegalArgumentException("instruction address can`t be negative");
+        }
         this.catch_all_addr = catch_all_addr;
     }
 
@@ -60,8 +58,9 @@ public class CatchHandler implements PublicCloneable {
     }
 
     public void write(WriteContext context, RandomOutput out) {
-        assert_(!(handlers.isEmpty() && catch_all_addr == null),
-                IllegalStateException::new, "unable to write empty catch handler");
+        if (handlers.isEmpty() && catch_all_addr == null) {
+            throw new IllegalArgumentException("unable to write empty catch handler");
+        }
         out.writeSLeb128(catch_all_addr == null ? handlers.size() : -handlers.size());
         for (CatchHandlerElement tmp : handlers) {
             tmp.write(context, out);

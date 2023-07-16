@@ -1,7 +1,5 @@
 package com.v7878.dex;
 
-import static com.v7878.unsafe.Utils.assert_;
-
 import com.v7878.dex.io.RandomInput;
 import com.v7878.dex.io.RandomOutput;
 
@@ -24,16 +22,18 @@ public class AnnotationsDirectory {
     }
 
     public void addFieldAnnotations(FieldId field, AnnotationSet annotations) {
-        assert_(!annotations.isEmpty(), IllegalStateException::new,
-                "field annotations is empty");
+        if (annotations.isEmpty()) {
+            throw new IllegalStateException("field annotations is empty");
+        }
         if (annotated_fields.putIfAbsent(field, annotations) != null) {
             throw new IllegalStateException("annotated_fields contain duplicates");
         }
     }
 
     public void addMethodAnnotations(MethodId method, AnnotationSet annotations) {
-        assert_(!annotations.isEmpty(), IllegalStateException::new,
-                "method annotations is empty");
+        if (annotations.isEmpty()) {
+            throw new IllegalStateException("method annotations is empty");
+        }
         if (annotated_methods.putIfAbsent(method, annotations) != null) {
             throw new IllegalStateException("annotated_methods contain duplicates");
         }
@@ -41,8 +41,9 @@ public class AnnotationsDirectory {
 
     public void addMethodParameterAnnotations(MethodId method,
                                               AnnotationSetList annotations) {
-        assert_(!annotations.isEmpty(), IllegalStateException::new,
-                "parameter annotations is empty");
+        if (annotations.isEmpty()) {
+            throw new IllegalStateException("parameter annotations is empty");
+        }
         if (annotated_parameters.putIfAbsent(method, annotations) != null) {
             throw new IllegalStateException("annotated_parameters contain duplicates");
         }

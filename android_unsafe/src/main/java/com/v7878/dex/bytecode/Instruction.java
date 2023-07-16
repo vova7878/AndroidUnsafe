@@ -1,7 +1,5 @@
 package com.v7878.dex.bytecode;
 
-import static com.v7878.unsafe.Utils.assert_;
-
 import com.v7878.dex.DataCollector;
 import com.v7878.dex.PCList;
 import com.v7878.dex.PublicCloneable;
@@ -36,13 +34,15 @@ public abstract class Instruction implements PublicCloneable {
         long start = in.position();
 
         while (in.position() - start < insns_bytes) {
-            assert_((in.position() - start & 1) == 0,
-                    IllegalStateException::new, "Unaligned code unit");
+            if ((in.position() - start & 1) != 0) {
+                throw new IllegalStateException("Unaligned code unit");
+            }
             insns.add(read(in, context));
         }
 
-        assert_(in.position() - start == insns_bytes,
-                IllegalStateException::new, "Read more code units than expected");
+        if (in.position() - start != insns_bytes) {
+            throw new IllegalStateException("Read more code units than expected");
+        }
 
         insns.trimToSize();
         return insns;

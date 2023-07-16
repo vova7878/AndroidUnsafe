@@ -1,7 +1,5 @@
 package com.v7878.dex;
 
-import static com.v7878.unsafe.Utils.assert_;
-
 import com.v7878.dex.io.RandomInput;
 import com.v7878.dex.io.RandomOutput;
 
@@ -74,9 +72,7 @@ public class MethodHandleItem implements PublicCloneable {
     }
 
     public final void setType(MethodHandleType type) {
-        assert_(type != null, IllegalArgumentException::new,
-                "method handle type can`n be null");
-        this.type = type;
+        this.type = Objects.requireNonNull(type, "method handle type can`n be null");
     }
 
     public final MethodHandleType getType() {

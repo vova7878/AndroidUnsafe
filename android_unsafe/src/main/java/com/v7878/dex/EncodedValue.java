@@ -1,7 +1,5 @@
 package com.v7878.dex;
 
-import static com.v7878.unsafe.Utils.assert_;
-
 import com.v7878.dex.io.RandomOutput;
 
 import java.lang.invoke.MethodHandle;
@@ -273,7 +271,9 @@ public interface EncodedValue extends PublicCloneable {
         private final EncodedValueType type;
 
         public SimpleValue(EncodedValueType type) {
-            assert_(type != null, AssertionError::new);
+            if (type == null) {
+                throw new AssertionError();
+            }
             this.type = type;
         }
 

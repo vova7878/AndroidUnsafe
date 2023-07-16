@@ -1,7 +1,6 @@
 package com.v7878.dex;
 
 import static com.v7878.misc.Math.roundUpL;
-import static com.v7878.unsafe.Utils.assert_;
 
 import android.util.SparseArray;
 
@@ -137,7 +136,9 @@ public class CodeItem implements PublicCloneable {
             tmp.write(context, out);
         }
         int insns_size = (int) (out.position() - insns_start);
-        assert_((insns_size & 1) == 0, IllegalStateException::new, "insns_size is odd");
+        if ((insns_size & 1) != 0) {
+            throw new IllegalStateException("insns_size is odd");
+        }
 
         out.position(insns_size_pos);
         out.writeInt(insns_size / 2); // size in code units

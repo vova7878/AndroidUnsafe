@@ -2,10 +2,8 @@ package com.v7878.dex.io;
 
 import static com.v7878.misc.Math.isAlignedL;
 import static com.v7878.misc.Math.roundUpL;
-import static com.v7878.unsafe.AndroidUnsafe.IS64BIT;
 
 import com.v7878.misc.Checks;
-import com.v7878.unsafe.memory.Word;
 
 import java.util.Objects;
 
@@ -78,10 +76,6 @@ public interface RandomInput extends AutoCloseable {
 
     default double readDouble() {
         return Double.longBitsToDouble(readLong());
-    }
-
-    default Word readWord() {
-        return new Word(IS64BIT ? readLong() : readInt());
     }
 
     default int readULeb128() {

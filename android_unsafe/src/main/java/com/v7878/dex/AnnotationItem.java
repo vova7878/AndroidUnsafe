@@ -1,7 +1,5 @@
 package com.v7878.dex;
 
-import static com.v7878.unsafe.Utils.assert_;
-
 import com.v7878.dex.io.RandomInput;
 import com.v7878.dex.io.RandomOutput;
 
@@ -116,9 +114,8 @@ public final class AnnotationItem implements PublicCloneable {
     }
 
     public void setVisibility(AnnotationVisibility visibility) {
-        assert_(visibility != null, IllegalArgumentException::new,
+        this.visibility = Objects.requireNonNull(visibility,
                 "annotation visibility can`t be null");
-        this.visibility = visibility;
     }
 
     public AnnotationVisibility getVisibility() {

@@ -1,7 +1,5 @@
 package com.v7878.dex;
 
-import static com.v7878.unsafe.Utils.assert_;
-
 import com.v7878.dex.EncodedValue.ArrayValue;
 
 import java.util.ArrayList;
@@ -105,8 +103,9 @@ public class DataSet extends DataFilter {
 
     @Override
     public void add(ClassData value) {
-        assert_(!value.isEmpty(), IllegalStateException::new,
-                "class_data is empty");
+        if (value.isEmpty()) {
+            throw new IllegalStateException("class_data is empty");
+        }
         super.add(value);
         class_data_items.add(value);
     }
@@ -125,23 +124,24 @@ public class DataSet extends DataFilter {
 
     @Override
     public void add(AnnotationSet value) {
-        assert_(!value.isEmpty(), IllegalStateException::new,
-                "annotation_set is empty");
+        if (value.isEmpty()) {
+            throw new IllegalStateException("annotation_set is empty");
+        }
         super.add(value);
         annotation_sets.add(value);
     }
 
     @Override
     public void add(AnnotationSetList value) {
-        assert_(!value.isEmpty(), IllegalStateException::new,
-                "annotation_set_list is empty");
+        if (value.isEmpty()) {
+            throw new IllegalStateException("annotation_set_list is empty");
+        }
         super.add(value);
         annotation_set_lists.add(value);
     }
 
     @Override
-    public void add(ClassDef clazz,
-                    AnnotationsDirectory value) {
+    public void add(ClassDef clazz, AnnotationsDirectory value) {
         if (annotations_directories.putIfAbsent(clazz, value) != null) {
             throw new IllegalStateException(
                     "annotations_directories contain duplicates");

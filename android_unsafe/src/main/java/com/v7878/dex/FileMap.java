@@ -1,13 +1,11 @@
 package com.v7878.dex;
 
-import static com.v7878.unsafe.Utils.assert_;
-import static com.v7878.unsafe.Utils.nothrows_run;
-
 import com.v7878.dex.io.RandomIO;
 import com.v7878.dex.io.RandomInput;
 import com.v7878.dex.io.RandomOutput;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -99,6 +97,18 @@ class FileMap {
     public int hiddenapi_class_data_items_size;
     public int hiddenapi_class_data_items_off;
 
+    private static void throwISE(boolean value, String msg) {
+        if (!value) {
+            throw new IllegalStateException(msg);
+        }
+    }
+
+    private static void throwISE(boolean value) {
+        if (!value) {
+            throw new IllegalStateException();
+        }
+    }
+
     public static FileMap read(RandomInput in, DexOptions options) {
         FileMap out = new FileMap();
         byte[] magic = in.readByteArray(8);
@@ -116,12 +126,13 @@ class FileMap {
         in.addPosition(20); //signature
         in.addPosition(4); //file_size
         int header_size = in.readInt();
-        assert_(header_size == HEADER_SIZE, IllegalArgumentException::new,
-                "invalid header size: " + header_size);
+        if (header_size != HEADER_SIZE) {
+            throw new IllegalStateException("invalid header size: " + header_size);
+        }
         int endian_tag = in.readInt();
-        assert_(endian_tag == DexConstants.ENDIAN_CONSTANT,
-                IllegalArgumentException::new,
-                "invalid endian_tag: " + Integer.toHexString(endian_tag));
+        if (endian_tag != DexConstants.ENDIAN_CONSTANT) {
+            throw new IllegalStateException("invalid endian_tag: " + Integer.toHexString(endian_tag));
+        }
         in.addPosition(4); //link_size
         in.addPosition(4); //link_off
         out.map_list_off = in.readInt();
@@ -141,36 +152,37 @@ class FileMap {
         in.addPosition(4); //data_off
         RandomInput in2 = in.duplicate(out.map_list_off);
         int map_size = in2.readInt();
+        //TODO: messages
         for (int i = 0; i < map_size; i++) {
             MapItem item = MapItem.read(in2);
             switch (item.type) {
                 case DexConstants.TYPE_HEADER_ITEM:
-                    assert_(item.size == 1, IllegalStateException::new);
-                    assert_(item.offset == 0, IllegalStateException::new);
+                    throwISE(item.size == 1);
+                    throwISE(item.offset == 0);
                     break;
                 case DexConstants.TYPE_STRING_ID_ITEM:
-                    assert_(item.size == out.string_ids_size, IllegalStateException::new);
-                    assert_(item.offset == out.string_ids_off, IllegalStateException::new);
+                    throwISE(item.size == out.string_ids_size);
+                    throwISE(item.offset == out.string_ids_off);
                     break;
                 case DexConstants.TYPE_TYPE_ID_ITEM:
-                    assert_(item.size == out.type_ids_size, IllegalStateException::new);
-                    assert_(item.offset == out.type_ids_off, IllegalStateException::new);
+                    throwISE(item.size == out.type_ids_size);
+                    throwISE(item.offset == out.type_ids_off);
                     break;
                 case DexConstants.TYPE_PROTO_ID_ITEM:
-                    assert_(item.size == out.proto_ids_size, IllegalStateException::new);
-                    assert_(item.offset == out.proto_ids_off, IllegalStateException::new);
+                    throwISE(item.size == out.proto_ids_size);
+                    throwISE(item.offset == out.proto_ids_off);
                     break;
                 case DexConstants.TYPE_FIELD_ID_ITEM:
-                    assert_(item.size == out.field_ids_size, IllegalStateException::new);
-                    assert_(item.offset == out.field_ids_off, IllegalStateException::new);
+                    throwISE(item.size == out.field_ids_size);
+                    throwISE(item.offset == out.field_ids_off);
                     break;
                 case DexConstants.TYPE_METHOD_ID_ITEM:
-                    assert_(item.size == out.method_ids_size, IllegalStateException::new);
-                    assert_(item.offset == out.method_ids_off, IllegalStateException::new);
+                    throwISE(item.size == out.method_ids_size);
+                    throwISE(item.offset == out.method_ids_off);
                     break;
                 case DexConstants.TYPE_CLASS_DEF_ITEM:
-                    assert_(item.size == out.class_defs_size, IllegalStateException::new);
-                    assert_(item.offset == out.class_defs_off, IllegalStateException::new);
+                    throwISE(item.size == out.class_defs_size);
+                    throwISE(item.offset == out.class_defs_off);
                     break;
                 case DexConstants.TYPE_CALL_SITE_ID_ITEM:
                     out.call_site_ids_size = item.size;
@@ -181,7 +193,7 @@ class FileMap {
                     out.method_handles_off = item.offset;
                     break;
                 case DexConstants.TYPE_MAP_LIST:
-                    assert_(item.size == 1, IllegalStateException::new);
+                    throwISE(item.size == 1);
                     break;
                 case DexConstants.TYPE_TYPE_LIST:
                 case DexConstants.TYPE_ANNOTATION_SET_REF_LIST:
@@ -326,7 +338,12 @@ class FileMap {
         out.writeInt(data_size > 0 ? data_off : 0);
 
         out.position(SIGNATURE_OFFSET);
-        MessageDigest md = nothrows_run(() -> MessageDigest.getInstance("SHA-1"));
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("unable to find SHA-1 MessageDigest", e);
+        }
         byte[] signature = md.digest(out.duplicate(FILE_SIZE_OFFSET)
                 .readByteArray(file_size - FILE_SIZE_OFFSET));
         out.writeByteArray(signature);

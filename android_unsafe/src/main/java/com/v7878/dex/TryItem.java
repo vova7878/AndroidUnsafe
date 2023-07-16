@@ -1,7 +1,5 @@
 package com.v7878.dex;
 
-import static com.v7878.unsafe.Utils.assert_;
-
 import android.util.SparseArray;
 
 import com.v7878.dex.io.RandomInput;
@@ -27,8 +25,9 @@ public class TryItem implements PublicCloneable {
     }
 
     public final void setStartAddress(int start_addr) {
-        assert_(start_addr >= 0, IllegalArgumentException::new,
-                "start address can`t be negative");
+        if (start_addr < 0) {
+            throw new IllegalArgumentException("start address can`t be negative");
+        }
         this.start_addr = start_addr;
     }
 
@@ -60,8 +59,10 @@ public class TryItem implements PublicCloneable {
 
         int handler_off = in.readUnsignedShort();
         CatchHandler handler = handlers.get(handler_off);
-        assert_(handler != null, IllegalStateException::new,
-                "unable to find catch handler with offset " + handler_off);
+        if (handler == null) {
+            throw new IllegalStateException(
+                    "unable to find catch handler with offset " + handler_off);
+        }
         return new TryItem(start_addr, insn_count, handler);
     }
 
@@ -73,8 +74,10 @@ public class TryItem implements PublicCloneable {
         out.writeInt(start_addr);
         out.writeShort(insn_count);
         Integer offset = handlers.get(handler);
-        assert_(offset != null, IllegalStateException::new,
-                "unable to find offset for catch handler");
+        if (offset == null) {
+            throw new IllegalStateException(
+                    "unable to find offset for catch handler");
+        }
         out.writeShort(offset);
     }
 

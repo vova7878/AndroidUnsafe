@@ -29,5 +29,6 @@ dependencies {
     implementation files('libs/Thrower.jar')
     implementation 'com.github.vova7878:SunUnsafeWrapper:v0.0.1'
     compileOnly 'com.github.vova7878:OptimizationAnnotations:v0.0.1'
+    implementation 'com.github.vova7878:AndroidMisc:v0.0.1'
     compileOnly 'androidx.annotation:annotation:+'
 }

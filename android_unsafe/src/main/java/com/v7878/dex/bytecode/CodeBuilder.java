@@ -437,23 +437,23 @@ public final class CodeBuilder {
                                    int arg_reg3, int arg_reg4, int arg_reg5) {
         Checks.checkRange(arg_count, 0, 6);
         if (arg_count == 5) check_reg(arg_reg5, 4);
-        else if (arg_reg5 == 0) throw new IllegalArgumentException(
+        else if (arg_reg5 != 0) throw new IllegalArgumentException(
                 "arg_count < 5, but arg_reg5 != 0");
 
         if (arg_count >= 4) check_reg(arg_reg4, 4);
-        else if (arg_reg4 == 0) throw new IllegalArgumentException(
+        else if (arg_reg4 != 0) throw new IllegalArgumentException(
                 "arg_count < 4, but arg_reg4 != 0");
 
         if (arg_count >= 3) check_reg(arg_reg3, 4);
-        else if (arg_reg3 == 0) throw new IllegalArgumentException(
+        else if (arg_reg3 != 0) throw new IllegalArgumentException(
                 "arg_count < 3, but arg_reg3 != 0");
 
         if (arg_count >= 2) check_reg(arg_reg2, 4);
-        else if (arg_reg2 == 0) throw new IllegalArgumentException(
+        else if (arg_reg2 != 0) throw new IllegalArgumentException(
                 "arg_count < 2, but arg_reg2 != 0");
 
         if (arg_count >= 1) check_reg(arg_reg1, 4);
-        else if (arg_reg1 == 0) throw new IllegalArgumentException(
+        else if (arg_reg1 != 0) throw new IllegalArgumentException(
                 "arg_count == 0, but arg_reg1 != 0");
     }
 

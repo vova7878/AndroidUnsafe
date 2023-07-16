@@ -1,15 +1,5 @@
 package com.v7878.dex.io;
 
-import static com.v7878.unsafe.AndroidUnsafe2.ARRAY_BYTE_BASE_OFFSET;
-import static com.v7878.unsafe.AndroidUnsafe2.getByteO;
-import static com.v7878.unsafe.AndroidUnsafe2.getIntUnaligned;
-import static com.v7878.unsafe.AndroidUnsafe2.getLongUnaligned;
-import static com.v7878.unsafe.AndroidUnsafe2.getShortUnaligned;
-import static com.v7878.unsafe.AndroidUnsafe2.putByteO;
-import static com.v7878.unsafe.AndroidUnsafe2.putIntUnaligned;
-import static com.v7878.unsafe.AndroidUnsafe2.putLongUnaligned;
-import static com.v7878.unsafe.AndroidUnsafe2.putShortUnaligned;
-
 import com.v7878.misc.Checks;
 
 import java.util.Arrays;
@@ -21,16 +11,24 @@ class ModifiableArray {
 
     private byte[] data;
     private int data_size;
-    private final int grow_factor;
+    private int grow_factor;
 
-    ModifiableArray(int size, int grow_factor) {
-        if (grow_factor <= 0) {
-            grow_factor = DEFAULT_GROW_FACTOR;
-        }
-        grow_factor = Math.min(grow_factor, MAX_GROW_FACTOR);
-        this.grow_factor = grow_factor;
+    ModifiableArray(int size) {
+        this.grow_factor = DEFAULT_GROW_FACTOR;
         this.data = new byte[size];
         this.data_size = 0;
+    }
+
+    ModifiableArray(byte[] new_data) {
+        this.data = new_data.clone();
+        this.data_size = data.length;
+    }
+
+    void setGrowFactor(int new_grow_factor) {
+        if (new_grow_factor <= 0) {
+            new_grow_factor = DEFAULT_GROW_FACTOR;
+        }
+        grow_factor = Math.min(new_grow_factor, MAX_GROW_FACTOR);
     }
 
     int size() {
@@ -68,64 +66,30 @@ public class ByteArrayIO implements RandomIO {
         this.offset = 0;
     }
 
-    public ByteArrayIO(int size, int grow_factor) {
-        this(new ModifiableArray(size, grow_factor));
+    public ByteArrayIO(byte[] data) {
+        this(new ModifiableArray(data));
     }
 
     public ByteArrayIO(int size) {
-        this(new ModifiableArray(size, 0));
+        this(new ModifiableArray(size));
     }
 
     public ByteArrayIO() {
         this(0);
     }
 
+    public void setGrowFactor(int new_grow_factor) {
+        arr.setGrowFactor(new_grow_factor);
+    }
+
     @Override
     public void writeByte(int value) {
-        int arr_offset = ARRAY_BYTE_BASE_OFFSET + (int) addPosition(1);
-        putByteO(arr.data(), arr_offset, (byte) value);
-    }
-
-    @Override
-    public void writeShort(int value) {
-        int arr_offset = ARRAY_BYTE_BASE_OFFSET + (int) addPosition(2);
-        putShortUnaligned(arr.data(), arr_offset, (short) value);
-    }
-
-    @Override
-    public void writeInt(int value) {
-        int arr_offset = ARRAY_BYTE_BASE_OFFSET + (int) addPosition(4);
-        putIntUnaligned(arr.data(), arr_offset, value);
-    }
-
-    @Override
-    public void writeLong(long value) {
-        int arr_offset = ARRAY_BYTE_BASE_OFFSET + (int) addPosition(8);
-        putLongUnaligned(arr.data(), arr_offset, value);
+        arr.data()[(int) addPosition(1)] = (byte) value;
     }
 
     @Override
     public byte readByte() {
-        int arr_offset = ARRAY_BYTE_BASE_OFFSET + (int) addPosition(1);
-        return getByteO(arr.data(), arr_offset);
-    }
-
-    @Override
-    public short readShort() {
-        int arr_offset = ARRAY_BYTE_BASE_OFFSET + (int) addPosition(2);
-        return getShortUnaligned(arr.data(), arr_offset);
-    }
-
-    @Override
-    public int readInt() {
-        int arr_offset = ARRAY_BYTE_BASE_OFFSET + (int) addPosition(4);
-        return getIntUnaligned(arr.data(), arr_offset);
-    }
-
-    @Override
-    public long readLong() {
-        int arr_offset = ARRAY_BYTE_BASE_OFFSET + (int) addPosition(8);
-        return getLongUnaligned(arr.data(), arr_offset);
+        return arr.data()[(int) addPosition(1)];
     }
 
     public byte[] toByteArray() {

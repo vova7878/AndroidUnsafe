@@ -7,6 +7,7 @@ import com.v7878.misc.Checks;
 
 import java.util.Objects;
 
+//TODO: byte order
 public interface RandomInput extends AutoCloseable {
 
     default void readFully(byte[] arr) {
@@ -56,19 +57,28 @@ public interface RandomInput extends AutoCloseable {
         return readByte() & 0xff;
     }
 
-    short readShort();
+    default short readShort() {
+        return (short) readUnsignedShort();
+    }
 
     default int readUnsignedShort() {
-        return readShort() & 0xffff;
+        // little-endian
+        return readUnsignedByte() | (readUnsignedByte() << 8);
     }
 
     default char readChar() {
-        return (char) readShort();
+        return (char) readUnsignedShort();
     }
 
-    int readInt();
+    default int readInt() {
+        // little-endian
+        return readUnsignedShort() | (readUnsignedShort() << 16);
+    }
 
-    long readLong();
+    default long readLong() {
+        // little-endian
+        return (readInt() & 0xffffffffL) | ((readInt() & 0xffffffffL) << 32);
+    }
 
     default float readFloat() {
         return Float.intBitsToFloat(readInt());

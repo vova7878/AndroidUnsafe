@@ -7,6 +7,7 @@ import com.v7878.misc.Checks;
 
 import java.util.Objects;
 
+//TODO: byte order
 public interface RandomOutput extends AutoCloseable {
 
     default void writeByteArray(byte[] arr) {
@@ -42,15 +43,27 @@ public interface RandomOutput extends AutoCloseable {
 
     void writeByte(int value);
 
-    void writeShort(int value);
+    default void writeShort(int value) {
+        // little-endian
+        writeByte(value);
+        writeByte(value >> 8);
+    }
 
     default void writeChar(int value) {
         writeShort(value);
     }
 
-    void writeInt(int value);
+    default void writeInt(int value) {
+        // little-endian
+        writeShort(value);
+        writeShort(value >> 16);
+    }
 
-    void writeLong(long value);
+    default void writeLong(long value) {
+        // little-endian
+        writeInt((int) value);
+        writeInt((int) (value >> 32));
+    }
 
     default void writeFloat(float value) {
         writeInt(Float.floatToRawIntBits(value));

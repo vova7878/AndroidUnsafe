@@ -5,6 +5,7 @@ import static com.v7878.misc.Version.CORRECT_SDK_INT;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.nothrows_run;
 import static com.v7878.unsafe.Utils.runOnce;
+import static com.v7878.unsafe.Utils.searchMethod;
 import static com.v7878.unsafe.memory.LayoutPath.PathElement.groupElement;
 import static com.v7878.unsafe.memory.ValueLayout.ADDRESS;
 import static com.v7878.unsafe.memory.ValueLayout.JAVA_INT;
@@ -21,7 +22,6 @@ import com.v7878.unsafe.memory.Word;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -334,12 +334,12 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
         }
     });
 
-    private static final Field threadNativePeer = nothrows_run(
-            () -> getDeclaredField(Thread.class, "nativePeer"));
+    private static final long nativePeerOffset = nothrows_run(
+            () -> fieldOffset(getDeclaredField(Thread.class, "nativePeer")));
 
     public static Pointer getNativePeer(Thread thread) {
         Objects.requireNonNull(thread);
-        long tmp = nothrows_run(() -> threadNativePeer.getLong(thread));
+        long tmp = getLongO(thread, nativePeerOffset);
         assert_(tmp != 0, IllegalArgumentException::new, "nativePeer == nullptr");
         return new Pointer(tmp);
     }
@@ -577,6 +577,68 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
 
         public static Class<?> getStackClass1() {
             return getStackClass2();
+        }
+    }
+
+    @Keep
+    private abstract static class GCUtils {
+
+        static {
+            Class<?> word = IS64BIT ? long.class : int.class;
+            String suffix = IS64BIT ? "64" : "32";
+
+            Method[] methods = getDeclaredMethods(GCUtils.class);
+
+            try (SymbolLookup art = SymbolLookup.defaultLookup()) {
+                Pointer increment = art.lookup(
+                        "_ZN3art2gc4Heap24IncrementDisableMovingGCEPNS_6ThreadE");
+                setExecutableData(searchMethod(methods,
+                        "IncrementDisableMovingGC" + suffix, word, word), increment);
+
+                Pointer decrement = art.lookup(
+                        "_ZN3art2gc4Heap24DecrementDisableMovingGCEPNS_6ThreadE");
+                setExecutableData(searchMethod(methods,
+                        "DecrementDisableMovingGC" + suffix, word, word), decrement);
+            }
+        }
+
+        @SuppressWarnings("JavaJniMissingFunction")
+        @CriticalNative
+        private static native void IncrementDisableMovingGC64(long heap, long thread);
+
+        @SuppressWarnings("JavaJniMissingFunction")
+        @CriticalNative
+        private static native void IncrementDisableMovingGC32(int heap, int thread);
+
+        @SuppressWarnings("JavaJniMissingFunction")
+        @CriticalNative
+        private static native void DecrementDisableMovingGC64(long heap, long thread);
+
+        @SuppressWarnings("JavaJniMissingFunction")
+        @CriticalNative
+        private static native void DecrementDisableMovingGC32(int heap, int thread);
+    }
+
+    public static class ScopedDisableGC implements AutoCloseable {
+        public ScopedDisableGC() {
+            long heap = getHeapPtr().getRawAddress();
+            long thread = getNativePeer(Thread.currentThread()).getRawAddress();
+            if (IS64BIT) {
+                GCUtils.IncrementDisableMovingGC64(heap, thread);
+            } else {
+                GCUtils.IncrementDisableMovingGC32((int) heap, (int) thread);
+            }
+        }
+
+        @Override
+        public void close() {
+            long heap = getHeapPtr().getRawAddress();
+            long thread = getNativePeer(Thread.currentThread()).getRawAddress();
+            if (IS64BIT) {
+                GCUtils.DecrementDisableMovingGC64(heap, thread);
+            } else {
+                GCUtils.DecrementDisableMovingGC32((int) heap, (int) thread);
+            }
         }
     }
 }

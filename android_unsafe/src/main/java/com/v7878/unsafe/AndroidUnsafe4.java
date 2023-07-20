@@ -52,19 +52,24 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
             runOnce(() -> getDeclaredField(Object.class, "shadow$_klass_"));
     private static final Supplier<Field> shadow$_monitor_ =
             runOnce(() -> getDeclaredField(Object.class, "shadow$_monitor_"));
+    private static final Supplier<Class<?>> vmruntime_class = runOnce(() -> {
+        return nothrows_run(() -> Class.forName("dalvik.system.VMRuntime"));
+    });
     private static final Supplier<Object> vmruntime = runOnce(() -> {
-        Class<?> vmrc = nothrows_run(() -> Class.forName("dalvik.system.VMRuntime"));
-        return allocateInstance(vmrc);
+        return allocateInstance(vmruntime_class.get());
     });
     private static final Supplier<MethodHandle> newNonMovableArray =
-            runOnce(() -> unreflectDirect(getDeclaredMethod(vmruntime.get().getClass(),
+            runOnce(() -> unreflectDirect(getDeclaredMethod(vmruntime_class.get(),
                     "newNonMovableArray", Class.class, int.class)));
     private static final Supplier<MethodHandle> addressOf =
-            runOnce(() -> unreflectDirect(getDeclaredMethod(vmruntime.get().getClass(),
+            runOnce(() -> unreflectDirect(getDeclaredMethod(vmruntime_class.get(),
                     "addressOf", Object.class)));
     private static final Supplier<MethodHandle> vmLibrary =
-            runOnce(() -> unreflectDirect(getDeclaredMethod(vmruntime.get().getClass(),
+            runOnce(() -> unreflectDirect(getDeclaredMethod(vmruntime_class.get(),
                     "vmLibrary")));
+    private static final Supplier<MethodHandle> getCurrentInstructionSet =
+            runOnce(() -> unreflect(getDeclaredMethod(vmruntime_class.get(),
+                    "getCurrentInstructionSet")));
 
     private static final Supplier<MethodHandle> internalClone =
             runOnce(() -> unreflectDirect(getDeclaredMethod(Object.class, "internalClone")));
@@ -80,6 +85,10 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
 
     public static String vmLibrary() {
         return (String) nothrows_run(() -> vmLibrary.get().invoke(vmruntime.get()));
+    }
+
+    public static String getCurrentInstructionSet() {
+        return (String) nothrows_run(() -> getCurrentInstructionSet.get().invoke());
     }
 
     public static Field getShadowKlassField() {

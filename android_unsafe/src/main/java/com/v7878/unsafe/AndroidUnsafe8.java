@@ -99,7 +99,7 @@ public class AndroidUnsafe8 extends AndroidUnsafe7 {
                         "_ZN3art2gc4Heap24DecrementDisableMovingGCEPNS_6ThreadE");
 
                 Pointer[] trampolines = NativeCodeUtils.makeCode(GCUtils.class,
-                        getTrampoline(increment), getTrampoline(increment));
+                        getTrampoline(increment), getTrampoline(decrement));
 
                 setExecutableData(searchMethod(methods,
                         "IncrementDisableMovingGC" + suffix, word, word), trampolines[0]);

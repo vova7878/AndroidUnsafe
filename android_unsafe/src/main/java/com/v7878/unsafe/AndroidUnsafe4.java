@@ -52,12 +52,12 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
             runOnce(() -> getDeclaredField(Object.class, "shadow$_klass_"));
     private static final Supplier<Field> shadow$_monitor_ =
             runOnce(() -> getDeclaredField(Object.class, "shadow$_monitor_"));
-    private static final Supplier<Class<?>> vmruntime_class = runOnce(() -> {
-        return nothrows_run(() -> Class.forName("dalvik.system.VMRuntime"));
-    });
-    private static final Supplier<Object> vmruntime = runOnce(() -> {
-        return allocateInstance(vmruntime_class.get());
-    });
+
+    private static final Supplier<Class<?>> vmruntime_class = runOnce(() ->
+            nothrows_run(() -> Class.forName("dalvik.system.VMRuntime")));
+    private static final Supplier<Object> vmruntime = runOnce(() ->
+            allocateInstance(vmruntime_class.get()));
+
     private static final Supplier<MethodHandle> newNonMovableArray =
             runOnce(() -> unreflectDirect(getDeclaredMethod(vmruntime_class.get(),
                     "newNonMovableArray", Class.class, int.class)));
@@ -67,6 +67,7 @@ public class AndroidUnsafe4 extends AndroidUnsafe3 {
     private static final Supplier<MethodHandle> vmLibrary =
             runOnce(() -> unreflectDirect(getDeclaredMethod(vmruntime_class.get(),
                     "vmLibrary")));
+
     private static final Supplier<MethodHandle> getCurrentInstructionSet =
             runOnce(() -> unreflect(getDeclaredMethod(vmruntime_class.get(),
                     "getCurrentInstructionSet")));

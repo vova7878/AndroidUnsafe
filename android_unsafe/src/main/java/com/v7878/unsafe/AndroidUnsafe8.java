@@ -38,22 +38,22 @@ public class AndroidUnsafe8 extends AndroidUnsafe7 {
             switch (iset) {
                 case "x86":
                     out = new byte[]{
-                            (byte) 0x8b, 0x44, 0x24, 0x10,             //mov    eax,DWORD PTR [esp+0x10]
-                            (byte) 0x89, 0x44, 0x24, 0x08,             //mov    DWORD PTR [esp+0x8],eax
-                            (byte) 0x8b, 0x44, 0x24, 0x0c,             //mov    eax,DWORD PTR [esp+0xc]
-                            (byte) 0x89, 0x44, 0x24, 0x04,             //mov    DWORD PTR [esp+0x4],eax
-                            (byte) 0xb8, 0x00, 0x00, 0x00, 0x00,       //mov    eax,0x00000000
-                            (byte) 0xff, (byte) 0xe0                   //jmp    eax
+                            (byte) 0x8b, 0x44, 0x24, 0x10,        //mov    eax, DWORD PTR [esp+0x10]
+                            (byte) 0x89, 0x44, 0x24, 0x08,        //mov    DWORD PTR [esp+0x8], eax
+                            (byte) 0x8b, 0x44, 0x24, 0x0c,        //mov    eax, DWORD PTR [esp+0xc]
+                            (byte) 0x89, 0x44, 0x24, 0x04,        //mov    DWORD PTR [esp+0x4], eax
+                            (byte) 0xb8, 0x00, 0x00, 0x00, 0x00,  //mov    eax, 0x00000000
+                            (byte) 0xff, (byte) 0xe0              //jmp    eax
                     };
                     offset = 17;
                     break;
                 case "x86_64":
                     out = new byte[]{
-                            0x48, (byte) 0x89, (byte) 0xd7,        //mov    rdi,rdx
-                            0x48, (byte) 0x89, (byte) 0xce,        //mov    rsi,rcx
+                            0x48, (byte) 0x89, (byte) 0xd7,       //mov    rdi, rdx
+                            0x48, (byte) 0x89, (byte) 0xce,       //mov    rsi, rcx
                             0x48, (byte) 0xb8, 0x00, 0x00, 0x00,
-                            0x00, 0x00, 0x00, 0x00, 0x00,          //movabs rax,0x0000000000000000
-                            (byte) 0xff, (byte) 0xe0               //jmp    rax
+                            0x00, 0x00, 0x00, 0x00, 0x00,         //movabs rax, 0x0000000000000000
+                            (byte) 0xff, (byte) 0xe0              //jmp    rax
                     };
                     offset = 8;
                     break;
@@ -69,12 +69,12 @@ public class AndroidUnsafe8 extends AndroidUnsafe7 {
                     break;
                 case "arm64":
                     out = new byte[]{
-                            (byte) 0xe0, 0x03, 0x02, (byte) 0xaa, // mov x0, x2
-                            (byte) 0xe1, 0x03, 0x03, (byte) 0xaa, // mov x1, x3
-                            0x42, 0x00, 0x00, 0x58, // ldr x2, #0x10
-                            0x40, 0x00, 0x1f, (byte) 0xd6, // br  x2
+                            (byte) 0xe0, 0x03, 0x02, (byte) 0xaa, //mov    x0, x2
+                            (byte) 0xe1, 0x03, 0x03, (byte) 0xaa, //mov    x1, x3
+                            0x42, 0x00, 0x00, 0x58,               //ldr    x2, #0x10
+                            0x40, 0x00, 0x1f, (byte) 0xd6,        //br     x2
                             0x00, 0x00, 0x00, 0x00,
-                            0x00, 0x00, 0x00, 0x00 // .dword 0x0000000000000000
+                            0x00, 0x00, 0x00, 0x00                //.dword 0x0000000000000000
                     };
                     offset = 16;
                     break;

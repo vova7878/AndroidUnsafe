@@ -11,14 +11,15 @@ import android.system.OsConstants;
 
 import com.v7878.unsafe.memory.Pointer;
 
+import sun.misc.Cleaner;
+
 class NativeCodeUtils {
     private static final int CODE_ALIGNMENT = 16;
     private static final int CODE_PROT = OsConstants.PROT_READ | OsConstants.PROT_WRITE | OsConstants.PROT_EXEC;
     private static final int MAP_ANONYMOUS = 0x20;
     private static final int CODE_FLAGS = OsConstants.MAP_PRIVATE | MAP_ANONYMOUS;
 
-    //TODO: clone arrays?
-    //TODO: cleanup code
+    // note: clone arrays if method will be public
     public static Pointer[] makeCode(Object lifetime, byte[]... code) {
         int count = code.length;
         long size = 0;
@@ -29,15 +30,17 @@ class NativeCodeUtils {
             size += code[i].length;
         }
         long finalSize = size;
-        Pointer data = new Pointer((long) nothrows_run(() -> mmap(0, finalSize, CODE_PROT, CODE_FLAGS, null, 0)));
+        Pointer data = nothrows_run(() -> new Pointer(
+                mmap(0, finalSize, CODE_PROT, CODE_FLAGS, null, 0)));
         if (lifetime != null) {
-            sun.misc.Cleaner.create(lifetime, () -> nothrows_run(() -> munmap(data.getRawAddress(), finalSize)));
+            Cleaner.create(lifetime, () -> nothrows_run(
+                    () -> munmap(data.getRawAddress(), finalSize)));
         }
         Pointer[] out = new Pointer[count];
         for (int i = 0; i < count; i++) {
             Pointer tmp = data.addOffset(offsets[i]);
-            copyMemory(code[i], ARRAY_BYTE_BASE_OFFSET, tmp.getBase(), tmp.getOffset(), code[i].length);
-            System.out.println(tmp);
+            copyMemory(code[i], ARRAY_BYTE_BASE_OFFSET,
+                    tmp.getBase(), tmp.getOffset(), code[i].length);
             out[i] = tmp;
         }
         return out;

@@ -21,6 +21,7 @@ import static com.v7878.unsafe.AndroidUnsafe4.getObjectRaw;
 import static com.v7878.unsafe.AndroidUnsafe4.getShortUnaligned;
 import static com.v7878.unsafe.AndroidUnsafe4.getWordUnaligned;
 import static com.v7878.unsafe.AndroidUnsafe4.newNonMovableArrayVM;
+import static com.v7878.unsafe.AndroidUnsafe4.objectToInt;
 import static com.v7878.unsafe.AndroidUnsafe4.putBoolean;
 import static com.v7878.unsafe.AndroidUnsafe4.putByte;
 import static com.v7878.unsafe.AndroidUnsafe4.putCharUnaligned;
@@ -36,6 +37,8 @@ import static com.v7878.unsafe.MemoryChecks.checkNativeAddress;
 import static com.v7878.unsafe.MemoryChecks.checkOffset;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.memory.ValueLayout.JAVA_BYTE;
+
+import com.v7878.unsafe.AndroidUnsafe8.ScopedDisableGC;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -316,7 +319,14 @@ public final class Pointer implements Addressable {
     }
 
     public static void copy(Pointer from, Pointer to, long size) {
-        copyMemory(from.base, from.getOffset(), to.base, to.getOffset(), size);
+        if (from.hasRawAddress() && to.hasRawAddress()) {
+            copyMemory(from.getRawAddress(), to.getRawAddress(), size);
+            return;
+        }
+        try (ScopedDisableGC dgc = new ScopedDisableGC()) {
+            copyMemory((objectToInt(from.getBase()) & 0xffffffffL) + from.getOffset(),
+                    (objectToInt(to.getBase()) & 0xffffffffL) + to.getOffset(), size);
+        }
     }
 
     @Override

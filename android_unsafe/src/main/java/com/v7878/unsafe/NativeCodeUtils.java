@@ -19,7 +19,7 @@ class NativeCodeUtils {
     private static final int MAP_ANONYMOUS = 0x20;
     private static final int CODE_FLAGS = OsConstants.MAP_PRIVATE | MAP_ANONYMOUS;
 
-    // note: clone arrays if method will be public
+    // note: clone arrays if class and method will be public
     public static Pointer[] makeCode(Object lifetime, byte[]... code) {
         int count = code.length;
         long size = 0;

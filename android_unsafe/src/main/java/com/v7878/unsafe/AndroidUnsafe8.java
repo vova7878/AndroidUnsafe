@@ -57,7 +57,7 @@ public class AndroidUnsafe8 extends AndroidUnsafe7 {
                     };
                     offset = 8;
                     break;
-                case "arm": // TODO: TEST!!!
+                /*case "arm": // TODO: TEST!!!
                     out = new byte[]{
                             0x02, 0x00, (byte) 0xa0, (byte) 0xe1, //mov    r0, r2
                             0x03, 0x10, (byte) 0xa0, (byte) 0xe1, //mov    r1, r3
@@ -66,7 +66,7 @@ public class AndroidUnsafe8 extends AndroidUnsafe7 {
                             0x00, 0x00, 0x00, 0x00                //.word  0x00000000
                     };
                     offset = 16;
-                    break;
+                    break;*/
                 case "arm64":
                     out = new byte[]{
                             (byte) 0xe0, 0x03, 0x02, (byte) 0xaa, //mov    x0, x2
@@ -78,7 +78,18 @@ public class AndroidUnsafe8 extends AndroidUnsafe7 {
                     };
                     offset = 16;
                     break;
-                //case "riscv64": //TODO
+                /*case "riscv64": // TODO: TEST!!!
+                    out = new byte[]{
+                            0x00, 0x06, (byte) 0x85, (byte) 0x93, //mv     a1, a3
+                            0x00, 0x06, 0x05, 0x13,               //mv     a0, a2
+                            0x00, 0x00, 0x07, (byte) 0xb7,        //lui    a5, 0x0
+                            0x00, 0x07, (byte) 0xb7, (byte) 0x83, //ld     a5, 0(a5)
+                            0x00, 0x07, (byte) 0x80, 0x67,        //jr     a5
+                            0x00, 0x00, 0x00, 0x00,
+                            0x00, 0x00, 0x00, 0x00                //.dword 0x0000000000000000
+                    };
+                    offset = 20;
+                    break;*/
                 default:
                     throw new IllegalStateException("unsupported instruction set: " + iset);
             }

@@ -88,7 +88,7 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
             JAVA_BOOLEAN.withName("is_compact_dex_"),
             JAVA_BYTE.withName("hiddenapi_domain_")
     );
-    private static final GroupLayout dex_file_13_10_layout = structLayout(
+    private static final GroupLayout dex_file_13_11_layout = structLayout(
             ADDRESS.withName("__cpp_virtual_data__"),
             ADDRESS.withName("begin_"),
             WORD.withName("size_"),
@@ -112,6 +112,31 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
             std.unique_ptr.withName("container_"),
             JAVA_BOOLEAN.withName("is_compact_dex_"),
             JAVA_BYTE.withName("hiddenapi_domain_")
+    );
+    private static final GroupLayout dex_file_10_layout = structLayout(
+            ADDRESS.withName("__cpp_virtual_data__"),
+            ADDRESS.withName("begin_"),
+            WORD.withName("size_"),
+            ADDRESS.withName("data_begin_"),
+            WORD.withName("data_size_"),
+            std.string.withName("location_"),
+            JAVA_INT.withName("location_checksum_"),
+            ADDRESS.withName("header_"),
+            ADDRESS.withName("string_ids_"),
+            ADDRESS.withName("type_ids_"),
+            ADDRESS.withName("field_ids_"),
+            ADDRESS.withName("method_ids_"),
+            ADDRESS.withName("proto_ids_"),
+            ADDRESS.withName("class_defs_"),
+            ADDRESS.withName("method_handles_"),
+            WORD.withName("num_method_handles_"),
+            ADDRESS.withName("call_site_ids_"),
+            WORD.withName("num_call_site_ids_"),
+            ADDRESS.withName("hiddenapi_class_data_"),
+            ADDRESS.withName("oat_dex_file_"),
+            std.unique_ptr.withName("container_"),
+            JAVA_BOOLEAN.withName("is_compact_dex_"),
+            JAVA_INT.withName("hiddenapi_domain_")
     );
     private static final GroupLayout dex_file_9_layout = structLayout(
             ADDRESS.withName("__cpp_virtual_data__"),
@@ -226,8 +251,9 @@ public class AndroidUnsafe5 extends AndroidUnsafe4 {
             case 32: // android 12L
             case 31: // android 12
             case 30: // android 11
+                return dex_file_13_11_layout;
             case 29: // android 10
-                return dex_file_13_10_layout;
+                return dex_file_10_layout;
             case 28: // android 9
                 return dex_file_9_layout;
             case 27: // android 8.1

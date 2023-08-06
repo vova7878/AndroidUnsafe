@@ -1,5 +1,6 @@
 package com.v7878.unsafe;
 
+import static com.v7878.misc.Math.roundUpL;
 import static com.v7878.misc.Version.CORRECT_SDK_INT;
 import static com.v7878.unsafe.Utils.assert_;
 import static com.v7878.unsafe.Utils.nothrows_run;
@@ -12,6 +13,7 @@ import static com.v7878.unsafe.memory.ValueLayout.structLayout;
 import androidx.annotation.Keep;
 
 import com.v7878.unsafe.function.FunctionDescriptor;
+import com.v7878.unsafe.function.SymbolLookup;
 import com.v7878.unsafe.memory.GroupLayout;
 import com.v7878.unsafe.memory.MemorySegment;
 import com.v7878.unsafe.memory.Pointer;
@@ -19,7 +21,6 @@ import com.v7878.unsafe.memory.Word;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -279,7 +280,7 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
             ADDRESS.withName("AttachCurrentThreadAsDaemon")
     );
 
-    public static final long env_offset = nothrows_run(() -> {
+    private static final long env_offset = nothrows_run(() -> {
         long tmp;
         switch (CORRECT_SDK_INT) {
             case 34: // android 14
@@ -332,12 +333,12 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
         }
     });
 
-    private static final Field threadNativePeer = nothrows_run(
-            () -> getDeclaredField(Thread.class, "nativePeer"));
+    private static final long nativePeerOffset = nothrows_run(
+            () -> fieldOffset(getDeclaredField(Thread.class, "nativePeer")));
 
     public static Pointer getNativePeer(Thread thread) {
         Objects.requireNonNull(thread);
-        long tmp = nothrows_run(() -> threadNativePeer.getLong(thread));
+        long tmp = getLongO(thread, nativePeerOffset);
         assert_(tmp != 0, IllegalArgumentException::new, "nativePeer == nullptr");
         return new Pointer(tmp);
     }
@@ -378,6 +379,101 @@ public class AndroidUnsafe6 extends AndroidUnsafe5 {
 
     public static MemorySegment getJNIInvokeInterface() {
         return jni_invoke_interface.bind(getJavaVMPtr().get(ADDRESS));
+    }
+
+    private static final Supplier<Pointer> runtimePtr = runOnce(() ->
+            SymbolLookup.defaultLookup().lookup("_ZN3art7Runtime9instance_E").get(ADDRESS));
+
+    public static Pointer getRuntimePtr() {
+        return runtimePtr.get();
+    }
+
+    private static final long heap_offset = nothrows_run(() -> {
+        long tmp;
+        switch (CORRECT_SDK_INT) {
+            case 34: // android 14
+            case 33: // android 13
+                tmp = 8 * 6;
+                tmp += 4 * 4;
+                tmp += ADDRESS_SIZE * 3L;
+                tmp += 4 * 2;
+                tmp += ADDRESS_SIZE;
+                tmp += 8; // bools
+                tmp += (ADDRESS_SIZE * 3L) * 16; // stl containers
+                tmp += ADDRESS_SIZE;
+                tmp += 4;
+                tmp = roundUpL(tmp, ADDRESS_SIZE);
+                return tmp;
+            case 32: // android 12L
+            case 31: // android 12
+                tmp = 8 * 6;
+                tmp += 4 * 4;
+                tmp += ADDRESS_SIZE * 3L;
+                tmp += 4 * 2;
+                tmp += ADDRESS_SIZE;
+                tmp += 8; // bools
+                tmp += (ADDRESS_SIZE * 3L) * 12; // stl containers
+                tmp += ADDRESS_SIZE;
+                tmp += 4;
+                tmp = roundUpL(tmp, ADDRESS_SIZE);
+                return tmp;
+            case 30: // android 11
+                tmp = 8 * 6;
+                tmp += 4 * 4;
+                tmp += ADDRESS_SIZE * 3L;
+                tmp += 4 * 2;
+                tmp += ADDRESS_SIZE;
+                tmp += 8; // bools
+                tmp += (ADDRESS_SIZE * 3L) * 11; // stl containers
+                tmp += ADDRESS_SIZE;
+                tmp += 4;
+                tmp = roundUpL(tmp, ADDRESS_SIZE);
+                return tmp;
+            case 29: // android 10
+                tmp = 8 * 6;
+                tmp += 4 * 4;
+                tmp += ADDRESS_SIZE * 3L;
+                tmp += 4 * 2;
+                tmp += ADDRESS_SIZE;
+                tmp += 8; // bools
+                tmp += (ADDRESS_SIZE * 3L) * 4; // stl containers
+                tmp += 1; // bool
+                tmp = roundUpL(tmp, ADDRESS_SIZE);
+                tmp += (ADDRESS_SIZE * 3L) * 7; // stl containers
+                tmp += ADDRESS_SIZE;
+                tmp += 4;
+                tmp = roundUpL(tmp, ADDRESS_SIZE);
+                return tmp;
+            case 28: // android 9
+                tmp = 8 * 6;
+                tmp += 4 * 2;
+                tmp += ADDRESS_SIZE * 3L;
+                tmp += 4 * 2;
+                tmp += (4 * 3) * 6; // QuickMethodFrameInfo
+                tmp += ADDRESS_SIZE;
+                tmp += 8; // bools
+                tmp += (ADDRESS_SIZE * 3L) * 11; // stl containers
+                tmp += ADDRESS_SIZE;
+                return tmp;
+            case 27: // android 8.1
+            case 26: // android 8
+                tmp = 8 * 4;
+                tmp += 4 * 2;
+                tmp += ADDRESS_SIZE * 3L;
+                tmp += 4 * 2;
+                tmp += (4 * 3) * 4; // QuickMethodFrameInfo
+                tmp += ADDRESS_SIZE;
+                tmp += 8; // bools
+                tmp += (ADDRESS_SIZE * 3L) * 10; // stl containers
+                tmp += ADDRESS_SIZE;
+                return tmp;
+            default:
+                throw new IllegalStateException("unsupported sdk: " + CORRECT_SDK_INT);
+        }
+    });
+
+    public static Pointer getHeapPtr() {
+        return runtimePtr.get().addOffset(heap_offset).get(ADDRESS);
     }
 
     @Keep
